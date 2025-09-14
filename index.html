@@ -38,14 +38,7 @@ tr:hover td { background:var(--row-hover); }
 </style>
 </head>
 <body>
-
-<nav id="tocSidebar">
-<h2 style="display:flex; justify-content:space-between; align-items:center;">
-  Table of Contents
-  <button id="tocToggle" onclick="toggleTOC()">Hide <span id="tocArrow">▼</span></button>
-</h2>
-<ul id="toc">
-<li><a href="#Table1">Table 1</a></li>
+<nav id="tocSidebar"><h2 style="display:flex; justify-content:space-between; align-items:center;">Table of Contents<button id="tocToggle" onclick="toggleTOC()">Hide <span id="tocArrow">▼</span></button></h2><ul id="toc"><li><a href="#Table1">Table 1</a></li>
 <li><a href="#Table2">Table 2</a></li>
 <li><a href="#Table3">Table 3</a></li>
 <li><a href="#Table4">Table 4</a></li>
@@ -495,126 +488,138 @@ tr:hover td { background:var(--row-hover); }
 
 <script>
 let originalTableRows=[];
+let sortState=[];
+
+// Cache original rows
 document.querySelectorAll(".table-container table").forEach((table,idx)=>{
     originalTableRows[idx]=Array.from(table.rows).slice(1).map(r=>r.cloneNode(true));
+    sortState[idx]=[];
     table.setAttribute("data-table-idx",idx);
 });
 
-// ----------------- SORT -----------------
-function sortTableByColumn(tableIdx,colIdx){ 
-    let table=document.querySelectorAll(".table-container table")[tableIdx];
-    let rows=Array.from(table.tBodies[0].rows);
-    let asc=!table.asc; table.asc=asc;
-    rows.sort((a,b)=>{ 
-        let valA=a.cells[colIdx].textContent.trim();
-        let valB=b.cells[colIdx].textContent.trim();
-        let numA=parseFloat(valA.replace(/,/g,'')); let numB=parseFloat(valB.replace(/,/g,''));
-        if(!isNaN(numA)&&!isNaN(numB)) return (numA-numB)*(asc?1:-1);
-        return valA.localeCompare(valB)*(asc?1:-1);
-    });
-    rows.forEach(r=>table.tBodies[0].appendChild(r));
-}
-
-// ----------------- COPY -----------------
-function getTableFromButton(btn){ return btn.closest('.table-container').querySelector('table'); }
-function copyTablePlain(btn){ 
-    let table=getTableFromButton(btn); 
-    let title=table.closest('.table-wrapper').querySelector('h3')?.textContent||'';
-    let text=title+"\n"+Array.from(table.rows).map(r=>Array.from(r.cells).map(c=>c.textContent.trim()).join("\t")).join("\n");
-    navigator.clipboard.writeText(text); alert('Table copied as plain text!');
-}
-function copyTableMarkdown(btn){ 
-    let table=getTableFromButton(btn); 
-    let title=table.closest('.table-wrapper').querySelector('h3')?.textContent||'';
-    let rows=Array.from(table.rows);
-    let text="**"+title+"**\n| "+Array.from(rows[0].cells).map(c=>c.textContent.trim()).join(" | ")+" |\n";
-    text+="| "+Array.from(rows[0].cells).map(()=> "---").join(" | ")+" |\n";
-    for(let i=1;i<rows.length;i++){ text+="| "+Array.from(rows[i].cells).map(c=>c.textContent.trim()).join(" | ")+" |\n"; }
-    navigator.clipboard.writeText(text); alert('Table copied in Markdown format!');
-}
-function copyAllTablesPlain(){ 
-    let text=""; 
-    document.querySelectorAll(".table-wrapper").forEach(wrapper=>{ 
-        let title=wrapper.querySelector('h3')?.textContent||'';
-        let table=wrapper.querySelector('table');
-        text+=title+"\n"+Array.from(table.rows).map(r=>Array.from(r.cells).map(c=>c.textContent.trim()).join("\t")).join("\n")+"\n";
-    }); 
-    navigator.clipboard.writeText(text); alert("All tables copied as plain text!");
-}
-function copyAllTablesMarkdown(){ 
-    let text=""; 
-    document.querySelectorAll(".table-wrapper").forEach(wrapper=>{ 
-        let title=wrapper.querySelector('h3')?.textContent||'';
-        let table=wrapper.querySelector('table');
-        let rows=Array.from(table.rows);
-        text+="**"+title+"**\n| "+Array.from(rows[0].cells).map(c=>c.textContent.trim()).join(" | ")+" |\n";
-        text+="| "+Array.from(rows[0].cells).map(()=> "---").join(" | ")+" |\n";
-        for(let i=1;i<rows.length;i++){ text+="| "+Array.from(rows[i].cells).map(c=>c.textContent.trim()).join(" | ")+" |\n"; }
-    }); 
-    navigator.clipboard.writeText(text); alert("All tables copied in Markdown format!");
-}
-function resetAllTables(){ 
-    document.querySelectorAll(".table-container table").forEach((table,idx)=>{ 
-        while(table.rows.length>1) table.deleteRow(1); 
-        originalTableRows[idx].forEach(r=>table.appendChild(r.cloneNode(true)));
-    });
-    document.getElementById("searchBox").value="";
-    searchTable();
-    alert("All tables reset!");
-}
-
-// ----------------- SEARCH -----------------
-function searchTable(){ 
-    let filter=document.getElementById("searchBox").value.toLowerCase();
-    let firstMatch=null;
-    document.querySelectorAll(".table-container table").forEach(table=>{ 
-        Array.from(table.rows).slice(1).forEach(row=>{ 
-            let rowMatches=false;
-            Array.from(row.cells).forEach(cell=>{ 
-                let text=cell.textContent.toLowerCase();
-                if(text.includes(filter)&&filter!==""){ 
-                    cell.classList.add("highlight"); rowMatches=true; if(!firstMatch) firstMatch=row;
-                } else cell.classList.remove("highlight");
-            });
-            row.style.display=rowMatches||filter===""?"":"none";
-        });
-    });
-    if(firstMatch){
-        const rect=firstMatch.getBoundingClientRect();
-        const headerHeight=document.getElementById('stickyMainHeader').offsetHeight+10;
-        const scrollTop=window.pageYOffset||document.documentElement.scrollTop;
-        window.scrollTo({top:scrollTop+rect.top-headerHeight, behavior:'smooth'});
-    }
-}
-
-// ----------------- TOC & MODE -----------------
+// Dark mode
 const modeBtn=document.getElementById('modeBtn');
-if(localStorage.getItem('uiMode')==='dark'){ document.documentElement.setAttribute('data-theme','dark'); modeBtn.textContent='Light mode'; }
-function toggleMode(){ 
-    const dark=document.documentElement.getAttribute('data-theme')!=='dark';
-    if(dark){ document.documentElement.setAttribute('data-theme','dark'); modeBtn.textContent='Light mode'; localStorage.setItem('uiMode','dark'); }
-    else { document.documentElement.removeAttribute('data-theme'); modeBtn.textContent='Dark mode'; localStorage.setItem('uiMode','light'); }
+if(localStorage.getItem('uiMode')==='dark'){document.documentElement.setAttribute('data-theme','dark'); modeBtn.textContent='Light mode';}
+function toggleMode(){
+  const dark=document.documentElement.getAttribute('data-theme')!=='dark';
+  if(dark){document.documentElement.setAttribute('data-theme','dark'); modeBtn.textContent='Light mode'; localStorage.setItem('uiMode','dark');}
+  else {document.documentElement.removeAttribute('data-theme'); modeBtn.textContent='Dark mode'; localStorage.setItem('uiMode','light');}
 }
 
+// Sort table
+function sortTableByColumn(tableIdx,colIdx){
+  document.getElementById('searchBox').value='';
+  searchTable();
+  let table=document.querySelectorAll(".table-container table")[tableIdx];
+  let rows=Array.from(originalTableRows[tableIdx]);
+  let asc=!sortState[tableIdx][colIdx]; sortState[tableIdx][colIdx]=asc;
+
+  rows.sort((a,b)=>{
+    let valA=a.cells[colIdx].textContent.trim();
+    let valB=b.cells[colIdx].textContent.trim();
+    let numA=parseFloat(valA.replace(/,/g,'')); let numB=parseFloat(valB.replace(/,/g,''));
+    if(!isNaN(numA)&&!isNaN(numB)) return (numA-numB)*(asc?1:-1);
+    return valA.localeCompare(valB)*(asc?1:-1);
+  });
+
+  let tbody=table.tBodies[0];
+  tbody.innerHTML='';
+  rows.forEach(r=>tbody.appendChild(r.cloneNode(true)));
+}
+
+// Copy functions
+function getTableFromButton(btn){return btn.closest('.table-container').querySelector('table');}
+function copyTablePlain(btn){
+  let table=getTableFromButton(btn);
+  let title=table.closest('.table-wrapper').querySelector('h3')?.textContent||'';
+  let text=title+"\n"+Array.from(table.rows).map(r=>Array.from(r.cells).map(c=>c.textContent.trim()).join("\t")).join("\n");
+  navigator.clipboard.writeText(text); alert('Table copied as plain text!');
+}
+function copyTableMarkdown(btn){
+  let table=getTableFromButton(btn);
+  let title=table.closest('.table-wrapper').querySelector('h3')?.textContent||'';
+  let rows=Array.from(table.rows);
+  let text="**"+title+"**\n| "+Array.from(rows[0].cells).map(c=>c.textContent.trim()).join(" | ")+" |\n";
+  text+="| "+Array.from(rows[0].cells).map(()=> "---").join(" | ")+" |\n";
+  for(let i=1;i<rows.length;i++){text+="| "+Array.from(rows[i].cells).map(c=>c.textContent.trim()).join(" | ")+" |\n";}
+  navigator.clipboard.writeText(text); alert('Table copied in Markdown format!');
+}
+function copyAllTablesPlain(){
+  let text="";
+  document.querySelectorAll(".table-wrapper").forEach(wrapper=>{
+    let title=wrapper.querySelector('h3')?.textContent||'';
+    let table=wrapper.querySelector('table');
+    text+=title+"\n"+Array.from(table.rows).map(r=>Array.from(r.cells).map(c=>c.textContent.trim()).join("\t")).join("\n")+"\n";
+  });
+  navigator.clipboard.writeText(text); alert("All tables copied as plain text!");
+}
+function copyAllTablesMarkdown(){
+  let text="";
+  document.querySelectorAll(".table-wrapper").forEach(wrapper=>{
+    let title=wrapper.querySelector('h3')?.textContent||'';
+    let table=wrapper.querySelector('table');
+    let rows=Array.from(table.rows);
+    text+="**"+title+"**\n| "+Array.from(rows[0].cells).map(c=>c.textContent.trim()).join(" | ")+" |\n";
+    text+="| "+Array.from(rows[0].cells).map(()=> "---").join(" | ")+" |\n";
+    for(let i=1;i<rows.length;i++){text+="| "+Array.from(rows[i].cells).map(c=>c.textContent.trim()).join(" | ")+" |\n";}
+  });
+  navigator.clipboard.writeText(text); alert("All tables copied in Markdown format!");
+}
+function resetAllTables(){
+  document.getElementById('searchBox').value='';
+  searchTable();
+  document.querySelectorAll(".table-container table").forEach((table,idx)=>{
+    let tbody=table.tBodies[0];
+    tbody.innerHTML='';
+    originalTableRows[idx].forEach(r=>tbody.appendChild(r.cloneNode(true)));
+    sortState[idx]=[];
+  });
+  alert("All tables reset!");
+}
+
+// Search
+function searchTable(){
+  let filter=document.getElementById("searchBox").value.toLowerCase();
+  let firstMatch=null;
+  document.querySelectorAll(".table-container table").forEach(table=>{
+    Array.from(table.rows).slice(1).forEach(row=>{
+      let rowMatches=false;
+      Array.from(row.cells).forEach(cell=>{
+        let text=cell.textContent.toLowerCase();
+        if(text.includes(filter)&&filter!==""){cell.classList.add("highlight"); rowMatches=true;if(!firstMatch) firstMatch=row;}
+        else cell.classList.remove("highlight");
+      });
+      row.style.display=rowMatches||filter===""?"":"none";
+    });
+  });
+  if(firstMatch){
+    const rect=firstMatch.getBoundingClientRect();
+    const headerHeight=document.getElementById('stickyMainHeader').offsetHeight+10;
+    const scrollTop=window.pageYOffset||document.documentElement.scrollTop;
+    window.scrollTo({top:scrollTop+rect.top-headerHeight,behavior:'smooth'});
+  }
+}
+
+// TOC toggle
 function toggleTOC(){
-    const toc=document.getElementById('toc'); const btn=document.getElementById('tocToggle');
-    toc.classList.toggle('hide');
-    if(toc.classList.contains('hide')) btn.innerHTML='Show <span id="tocArrow" class="rotate">▼</span>';
-    else btn.innerHTML='Hide <span id="tocArrow">▼</span>';
+  const toc=document.getElementById('toc'); const btn=document.getElementById('tocToggle');
+  toc.classList.toggle('hide');
+  if(toc.classList.contains('hide')) btn.innerHTML='Show <span id="tocArrow" class="rotate">▼</span>';
+  else btn.innerHTML='Hide <span id="tocArrow">▼</span>';
 }
 
 // TOC click scroll
-document.querySelectorAll('#tocSidebar a[href^="#"]').forEach(a=>{ 
-    a.addEventListener('click',function(e){ 
-        e.preventDefault();
-        const id=this.getAttribute('href').substring(1);
-        const container=document.getElementById(id)?.closest('.table-wrapper');
-        if(!container) return;
-        const headerHeight=document.getElementById('stickyMainHeader')?.offsetHeight||0;
-        const containerTop=container.getBoundingClientRect().top+window.pageYOffset;
-        window.scrollTo({top:containerTop-headerHeight-5, behavior:'smooth'});
-        try{ history.replaceState(null,'','#'+id); }catch(e){}
-    });
+document.querySelectorAll('#tocSidebar a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',function(e){
+    e.preventDefault();
+    const id=this.getAttribute('href').substring(1);
+    const container=document.getElementById(id)?.closest('.table-wrapper');
+    if(!container) return;
+    const headerHeight=document.getElementById('stickyMainHeader')?.offsetHeight||0;
+    const containerTop=container.getBoundingClientRect().top+window.pageYOffset;
+    window.scrollTo({top:containerTop-headerHeight-5, behavior:'smooth'});
+    try{history.replaceState(null,'','#'+id);}catch(e){}
+  });
 });
 </script>
 </body>
