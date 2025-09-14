@@ -494,12 +494,12 @@ tr:hover td { background:var(--row-hover); }
 </tbody></table></div></div>
 
 <script>
+// Store original table rows
 let originalTableRows=[];
-let tableSortState=[]; // 0=original, 1=asc, 2=desc
-
+let sortStates=[]; // 0: original, 1: asc, 2: desc
 document.querySelectorAll(".table-container table").forEach((table,idx)=>{
-    originalTableRows[idx]=Array.from(table.rows).slice(1).map(r=>r.cloneNode(true));
-    tableSortState[idx]=0;
+    originalTableRows[idx]=Array.from(table.tBodies[0].rows).map(r=>r.cloneNode(true));
+    sortStates[idx]=Array(table.rows[0].cells.length).fill(0);
 });
 
 // Dark mode
@@ -511,13 +511,14 @@ function toggleMode(){
   else {document.documentElement.removeAttribute('data-theme'); modeBtn.textContent='Dark mode'; localStorage.setItem('uiMode','light');}
 }
 
-// Sort table: 3-state Original -> Asc -> Desc -> Original
+// Sort table with 3-state
 function sortTableByColumn(tableIdx,colIdx){
   let table=document.querySelectorAll(".table-container table")[tableIdx];
-  let rows=[];
-  let state=tableSortState[tableIdx];
-  if(state===0){ // original -> asc
-    rows=Array.from(originalTableRows[tableIdx]);
+  let state = sortStates[tableIdx][colIdx];
+  let rows = Array.from(table.tBodies[0].rows);
+  let newRows = [];
+
+  if(state===0){ // Original -> Asc
     rows.sort((a,b)=>{
       let valA=a.cells[colIdx].textContent.trim();
       let valB=b.cells[colIdx].textContent.trim();
@@ -525,9 +526,8 @@ function sortTableByColumn(tableIdx,colIdx){
       if(!isNaN(numA)&&!isNaN(numB)) return numA-numB;
       return valA.localeCompare(valB);
     });
-    tableSortState[tableIdx]=1;
-  } else if(state===1){ // asc -> desc
-    rows=Array.from(table.tBodies[0].rows);
+    sortStates[tableIdx][colIdx]=1;
+  } else if(state===1){ // Asc -> Desc
     rows.sort((a,b)=>{
       let valA=a.cells[colIdx].textContent.trim();
       let valB=b.cells[colIdx].textContent.trim();
@@ -535,17 +535,22 @@ function sortTableByColumn(tableIdx,colIdx){
       if(!isNaN(numA)&&!isNaN(numB)) return numB-numA;
       return valB.localeCompare(valA);
     });
-    tableSortState[tableIdx]=2;
-  } else { // desc -> original
-    rows=Array.from(originalTableRows[tableIdx]);
-    tableSortState[tableIdx]=0;
+    sortStates[tableIdx][colIdx]=2;
+  } else { // Desc -> Original
+    rows = originalTableRows[tableIdx].map(r=>r.cloneNode(true));
+    sortStates[tableIdx][colIdx]=0;
   }
-  let tbody=table.tBodies[0];
-  while(tbody.rows.length>0) tbody.deleteRow(0);
-  rows.forEach(r=>tbody.appendChild(r.cloneNode(true)));
+
+  // Reset other columns' states
+  for(let i=0;i<sortStates[tableIdx].length;i++){if(i!==colIdx) sortStates[tableIdx][i]=0;}
+
+  // Append rows
+  let tbody = table.tBodies[0];
+  tbody.innerHTML="";
+  rows.forEach(r=>tbody.appendChild(r));
 }
 
-// Copy functions
+// Copy & Reset functions (unchanged)
 function getTableFromButton(btn){return btn.closest('.table-container').querySelector('table');}
 function copyTablePlain(btn){
   let table=getTableFromButton(btn);
@@ -586,11 +591,11 @@ function copyAllTablesMarkdown(){
 function resetAllTables(){
   document.querySelectorAll(".table-container table").forEach((table,idx)=>{
     let tbody=table.tBodies[0];
-    while(tbody.rows.length>0) tbody.deleteRow(0);
+    tbody.innerHTML="";
     originalTableRows[idx].forEach(r=>tbody.appendChild(r.cloneNode(true)));
-    tableSortState[idx]=0;
+    sortStates[idx]=Array(table.rows[0].cells.length).fill(0);
   });
-  document.getElementById("searchBox").value='';
+  document.getElementById('searchBox').value="";
   searchTable();
   alert("All tables reset!");
 }
