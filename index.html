@@ -3,38 +3,57 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Tables Viewer v2.0 Final</title>
+<title>Tables Viewer v2.1</title>
 <style>
 :root {
   --bg: #ffffff; --text: #111827; --panel: #f8fafc; --border: #e5e7eb;
   --row-hover: #d0ebff; --highlight: #fff3a2; --current-row: #ffeaa2;
   --button-bg: #f3f4f6; --button-text: #111827;
+  --muted: rgba(17,24,39,0.45);
 }
 [data-theme="dark"] {
   --bg: #1e1e2f; --text: #e0e0e0; --panel: #2a2a3e; --border: #3c3c4f;
   --row-hover: #38384c; --highlight: #fffa8c; --current-row: #ffd86c;
   --button-bg: #44445a; --button-text: #e0e0e0;
+  --muted: rgba(224,224,224,0.35);
 }
 html, body { margin:0; background:var(--bg); color:var(--text); font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial; }
 a { color:inherit; text-decoration:none; }
 button { background:var(--button-bg); color:var(--button-text); border:1px solid var(--border); padding:6px 12px; border-radius:6px; cursor:pointer; font-size:14px; }
 button:active { transform:translateY(1px); }
-table { width:100%; border-collapse:collapse; table-layout:fixed; word-wrap:break-word; margin-bottom:18px; background:var(--bg); }
+table { width:100%; border-collapse:collapse; table-layout:fixed; word-wrap:break-word; margin-bottom:18px; background:var(--bg); box-shadow:0 1px 2px rgba(0,0,0,0.03); }
 th, td { padding:10px; border:1px solid var(--border); vertical-align:top; font-size:14px; }
-thead th { background:var(--panel); position:sticky; top:48px; z-index:2; text-align:left; cursor:pointer; }
-td:first-child { background:var(--panel); font-weight:500; position:sticky; left:0; z-index:1; min-width:140px; }
+/* UPDATED: hand cursor + hover for headers, smooth transition */
+thead th { background:var(--panel); position:sticky; top:48px; z-index:3; text-align:left; cursor:pointer; transition: background 0.18s ease; }
+thead th:hover { background-color:#e2e8f0; }
+/* increase tappable area of sort button */
+.sort-btn { display:flex; align-items:center; gap:6px; background:transparent; border:0; padding:6px 8px; cursor:pointer; border-radius:8px; font-size:12px; color:var(--muted); }
+td:first-child { background:var(--panel); font-weight:500; position:sticky; left:0; z-index:2; min-width:140px; box-shadow:2px 0 5px -2px rgba(0,0,0,0.08); }
 tr:nth-child(even) { background:var(--bg); }
 tr:hover td { background:var(--row-hover); }
-.highlight { background:var(--highlight) !important; }
+.highlight { background:var(--highlight) !important; transition: background 0.45s ease; }
 .current-row td { background:var(--current-row) !important; }
 #tocSidebar { background:var(--panel); padding:16px; border-right:1px solid var(--border); width:260px; position:fixed; top:0; bottom:0; overflow:auto; border-radius:8px; }
 #tocSidebar a:hover { background:#50506a; border-radius:6px; }
 #toc { max-height:1000px; transition:max-height 0.3s ease; overflow:hidden; }
 #toc.hide { max-height:0; }
-#tocArrow.rotate { transform:rotate(180deg); display:inline-block; transition:transform 0.3s ease; }
 #stickyMainHeader { position:sticky; top:0; background:var(--bg); z-index:1000; padding:15px 0; border-bottom:1px solid var(--border); }
 #stickyMainHeader input { width:300px; padding:6px; font-size:16px; }
 #mainContent { margin-left:280px; padding:20px; }
+
+/* --- Sorting button styles --- */
+.th-with-sort { display:flex; align-items:center; gap:8px; }
+.sort-icon { width:12px; height:12px; display:inline-block; vertical-align:middle; }
+.sort-state-0 { opacity:0.45; } /* unsorted */
+.sort-state-1 { color:var(--text); opacity:1; } /* asc */
+.sort-state-2 { color:var(--text); opacity:1; } /* desc */
+
+/* small responsive tweaks */
+@media (max-width:900px) {
+  #stickyMainHeader input { width:180px; }
+  #tocSidebar { width:200px; }
+  #mainContent { margin-left:220px; padding:12px; }
+}
 </style>
 </head>
 <body>
@@ -59,7 +78,7 @@ tr:hover td { background:var(--row-hover); }
 <li><a href="#Table12">Table 12</a></li>
 </ul><button id='modeBtn' onclick='toggleMode()'>Dark mode</button></nav><div id='mainContent'>
 <div id="stickyMainHeader">
-  <h1 style="margin:0;">Tables Viewer v2.0 Final</h1>
+  <h1 style="margin:0;">Tables Viewer v2.1</h1>
   <div style="margin:10px 0; display:flex; align-items:center;">
     <input type="text" id="searchBox" onkeyup="searchTable()" placeholder="Search for keywords...">
     <button onclick="document.getElementById('searchBox').value=''; searchTable();">Reset</button>
@@ -82,7 +101,33 @@ tr:hover td { background:var(--row-hover); }
     </div>
     <table>
       <thead><tr>
-<th style="width:28.57%;" onclick="sortTableByColumn(0,0)">Summary</th><th style="width:71.43%;" onclick="sortTableByColumn(0,1)">Notes</th></tr></thead><tbody><tr><td data-label="Summary"><b>Spot the Exception Like Vincent van Gogh and Marie Curie<b> </td><td data-label="Notes">Several long-term employees, failing at their jobs, were sent to a museum exercise to rediscover intuition. Those who remembered unique details of paintings improved dramatically in their performance, showing that recalling exceptional information activates intuition.                                                                                </td></tr>
+
+        <th style="width:28.57%;" onclick="sortTableByColumn(0,0)" role="button" aria-label="Sort by Summary">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Summary</div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(0,1)" role="button" aria-label="Sort by Notes">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Notes</div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="Summary"><b>Spot the Exception Like Vincent van Gogh and Marie Curie<b> </td><td data-label="Notes">Several long-term employees, failing at their jobs, were sent to a museum exercise to rediscover intuition. Those who remembered unique details of paintings improved dramatically in their performance, showing that recalling exceptional information activates intuition.                                                                                </td></tr>
 <tr><td data-label="Summary"><b>Intuition defined<b>                                        </td><td data-label="Notes">Intuition is knowing without consciously thinking. It allows acting in ways no one has previously envisioned, solving old problems in fresh ways. Modern interpretations often see it as mystical, but it has a natural, evidence-based source.                                                                                                             </td></tr>
 <tr><td data-label="Summary"><b>U.S. Army Special Operators and intuition<b>                </td><td data-label="Notes">Special Operators display high levels of intuition, which improves over time. They can anticipate possibilities by identifying exceptional information—details that break conventional rules or expectations. Example: An operator in Baghdad 2003 detected an Iraqi man who could speak better English than Americans, signaling unforeseen possibilities. </td></tr>
 <tr><td data-label="Summary"><b>Exceptional Information<b>                                  </td><td data-label="Notes">Defined as information from extraordinary events, unseen opportunities, or new threats. It violates precedent and reveals that more can happen than expected. Distinct from logical intuition, which relies on pattern recognition.                                                                                                                         </td></tr>
@@ -112,7 +157,33 @@ tr:hover td { background:var(--row-hover); }
     </div>
     <table>
       <thead><tr>
-<th style="width:28.57%;" onclick="sortTableByColumn(1,0)">Summary</th><th style="width:71.43%;" onclick="sortTableByColumn(1,1)">Notes</th></tr></thead><tbody><tr><td data-label="Summary"><b>Morning Fog Simulation: Operators Under Stress<b>     </td><td data-label="Notes">The chapter opens with a U.S. Special Forces training simulation near Cape Fear, North Carolina. A bomb detonates while Operators are meeting a guerrilla chieftain, testing their response under uncertainty. Their reactions highlight agility, decisiveness, and imagination.                              </td></tr>
+
+        <th style="width:28.57%;" onclick="sortTableByColumn(1,0)" role="button" aria-label="Sort by Summary">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Summary</div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(1,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(1,1)" role="button" aria-label="Sort by Notes">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Notes</div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(1,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="Summary"><b>Morning Fog Simulation: Operators Under Stress<b>     </td><td data-label="Notes">The chapter opens with a U.S. Special Forces training simulation near Cape Fear, North Carolina. A bomb detonates while Operators are meeting a guerrilla chieftain, testing their response under uncertainty. Their reactions highlight agility, decisiveness, and imagination.                              </td></tr>
 <tr><td data-label="Summary"><b>Operators’ Uncommon Responses<b>                      </td><td data-label="Notes">Each Operator reacts differently: one persuades the chieftain to lead, another goes solo to solve the bomb situation, another delegates to the chieftain entirely. This variability demonstrates their flexible problem-solving capacity.                                                                     </td></tr>
 <tr><td data-label="Summary"><b>Training as the Key to Imagination<b>                 </td><td data-label="Notes">Operators’ actions stem from rigorous training. Unlike untrained soldiers (or business leaders), they avoid default responses: fright, fight, or dependence. Training cultivates imagination, enabling fast, adaptive decision‐making.                                                                        </td></tr>
 <tr><td data-label="Summary"><b>Defining Imagination<b>                               </td><td data-label="Notes">Imagination is the ability to “see things that the eyes don’t see.” It allows individuals to anticipate future events, envision unseen outcomes, and creatively generate solutions beyond immediate sensory input.                                                                                            </td></tr>
@@ -149,7 +220,33 @@ tr:hover td { background:var(--row-hover); }
     </div>
     <table>
       <thead><tr>
-<th style="width:28.57%;" onclick="sortTableByColumn(2,0)">Summary</th><th style="width:71.43%;" onclick="sortTableByColumn(2,1)">Notes</th></tr></thead><tbody><tr><td data-label="Summary"><b>Emotions as Biological Intelligence<b>        </td><td data-label="Notes">The CEO had climbed from summer intern to the head of a corporation generating half a trillion dollars in revenue. Despite his success, he realized his team—managers, employees, and C-suite—relied on data and metrics, not intuition. Traditional EQ courses failed to instill change, highlighting a gap between logical understanding of emotion and its biological function.                                                                                                  </td></tr>
+
+        <th style="width:28.57%;" onclick="sortTableByColumn(2,0)" role="button" aria-label="Sort by Summary">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Summary</div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(2,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(2,1)" role="button" aria-label="Sort by Notes">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Notes</div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(2,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="Summary"><b>Emotions as Biological Intelligence<b>        </td><td data-label="Notes">The CEO had climbed from summer intern to the head of a corporation generating half a trillion dollars in revenue. Despite his success, he realized his team—managers, employees, and C-suite—relied on data and metrics, not intuition. Traditional EQ courses failed to instill change, highlighting a gap between logical understanding of emotion and its biological function.                                                                                                  </td></tr>
 <tr><td data-label="Summary"><b>EQ vs Biological Emotion<b>                   </td><td data-label="Notes">EQ teaches identifying others’ emotions through analogies to personal experiences, e.g., “That man is scared; I can empathize.” However, behavior rarely changes because human brains evolved to use emotion internally to monitor and correct mental life narratives, not just to read others. The CEO remained frustrated: empathy alone did not improve communication, decision-making, or strategic execution.                                                                  </td></tr>
 <tr><td data-label="Summary"><b>Singletons: Emotion-Driven Self-Assessment<b> </td><td data-label="Notes">Lucy Gray, a Special Operations singleton, exemplifies mastery of self-assessment through “feel.” She operates solo in hostile environments, adjusting plans instantly based on emotional feedback rather than pre-defined metrics. Gray’s decision-making relies on an internal sensor: when “feel” indicates wrongness, she adapts; when it indicates rightness, she commits. Her biological system constantly checks the alignment of her actions with her narrative objectives. </td></tr>
 <tr><td data-label="Summary"><b>Mental Life Narrative & Emotion<b>            </td><td data-label="Notes">Optimal mental narratives integrate past experiences and allow future options to branch. Emotions signal deviations, acting as feedback loops for course correction. Visual example (image\<i>page\<i>53): past integrated, future branching. Emotions serve as early-warning systems, flashing alerts when plans or intentions diverge from desired trajectories.                                                                                                                      </td></tr>
@@ -180,7 +277,33 @@ tr:hover td { background:var(--row-hover); }
     </div>
     <table>
       <thead><tr>
-<th style="width:28.57%;" onclick="sortTableByColumn(3,0)">Summary</th><th style="width:71.43%;" onclick="sortTableByColumn(3,1)">Notes</th></tr></thead><tbody><tr><td data-label="Summary"><b>Commonsense is a mental skill that helps detect “unknown unknowns.”<b>         </td><td data-label="Notes">The stock picker wanted a planner who could anticipate fresh opportunities, not just follow past data or take speculative risks. Commonsense allowed him to separate superficial market noise from fundamental changes.                                                                                               </td></tr>
+
+        <th style="width:28.57%;" onclick="sortTableByColumn(3,0)" role="button" aria-label="Sort by Summary">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Summary</div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(3,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(3,1)" role="button" aria-label="Sort by Notes">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Notes</div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(3,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="Summary"><b>Commonsense is a mental skill that helps detect “unknown unknowns.”<b>         </td><td data-label="Notes">The stock picker wanted a planner who could anticipate fresh opportunities, not just follow past data or take speculative risks. Commonsense allowed him to separate superficial market noise from fundamental changes.                                                                                               </td></tr>
 <tr><td data-label="Summary"><b>Children outperform AI in commonsense by recognizing what they do not know.<b> </td><td data-label="Notes">A child entering a new house or meeting a new person hesitates: <i>“I don’t know this place. I don’t know that face.”<i> Logic-based AI lacks this ability, leading to confident but incorrect answers.                                                                                                                   </td></tr>
 <tr><td data-label="Summary"><b>Story enables the brain to recognize novelty.<b>                               </td><td data-label="Notes">Story operates in the past-future temporal domain (<i>why<i> and <i>what if<i>), allowing the brain to identify environmental volatility and the limits of its knowledge. Computers process timeless logic and cannot detect unknown unknowns.                                                                                </td></tr>
 <tr><td data-label="Summary"><b>Commonsense has a negative function: doubt current plans.<b>                   </td><td data-label="Notes">When commonsense detects unknown unknowns, it warns: <i>“There is relevant info you don’t know.”<i> This can prompt new planning or rapid pivoting when volatility is high.                                                                                                                                               </td></tr>
@@ -220,7 +343,33 @@ tr:hover td { background:var(--row-hover); }
     </div>
     <table>
       <thead><tr>
-<th style="width:28.57%;" onclick="sortTableByColumn(4,0)"><b>Summary<b></th><th style="width:71.43%;" onclick="sortTableByColumn(4,1)"><b>Notes<b></th></tr></thead><tbody><tr><td data-label="<b>Summary<b>"><b>Clausewitz realized war is an arena of individual creativity.<b>                              </td><td data-label="<b>Notes<b>">Clausewitz, influenced by Shakespeare and German Romantics, rejected Enlightenment ideas that battles could be fully reduced to logical rules. He observed that commanders, not soldiers, retained independent thought, shaping strategy uniquely.                                                                                                          </td></tr>
+
+        <th style="width:28.57%;" onclick="sortTableByColumn(4,0)" role="button" aria-label="Sort by <b>Summary<b>">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>Summary<b></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(4,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(4,1)" role="button" aria-label="Sort by <b>Notes<b>">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>Notes<b></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(4,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="<b>Summary<b>"><b>Clausewitz realized war is an arena of individual creativity.<b>                              </td><td data-label="<b>Notes<b>">Clausewitz, influenced by Shakespeare and German Romantics, rejected Enlightenment ideas that battles could be fully reduced to logical rules. He observed that commanders, not soldiers, retained independent thought, shaping strategy uniquely.                                                                                                          </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Logical, predictable plans are vulnerable; creativity introduces unpredictability.<b>         </td><td data-label="<b>Notes<b>">Napoléon's armies, while disciplined and drilled, had one independent thinker per army: the commander. Each commander saw different opportunities in the same battlefield. Clausewitz understood that variability in human perception creates opportunities for innovation.                                                                                 </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Special Operators adopt Clausewitz’s principle: humans innovate, not computers.<b>            </td><td data-label="<b>Notes<b>">Modern Special Ops teams can outperform AI because they pool individual perspectives and create original strategies. AI can only recycle old tactics, producing derivative outcomes.                                                                                                                                                                        </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Teams that leverage combined intuition generate fundamentally new rules.<b>                   </td><td data-label="<b>Notes<b>">Human teams synthesize diverse insights, pushing beyond mere optimization to create entirely new frameworks of action. This mirrors innovation in science, business, and art.                                                                                                                                                                               </td></tr>
@@ -270,7 +419,33 @@ tr:hover td { background:var(--row-hover); }
     </div>
     <table>
       <thead><tr>
-<th style="width:28.57%;" onclick="sortTableByColumn(5,0)"><b>Summary<b></th><th style="width:71.43%;" onclick="sortTableByColumn(5,1)"><b>Notes<b></th></tr></thead><tbody><tr><td data-label="<b>Summary<b>"><b>Resilience and Antifragility<b>             </td><td data-label="<b>Notes<b>">The chapter introduces antifragility, the capacity to gain strength from adversity. Unlike simple resilience, antifragility implies growth from stressors, trauma, or challenges. The narrative demonstrates this through both a clinic patient and Special Operators.                                        </td></tr>
+
+        <th style="width:28.57%;" onclick="sortTableByColumn(5,0)" role="button" aria-label="Sort by <b>Summary<b>">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>Summary<b></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(5,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(5,1)" role="button" aria-label="Sort by <b>Notes<b>">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>Notes<b></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(5,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="<b>Summary<b>"><b>Resilience and Antifragility<b>             </td><td data-label="<b>Notes<b>">The chapter introduces antifragility, the capacity to gain strength from adversity. Unlike simple resilience, antifragility implies growth from stressors, trauma, or challenges. The narrative demonstrates this through both a clinic patient and Special Operators.                                        </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Clinic Patient’s Initial Condition<b>       </td><td data-label="<b>Notes<b>">A patient at a lakeside clinic, along with a dozen others, suffered from lost purpose, feeling life lacked meaning. Previous attempts at mindfulness, meditation, and positive thinking failed. A sense of numbness and apathy dominated daily routines.                                                      </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Journaling as a Therapeutic Tool<b>         </td><td data-label="<b>Notes<b>">Patients engaged in intensive journaling—writing thoughts, memories, and stream-of-consciousness content. While most remained unchanged, one patient’s story sparked a major transformation in life purpose, illustrating the impact of narrative on the mind.                                                </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Role of a Positive Story<b>                 </td><td data-label="<b>Notes<b>">The transformative story contained a fortunate plot twist—a positive surprise that provided the brain a tangible example of good emerging from adversity. This contrasts with positive thinking, which attempts to override lived experience without engagement.                                              </td></tr>
@@ -321,7 +496,33 @@ tr:hover td { background:var(--row-hover); }
     </div>
     <table>
       <thead><tr>
-<th style="width:28.57%;" onclick="sortTableByColumn(6,0)"><b>Summary<b></th><th style="width:71.43%;" onclick="sortTableByColumn(6,1)"><b>Notes<b></th></tr></thead><tbody><tr><td data-label="<b>Summary<b>"><b>Decision-Making Under Uncertainty<b>             </td><td data-label="<b>Notes<b>">Chapter 7 explores how humans make intelligent decisions under volatile and unpredictable conditions. Astronauts noticed a paradox: the more they trained in simulators, the better their performance in controlled scenarios—but the more prone they became to catastrophic failure in real-life emergencies. Training that optimized performance introduced unforeseen vulnerabilities.                                                                                                                                                  </td></tr>
+
+        <th style="width:28.57%;" onclick="sortTableByColumn(6,0)" role="button" aria-label="Sort by <b>Summary<b>">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>Summary<b></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(6,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(6,1)" role="button" aria-label="Sort by <b>Notes<b>">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>Notes<b></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(6,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="<b>Summary<b>"><b>Decision-Making Under Uncertainty<b>             </td><td data-label="<b>Notes<b>">Chapter 7 explores how humans make intelligent decisions under volatile and unpredictable conditions. Astronauts noticed a paradox: the more they trained in simulators, the better their performance in controlled scenarios—but the more prone they became to catastrophic failure in real-life emergencies. Training that optimized performance introduced unforeseen vulnerabilities.                                                                                                                                                  </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Optimization Trap<b>                             </td><td data-label="<b>Notes<b>">The optimization trap occurs when a system becomes highly specialized for current conditions but fails under new or shifting environments. For AI, more data improves accuracy and speed until sudden environmental changes make the accumulated data a liability, leading to catastrophic errors:<br>“dumps commodities at fire-sale prices, diagnoses healthy newborns with brain tumors, and pilots cargo planes into mountainsides.”                                                                                                   </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Biology and Maximum Adequacy<b>                  </td><td data-label="<b>Notes<b>">Biological systems illustrate the value of generalist adaptation over hyperspecialization. Maximum adequacy is a survival trait:<br>- The human hand is competent at countless tasks but not perfectly optimized for any single one.<br>- The human brain is satisfactory across many domains, combining logic, creativity, and commonsense to avoid the rigidity of AI over-optimization.                                                                                                                                                 </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Commonsense as a Guide<b>                        </td><td data-label="<b>Notes<b>">Army Special Operators discovered that commonsense is the key to surviving uncertainty.<br>Commonsense operates by detecting unknown unknowns and enabling two forms of decision-making:<br>1) Recognizing when to switch plans (Chapter 4: tuning anxiety)<br>2) Deciding which new plan to adopt<br>The principle for plan selection is: <b>Match the newness of your plan to the newness of your environment.<b>                                                                                                                          </td></tr>
@@ -353,7 +554,33 @@ tr:hover td { background:var(--row-hover); }
     </div>
     <table>
       <thead><tr>
-<th style="width:28.57%;" onclick="sortTableByColumn(7,0)"><b>Summary<b></th><th style="width:71.43%;" onclick="sortTableByColumn(7,1)"><b>Notes<b></th></tr></thead><tbody><tr><td data-label="<b>Summary<b>"><b>Introduction<b>                                              </td><td data-label="<b>Notes<b>">Chapter 8 explores the power of communication, both external (marketing) and internal (team alignment), showing how imagination, narrative structure, and trust shape human engagement.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 </td></tr>
+
+        <th style="width:28.57%;" onclick="sortTableByColumn(7,0)" role="button" aria-label="Sort by <b>Summary<b>">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>Summary<b></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(7,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(7,1)" role="button" aria-label="Sort by <b>Notes<b>">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>Notes<b></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(7,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="<b>Summary<b>"><b>Introduction<b>                                              </td><td data-label="<b>Notes<b>">Chapter 8 explores the power of communication, both external (marketing) and internal (team alignment), showing how imagination, narrative structure, and trust shape human engagement.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Answer Why Like Maya Angelou and Abraham Lincoln<b>          </td><td data-label="<b>Notes<b>">A company with a billion-dollar marketing budget saw stagnant revenue despite numerous ads. Only a tiny fraction of ads created sustained influence. Example: Nike’s “Just Do It” ad featuring 80-year-old Walt Stack. Unlike fear-based ads, it sparked imagination, merging personal narrative with the ad’s story.                                                                                                                                                                                                                                                                                                                                                   </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>The Science of Imagination in Ads<b>                         </td><td data-label="<b>Notes<b>">1. Fear makes the brain susceptible to narratives but fragile—power fades once fear is gone.<br>2. Imagination-driven stories integrate into personal biography, giving lasting influence.<br>3. Nike’s ad works not by brainwashing but by inviting viewers to imagine their own future “Just Do It” story.                                                                                                                                                                                                                                                                                                                                                            </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Three Shakespearean Techniques for External Communication<b> </td><td data-label="<b>Notes<b>"><b>1. Start in the middle:<b> Storytelling begins with the unexpected \[middle], prompting backward causal thinking (\[beginning]) and forward creative planning (\[end]). Example: Homer’s <i>Odyssey<i>, Shakespeare’s <i>Othello<i>, Shelley’s <i>Frankenstein<i>.<br><b>2. Focus on exceptions:<b> Anomalies capture imagination, breaking archetypes. Example: Hamlet, Cleopatra, Shylock; Maya Angelou in <i>I Know Why the Caged Bird Sings<i>.<br><b>3. Write in riddle:<b> Contradictions stimulate curiosity and suspense. Example: Macbeth’s “Fair is foul, and foul is fair”; Lincoln’s Gettysburg Address poses America as a riddle (dedicated to equality yet slavery existed). </td></tr>
@@ -378,7 +605,33 @@ tr:hover td { background:var(--row-hover); }
     </div>
     <table>
       <thead><tr>
-<th style="width:28.57%;" onclick="sortTableByColumn(8,0)"><b>Summary<b></th><th style="width:71.43%;" onclick="sortTableByColumn(8,1)"><b>Notes<b></th></tr></thead><tbody><tr><td data-label="<b>Summary<b>"><b>Introduction<b>                         </td><td data-label="<b>Notes<b>">Chapter 9 explores coaching through the perspectives of elite performers—football coaches, Special Operations pilots, Hollywood showrunners, and medical pioneers. It emphasizes that <b>unleashing the rookie<b> allows both the learner and the expert to reach their full potential.                                                                                                                                                                                                                                  </td></tr>
+
+        <th style="width:28.57%;" onclick="sortTableByColumn(8,0)" role="button" aria-label="Sort by <b>Summary<b>">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>Summary<b></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(8,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(8,1)" role="button" aria-label="Sort by <b>Notes<b>">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>Notes<b></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(8,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="<b>Summary<b>"><b>Introduction<b>                         </td><td data-label="<b>Notes<b>">Chapter 9 explores coaching through the perspectives of elite performers—football coaches, Special Operations pilots, Hollywood showrunners, and medical pioneers. It emphasizes that <b>unleashing the rookie<b> allows both the learner and the expert to reach their full potential.                                                                                                                                                                                                                                  </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Unleash the Rookie<b>                   </td><td data-label="<b>Notes<b>">1. Rookies carry immense promise but also high risk: they can be overconfident, self-doubting, tunnel-visioned, lazy, or indifferent.<br>2. Coaches face the dilemma: protect the rookie with a limited playbook or treat him as a veteran.<br>3. Special Operations rule: <b>“Unleash the rookie”<b>—let rookies explore the plays that excite them and act freely.<br>4. This approach benefits the rookie, the team, and even the coach, fostering innovation and adaptability.                                       </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Rookie Quarterback Example<b>           </td><td data-label="<b>Notes<b>">1. Rookie quarterbacks can elevate the team but also fail spectacularly.<br>2. Coaches struggle to balance oversight and autonomy.<br>3. Author advises releasing the rookie to explore their own plays, creating opportunities for learning and discovery.<br>4. Rookies’ mistakes become catalysts for expert growth, not just errors to correct.                                                                                                                                                                    </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>SOAR Pilot Example<b>                   </td><td data-label="<b>Notes<b>">1. 160th Special Operations Aviation Regiment pilots allow rookies to fly difficult missions.<br>2. Initial supervision is tight, correcting mistakes; over time, rookies are given more autonomy.<br>3. Experts embrace chains of rookie mistakes to discover new approaches.<br>4. Example: letting a rookie handle multiple errors simultaneously forces the pilot to innovate, increasing skill.<br>5. Gradually, the expert can let the rookie fly longer, chaining more mistakes safely.                         </td></tr>
@@ -409,7 +662,33 @@ tr:hover td { background:var(--row-hover); }
     </div>
     <table>
       <thead><tr>
-<th style="width:28.57%;" onclick="sortTableByColumn(9,0)"><b>Summary<b></th><th style="width:71.43%;" onclick="sortTableByColumn(9,1)"><b>Notes<b></th></tr></thead><tbody><tr><td data-label="<b>Summary<b>"><b>Leadership is innate and primal.<b>                        </td><td data-label="<b>Notes<b>">Humans are born with leadership tendencies. Anthropologists note that early humans organized themselves around natural leaders for hunting, defense, and survival. Schooling has conditioned humans to follow instructions rather than trust intuition. The phrase “to be led” underlines the passive role modern education often cultivates. Tests and grades reinforce obedience rather than initiative. Over time, societal validation—promotions, titles, accolades—becomes a proxy for self-worth, which can undermine natural leadership instincts.                                                                                                                                                                                                                             </td></tr>
+
+        <th style="width:28.57%;" onclick="sortTableByColumn(9,0)" role="button" aria-label="Sort by <b>Summary<b>">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>Summary<b></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(9,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(9,1)" role="button" aria-label="Sort by <b>Notes<b>">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>Notes<b></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(9,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="<b>Summary<b>"><b>Leadership is innate and primal.<b>                        </td><td data-label="<b>Notes<b>">Humans are born with leadership tendencies. Anthropologists note that early humans organized themselves around natural leaders for hunting, defense, and survival. Schooling has conditioned humans to follow instructions rather than trust intuition. The phrase “to be led” underlines the passive role modern education often cultivates. Tests and grades reinforce obedience rather than initiative. Over time, societal validation—promotions, titles, accolades—becomes a proxy for self-worth, which can undermine natural leadership instincts.                                                                                                                                                                                                                             </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Three common ways leaders fail.<b>                         </td><td data-label="<b>Notes<b>">Leaders frequently fall into one of three failure modes:<br>1. <b>Spooked leaders<b>: Hesitate, over-consult, avoid risk, and struggle to inspire action. Fear dominates decision-making. Example: managers paralyzed by crisis data rather than acting decisively.<br>2. <b>Angry leaders<b>: Rely on intimidation or coercion, micro-manage, and often burn out teams. Example: executives who enforce rules rigidly and stifle innovation.<br>3. <b>Disorganized leaders<b>: Lack focus, fail to follow through, and scatter efforts. Example: well-intentioned leaders who start multiple initiatives but leave them incomplete.<br>Even leaders who achieve high success often credit “special gifts” or inherent talent, perpetuating the myth that leadership is reserved for a few. </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Distinction between management and leadership.<b>          </td><td data-label="<b>Notes<b>">Management: directs resources and people to achieve predictable results.<br>Leadership: creates new possibilities, envisions change, and mobilizes others toward long-term impact.<br>1. <b>Management<b>:<br>- Focused on process, monitoring, and compliance.<br>- Relies heavily on data, forecasts, and planning.<br>- Strives for orchestrated harmony and minimizing surprises.<br>2. <b>Leadership<b>:<br>- Envisions a compelling future and inspires others to pursue it.<br>- Takes first steps without waiting for complete certainty.<br>- Encourages initiative, creativity, and autonomous decision-making.<br>- Leads by example, adapting as circumstances evolve.                                                                                                        </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Core skills of leaders.<b>                                 </td><td data-label="<b>Notes<b>">Leaders combine multiple competencies:<br>1. <b>Innovators<b>: identify unseen opportunities and act before the competition.<br>2. <b>Resilient<b>: recover from failure, learn quickly, and adapt strategy.<br>3. <b>Decisive<b>: know when to pivot or commit fully to a course of action.<br>4. <b>Communicators<b>: articulate vision in ways that mobilize teams.<br>5. <b>Coaches<b>: mentor and cultivate talents in others.<br>These skills require integrating intuition, imagination, emotion, and common sense. Leaders see patterns where others see randomness, envision solutions beyond conventional frameworks, and inspire trust and followership.                                                                                                                             </td></tr>
@@ -438,7 +717,33 @@ tr:hover td { background:var(--row-hover); }
     </div>
     <table>
       <thead><tr>
-<th style="width:28.57%;" onclick="sortTableByColumn(10,0)"><b>Summary<b></th><th style="width:71.43%;" onclick="sortTableByColumn(10,1)"><b>Notes<b></th></tr></thead><tbody><tr><td data-label="<b>Summary<b>"><b>Opening Scene at Fort Bragg, June 2021<b>       </td><td data-label="<b>Notes<b>">The author describes the North Carolina bogs at Fort Bragg: clear sky, calm breeze, air tasting like nitric oxide. Strong recommendation to wear sunglasses, not for glare but to protect eyes from horseflies. Expectation of high-tech covert training facilities (VR simulators, waterless baths, heart monitors) is subverted: the site is primitively designed, reminiscent of a 1970s student co-op, with haphazard furniture, ambient sweat, spartan sheds connected by crumbling tarmac, driftwood gladiator pits, and temples made of dead helicopters. </td></tr>
+
+        <th style="width:28.57%;" onclick="sortTableByColumn(10,0)" role="button" aria-label="Sort by <b>Summary<b>">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>Summary<b></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(10,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(10,1)" role="button" aria-label="Sort by <b>Notes<b>">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>Notes<b></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(10,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="<b>Summary<b>"><b>Opening Scene at Fort Bragg, June 2021<b>       </td><td data-label="<b>Notes<b>">The author describes the North Carolina bogs at Fort Bragg: clear sky, calm breeze, air tasting like nitric oxide. Strong recommendation to wear sunglasses, not for glare but to protect eyes from horseflies. Expectation of high-tech covert training facilities (VR simulators, waterless baths, heart monitors) is subverted: the site is primitively designed, reminiscent of a 1970s student co-op, with haphazard furniture, ambient sweat, spartan sheds connected by crumbling tarmac, driftwood gladiator pits, and temples made of dead helicopters. </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Introduction to Special Operators<b>            </td><td data-label="<b>Notes<b>">The Operators present at the site come from elite units: 1st SFOD-Delta (U.S. Army), British SAS, Canada’s Joint Task Force 2, U.S. Green Berets, Navy DEVGRU, and an unnamed unit. They are guarded but friendly. They know the author brings a “gift”: a science to enhance decision-making under chaos and breakdown of logic. This is the author’s first encounter with them, though readers have seen them in prior chapters.                                                                                                                               </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Primal Intelligence and Evolutionary Origins<b> </td><td data-label="<b>Notes<b>">Primal intelligence arises from the animal neuron, evolved during the Cambrian “Biological Big Bang” >500 million years ago, when life diversified rapidly, creating competition. Two core concerns: \[Eat] → origin of logic; \[Don’t get eaten] → origin of story/creative action. Logic neurons detect light, identify patterns, and operate computationally; motor neurons innovate behaviors to evade predators, chaining actions fluidly to maximize survival.                                                                                             </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Dual Brain Functions<b>                         </td><td data-label="<b>Notes<b>">Symbolic logic (visual cortex, algorithmic functions) allows arithmetic, deduction, interpretation, and language elements (nouns/adjectives). Creative action (motor cortex) supports skilled movement (surgeons’ hands, athletes’ hips, dancers’ arms) and higher-order causal/counterfactual cognition (thinking “why” and “what if”), powering verbs, scientific hypotheses, military tactics, engineering, entrepreneurship, storytelling. Brain can think A → B (action), unlike computers’ A = B (logic).                                                  </td></tr>
@@ -468,7 +773,33 @@ tr:hover td { background:var(--row-hover); }
     </div>
     <table>
       <thead><tr>
-<th style="width:28.57%;" onclick="sortTableByColumn(11,0)"><b>Summary<b></th><th style="width:71.43%;" onclick="sortTableByColumn(11,1)"><b>Notes<b></th></tr></thead><tbody><tr><td data-label="<b>Summary<b>"><b>Unconventional Research Origins<b>                       </td><td data-label="<b>Notes<b>">The author began studying human intelligence in the late 1990s at the University of Michigan Medical School. Focused on synapses using handmade microscope rigs, he tracked individual synapses and engineered mutants. This differed from psychology experiments that averaged hundreds of participants into “one average person.” He found statistical methods clever but misleading.        </td></tr>
+
+        <th style="width:28.57%;" onclick="sortTableByColumn(11,0)" role="button" aria-label="Sort by <b>Summary<b>">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>Summary<b></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(11,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(11,1)" role="button" aria-label="Sort by <b>Notes<b>">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>Notes<b></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(11,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="<b>Summary<b>"><b>Unconventional Research Origins<b>                       </td><td data-label="<b>Notes<b>">The author began studying human intelligence in the late 1990s at the University of Michigan Medical School. Focused on synapses using handmade microscope rigs, he tracked individual synapses and engineered mutants. This differed from psychology experiments that averaged hundreds of participants into “one average person.” He found statistical methods clever but misleading.        </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Discovery of Natural History<b>                          </td><td data-label="<b>Notes<b>">On a dusty shelf, he found <i>A Naturalist's Field Guide<i> (1960s), teaching naturalists to observe unique phenomena patiently. Curiosity is sparked by the unexpected—new species, behaviors, or exceptions. Naturalists watch, speculate, and contextualize exceptions to understand broader systems. Unlike statistical science, it cultivates intimate, slow, yet far-reaching understanding. </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>The Death of Natural History<b>                          </td><td data-label="<b>Notes<b>">Lab director dismissed natural history as obsolete, overtaken by “physics envy” after Einstein. Statistical methods replaced patient observation. Big-data ecology and cognitive science allowed researchers to study everything numerically, often from desks, displacing immersive fieldwork.                                                                                                </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Historical Precedents<b>                                 </td><td data-label="<b>Notes<b>">1. <b>Michael Faraday<b> discovered electromagnetic laws by feel, not math. Later, Maxwell formalized them mathematically. <br>2. <b>William James<b> studied individual psychology without statistics, leading to validated insights on consciousness and free will. <br>3. The author’s lab director trained him to develop a “feel” for neurons—rooted in patience and observation.                     </td></tr>
@@ -494,154 +825,216 @@ tr:hover td { background:var(--row-hover); }
 </tbody></table></div></div>
 
 <script>
-// Store original table rows
-let originalTableRows=[];
-let sortStates=[]; // 0: original, 1: asc, 2: desc
-document.querySelectorAll(".table-container table").forEach((table,idx)=>{
-    originalTableRows[idx]=Array.from(table.tBodies[0].rows).map(r=>r.cloneNode(true));
-    sortStates[idx]=Array(table.rows[0].cells.length).fill(0);
+// Store original table rows and sort states
+let originalTableRows = [];
+let sortStates = [];
+document.querySelectorAll(".table-container table").forEach((table, idx) => {
+  // store original tbody rows
+  const rows = Array.from(table.tBodies[0].rows).map(r => r.cloneNode(true));
+  originalTableRows[idx] = rows;
+  // initialize sort states for each column (0=original,1=asc,2=desc)
+  sortStates[idx] = Array(table.rows[0].cells.length).fill(0);
 });
 
 // Dark mode
-const modeBtn=document.getElementById('modeBtn');
-if(localStorage.getItem('uiMode')==='dark'){document.documentElement.setAttribute('data-theme','dark'); modeBtn.textContent='Light mode';}
+const modeBtn = document.getElementById('modeBtn');
+if (localStorage.getItem('uiMode') === 'dark') {
+  document.documentElement.setAttribute('data-theme','dark');
+  modeBtn.textContent = 'Light mode';
+}
 function toggleMode(){
-  const dark=document.documentElement.getAttribute('data-theme')!=='dark';
-  if(dark){document.documentElement.setAttribute('data-theme','dark'); modeBtn.textContent='Light mode'; localStorage.setItem('uiMode','dark');}
-  else {document.documentElement.removeAttribute('data-theme'); modeBtn.textContent='Dark mode'; localStorage.setItem('uiMode','light');}
+  const dark = document.documentElement.getAttribute('data-theme') !== 'dark';
+  if(dark){
+    document.documentElement.setAttribute('data-theme','dark'); modeBtn.textContent='Light mode'; localStorage.setItem('uiMode','dark');
+  } else {
+    document.documentElement.removeAttribute('data-theme'); modeBtn.textContent='Dark mode'; localStorage.setItem('uiMode','light');
+  }
 }
 
-// Sort table with 3-state
-function sortTableByColumn(tableIdx,colIdx){
-  let table=document.querySelectorAll(".table-container table")[tableIdx];
-  let state = sortStates[tableIdx][colIdx];
-  let rows = Array.from(table.tBodies[0].rows);
-  let newRows = [];
+// Helper: update header sort UI and aria-sort for accessibility
+function updateHeaderSortUI(tableIdx){
+  const table = document.querySelectorAll(".table-container table")[tableIdx];
+  const ths = table.tHead.rows[0].cells;
+  for(let c = 0; c < ths.length; c++){
+    const btn = ths[c].querySelector('.sort-btn');
+    if(!btn) continue;
+    // reset classes
+    btn.classList.remove('sort-state-0','sort-state-1','sort-state-2');
+    const state = sortStates[tableIdx][c] || 0;
+    btn.classList.add('sort-state-' + state);
+    // set ARIA attribute for screen readers
+    if(state === 1) ths[c].setAttribute('aria-sort','ascending');
+    else if(state === 2) ths[c].setAttribute('aria-sort','descending');
+    else ths[c].setAttribute('aria-sort','none');
 
-  if(state===0){ // Original -> Asc
-    rows.sort((a,b)=>{
-      let valA=a.cells[colIdx].textContent.trim();
-      let valB=b.cells[colIdx].textContent.trim();
-      let numA=parseFloat(valA.replace(/,/g,'')); let numB=parseFloat(valB.replace(/,/g,''));
-      if(!isNaN(numA)&&!isNaN(numB)) return numA-numB;
+    // replace icon SVG to visually indicate asc/desc/unsorted
+    const iconSpan = btn.querySelector('.sort-icon');
+    if(iconSpan){
+      if(state === 0){
+        iconSpan.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M7 14l5-5 5 5"></path><path d="M7 10l5 5 5-5"></path></svg>`;
+      } else if(state === 1){
+        iconSpan.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 19V6"></path><path d="M5 12l7-7 7 7"></path></svg>`;
+      } else {
+        iconSpan.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 5v13"></path><path d="M19 12l-7 7-7-7"></path></svg>`;
+      }
+    }
+  }
+}
+
+// Sort table with 3-state (preserves originalTableRows)
+function sortTableByColumn(tableIdx, colIdx){
+  let table = document.querySelectorAll(".table-container table")[tableIdx];
+  let state = sortStates[tableIdx][colIdx] || 0;
+  let rows = Array.from(table.tBodies[0].rows);
+
+  if(state === 0){ // Original -> Asc
+    rows.sort((a, b) => {
+      let valA = a.cells[colIdx].textContent.trim();
+      let valB = b.cells[colIdx].textContent.trim();
+      let numA = parseFloat(valA.replace(/,/g,'')); let numB = parseFloat(valB.replace(/,/g,''));
+      if(!isNaN(numA) && !isNaN(numB)) return numA - numB;
       return valA.localeCompare(valB);
     });
-    sortStates[tableIdx][colIdx]=1;
-  } else if(state===1){ // Asc -> Desc
-    rows.sort((a,b)=>{
-      let valA=a.cells[colIdx].textContent.trim();
-      let valB=b.cells[colIdx].textContent.trim();
-      let numA=parseFloat(valA.replace(/,/g,'')); let numB=parseFloat(valB.replace(/,/g,''));
-      if(!isNaN(numA)&&!isNaN(numB)) return numB-numA;
+    sortStates[tableIdx][colIdx] = 1;
+  } else if(state === 1){ // Asc -> Desc
+    rows.sort((a, b) => {
+      let valA = a.cells[colIdx].textContent.trim();
+      let valB = b.cells[colIdx].textContent.trim();
+      let numA = parseFloat(valA.replace(/,/g,'')); let numB = parseFloat(valB.replace(/,/g,''));
+      if(!isNaN(numA) && !isNaN(numB)) return numB - numA;
       return valB.localeCompare(valA);
     });
-    sortStates[tableIdx][colIdx]=2;
-  } else { // Desc -> Original
-    rows = originalTableRows[tableIdx].map(r=>r.cloneNode(true));
-    sortStates[tableIdx][colIdx]=0;
+    sortStates[tableIdx][colIdx] = 2;
+  } else { // Desc -> Original (restore original order)
+    rows = originalTableRows[tableIdx].map(r => r.cloneNode(true));
+    sortStates[tableIdx][colIdx] = 0;
   }
 
   // Reset other columns' states
-  for(let i=0;i<sortStates[tableIdx].length;i++){if(i!==colIdx) sortStates[tableIdx][i]=0;}
+  for(let i = 0; i < sortStates[tableIdx].length; i++){ if(i !== colIdx) sortStates[tableIdx][i] = 0; }
 
   // Append rows
   let tbody = table.tBodies[0];
-  tbody.innerHTML="";
-  rows.forEach(r=>tbody.appendChild(r));
+  tbody.innerHTML = "";
+  rows.forEach(r => tbody.appendChild(r));
+
+  // update header UI + aria
+  updateHeaderSortUI(tableIdx);
 }
 
-// Copy & Reset functions (unchanged)
-function getTableFromButton(btn){return btn.closest('.table-container').querySelector('table');}
+// Handler for the small header button click (prevents propagation to th)
+function headerSortButtonClicked(tableIdx, colIdx, btnEl){
+  sortTableByColumn(tableIdx, colIdx);
+  try{ btnEl.focus(); } catch(e) {}
+}
+
+// Initialize header UI states on page load
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll(".table-container table").forEach((t, idx) => {
+    updateHeaderSortUI(idx);
+  });
+});
+
+// Copy & Reset functions
+function getTableFromButton(btn){ return btn.closest('.table-container').querySelector('table'); }
 function copyTablePlain(btn){
-  let table=getTableFromButton(btn);
-  let title=table.closest('.table-wrapper').querySelector('h3')?.textContent||'';
-  let text=title+"\n"+Array.from(table.rows).map(r=>Array.from(r.cells).map(c=>c.textContent.trim()).join("\t")).join("\n");
+  let table = getTableFromButton(btn);
+  let title = table.closest('.table-wrapper').querySelector('h3')?.textContent || '';
+  let text = title + "\n" + Array.from(table.rows).map(r => Array.from(r.cells).map(c => c.textContent.trim()).join("\t")).join("\n");
   navigator.clipboard.writeText(text); alert('Table copied as plain text!');
 }
 function copyTableMarkdown(btn){
-  let table=getTableFromButton(btn);
-  let title=table.closest('.table-wrapper').querySelector('h3')?.textContent||'';
-  let rows=Array.from(table.rows);
-  let text="**"+title+"**\n| "+Array.from(rows[0].cells).map(c=>c.textContent.trim()).join(" | ")+" |\n";
-  text+="| "+Array.from(rows[0].cells).map(()=> "---").join(" | ")+" |\n";
-  for(let i=1;i<rows.length;i++){text+="| "+Array.from(rows[i].cells).map(c=>c.textContent.trim()).join(" | ")+" |\n";}
+  let table = getTableFromButton(btn);
+  let title = table.closest('.table-wrapper').querySelector('h3')?.textContent || '';
+  let rows = Array.from(table.rows);
+  let text = "**" + title + "**\n| " + Array.from(rows[0].cells).map(c => c.textContent.trim()).join(" | ") + " |\n";
+  text += "| " + Array.from(rows[0].cells).map(() => "---").join(" | ") + " |\n";
+  for(let i = 1; i < rows.length; i++){ text += "| " + Array.from(rows[i].cells).map(c => c.textContent.trim()).join(" | ") + " |\n"; }
   navigator.clipboard.writeText(text); alert('Table copied in Markdown format!');
 }
 function copyAllTablesPlain(){
-  let text="";
-  document.querySelectorAll(".table-wrapper").forEach(wrapper=>{
-    let title=wrapper.querySelector('h3')?.textContent||'';
-    let table=wrapper.querySelector('table');
-    text+=title+"\n"+Array.from(table.rows).map(r=>Array.from(r.cells).map(c=>c.textContent.trim()).join("\t")).join("\n")+"\n";
+  let text = "";
+  document.querySelectorAll(".table-wrapper").forEach(wrapper => {
+    let title = wrapper.querySelector('h3')?.textContent || '';
+    let table = wrapper.querySelector('table');
+    text += title + "\n" + Array.from(table.rows).map(r => Array.from(r.cells).map(c => c.textContent.trim()).join("\t")).join("\n") + "\n";
   });
   navigator.clipboard.writeText(text); alert("All tables copied as plain text!");
 }
 function copyAllTablesMarkdown(){
-  let text="";
-  document.querySelectorAll(".table-wrapper").forEach(wrapper=>{
-    let title=wrapper.querySelector('h3')?.textContent||'';
-    let table=wrapper.querySelector('table');
-    let rows=Array.from(table.rows);
-    text+="**"+title+"**\n| "+Array.from(rows[0].cells).map(c=>c.textContent.trim()).join(" | ")+" |\n";
-    text+="| "+Array.from(rows[0].cells).map(()=> "---").join(" | ")+" |\n";
-    for(let i=1;i<rows.length;i++){text+="| "+Array.from(rows[i].cells).map(c=>c.textContent.trim()).join(" | ")+" |\n";}
+  let text = "";
+  document.querySelectorAll(".table-wrapper").forEach(wrapper => {
+    let title = wrapper.querySelector('h3')?.textContent || '';
+    let table = wrapper.querySelector('table');
+    let rows = Array.from(table.rows);
+    text += "**" + title + "**\n| " + Array.from(rows[0].cells).map(c => c.textContent.trim()).join(" | ") + " |\n";
+    text += "| " + Array.from(rows[0].cells).map(() => "---").join(" | ") + " |\n";
+    for(let i = 1; i < rows.length; i++){ text += "| " + Array.from(rows[i].cells).map(c => c.textContent.trim()).join(" | ") + " |\n"; }
   });
   navigator.clipboard.writeText(text); alert("All tables copied in Markdown format!");
 }
 function resetAllTables(){
-  document.querySelectorAll(".table-container table").forEach((table,idx)=>{
-    let tbody=table.tBodies[0];
-    tbody.innerHTML="";
-    originalTableRows[idx].forEach(r=>tbody.appendChild(r.cloneNode(true)));
-    sortStates[idx]=Array(table.rows[0].cells.length).fill(0);
+  document.querySelectorAll(".table-container table").forEach((table, idx) => {
+    let tbody = table.tBodies[0];
+    tbody.innerHTML = "";
+    originalTableRows[idx].forEach(r => tbody.appendChild(r.cloneNode(true)));
+    sortStates[idx] = Array(table.rows[0].cells.length).fill(0);
+    updateHeaderSortUI(idx);
   });
-  document.getElementById('searchBox').value="";
+  document.getElementById('searchBox').value = "";
   searchTable();
   alert("All tables reset!");
 }
 
 // Search
 function searchTable(){
-  let filter=document.getElementById("searchBox").value.toLowerCase();
-  let firstMatch=null;
-  document.querySelectorAll(".table-container table").forEach(table=>{
-    Array.from(table.rows).slice(1).forEach(row=>{
-      let rowMatches=false;
-      Array.from(row.cells).forEach(cell=>{
-        let text=cell.textContent.toLowerCase();
-        if(text.includes(filter)&&filter!==""){cell.classList.add("highlight"); rowMatches=true;if(!firstMatch) firstMatch=row;}
-        else cell.classList.remove("highlight");
+  let filter = document.getElementById("searchBox").value.toLowerCase();
+  let firstMatch = null;
+  document.querySelectorAll(".table-container table").forEach(table => {
+    Array.from(table.rows).slice(1).forEach(row => {
+      let rowMatches = false;
+      Array.from(row.cells).forEach(cell => {
+        let text = cell.textContent.toLowerCase();
+        if(text.includes(filter) && filter !== ""){
+          cell.classList.add("highlight"); rowMatches = true;
+          if(!firstMatch) firstMatch = row;
+        } else {
+          cell.classList.remove("highlight");
+        }
       });
-      row.style.display=rowMatches||filter===""?"":"none";
+      row.style.display = rowMatches || filter === "" ? "" : "none";
     });
   });
   if(firstMatch){
-    const rect=firstMatch.getBoundingClientRect();
-    const headerHeight=document.getElementById('stickyMainHeader').offsetHeight+10;
-    const scrollTop=window.pageYOffset||document.documentElement.scrollTop;
-    window.scrollTo({top:scrollTop+rect.top-headerHeight,behavior:'smooth'});
+    const rect = firstMatch.getBoundingClientRect();
+    const headerHeight = document.getElementById('stickyMainHeader').offsetHeight + 10;
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    window.scrollTo({ top: scrollTop + rect.top - headerHeight, behavior: 'smooth' });
   }
 }
 
 // TOC toggle
 function toggleTOC(){
-  const toc=document.getElementById('toc'); const btn=document.getElementById('tocToggle');
+  const toc = document.getElementById('toc'); const btn = document.getElementById('tocToggle');
   toc.classList.toggle('hide');
-  if(toc.classList.contains('hide')) btn.innerHTML='Show <span id="tocArrow" class="rotate">▼</span>';
-  else btn.innerHTML='Hide <span id="tocArrow">▼</span>';
+  if(toc.classList.contains('hide')) btn.innerHTML = 'Show <span id="tocArrow" class="rotate">▼</span>';
+  else btn.innerHTML = 'Hide <span id="tocArrow">▼</span>';
 }
 
 // TOC click scroll
-document.querySelectorAll('#tocSidebar a[href^="#"]').forEach(a=>{
-  a.addEventListener('click',function(e){
+document.querySelectorAll('#tocSidebar a[href^="#"]').forEach(a => {
+  a.addEventListener('click', function(e){
     e.preventDefault();
-    const id=this.getAttribute('href').substring(1);
-    const container=document.getElementById(id)?.closest('.table-wrapper');
+    const id = this.getAttribute('href').substring(1);
+    const container = document.getElementById(id)?.closest('.table-wrapper');
     if(!container) return;
-    const headerHeight=document.getElementById('stickyMainHeader')?.offsetHeight||0;
-    const containerTop=container.getBoundingClientRect().top+window.pageYOffset;
-    window.scrollTo({top:containerTop-headerHeight-5, behavior:'smooth'});
-    try{history.replaceState(null,'','#'+id);}catch(e){}
+    const headerHeight = document.getElementById('stickyMainHeader')?.offsetHeight || 0;
+    const containerTop = container.getBoundingClientRect().top + window.pageYOffset;
+    window.scrollTo({ top: containerTop - headerHeight - 5, behavior: 'smooth' });
+    try{ history.replaceState(null, '', '#' + id); }catch(e){}
   });
 });
 </script>
