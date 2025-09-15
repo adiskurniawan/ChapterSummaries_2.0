@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Tables Viewer v2.2</title>
-<link rel="stylesheet" href="assets/style.css?v=2.2">
+<title>Tables Viewer v2.3</title>
+<link rel="stylesheet" href="assets/style.css?v=2.3">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
@@ -13,18 +13,18 @@
     <button id="tocToggle" onclick="(function(){const toc=document.getElementById('toc'); toc.classList.toggle('hide'); if(toc.classList.contains('hide')) document.getElementById('tocToggle').innerHTML='Show <span id=\'tocArrow\'>▼</span>'; else document.getElementById('tocToggle').innerHTML='Hide <span id=\'tocArrow\'>▼</span>'; })();">Hide <span id="tocArrow">▼</span></button>
   </h2>
   <ul id="toc">
-    <li><a href="#Table1" title="Jump to Table 1">Table 1</a></li>
-<li><a href="#Table2" title="Jump to Table 2">Table 2</a></li>
-<li><a href="#Table3" title="Jump to Table 3">Table 3</a></li>
-<li><a href="#Table4" title="Jump to Table 4">Table 4</a></li>
-<li><a href="#Table5" title="Jump to Table 5">Table 5</a></li>
-<li><a href="#Table6" title="Jump to Table 6">Table 6</a></li>
-<li><a href="#Table7" title="Jump to Table 7">Table 7</a></li>
-<li><a href="#Table8" title="Jump to Table 8">Table 8</a></li>
-<li><a href="#Table9" title="Jump to Table 9">Table 9</a></li>
-<li><a href="#Table10" title="Jump to Table 10">Table 10</a></li>
-<li><a href="#Table11" title="Jump to Table 11">Table 11</a></li>
-<li><a href="#Table12" title="Jump to Table 12">Table 12</a></li>
+    <li><a href="#table-1" title="Jump to Table 1">Table 1</a></li>
+<li><a href="#table-2" title="Jump to Table 2">Table 2</a></li>
+<li><a href="#table-3" title="Jump to Table 3">Table 3</a></li>
+<li><a href="#table-4" title="Jump to Table 4">Table 4</a></li>
+<li><a href="#table-5" title="Jump to Table 5">Table 5</a></li>
+<li><a href="#table-6" title="Jump to Table 6">Table 6</a></li>
+<li><a href="#table-7" title="Jump to Table 7">Table 7</a></li>
+<li><a href="#table-8" title="Jump to Table 8">Table 8</a></li>
+<li><a href="#table-9" title="Jump to Table 9">Table 9</a></li>
+<li><a href="#table-10" title="Jump to Table 10">Table 10</a></li>
+<li><a href="#table-11" title="Jump to Table 11">Table 11</a></li>
+<li><a href="#table-12" title="Jump to Table 12">Table 12</a></li>
   </ul>
   <div style="margin-top:10px;">
     <button id="modeBtn" onclick="toggleMode()">Dark mode</button>
@@ -33,7 +33,7 @@
 
 <div id="mainContent">
   <div id="stickyMainHeader">
-    <h1 style="margin:0;">Tables Viewer v2.2</h1>
+    <h1 style="margin:0;">Tables Viewer v2.3</h1>
     <div style="margin:10px 0; display:flex; align-items:center; gap:8px;">
       <input type="text" id="searchBox" onkeyup="searchTable()" placeholder="Search for keywords...">
       <button onclick="document.getElementById('searchBox').value=''; searchTable();">Reset</button>
@@ -51,12 +51,12 @@
   
 <div class="table-wrapper">
   <div class="table-title-row">
-    <h3 id="Table1" style="margin-top:30px; margin-bottom:10px;">Table 1</h3>
+    <h3 id="table-1" style="margin-top:30px; margin-bottom:10px;">Table 1</h3>
     <div class="table-controls">
       <button class="collapse-btn" onclick="toggleCollapse(this)">Collapse</button>
     </div>
   </div>
-  <div class="table-container" id="container-Table1">
+  <div class="table-container" id="container-table-1">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons table-controls">
         <button class="copy-plain-btn" onclick="copyTablePlain(this)">Copy Plain Table</button>
@@ -109,12 +109,12 @@
 
 <div class="table-wrapper">
   <div class="table-title-row">
-    <h3 id="Table2" style="margin-top:30px; margin-bottom:10px;">Table 2</h3>
+    <h3 id="table-2" style="margin-top:30px; margin-bottom:10px;">Table 2</h3>
     <div class="table-controls">
       <button class="collapse-btn" onclick="toggleCollapse(this)">Collapse</button>
     </div>
   </div>
-  <div class="table-container" id="container-Table2">
+  <div class="table-container" id="container-table-2">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons table-controls">
         <button class="copy-plain-btn" onclick="copyTablePlain(this)">Copy Plain Table</button>
@@ -174,12 +174,12 @@
 
 <div class="table-wrapper">
   <div class="table-title-row">
-    <h3 id="Table3" style="margin-top:30px; margin-bottom:10px;">Table 3</h3>
+    <h3 id="table-3" style="margin-top:30px; margin-bottom:10px;">Table 3</h3>
     <div class="table-controls">
       <button class="collapse-btn" onclick="toggleCollapse(this)">Collapse</button>
     </div>
   </div>
-  <div class="table-container" id="container-Table3">
+  <div class="table-container" id="container-table-3">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons table-controls">
         <button class="copy-plain-btn" onclick="copyTablePlain(this)">Copy Plain Table</button>
@@ -233,12 +233,12 @@
 
 <div class="table-wrapper">
   <div class="table-title-row">
-    <h3 id="Table4" style="margin-top:30px; margin-bottom:10px;">Table 4</h3>
+    <h3 id="table-4" style="margin-top:30px; margin-bottom:10px;">Table 4</h3>
     <div class="table-controls">
       <button class="collapse-btn" onclick="toggleCollapse(this)">Collapse</button>
     </div>
   </div>
-  <div class="table-container" id="container-Table4">
+  <div class="table-container" id="container-table-4">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons table-controls">
         <button class="copy-plain-btn" onclick="copyTablePlain(this)">Copy Plain Table</button>
@@ -301,12 +301,12 @@
 
 <div class="table-wrapper">
   <div class="table-title-row">
-    <h3 id="Table5" style="margin-top:30px; margin-bottom:10px;">Table 5</h3>
+    <h3 id="table-5" style="margin-top:30px; margin-bottom:10px;">Table 5</h3>
     <div class="table-controls">
       <button class="collapse-btn" onclick="toggleCollapse(this)">Collapse</button>
     </div>
   </div>
-  <div class="table-container" id="container-Table5">
+  <div class="table-container" id="container-table-5">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons table-controls">
         <button class="copy-plain-btn" onclick="copyTablePlain(this)">Copy Plain Table</button>
@@ -379,12 +379,12 @@
 
 <div class="table-wrapper">
   <div class="table-title-row">
-    <h3 id="Table6" style="margin-top:30px; margin-bottom:10px;">Table 6</h3>
+    <h3 id="table-6" style="margin-top:30px; margin-bottom:10px;">Table 6</h3>
     <div class="table-controls">
       <button class="collapse-btn" onclick="toggleCollapse(this)">Collapse</button>
     </div>
   </div>
-  <div class="table-container" id="container-Table6">
+  <div class="table-container" id="container-table-6">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons table-controls">
         <button class="copy-plain-btn" onclick="copyTablePlain(this)">Copy Plain Table</button>
@@ -458,12 +458,12 @@
 
 <div class="table-wrapper">
   <div class="table-title-row">
-    <h3 id="Table7" style="margin-top:30px; margin-bottom:10px;">Table 7</h3>
+    <h3 id="table-7" style="margin-top:30px; margin-bottom:10px;">Table 7</h3>
     <div class="table-controls">
       <button class="collapse-btn" onclick="toggleCollapse(this)">Collapse</button>
     </div>
   </div>
-  <div class="table-container" id="container-Table7">
+  <div class="table-container" id="container-table-7">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons table-controls">
         <button class="copy-plain-btn" onclick="copyTablePlain(this)">Copy Plain Table</button>
@@ -518,12 +518,12 @@
 
 <div class="table-wrapper">
   <div class="table-title-row">
-    <h3 id="Table8" style="margin-top:30px; margin-bottom:10px;">Table 8</h3>
+    <h3 id="table-8" style="margin-top:30px; margin-bottom:10px;">Table 8</h3>
     <div class="table-controls">
       <button class="collapse-btn" onclick="toggleCollapse(this)">Collapse</button>
     </div>
   </div>
-  <div class="table-container" id="container-Table8">
+  <div class="table-container" id="container-table-8">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons table-controls">
         <button class="copy-plain-btn" onclick="copyTablePlain(this)">Copy Plain Table</button>
@@ -571,12 +571,12 @@
 
 <div class="table-wrapper">
   <div class="table-title-row">
-    <h3 id="Table9" style="margin-top:30px; margin-bottom:10px;">Table 9</h3>
+    <h3 id="table-9" style="margin-top:30px; margin-bottom:10px;">Table 9</h3>
     <div class="table-controls">
       <button class="collapse-btn" onclick="toggleCollapse(this)">Collapse</button>
     </div>
   </div>
-  <div class="table-container" id="container-Table9">
+  <div class="table-container" id="container-table-9">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons table-controls">
         <button class="copy-plain-btn" onclick="copyTablePlain(this)">Copy Plain Table</button>
@@ -630,12 +630,12 @@
 
 <div class="table-wrapper">
   <div class="table-title-row">
-    <h3 id="Table10" style="margin-top:30px; margin-bottom:10px;">Table 10</h3>
+    <h3 id="table-10" style="margin-top:30px; margin-bottom:10px;">Table 10</h3>
     <div class="table-controls">
       <button class="collapse-btn" onclick="toggleCollapse(this)">Collapse</button>
     </div>
   </div>
-  <div class="table-container" id="container-Table10">
+  <div class="table-container" id="container-table-10">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons table-controls">
         <button class="copy-plain-btn" onclick="copyTablePlain(this)">Copy Plain Table</button>
@@ -687,12 +687,12 @@
 
 <div class="table-wrapper">
   <div class="table-title-row">
-    <h3 id="Table11" style="margin-top:30px; margin-bottom:10px;">Table 11</h3>
+    <h3 id="table-11" style="margin-top:30px; margin-bottom:10px;">Table 11</h3>
     <div class="table-controls">
       <button class="collapse-btn" onclick="toggleCollapse(this)">Collapse</button>
     </div>
   </div>
-  <div class="table-container" id="container-Table11">
+  <div class="table-container" id="container-table-11">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons table-controls">
         <button class="copy-plain-btn" onclick="copyTablePlain(this)">Copy Plain Table</button>
@@ -745,12 +745,12 @@
 
 <div class="table-wrapper">
   <div class="table-title-row">
-    <h3 id="Table12" style="margin-top:30px; margin-bottom:10px;">Table 12</h3>
+    <h3 id="table-12" style="margin-top:30px; margin-bottom:10px;">Table 12</h3>
     <div class="table-controls">
       <button class="collapse-btn" onclick="toggleCollapse(this)">Collapse</button>
     </div>
   </div>
-  <div class="table-container" id="container-Table12">
+  <div class="table-container" id="container-table-12">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons table-controls">
         <button class="copy-plain-btn" onclick="copyTablePlain(this)">Copy Plain Table</button>
@@ -809,6 +809,6 @@
 
 </div>
 
-<script src="assets/script.js?v=2.2"></script>
+<script src="assets/script.js?v=2.3"></script>
 </body>
 </html>
