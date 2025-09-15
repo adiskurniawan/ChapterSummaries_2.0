@@ -14,7 +14,6 @@ function initTables(){
     if(wrapper && !wrapper.querySelector('.match-counter')){
       const el = document.createElement('span');
       el.className = 'match-counter counter-badge';
-      // try to append into table-header-wrapper .table-controls, fall back to wrapper
       const headerControls = wrapper.querySelector('.table-header-wrapper .table-controls');
       if(headerControls) headerControls.appendChild(el);
       else wrapper.appendChild(el);
