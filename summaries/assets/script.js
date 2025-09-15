@@ -1,4 +1,4 @@
-// tables viewer v2.3 (script)
+// script.js (updated) - adds working dark mode toggle + persistence
 const STORAGE_KEY_PREFIX = "tablesViewer_v2";
 let originalTableRows = [];
 let sortStates = [];
@@ -270,7 +270,40 @@ function initTOCLinks(){
   });
 }
 
+/* ---------------------------
+   Dark mode functions
+   --------------------------- */
+function applySavedMode(){
+  const mode = localStorage.getItem('uiMode') || 'light';
+  const modeBtn = document.getElementById('modeBtn');
+  if(mode === 'dark'){
+    document.documentElement.setAttribute('data-theme','dark');
+    if(modeBtn) modeBtn.textContent = 'Light mode';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    if(modeBtn) modeBtn.textContent = 'Dark mode';
+  }
+}
+
+function toggleMode(){
+  const modeBtn = document.getElementById('modeBtn');
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  if(isDark){
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('uiMode','light');
+    if(modeBtn) modeBtn.textContent = 'Dark mode';
+  } else {
+    document.documentElement.setAttribute('data-theme','dark');
+    localStorage.setItem('uiMode','dark');
+    if(modeBtn) modeBtn.textContent = 'Light mode';
+  }
+}
+
+/* ---------------------------
+   Init
+   --------------------------- */
 document.addEventListener('DOMContentLoaded', function(){
+  applySavedMode();
   initTables();
   initTOCLinks();
   const exportAllCSVBtn = document.getElementById('exportAllCSV');
