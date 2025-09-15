@@ -13,14 +13,14 @@ document.querySelectorAll(".table-container table").forEach((table, idx) => {
 const modeBtn = document.getElementById('modeBtn');
 if (localStorage.getItem('uiMode') === 'dark') {
   document.documentElement.setAttribute('data-theme','dark');
-  modeBtn.textContent = 'Light mode';
+  if (modeBtn) modeBtn.textContent = 'Light mode';
 }
 function toggleMode(){
   const dark = document.documentElement.getAttribute('data-theme') !== 'dark';
   if(dark){
-    document.documentElement.setAttribute('data-theme','dark'); modeBtn.textContent='Light mode'; localStorage.setItem('uiMode','dark');
+    document.documentElement.setAttribute('data-theme','dark'); if (modeBtn) modeBtn.textContent='Light mode'; localStorage.setItem('uiMode','dark');
   } else {
-    document.documentElement.removeAttribute('data-theme'); modeBtn.textContent='Dark mode'; localStorage.setItem('uiMode','light');
+    document.documentElement.removeAttribute('data-theme'); if (modeBtn) modeBtn.textContent='Dark mode'; localStorage.setItem('uiMode','light');
   }
 }
 

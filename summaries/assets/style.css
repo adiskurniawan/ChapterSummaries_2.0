@@ -3,12 +3,21 @@
   --row-hover: #d0ebff; --highlight: #fff3a2; --current-row: #ffeaa2;
   --button-bg: #f3f4f6; --button-text: #111827;
   --muted: rgba(17,24,39,0.45);
+
+  /* TOC colors */
+  --toc-link: #2563eb;
+  --toc-link-hover-bg: #e0f2fe;
+  --toc-link-hover-color: #1e40af;
 }
 [data-theme="dark"] {
   --bg: #1e1e2f; --text: #e0e0e0; --panel: #2a2a3e; --border: #3c3c4f;
   --row-hover: #38384c; --highlight: #fffa8c; --current-row: #ffd86c;
   --button-bg: #44445a; --button-text: #e0e0e0;
   --muted: rgba(224,224,224,0.35);
+
+  --toc-link: #93c5fd;
+  --toc-link-hover-bg: #1e3a8a;
+  --toc-link-hover-color: #ffffff;
 }
 html, body { margin:0; background:var(--bg); color:var(--text); font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial; }
 a { color:inherit; text-decoration:none; }
@@ -29,8 +38,12 @@ tr:nth-child(even) { background:var(--bg); }
 tr:hover td { background:var(--row-hover); }
 .highlight { background:var(--highlight) !important; transition: background 0.45s ease; }
 .current-row td { background:var(--current-row) !important; }
+
+/* TOC sidebar styles (simple color improvements) */
 #tocSidebar { background:var(--panel); padding:16px; border-right:1px solid var(--border); width:260px; position:fixed; top:0; bottom:0; overflow:auto; border-radius:8px; }
-#tocSidebar a:hover { background:#50506a; border-radius:6px; }
+#tocSidebar a { display:block; padding:6px 10px; margin:2px 0; color:var(--toc-link); border-radius:6px; transition: background 0.18s ease, color 0.18s ease; }
+#tocSidebar a:hover { background:var(--toc-link-hover-bg); color:var(--toc-link-hover-color); }
+
 #toc { max-height:1000px; transition:max-height 0.3s ease; overflow:hidden; }
 #toc.hide { max-height:0; }
 #stickyMainHeader { position:sticky; top:0; background:var(--bg); z-index:1000; padding:15px 0; border-bottom:1px solid var(--border); }
