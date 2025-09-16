@@ -1,5 +1,5 @@
-// script.js (updated) - adds working dark mode toggle + persistence
-const STORAGE_KEY_PREFIX = "tablesViewer_v2";
+// script.js - merged interactive features
+const STORAGE_KEY_PREFIX = "tablesViewer_v_mixed";
 let originalTableRows = [];
 let sortStates = [];
 
@@ -10,11 +10,12 @@ function initTables(){
     const rows = Array.from(table.tBodies[0].rows).map(r => r.cloneNode(true));
     originalTableRows[idx] = rows;
     sortStates[idx] = Array(table.tHead.rows[0].cells.length).fill(0);
+    // ensure match-counter exists
     const wrapper = table.closest('.table-wrapper');
     if(wrapper && !wrapper.querySelector('.match-counter')){
       const el = document.createElement('span');
       el.className = 'match-counter counter-badge';
-      const headerControls = wrapper.querySelector('.table-header-wrapper .table-controls');
+      const headerControls = wrapper.querySelector('.table-header-wrapper .table-controls') || wrapper.querySelector('.table-header-wrapper');
       if(headerControls) headerControls.appendChild(el);
       else wrapper.appendChild(el);
     }
@@ -29,8 +30,10 @@ function saveState(){
     localStorage.setItem(_storageKey("sortStates"), JSON.stringify(sortStates));
     const collapsed = Array.from(document.querySelectorAll('.table-container')).map(c => c.classList.contains('collapsed'));
     localStorage.setItem(_storageKey("collapsed"), JSON.stringify(collapsed));
+    localStorage.setItem('uiMode', document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
   }catch(e){ console.debug("saveState:", e); }
 }
+
 function loadState(){
   try{
     const search = localStorage.getItem(_storageKey("search")) || "";
@@ -52,13 +55,12 @@ function applySavedState(){
   if(Array.isArray(state.sortStates)){
     state.sortStates.forEach((arr, tableIdx) => {
       if(!arr) return;
-      sortStates[tableIdx] = Array(arr.length).fill(0);
+      // replay sort states (1=asc,2=desc)
       arr.forEach((colState, colIdx) => {
         if(colState === 1){
           sortTableByColumn(tableIdx, colIdx);
         } else if(colState === 2){
-          sortTableByColumn(tableIdx, colIdx);
-          sortTableByColumn(tableIdx, colIdx);
+          sortTableByColumn(tableIdx, colIdx); sortTableByColumn(tableIdx, colIdx);
         }
       });
     });
@@ -152,13 +154,70 @@ function copyTableMarkdown(btn){
   const table = getTableFromButton(btn);
   const title = btn.closest('.table-wrapper').querySelector('h3')?.textContent || '';
   const rows = Array.from(table.rows);
-  let text = "**" + title + "**\n| " + Array.from(rows[0].cells).map(c=>c.textContent.trim()).join(" | ") + " |\n";
-  text += "| " + Array.from(rows[0].cells).map(()=> "---").join(" | ") + " |\n";
-  for(let i=1;i<rows.length;i++) text += "| " + Array.from(rows[i].cells).map(c=>c.textContent.trim()).join(" | ") + " |\n";
+  // Title NOT wrapped in ** to avoid duplicate bold markup
+  let text = title + "\n| " + Array.from(rows[0].cells).map(c => c.textContent.trim()).join(" | ") + " |\n";
+  text += "| " + Array.from(rows[0].cells).map(() => "---").join(" | ") + " |\n";
+  for(let i = 1; i < rows.length; i++){
+    text += "| " + Array.from(rows[i].cells).map(c => c.textContent.trim()).join(" | ") + " |\n";
+  }
   navigator.clipboard.writeText(text).then(()=> alert('Table copied in Markdown format!'));
 }
 function copyAllTablesPlain(){ document.querySelectorAll('.table-wrapper .copy-plain-btn').forEach(b => copyTablePlain(b)); alert('All tables copied as plain text.'); }
-function copyAllTablesMarkdown(){ document.querySelectorAll('.table-wrapper .copy-md-btn').forEach(b => copyTableMarkdown(b)); alert('All tables copied as markdown.'); }
+function copyAllTablesMarkdown(){
+  let all = "";
+  document.querySelectorAll(".table-wrapper").forEach((w) => {
+    const title = w.querySelector('h3')?.textContent || '';
+    const table = w.querySelector('table');
+    const rows = Array.from(table.rows);
+    all += title + "\n| " + Array.from(rows[0].cells).map(c => c.textContent.trim()).join(" | ") + " |\n";
+    all += "| " + Array.from(rows[0].cells).map(() => "---").join(" | ") + " |\n";
+    for(let i = 1; i < rows.length; i++){
+      all += "| " + Array.from(rows[i].cells).map(c => c.textContent.trim()).join(" | ") + " |\n";
+    }
+    all += "\n";
+  });
+  navigator.clipboard.writeText(all).then(()=> alert('All tables copied in Markdown format!'));
+}
+
+function exportTableCSV(btn){
+  const table = btn.closest('.table-container').querySelector('table');
+  const title = btn.closest('.table-wrapper').querySelector('h3')?.textContent || 'table';
+  const rows = Array.from(table.rows);
+  const csv = rows.map(r => Array.from(r.cells).map(c => '"' + c.textContent.replace(/"/g,'""') + '"').join(",")).join("\n");
+  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = title.replace(/\s+/g,'_') + '.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function sanitizeSheetName(name){
+  return String(name || 'Sheet').replace(/[\[\]\*\/\\:\?]/g,'').substring(0,31);
+}
+function exportTableXLSX(btn){
+  if(typeof XLSX === 'undefined'){ alert('SheetJS (XLSX) library not loaded.'); return; }
+  const table = btn.closest('.table-container').querySelector('table');
+  const title = btn.closest('.table-wrapper').querySelector('h3')?.textContent || 'table';
+  const ws = XLSX.utils.table_to_sheet(table, {raw: true});
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, sanitizeSheetName(title) || 'Sheet1');
+  XLSX.writeFile(wb, title.replace(/\s+/g,'_') + '.xlsx');
+}
+function exportAllXLSX(){
+  if(typeof XLSX === 'undefined'){ alert('SheetJS (XLSX) library not loaded.'); return; }
+  const wrappers = document.querySelectorAll('.table-wrapper');
+  const wb = XLSX.utils.book_new();
+  wrappers.forEach((w, idx) => {
+    const title = (w.querySelector('h3')?.textContent || `Table_${idx+1}`);
+    const table = w.querySelector('table');
+    if(table){
+      const ws = XLSX.utils.table_to_sheet(table, {raw: true});
+      XLSX.utils.book_append_sheet(wb, ws, sanitizeSheetName(title) || `Sheet${idx+1}`);
+    }
+  });
+  XLSX.writeFile(wb, 'all_tables.xlsx');
+}
 
 function resetAllTables(){
   document.querySelectorAll(".table-container table").forEach((table, idx) => {
@@ -168,7 +227,8 @@ function resetAllTables(){
     sortStates[idx] = Array(table.rows[0].cells.length).fill(0);
     updateHeaderSortUI(idx);
   });
-  document.getElementById('searchBox').value = "";
+  const sb = document.getElementById('searchBox');
+  if(sb) sb.value = "";
   saveState();
   searchTable();
   alert("All tables reset!");
@@ -214,47 +274,6 @@ function searchTable(){
   }
 }
 
-function exportTableCSV(btn){
-  const table = btn.closest('.table-container').querySelector('table');
-  const title = btn.closest('.table-wrapper').querySelector('h3')?.textContent || 'table';
-  const rows = Array.from(table.rows);
-  const csv = rows.map(r => Array.from(r.cells).map(c => '"' + c.textContent.replace(/"/g,'""') + '"').join(",")).join("\n");
-  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = title.replace(/\s+/g,'_') + '.csv';
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-
-function sanitizeSheetName(name){
-  return String(name || 'Sheet').replace(/[\[\]\*\/\\:\?]/g,'').substring(0,31);
-}
-function exportTableXLSX(btn){
-  if(typeof XLSX === 'undefined'){ alert('SheetJS (XLSX) library not loaded.'); return; }
-  const table = btn.closest('.table-container').querySelector('table');
-  const title = btn.closest('.table-wrapper').querySelector('h3')?.textContent || 'table';
-  const ws = XLSX.utils.table_to_sheet(table, {raw: true});
-  const wb = XLSX.utils.book_new();
-  const safeName = sanitizeSheetName(title);
-  XLSX.utils.book_append_sheet(wb, ws, safeName || 'Sheet1');
-  XLSX.writeFile(wb, title.replace(/\s+/g,'_') + '.xlsx');
-}
-function exportAllXLSX(){
-  if(typeof XLSX === 'undefined'){ alert('SheetJS (XLSX) library not loaded.'); return; }
-  const wrappers = document.querySelectorAll('.table-wrapper');
-  const wb = XLSX.utils.book_new();
-  wrappers.forEach((w, idx) => {
-    const title = (w.querySelector('h3')?.textContent || `Table_${idx+1}`);
-    const table = w.querySelector('table');
-    if(table){
-      const ws = XLSX.utils.table_to_sheet(table, {raw: true});
-      XLSX.utils.book_append_sheet(wb, ws, sanitizeSheetName(title) || `Sheet${idx+1}`);
-    }
-  });
-  XLSX.writeFile(wb, 'all_tables.xlsx');
-}
-
 function initTOCLinks(){
   document.querySelectorAll('#tocSidebar a').forEach(a=>{
     a.addEventListener('click', e=>{
@@ -272,9 +291,7 @@ function initTOCLinks(){
   });
 }
 
-/* ---------------------------
-   Dark mode functions
-   --------------------------- */
+/* Dark mode */
 function applySavedMode(){
   const mode = localStorage.getItem('uiMode') || 'light';
   const modeBtn = document.getElementById('modeBtn');
@@ -286,7 +303,6 @@ function applySavedMode(){
     if(modeBtn) modeBtn.textContent = 'Dark mode';
   }
 }
-
 function toggleMode(){
   const modeBtn = document.getElementById('modeBtn');
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -301,15 +317,11 @@ function toggleMode(){
   }
 }
 
-/* ---------------------------
-   Init
-   --------------------------- */
+/* Init */
 document.addEventListener('DOMContentLoaded', function(){
   applySavedMode();
   initTables();
   initTOCLinks();
-  const exportAllCSVBtn = document.getElementById('exportAllCSV');
-  if(exportAllCSVBtn) exportAllCSVBtn.addEventListener('click', function(){ /* unused in this build */ });
   const exportAllXLSXBtn = document.getElementById('exportAllXLSX');
   if(exportAllXLSXBtn) exportAllXLSXBtn.addEventListener('click', exportAllXLSX);
 });
