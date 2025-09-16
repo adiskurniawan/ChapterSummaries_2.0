@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tables Viewer v2.1</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<nav id="tocSidebar">
+<h2 style="display:flex; justify-content:space-between; align-items:center;">
+  Table of Contents
+  <button id="tocToggle" onclick="toggleTOC()">Hide <span id="tocArrow">▼</span></button>
+</h2>
+<ul id="toc">
+<li><a href="#Table1">Table 1</a></li>
+<li><a href="#Table2">Table 2</a></li>
+<li><a href="#Table3">Table 3</a></li>
+<li><a href="#Table4">Table 4</a></li>
+<li><a href="#Table5">Table 5</a></li>
+<li><a href="#Table6">Table 6</a></li>
+</ul><button id='modeBtn' onclick='toggleMode()'>Dark mode</button></nav><div id='mainContent'>
+<div id="stickyMainHeader">
+  <h1 style="margin:0;">Tables Viewer v2.1</h1>
+  <div style="margin:10px 0; display:flex; align-items:center;">
+    <input type="text" id="searchBox" onkeyup="searchTable()" placeholder="Search for keywords...">
+    <button onclick="document.getElementById('searchBox').value=''; searchTable();">Reset</button>
+  </div>
+  <div style="margin-bottom:10px;">
+    <button onclick="copyAllTablesPlain()">Copy All Tables (Plain Text)</button>
+    <button onclick="copyAllTablesMarkdown()">Copy All Tables (Markdown)</button>
+    <button onclick="resetAllTables()">Reset All Tables</button>
+    <button id="toggleAllBtn" onclick="toggleAllTables()">Collapse All Tables</button>
+  </div>
+</div>
+
+<div class="table-wrapper">
+  <h3 id="Table1" style="margin-top:30px; margin-bottom:10px;">Table 1</h3>
+  <div class="table-container">
+    <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+      <div class="copy-buttons">
+        <button onclick="copyTablePlain(this)">Copy Plain Table</button>
+        <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
+      </div>
+    </div>
+    <table>
+      <thead><tr>
+
+        <th style="width:28.57%;" onclick="sortTableByColumn(0,0)" role="button" aria-label="Sort by <b>Summary<b>">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>Summary<b></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(0,1)" role="button" aria-label="Sort by <b>Notes<b>">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>Notes<b></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="<b>Summary<b>"><b>Imports<b>                  </td><td data-label="<b>Notes<b>">Brings in Python’s standard libraries: `os` for file and path management, `datetime` for timestamps.                                                                                                                                    </td></tr>
+<tr><td data-label="<b>Summary<b>"><b>Function entrypoint<b>      </td><td data-label="<b>Notes<b>">Defines `render<i>html(all<i>tables, output<i>html, markdown<i>to<i>html)` as the main public function. It takes: <br>– a list of parsed tables, <br>– a target HTML file path, <br>– and a converter for markdown → HTML.                        </td></tr>
+<tr><td data-label="<b>Summary<b>"><b>Docstring<b>                </td><td data-label="<b>Notes<b>">Explains the renderer’s purpose: generate a complete HTML file along with its supporting assets (`style.css`, `script.js`), automatically writing them into an `assets/` folder. Assets are overwritten each run to ensure consistency. </td></tr>
+<tr><td data-label="<b>Summary<b>"><b>Column width calculation<b> </td><td data-label="<b>Notes<b>">Sets up proportions for the output layout: left (summary) vs. right (notes). Encodes them as percentages, ensuring consistent column sizing.                                                                                            </td></tr>
+<tr><td data-label="<b>Summary<b>"><b>Prepare output folders<b>   </td><td data-label="<b>Notes<b>">Figures out where the HTML will be saved, ensures an `assets/` subfolder exists, and prepares it to hold CSS + JS files.                                                                                                                </td></tr>
+</tbody></table></div></div>
+
+<div class="table-wrapper">
+  <h3 id="Table2" style="margin-top:30px; margin-bottom:10px;">Table 2</h3>
+  <div class="table-container">
+    <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+      <div class="copy-buttons">
+        <button onclick="copyTablePlain(this)">Copy Plain Table</button>
+        <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
+      </div>
+    </div>
+    <table>
+      <thead><tr>
+
+        <th style="width:28.57%;" onclick="sortTableByColumn(1,0)" role="button" aria-label="Sort by <b>Summary<b>">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>Summary<b></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(1,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(1,1)" role="button" aria-label="Sort by <b>Notes<b>">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>Notes<b></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(1,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="<b>Summary<b>"><b>CSS variables – light theme<b> </td><td data-label="<b>Notes<b>">Defines a set of reusable color and style variables (backgrounds, text, panels, borders, highlights, buttons, muted text). Provides consistent styling across all components.    </td></tr>
+<tr><td data-label="<b>Summary<b>"><b>CSS variables – dark theme<b>  </td><td data-label="<b>Notes<b>">Overrides the same variables for dark mode (darker panels, lighter text, different hover colors). Applied automatically when the document’s `data-theme="dark"`.                 </td></tr>
+<tr><td data-label="<b>Summary<b>"><b>Global base styles<b>          </td><td data-label="<b>Notes<b>">Resets and standardizes the page: sets font, background, text color, link colors, and button defaults.                                                                           </td></tr>
+<tr><td data-label="<b>Summary<b>"><b>Table layout<b>                </td><td data-label="<b>Notes<b>">Tables are styled to be full-width, with fixed layout, shadows, rounded corners, and padding. Ensures readability and structure.                                                 </td></tr>
+<tr><td data-label="<b>Summary<b>"><b>Sticky headers<b>              </td><td data-label="<b>Notes<b>">Table headers remain visible when scrolling. Styled with hover effects, clickable sort buttons, and different visuals for light/dark themes.                                     </td></tr>
+<tr><td data-label="<b>Summary<b>"><b>Sorting buttons<b>             </td><td data-label="<b>Notes<b>">Special `.sort-btn` style makes column headers interactive, aligning text + icons, with clear visual states for unsorted/ascending/descending.                                   </td></tr>
+<tr><td data-label="<b>Summary<b>"><b>Row & cell formatting<b>       </td><td data-label="<b>Notes<b>">Alternating row colors, hover highlighting, sticky first column (always visible while scrolling), and highlight classes for search matches. Improves navigation in large tables. </td></tr>
+<tr><td data-label="<b>Summary<b>"><b>TOC sidebar<b>                 </td><td data-label="<b>Notes<b>">Sidebar fixed on the left, styled with background, borders, padding, and rounded corners. TOC links are indented and highlighted on hover.                                       </td></tr>
+<tr><td data-label="<b>Summary<b>"><b>Sticky top header<b>           </td><td data-label="<b>Notes<b>">A fixed bar at the top for global controls (search, reset, theme toggle, export/copy). Styled for usability and visibility across themes.                                        </td></tr>
+<tr><td data-label="<b>Summary<b>"><b>Responsive design<b>           </td><td data-label="<b>Notes<b>">Media queries adjust layout on small screens (shrink TOC/sidebar, narrow search box), ensuring usability on mobile devices.                                                      </td></tr>
+</tbody></table></div></div>
+
+<div class="table-wrapper">
+  <h3 id="Table3" style="margin-top:30px; margin-bottom:10px;">Table 3</h3>
+  <div class="table-container">
+    <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+      <div class="copy-buttons">
+        <button onclick="copyTablePlain(this)">Copy Plain Table</button>
+        <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
+      </div>
+    </div>
+    <table>
+      <thead><tr>
+
+        <th style="width:28.57%;" onclick="sortTableByColumn(2,0)" role="button" aria-label="Sort by Summary">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Summary</div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(2,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(2,1)" role="button" aria-label="Sort by Notes">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Notes</div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(2,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="Summary"><b>Theme switching<b> </td><td data-label="Notes">Adds a button to toggle between light and dark mode by changing the data-theme attribute. Saves user preference in local storage and restores it on page load. </td></tr>
+<tr><td data-label="Summary"><b>Dynamic TOC (Table of Contents)<b> </td><td data-label="Notes">Scans headings and builds a sidebar with anchor links. Implements smooth scrolling and highlights the active section as the user scrolls. </td></tr>
+<tr><td data-label="Summary"><b>Column sorting<b> </td><td data-label="Notes">Makes table headers interactive. Each header cycles through three states — unsorted → ascending → descending — and reorders rows accordingly. </td></tr>
+<tr><td data-label="Summary"><b>Row and column highlighting<b> </td><td data-label="Notes">On hover, both the row and its sticky first column are highlighted to improve readability during horizontal scrolling. </td></tr>
+<tr><td data-label="Summary"><b>Global search with highlighting<b> </td><td data-label="Notes">Search box filters all tables at once. Matches are highlighted, with navigation buttons to move between them. Shows match counts for clarity. </td></tr>
+<tr><td data-label="Summary"><b>Copy and export tools<b> </td><td data-label="Notes">Buttons let users copy a table in plain text or markdown or export as CSV or XLSX. Global buttons handle all tables together. </td></tr>
+<tr><td data-label="Summary"><b>Collapse and expand controls<b> </td><td data-label="Notes">Rows with long or detailed content can be collapsed and expanded to reduce clutter, giving users control over what they see. </td></tr>
+<tr><td data-label="Summary"><b>Reset functionality<b> </td><td data-label="Notes">Restores the default state by clearing search, resetting sort, removing highlights, and expanding all rows. Provides a one-click way to undo all changes. </td></tr>
+<tr><td data-label="Summary"><b>Keyboard shortcuts<b> </td><td data-label="Notes">Implements hotkeys for faster navigation, such as jumping through search matches, enhancing accessibility and efficiency. </td></tr>
+</tbody></table></div></div>
+
+<div class="table-wrapper">
+  <h3 id="Table4" style="margin-top:30px; margin-bottom:10px;">Table 4</h3>
+  <div class="table-container">
+    <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+      <div class="copy-buttons">
+        <button onclick="copyTablePlain(this)">Copy Plain Table</button>
+        <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
+      </div>
+    </div>
+    <table>
+      <thead><tr>
+
+        <th style="width:28.57%;" onclick="sortTableByColumn(3,0)" role="button" aria-label="Sort by Summary">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Summary</div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(3,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(3,1)" role="button" aria-label="Sort by Notes">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Notes</div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(3,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="Summary">Document root </td><td data-label="Notes">Starts with html and body tags. Declares language, sets default theme as light, and allows JavaScript to toggle themes. </td></tr>
+<tr><td data-label="Summary">Head section </td><td data-label="Notes">Contains metadata such as charset, viewport for mobile friendliness, page title, and an auto-generated timestamp. Links the CSS stylesheet located in assets/style.css for styling. </td></tr>
+<tr><td data-label="Summary">Script inclusion </td><td data-label="Notes">Loads the interactive JavaScript from assets/script.js to enable search, sorting, theme toggle, and other dynamic features. </td></tr>
+<tr><td data-label="Summary">Sticky top header </td><td data-label="Notes">A fixed bar at the top of the body with global controls including search box, reset button, theme toggle, and export or copy options. Always visible during scrolling. </td></tr>
+<tr><td data-label="Summary">TOC sidebar </td><td data-label="Notes">A navigation panel on the left, auto-populated with section links from headings. Provides quick navigation between sections. </td></tr>
+<tr><td data-label="Summary">Main content area </td><td data-label="Notes">The right-hand section where all rendered tables are displayed. Each table is grouped under a section with headings that also feed the TOC. </td></tr>
+<tr><td data-label="Summary">Table rendering loop </td><td data-label="Notes">Python injects each table into the HTML by creating headings for structure and TOC, and tables with sticky headers, collapsible rows, and interactive elements. </td></tr>
+<tr><td data-label="Summary">Footer scripts </td><td data-label="Notes">Ensures JavaScript is loaded after the DOM is built. Finalizes the body structure and closes with html. </td></tr>
+</tbody></table></div></div>
+
+<div class="table-wrapper">
+  <h3 id="Table5" style="margin-top:30px; margin-bottom:10px;">Table 5</h3>
+  <div class="table-container">
+    <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+      <div class="copy-buttons">
+        <button onclick="copyTablePlain(this)">Copy Plain Table</button>
+        <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
+      </div>
+    </div>
+    <table>
+      <thead><tr>
+
+        <th style="width:28.57%;" onclick="sortTableByColumn(4,0)" role="button" aria-label="Sort by <b>Summary<b>">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>Summary<b></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(4,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(4,1)" role="button" aria-label="Sort by <b>Notes<b>">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><b>Notes<b></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(4,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="<b>Summary<b>"><b>Assets folder setup<b>        </td><td data-label="<b>Notes<b>">Before generating output, Python ensures the `assets/` subdirectory exists next to the target HTML file. Keeps supporting files organized.                                                                           </td></tr>
+<tr><td data-label="<b>Summary<b>"><b>CSS file writing<b>           </td><td data-label="<b>Notes<b>">The renderer writes `style.css` into the assets folder. This file contains all visual rules (light/dark themes, sticky headers, responsive layout). It is overwritten each run to stay in sync with the Python code. </td></tr>
+<tr><td data-label="<b>Summary<b>"><b>JS file writing<b>            </td><td data-label="<b>Notes<b>">Similarly, the renderer writes `script.js` into the assets folder. This file holds all interactive behaviors (sorting, search, export, theme switching). Always freshly written to match the latest logic.           </td></tr>
+<tr><td data-label="<b>Summary<b>"><b>HTML file creation<b>         </td><td data-label="<b>Notes<b>">Opens the target HTML file path (`output<i>html`) for writing. This becomes the main deliverable users open in a browser.                                                                                              </td></tr>
+<tr><td data-label="<b>Summary<b>"><b>HTML head + header writing<b> </td><td data-label="<b>Notes<b>">Writes document boilerplate: doctype, `<html>`, `<head>` metadata, links to CSS/JS, and starts the body with sticky top header and TOC container.                                                                    </td></tr>
+<tr><td data-label="<b>Summary<b>"><b>Injecting tables<b>           </td><td data-label="<b>Notes<b>">Iterates through all parsed tables (`all<i>tables`), converts markdown cells to HTML, and embeds them into `<section>` blocks with headings. Each section becomes accessible via the TOC.                              </td></tr>
+<tr><td data-label="<b>Summary<b>"><b>Footer writing<b>             </td><td data-label="<b>Notes<b>">After tables, closes the `<main>`, TOC, sticky header, and body. Ends with `</html>`.                                                                                                                                </td></tr>
+<tr><td data-label="<b>Summary<b>"><b>File closing<b>               </td><td data-label="<b>Notes<b>">Ensures all open file handles (CSS, JS, HTML) are properly closed, finalizing the output package.                                                                                                                    </td></tr>
+</tbody></table></div></div>
+
+<div class="table-wrapper">
+  <h3 id="Table6" style="margin-top:30px; margin-bottom:10px;">Table 6</h3>
+  <div class="table-container">
+    <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+      <div class="copy-buttons">
+        <button onclick="copyTablePlain(this)">Copy Plain Table</button>
+        <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
+      </div>
+    </div>
+    <table>
+      <thead><tr>
+
+        <th style="width:28.57%;" onclick="sortTableByColumn(5,0)" role="button" aria-label="Sort by Summary">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Summary</div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(5,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(5,1)" role="button" aria-label="Sort by Notes">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Notes</div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(5,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="Summary"><b>1. Imports and setup<b> </td><td data-label="Notes">Uses Python os for file and folder management and datetime for timestamps. Defines the main entrypoint function render<i>html(all<i>tables, output<i>html, markdown<i>to<i>html), which takes structured table data, knows where to write the HTML file, and accepts a markdown-to-HTML converter. The docstring explains its purpose: generate a full HTML file and supporting assets (style.css, script.js) inside an assets folder. Column widths for summary versus notes are calculated in percentages, and the assets folder is created if missing. This is the bootstrap step that prepares the environment before generation. </td></tr>
+<tr><td data-label="Summary"><b>2. CSS styling<b> </td><td data-label="Notes">Defines the visual design of the renderer. Variables: light theme colors for backgrounds, panels, text, hover states, and buttons, with dark theme overrides. Global base: page-wide defaults for fonts, text, links, and buttons. Table layout: full-width, fixed layout with padding, shadows, and rounded corners. Sticky headers remain visible during scroll. Sorting buttons: styled for clarity, with icons and states for unsorted, ascending, and descending. Row and cell rules: alternating colors, hover highlights, sticky first column, and search-result highlights. TOC sidebar: fixed on the left with background, borders, and hoverable links. Sticky top header: contains search, reset, theme toggle, and export controls, always visible. Responsive design: adjusts TOC, sidebar, and search box for small screens. This CSS block is the visual backbone, balancing aesthetics and usability. </td></tr>
+<tr><td data-label="Summary"><b>3. JavaScript interactivity<b> </td><td data-label="Notes">Provides the behavioral layer that makes tables dynamic. Theme switching: toggles between light and dark modes, saving preference in local storage. Dynamic TOC: builds a sidebar from headings, supports smooth scrolling, and highlights the active section. Sorting: adds three-state sorting on column headers. Row and column highlights: improves readability when hovering by highlighting both row and sticky column. Global search: filters rows across all tables, highlights matches, and provides navigation with counts. Copy and export tools: allows copying a table as plain text or markdown or exporting as CSV or XLSX, with support for global export. Collapse and expand: lets users fold long rows for clarity. Reset button: clears all filters, sorts, highlights, and collapses. Keyboard shortcuts: provides hotkeys for accessibility and speed. This layer turns static tables into interactive tools. </td></tr>
+<tr><td data-label="Summary"><b>4. HTML structure<b> </td><td data-label="Notes">Defines the scaffolding of the page. Document root: starts with doctype and html lang set to English, with light theme by default. Head: contains metadata such as charset, viewport, title, and timestamp, and links to CSS. Script inclusion: links to the external JavaScript file for interactivity. Sticky header: a persistent top bar with global controls for search, reset, theme toggle, and export. TOC sidebar: a left-hand navigation menu auto-filled by the JavaScript TOC builder. Main content: houses the tables, grouped into sections with headings that feed the TOC. Table rendering loop: Python injects each table into the HTML with sticky headers and interactive controls. Footer scripts: ensures JavaScript loads after DOM construction, then closes the HTML document. This structure ties CSS for appearance and JavaScript for behavior into a cohesive, navigable page. </td></tr>
+<tr><td data-label="Summary"><b>5. Python output writing<b> </td><td data-label="Notes">Implements the publishing stage of the renderer. Assets folder: ensures assets exists beside the output HTML file. Write CSS: saves the stylesheet into style.css, including themes, layout, and responsiveness, always overwritten for consistency. Write JS: saves the interaction logic into script.js, overwritten each run. HTML creation: opens or overwrites the specified output HTML file. Header writing: outputs boilerplate such as doctype, head, stylesheet and script references, sticky header, and TOC container. Inject tables: loops through all<i>tables, converts markdown to HTML, and writes each table inside section blocks. Footer writing: closes all containers and ends with html. Close files: ensures all file handles are properly closed. At the end, the result is a self-contained static package with HTML, CSS, and JS that can be opened directly in any browser. </td></tr>
+</tbody></table></div></div>
+
+<button id="backToTop" onclick="backToTop()">↑ Top</button>
+<script src="assets/script.js"></script>
+</body>
+</html>
