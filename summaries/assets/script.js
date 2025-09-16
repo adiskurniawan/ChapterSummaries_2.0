@@ -67,7 +67,7 @@ function sortTableByColumn(tableIdx, colIdx){
     rows.sort((a, b) => {
       let valA = a.cells[colIdx].textContent.trim();
       let valB = b.cells[colIdx].textContent.trim();
-      let numA = parseFloat(valA.replace(/,/g,'')); let numB = parseFloat(valB.replace(/,/g,''));
+      let numA = parseFloat(valA.replace(/,/g,'')); let numB = parseFloat(valB.replace(/,/g,'')); 
       if(!isNaN(numA) && !isNaN(numB)) return numA - numB;
       return valA.localeCompare(valB);
     });
@@ -76,7 +76,7 @@ function sortTableByColumn(tableIdx, colIdx){
     rows.sort((a, b) => {
       let valA = a.cells[colIdx].textContent.trim();
       let valB = b.cells[colIdx].textContent.trim();
-      let numA = parseFloat(valA.replace(/,/g,'')); let numB = parseFloat(valB.replace(/,/g,''));
+      let numA = parseFloat(valA.replace(/,/g,'')); let numB = parseFloat(valB.replace(/,/g,'')); 
       if(!isNaN(numA) && !isNaN(numB)) return numB - numA;
       return valB.localeCompare(valA);
     });
@@ -96,6 +96,9 @@ function sortTableByColumn(tableIdx, colIdx){
 
   // update header UI + aria
   updateHeaderSortUI(tableIdx);
+
+  // update visible row counts after sorting
+  try { updateRowCounts(); } catch(e) {}
 }
 
 // Handler for the small header button click (prevents propagation to th)
@@ -104,12 +107,138 @@ function headerSortButtonClicked(tableIdx, colIdx, btnEl){
   try{ btnEl.focus(); } catch(e) {}
 }
 
+// === Enhancement: persist table expand/collapse state ===
+// Save states whenever a table is toggled
+function saveTableStates() {
+  const states = {};
+  document.querySelectorAll('.table-wrapper').forEach((w, idx) => {
+    states[idx] = w.classList.contains('table-collapsed') ? 1 : 0;
+  });
+  try { localStorage.setItem('tableStates', JSON.stringify(states)); } catch(e) {}
+}
+
+// Restore states on page load
+function restoreTableStates() {
+  try {
+    const states = JSON.parse(localStorage.getItem('tableStates') || "{}");
+    document.querySelectorAll('.table-wrapper').forEach((w, idx) => {
+      const btn = w.querySelector('.toggle-table-btn');
+      if(states[idx] === 1){
+        w.classList.add('table-collapsed');
+        if(btn) btn.textContent = "Expand Table";
+      } else {
+        w.classList.remove('table-collapsed');
+        if(btn) btn.textContent = "Collapse Table";
+      }
+    });
+    // update global toggle button
+    const anyExpanded = document.querySelectorAll('.table-wrapper:not(.table-collapsed)').length > 0;
+    const toggleAllBtn = document.getElementById('toggleAllBtn');
+    if(toggleAllBtn) toggleAllBtn.textContent = anyExpanded ? "Collapse All Tables" : "Expand All Tables";
+  } catch(e){}
+}
+
+// Expand / Collapse single table
+function toggleTable(btn){
+  const wrapper = btn.closest('.table-wrapper');
+  if(!wrapper) return;
+  const collapsed = wrapper.classList.toggle('table-collapsed');
+  btn.textContent = collapsed ? "Expand Table" : "Collapse Table";
+  // update global button label based on whether any table is expanded
+  const anyExpanded = document.querySelectorAll('.table-wrapper:not(.table-collapsed)').length > 0;
+  const toggleAllBtn = document.getElementById('toggleAllBtn');
+  if(toggleAllBtn) toggleAllBtn.textContent = anyExpanded ? "Collapse All Tables" : "Expand All Tables";
+  // persist state change
+  try { saveTableStates(); } catch(e) {}
+  // update counts (rows hidden/displayed may have changed)
+  try { updateRowCounts(); } catch(e) {}
+}
+
+// Expand / Collapse all tables
+function toggleAllTables(){
+  const wrappers = Array.from(document.querySelectorAll('.table-wrapper'));
+  if(wrappers.length === 0) return;
+  const anyExpanded = wrappers.some(w => !w.classList.contains('table-collapsed'));
+  if(anyExpanded){
+    // collapse all
+    wrappers.forEach(w => {
+      w.classList.add('table-collapsed');
+      const btn = w.querySelector('.toggle-table-btn');
+      if(btn) btn.textContent = "Expand Table";
+    });
+    document.getElementById('toggleAllBtn').textContent = "Expand All Tables";
+  } else {
+    // expand all
+    wrappers.forEach(w => {
+      w.classList.remove('table-collapsed');
+      const btn = w.querySelector('.toggle-table-btn');
+      if(btn) btn.textContent = "Collapse Table";
+    });
+    document.getElementById('toggleAllBtn').textContent = "Collapse All Tables";
+  }
+  // persist all states
+  try { saveTableStates(); } catch(e) {}
+  // update counts after toggling all
+  try { updateRowCounts(); } catch(e) {}
+}
+
 // Initialize header UI states on page load
 document.addEventListener('DOMContentLoaded', function(){
   document.querySelectorAll(".table-container table").forEach((t, idx) => {
     updateHeaderSortUI(idx);
   });
+
+  // Ensure toggle buttons reflect state (all tables start expanded)
+  document.querySelectorAll('.table-wrapper').forEach(w => {
+    const btn = w.querySelector('.toggle-table-btn');
+    if(btn) btn.textContent = w.classList.contains('table-collapsed') ? "Expand Table" : "Collapse Table";
+  });
+
+  // Set global toggle label appropriately
+  const anyExpanded = document.querySelectorAll('.table-wrapper:not(.table-collapsed)').length > 0;
+  const toggleAll = document.getElementById('toggleAllBtn');
+  if(toggleAll) toggleAll.textContent = anyExpanded ? "Collapse All Tables" : "Expand All Tables";
+
+  // Focus search box with "/" key
+  // - Avoid hijacking input/textarea/contenteditable typing.
+  // - If "/" is pressed while not typing, focus & select the search box.
+  document.addEventListener("keydown", function(e){
+    try {
+      const active = document.activeElement;
+      const tag = active && (active.tagName || "").toLowerCase();
+      if(e.key === "/" && !e.ctrlKey && !e.metaKey && !e.altKey){
+        if(tag === 'input' || tag === 'textarea' || (active && active.isContentEditable)) return;
+        e.preventDefault();
+        const sb = document.getElementById("searchBox");
+        if(sb){ sb.focus(); sb.select(); }
+      }
+    } catch(err) {
+      // swallow errors to avoid breaking page if DOM changes
+      console.warn("Search shortcut error:", err);
+    }
+  });
+
+  // Restore persisted collapse/expand states before updating counts
+  try { restoreTableStates(); } catch(e) {}
+
+  // Initialize row counts on load
+  try { updateRowCounts(); } catch(e) {}
 });
+
+// Row count update function - shows "Showing X of Y rows" under each table
+function updateRowCounts() {
+  document.querySelectorAll(".table-wrapper").forEach((wrapper, idx) => {
+    const table = wrapper.querySelector("table");
+    const countDiv = wrapper.querySelector(".row-count");
+    if (!table || !countDiv) return;
+    const rows = table.tBodies[0].rows;
+    const total = rows.length;
+    const visible = Array.from(rows).filter(r => r.style.display !== "none").length;
+    if(total === 0) countDiv.textContent = "Showing 0 rows";
+    else if(visible === total) countDiv.textContent = `Showing ${total} rows`;
+    else countDiv.textContent = `Showing ${visible} of ${total} rows`;
+  });
+}
 
 // Copy & Reset functions
 function getTableFromButton(btn){ return btn.closest('.table-container').querySelector('table'); }
@@ -157,8 +286,20 @@ function resetAllTables(){
     sortStates[idx] = Array(table.rows[0].cells.length).fill(0);
     updateHeaderSortUI(idx);
   });
+  // expand all (reset collapsed state) and reset per-table button labels
+  document.querySelectorAll('.table-wrapper').forEach(w => {
+    w.classList.remove('table-collapsed');
+    const btn = w.querySelector('.toggle-table-btn');
+    if(btn) btn.textContent = "Collapse Table";
+  });
+  const toggleAllBtn = document.getElementById('toggleAllBtn');
+  if(toggleAllBtn) toggleAllBtn.textContent = "Collapse All Tables";
   document.getElementById('searchBox').value = "";
   searchTable();
+  // persist state after reset
+  try { saveTableStates(); } catch(e) {}
+  // update counts after reset
+  try { updateRowCounts(); } catch(e) {}
   alert("All tables reset!");
 }
 
@@ -187,6 +328,8 @@ function searchTable(){
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
     window.scrollTo({ top: scrollTop + rect.top - headerHeight, behavior: 'smooth' });
   }
+  // update counts after search
+  try { updateRowCounts(); } catch(e) {}
 }
 
 // TOC toggle
@@ -197,16 +340,92 @@ function toggleTOC(){
   else btn.innerHTML = 'Hide <span id="tocArrow">▼</span>';
 }
 
-// TOC click scroll
+// TOC click scroll (fixed to respect header offset and to work with section-wrapped tables)
 document.querySelectorAll('#tocSidebar a[href^="#"]').forEach(a => {
   a.addEventListener('click', function(e){
     e.preventDefault();
     const id = this.getAttribute('href').substring(1);
-    const container = document.getElementById(id)?.closest('.table-wrapper');
-    if(!container) return;
+    const target = document.getElementById(id);
+    if(!target) return;
     const headerHeight = document.getElementById('stickyMainHeader')?.offsetHeight || 0;
-    const containerTop = container.getBoundingClientRect().top + window.pageYOffset;
-    window.scrollTo({ top: containerTop - headerHeight - 5, behavior: 'smooth' });
+    const targetTop = target.getBoundingClientRect().top + window.pageYOffset;
+    window.scrollTo({ top: targetTop - headerHeight - 5, behavior: 'smooth' });
     try{ history.replaceState(null, '', '#' + id); }catch(e){}
   });
 });
+
+// Back to Top button logic
+window.addEventListener("scroll", function(){
+  const btn = document.getElementById("backToTop");
+  if(!btn) return;
+  if(document.documentElement.scrollTop > 200){
+    btn.style.display = "block";
+  } else {
+    btn.style.display = "none";
+  }
+});
+function backToTop(){
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// Enhancement: keyboard shortcut to scroll to top via Escape key
+document.addEventListener("keydown", function(e){
+  if(e.key === "Escape"){
+    // call same function used by the Back to Top button
+    try { backToTop(); } catch(err) { /* ignore errors */ }
+  }
+});
+
+/* === Improved TOC Scroll-Spy using IntersectionObserver ===
+   - Uses sections with ids starting with "Table" (e.g., <section id="Table1">)
+   - Accounts for sticky header by using a negative top rootMargin
+   - More accurate than the previous bounding-rect scan (fixes off-by-one)
+*/
+(function(){
+  function initTOCScrollSpy(){
+    const sections = Array.from(document.querySelectorAll("section[id^='Table']"));
+    const tocLinks = Array.from(document.querySelectorAll('#toc a[href^="#Table"]'));
+    if(sections.length === 0 || tocLinks.length === 0) return;
+
+    // Determine header offset dynamically, fallback to 80px
+    const header = document.getElementById('stickyMainHeader');
+    const headerOffset = header ? header.offsetHeight : 80;
+
+    // rootMargin shifts the observed intersection area so the sticky header is accounted for.
+    // We use a negative top margin equal to the header height and a negative bottom margin
+    // so that the section becomes "active" when it occupies the top ~60% of the viewport.
+    const rootMargin = `-${headerOffset}px 0px -40% 0px`;
+
+    let activeIndex = null;
+
+    const observer = new IntersectionObserver((entries) => {
+      // Look for entries that are intersecting and pick the one with highest intersectionRatio
+      const intersecting = entries.filter(e => e.isIntersecting);
+      if(intersecting.length === 0) {
+        return;
+      }
+      intersecting.sort((a,b) => b.intersectionRatio - a.intersectionRatio);
+      const topEntry = intersecting[0];
+      const id = topEntry.target.id;
+      const idx = sections.findIndex(s => s.id === id);
+      if(idx !== -1 && idx !== activeIndex){
+        activeIndex = idx;
+        tocLinks.forEach(l => l.classList.remove('active'));
+        if(tocLinks[idx]){
+          tocLinks[idx].classList.add('active');
+          try {
+            tocLinks[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          } catch(e){}
+        }
+      }
+    }, { root: null, rootMargin: rootMargin, threshold: [0.25, 0.5, 0.75] });
+
+    sections.forEach(s => observer.observe(s));
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', initTOCScrollSpy);
+  } else {
+    initTOCScrollSpy();
+  }
+})();
