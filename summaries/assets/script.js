@@ -1,327 +1,212 @@
-// script.js - merged interactive features
-const STORAGE_KEY_PREFIX = "tablesViewer_v_mixed";
+// Store original table rows and sort states
 let originalTableRows = [];
 let sortStates = [];
+document.querySelectorAll(".table-container table").forEach((table, idx) => {
+  // store original tbody rows
+  const rows = Array.from(table.tBodies[0].rows).map(r => r.cloneNode(true));
+  originalTableRows[idx] = rows;
+  // initialize sort states for each column (0=original,1=asc,2=desc)
+  sortStates[idx] = Array(table.rows[0].cells.length).fill(0);
+});
 
-function _storageKey(k){ return STORAGE_KEY_PREFIX + "_" + k; }
-
-function initTables(){
-  document.querySelectorAll(".table-container table").forEach((table, idx) => {
-    const rows = Array.from(table.tBodies[0].rows).map(r => r.cloneNode(true));
-    originalTableRows[idx] = rows;
-    sortStates[idx] = Array(table.tHead.rows[0].cells.length).fill(0);
-    // ensure match-counter exists
-    const wrapper = table.closest('.table-wrapper');
-    if(wrapper && !wrapper.querySelector('.match-counter')){
-      const el = document.createElement('span');
-      el.className = 'match-counter counter-badge';
-      const headerControls = wrapper.querySelector('.table-header-wrapper .table-controls') || wrapper.querySelector('.table-header-wrapper');
-      if(headerControls) headerControls.appendChild(el);
-      else wrapper.appendChild(el);
-    }
-  });
-  applySavedState();
-  document.querySelectorAll(".table-container table").forEach((t, idx)=> updateHeaderSortUI(idx));
+// Dark mode
+const modeBtn = document.getElementById('modeBtn');
+if (localStorage.getItem('uiMode') === 'dark') {
+  document.documentElement.setAttribute('data-theme','dark');
+  if (modeBtn) modeBtn.textContent = 'Light mode';
 }
-
-function saveState(){
-  try{
-    localStorage.setItem(_storageKey("search"), document.getElementById('searchBox')?.value || "");
-    localStorage.setItem(_storageKey("sortStates"), JSON.stringify(sortStates));
-    const collapsed = Array.from(document.querySelectorAll('.table-container')).map(c => c.classList.contains('collapsed'));
-    localStorage.setItem(_storageKey("collapsed"), JSON.stringify(collapsed));
-    localStorage.setItem('uiMode', document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
-  }catch(e){ console.debug("saveState:", e); }
-}
-
-function loadState(){
-  try{
-    const search = localStorage.getItem(_storageKey("search")) || "";
-    const ss = JSON.parse(localStorage.getItem(_storageKey("sortStates") || "null") || "null");
-    const collapsed = JSON.parse(localStorage.getItem(_storageKey("collapsed") || "null") || "null");
-    return { search: search, sortStates: ss, collapsed: collapsed };
-  }catch(e){ console.debug("loadState:", e); return { search: "", sortStates: null, collapsed: null }; }
-}
-
-function applySavedState(){
-  const state = loadState();
-  if(Array.isArray(state.collapsed)){
-    document.querySelectorAll('.table-container').forEach((c, i) => {
-      if(state.collapsed[i]) c.classList.add('collapsed'); else c.classList.remove('collapsed');
-      const btn = c.closest('.table-wrapper')?.querySelector('.collapse-btn');
-      if(btn) btn.textContent = c.classList.contains('collapsed') ? 'Expand' : 'Collapse';
-    });
-  }
-  if(Array.isArray(state.sortStates)){
-    state.sortStates.forEach((arr, tableIdx) => {
-      if(!arr) return;
-      // replay sort states (1=asc,2=desc)
-      arr.forEach((colState, colIdx) => {
-        if(colState === 1){
-          sortTableByColumn(tableIdx, colIdx);
-        } else if(colState === 2){
-          sortTableByColumn(tableIdx, colIdx); sortTableByColumn(tableIdx, colIdx);
-        }
-      });
-    });
-  }
-  if(state.search){
-    const sb = document.getElementById('searchBox');
-    if(sb){ sb.value = state.search; searchTable(); }
+function toggleMode(){
+  const dark = document.documentElement.getAttribute('data-theme') !== 'dark';
+  if(dark){
+    document.documentElement.setAttribute('data-theme','dark'); if (modeBtn) modeBtn.textContent='Light mode'; localStorage.setItem('uiMode','dark');
   } else {
-    searchTable();
+    document.documentElement.removeAttribute('data-theme'); if (modeBtn) modeBtn.textContent='Dark mode'; localStorage.setItem('uiMode','light');
   }
 }
 
+// Helper: update header sort UI and aria-sort for accessibility
 function updateHeaderSortUI(tableIdx){
   const table = document.querySelectorAll(".table-container table")[tableIdx];
-  if(!table) return;
   const ths = table.tHead.rows[0].cells;
-  for(let c=0;c<ths.length;c++){
+  for(let c = 0; c < ths.length; c++){
     const btn = ths[c].querySelector('.sort-btn');
     if(!btn) continue;
+    // reset classes
     btn.classList.remove('sort-state-0','sort-state-1','sort-state-2');
-    const state = (sortStates[tableIdx] && sortStates[tableIdx][c]) ? sortStates[tableIdx][c] : 0;
+    const state = sortStates[tableIdx][c] || 0;
     btn.classList.add('sort-state-' + state);
-    if(state===1) ths[c].setAttribute('aria-sort','ascending');
-    else if(state===2) ths[c].setAttribute('aria-sort','descending');
+    // set ARIA attribute for screen readers
+    if(state === 1) ths[c].setAttribute('aria-sort','ascending');
+    else if(state === 2) ths[c].setAttribute('aria-sort','descending');
     else ths[c].setAttribute('aria-sort','none');
-    const icon = btn.querySelector('.sort-icon');
-    if(icon){
-      if(state===0) icon.innerHTML = '⇅';
-      else if(state===1) icon.innerHTML = '↑';
-      else icon.innerHTML = '↓';
+
+    // replace icon SVG to visually indicate asc/desc/unsorted
+    const iconSpan = btn.querySelector('.sort-icon');
+    if(iconSpan){
+      if(state === 0){
+        iconSpan.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M7 14l5-5 5 5"></path><path d="M7 10l5 5 5-5"></path></svg>`;
+      } else if(state === 1){
+        iconSpan.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 19V6"></path><path d="M5 12l7-7 7 7"></path></svg>`;
+      } else {
+        iconSpan.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 5v13"></path><path d="M19 12l-7 7-7-7"></path></svg>`;
+      }
     }
   }
 }
 
-function numericCompare(a,b){
-  const na = parseFloat(a.replace(/,/g,'')), nb = parseFloat(b.replace(/,/g,''));
-  if(!isNaN(na) && !isNaN(nb)) return na-nb;
-  return a.localeCompare(b);
-}
-
+// Sort table with 3-state (preserves originalTableRows)
 function sortTableByColumn(tableIdx, colIdx){
-  const table = document.querySelectorAll(".table-container table")[tableIdx];
-  if(!table) return;
-  if(!sortStates[tableIdx]) sortStates[tableIdx] = Array(table.tHead.rows[0].cells.length).fill(0);
+  let table = document.querySelectorAll(".table-container table")[tableIdx];
   let state = sortStates[tableIdx][colIdx] || 0;
   let rows = Array.from(table.tBodies[0].rows);
-  function cellVal(r){ return r.cells[colIdx].textContent.trim(); }
-  if(state===0){
-    rows.sort((a,b)=> numericCompare(cellVal(a), cellVal(b)));
-    sortStates[tableIdx][colIdx]=1;
-  } else if(state===1){
-    rows.sort((a,b)=> numericCompare(cellVal(b), cellVal(a)));
-    sortStates[tableIdx][colIdx]=2;
-  } else {
+
+  if(state === 0){ // Original -> Asc
+    rows.sort((a, b) => {
+      let valA = a.cells[colIdx].textContent.trim();
+      let valB = b.cells[colIdx].textContent.trim();
+      let numA = parseFloat(valA.replace(/,/g,'')); let numB = parseFloat(valB.replace(/,/g,''));
+      if(!isNaN(numA) && !isNaN(numB)) return numA - numB;
+      return valA.localeCompare(valB);
+    });
+    sortStates[tableIdx][colIdx] = 1;
+  } else if(state === 1){ // Asc -> Desc
+    rows.sort((a, b) => {
+      let valA = a.cells[colIdx].textContent.trim();
+      let valB = b.cells[colIdx].textContent.trim();
+      let numA = parseFloat(valA.replace(/,/g,'')); let numB = parseFloat(valB.replace(/,/g,''));
+      if(!isNaN(numA) && !isNaN(numB)) return numB - numA;
+      return valB.localeCompare(valA);
+    });
+    sortStates[tableIdx][colIdx] = 2;
+  } else { // Desc -> Original (restore original order)
     rows = originalTableRows[tableIdx].map(r => r.cloneNode(true));
-    sortStates[tableIdx][colIdx]=0;
+    sortStates[tableIdx][colIdx] = 0;
   }
-  for(let i=0;i<sortStates[tableIdx].length;i++) if(i!==colIdx) sortStates[tableIdx][i]=0;
-  const tbody = table.tBodies[0];
+
+  // Reset other columns' states
+  for(let i = 0; i < sortStates[tableIdx].length; i++){ if(i !== colIdx) sortStates[tableIdx][i] = 0; }
+
+  // Append rows
+  let tbody = table.tBodies[0];
   tbody.innerHTML = "";
-  rows.forEach(r=> tbody.appendChild(r));
+  rows.forEach(r => tbody.appendChild(r));
+
+  // update header UI + aria
   updateHeaderSortUI(tableIdx);
-  saveState();
-  searchTable();
 }
 
-function headerSortButtonClicked(tableIdx,colIdx,btnEl){
-  sortTableByColumn(tableIdx,colIdx);
-  try{ btnEl.focus(); }catch(e){}
+// Handler for the small header button click (prevents propagation to th)
+function headerSortButtonClicked(tableIdx, colIdx, btnEl){
+  sortTableByColumn(tableIdx, colIdx);
+  try{ btnEl.focus(); } catch(e) {}
 }
 
-function toggleCollapse(btn){
-  const wrapper = btn.closest('.table-wrapper');
-  if(!wrapper) return;
-  const container = wrapper.querySelector('.table-container');
-  if(!container) return;
-  const collapsed = container.classList.toggle('collapsed');
-  btn.textContent = collapsed ? 'Expand' : 'Collapse';
-  btn.title = collapsed ? 'Expand this table' : 'Collapse this table';
-  saveState();
-}
+// Initialize header UI states on page load
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll(".table-container table").forEach((t, idx) => {
+    updateHeaderSortUI(idx);
+  });
+});
 
+// Copy & Reset functions
 function getTableFromButton(btn){ return btn.closest('.table-container').querySelector('table'); }
 function copyTablePlain(btn){
-  const table = getTableFromButton(btn);
-  const title = btn.closest('.table-wrapper').querySelector('h3')?.textContent || '';
-  const text = title + "\n" + Array.from(table.rows).map(r => Array.from(r.cells).map(c => c.textContent.trim()).join("\t")).join("\n");
-  navigator.clipboard.writeText(text).then(()=> alert('Table copied as plain text!'));
+  let table = getTableFromButton(btn);
+  let title = table.closest('.table-wrapper').querySelector('h3')?.textContent || '';
+  let text = title + "\n" + Array.from(table.rows).map(r => Array.from(r.cells).map(c => c.textContent.trim()).join("\t")).join("\n");
+  navigator.clipboard.writeText(text); alert('Table copied as plain text!');
 }
 function copyTableMarkdown(btn){
-  const table = getTableFromButton(btn);
-  const title = btn.closest('.table-wrapper').querySelector('h3')?.textContent || '';
-  const rows = Array.from(table.rows);
-  // Title NOT wrapped in ** to avoid duplicate bold markup
-  let text = title + "\n| " + Array.from(rows[0].cells).map(c => c.textContent.trim()).join(" | ") + " |\n";
+  let table = getTableFromButton(btn);
+  let title = table.closest('.table-wrapper').querySelector('h3')?.textContent || '';
+  let rows = Array.from(table.rows);
+  let text = "**" + title + "**\n| " + Array.from(rows[0].cells).map(c => c.textContent.trim()).join(" | ") + " |\n";
   text += "| " + Array.from(rows[0].cells).map(() => "---").join(" | ") + " |\n";
-  for(let i = 1; i < rows.length; i++){
-    text += "| " + Array.from(rows[i].cells).map(c => c.textContent.trim()).join(" | ") + " |\n";
-  }
-  navigator.clipboard.writeText(text).then(()=> alert('Table copied in Markdown format!'));
+  for(let i = 1; i < rows.length; i++){ text += "| " + Array.from(rows[i].cells).map(c => c.textContent.trim()).join(" | ") + " |\n"; }
+  navigator.clipboard.writeText(text); alert('Table copied in Markdown format!');
 }
-function copyAllTablesPlain(){ document.querySelectorAll('.table-wrapper .copy-plain-btn').forEach(b => copyTablePlain(b)); alert('All tables copied as plain text.'); }
+function copyAllTablesPlain(){
+  let text = "";
+  document.querySelectorAll(".table-wrapper").forEach(wrapper => {
+    let title = wrapper.querySelector('h3')?.textContent || '';
+    let table = wrapper.querySelector('table');
+    text += title + "\n" + Array.from(table.rows).map(r => Array.from(r.cells).map(c => c.textContent.trim()).join("\t")).join("\n") + "\n";
+  });
+  navigator.clipboard.writeText(text); alert("All tables copied as plain text!");
+}
 function copyAllTablesMarkdown(){
-  let all = "";
-  document.querySelectorAll(".table-wrapper").forEach((w) => {
-    const title = w.querySelector('h3')?.textContent || '';
-    const table = w.querySelector('table');
-    const rows = Array.from(table.rows);
-    all += title + "\n| " + Array.from(rows[0].cells).map(c => c.textContent.trim()).join(" | ") + " |\n";
-    all += "| " + Array.from(rows[0].cells).map(() => "---").join(" | ") + " |\n";
-    for(let i = 1; i < rows.length; i++){
-      all += "| " + Array.from(rows[i].cells).map(c => c.textContent.trim()).join(" | ") + " |\n";
-    }
-    all += "\n";
+  let text = "";
+  document.querySelectorAll(".table-wrapper").forEach(wrapper => {
+    let title = wrapper.querySelector('h3')?.textContent || '';
+    let table = wrapper.querySelector('table');
+    let rows = Array.from(table.rows);
+    text += "**" + title + "**\n| " + Array.from(rows[0].cells).map(c => c.textContent.trim()).join(" | ") + " |\n";
+    text += "| " + Array.from(rows[0].cells).map(() => "---").join(" | ") + " |\n";
+    for(let i = 1; i < rows.length; i++){ text += "| " + Array.from(rows[i].cells).map(c => c.textContent.trim()).join(" | ") + " |\n"; }
   });
-  navigator.clipboard.writeText(all).then(()=> alert('All tables copied in Markdown format!'));
+  navigator.clipboard.writeText(text); alert("All tables copied in Markdown format!");
 }
-
-function exportTableCSV(btn){
-  const table = btn.closest('.table-container').querySelector('table');
-  const title = btn.closest('.table-wrapper').querySelector('h3')?.textContent || 'table';
-  const rows = Array.from(table.rows);
-  const csv = rows.map(r => Array.from(r.cells).map(c => '"' + c.textContent.replace(/"/g,'""') + '"').join(",")).join("\n");
-  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = title.replace(/\s+/g,'_') + '.csv';
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-
-function sanitizeSheetName(name){
-  return String(name || 'Sheet').replace(/[\[\]\*\/\\:\?]/g,'').substring(0,31);
-}
-function exportTableXLSX(btn){
-  if(typeof XLSX === 'undefined'){ alert('SheetJS (XLSX) library not loaded.'); return; }
-  const table = btn.closest('.table-container').querySelector('table');
-  const title = btn.closest('.table-wrapper').querySelector('h3')?.textContent || 'table';
-  const ws = XLSX.utils.table_to_sheet(table, {raw: true});
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, sanitizeSheetName(title) || 'Sheet1');
-  XLSX.writeFile(wb, title.replace(/\s+/g,'_') + '.xlsx');
-}
-function exportAllXLSX(){
-  if(typeof XLSX === 'undefined'){ alert('SheetJS (XLSX) library not loaded.'); return; }
-  const wrappers = document.querySelectorAll('.table-wrapper');
-  const wb = XLSX.utils.book_new();
-  wrappers.forEach((w, idx) => {
-    const title = (w.querySelector('h3')?.textContent || `Table_${idx+1}`);
-    const table = w.querySelector('table');
-    if(table){
-      const ws = XLSX.utils.table_to_sheet(table, {raw: true});
-      XLSX.utils.book_append_sheet(wb, ws, sanitizeSheetName(title) || `Sheet${idx+1}`);
-    }
-  });
-  XLSX.writeFile(wb, 'all_tables.xlsx');
-}
-
 function resetAllTables(){
   document.querySelectorAll(".table-container table").forEach((table, idx) => {
-    const tbody = table.tBodies[0];
+    let tbody = table.tBodies[0];
     tbody.innerHTML = "";
     originalTableRows[idx].forEach(r => tbody.appendChild(r.cloneNode(true)));
     sortStates[idx] = Array(table.rows[0].cells.length).fill(0);
     updateHeaderSortUI(idx);
   });
-  const sb = document.getElementById('searchBox');
-  if(sb) sb.value = "";
-  saveState();
+  document.getElementById('searchBox').value = "";
   searchTable();
   alert("All tables reset!");
 }
 
+// Search
 function searchTable(){
-  const filter = (document.getElementById("searchBox").value || "").toLowerCase();
-  let globalMatches = 0;
-  document.querySelectorAll(".table-wrapper").forEach((wrapper, tableIdx) => {
-    const table = wrapper.querySelector('table');
-    const rows = Array.from(table.tBodies[0].rows);
-    let tableMatches = 0;
-    rows.forEach(row => {
+  let filter = document.getElementById("searchBox").value.toLowerCase();
+  let firstMatch = null;
+  document.querySelectorAll(".table-container table").forEach(table => {
+    Array.from(table.rows).slice(1).forEach(row => {
       let rowMatches = false;
       Array.from(row.cells).forEach(cell => {
-        const text = (cell.textContent || '').toLowerCase();
-        if(filter !== "" && text.includes(filter)){
-          cell.classList.add('highlight'); rowMatches = true; tableMatches++;
+        let text = cell.textContent.toLowerCase();
+        if(text.includes(filter) && filter !== ""){
+          cell.classList.add("highlight"); rowMatches = true;
+          if(!firstMatch) firstMatch = row;
         } else {
-          cell.classList.remove('highlight');
+          cell.classList.remove("highlight");
         }
       });
       row.style.display = rowMatches || filter === "" ? "" : "none";
     });
-    globalMatches += tableMatches;
-    const counterEl = wrapper.querySelector('.match-counter');
-    if(counterEl) counterEl.textContent = tableMatches > 0 ? `${tableMatches} match${tableMatches>1?'es':''}` : '';
   });
-  const globalEl = document.getElementById('globalMatchCounter');
-  if(globalEl) globalEl.textContent = globalMatches > 0 ? `${globalMatches} total match${globalMatches>1?'es':''}` : '';
-  saveState();
-  if(filter !== ""){
-    const first = document.querySelector('.highlight');
-    if(first){
-      const row = first.closest('tr');
-      if(row){
-        const headerHeight = document.getElementById('stickyMainHeader')?.offsetHeight || 0;
-        const rect = row.getBoundingClientRect();
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        window.scrollTo({ top: scrollTop + rect.top - headerHeight - 10, behavior: 'smooth' });
-      }
-    }
+  if(firstMatch){
+    const rect = firstMatch.getBoundingClientRect();
+    const headerHeight = document.getElementById('stickyMainHeader').offsetHeight + 10;
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    window.scrollTo({ top: scrollTop + rect.top - headerHeight, behavior: 'smooth' });
   }
 }
 
-function initTOCLinks(){
-  document.querySelectorAll('#tocSidebar a').forEach(a=>{
-    a.addEventListener('click', e=>{
-      e.preventDefault();
-      const href = a.getAttribute('href');
-      if(!href) return;
-      const target = document.querySelector(href);
-      if(target){
-        const headerHeight = document.getElementById('stickyMainHeader')?.offsetHeight || 0;
-        const rect = target.getBoundingClientRect();
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        window.scrollTo({ top: scrollTop + rect.top - headerHeight - 10, behavior: 'smooth' });
-      }
-    });
+// TOC toggle
+function toggleTOC(){
+  const toc = document.getElementById('toc'); const btn = document.getElementById('tocToggle');
+  toc.classList.toggle('hide');
+  if(toc.classList.contains('hide')) btn.innerHTML = 'Show <span id="tocArrow" class="rotate">▼</span>';
+  else btn.innerHTML = 'Hide <span id="tocArrow">▼</span>';
+}
+
+// TOC click scroll
+document.querySelectorAll('#tocSidebar a[href^="#"]').forEach(a => {
+  a.addEventListener('click', function(e){
+    e.preventDefault();
+    const id = this.getAttribute('href').substring(1);
+    const container = document.getElementById(id)?.closest('.table-wrapper');
+    if(!container) return;
+    const headerHeight = document.getElementById('stickyMainHeader')?.offsetHeight || 0;
+    const containerTop = container.getBoundingClientRect().top + window.pageYOffset;
+    window.scrollTo({ top: containerTop - headerHeight - 5, behavior: 'smooth' });
+    try{ history.replaceState(null, '', '#' + id); }catch(e){}
   });
-}
-
-/* Dark mode */
-function applySavedMode(){
-  const mode = localStorage.getItem('uiMode') || 'light';
-  const modeBtn = document.getElementById('modeBtn');
-  if(mode === 'dark'){
-    document.documentElement.setAttribute('data-theme','dark');
-    if(modeBtn) modeBtn.textContent = 'Light mode';
-  } else {
-    document.documentElement.removeAttribute('data-theme');
-    if(modeBtn) modeBtn.textContent = 'Dark mode';
-  }
-}
-function toggleMode(){
-  const modeBtn = document.getElementById('modeBtn');
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  if(isDark){
-    document.documentElement.removeAttribute('data-theme');
-    localStorage.setItem('uiMode','light');
-    if(modeBtn) modeBtn.textContent = 'Dark mode';
-  } else {
-    document.documentElement.setAttribute('data-theme','dark');
-    localStorage.setItem('uiMode','dark');
-    if(modeBtn) modeBtn.textContent = 'Light mode';
-  }
-}
-
-/* Init */
-document.addEventListener('DOMContentLoaded', function(){
-  applySavedMode();
-  initTables();
-  initTOCLinks();
-  const exportAllXLSXBtn = document.getElementById('exportAllXLSX');
-  if(exportAllXLSXBtn) exportAllXLSXBtn.addEventListener('click', exportAllXLSX);
 });

@@ -1,29 +1,37 @@
 :root {
   --bg: #ffffff; --text: #111827; --panel: #f8fafc; --border: #e5e7eb;
   --row-hover: #d0ebff; --highlight: #fff3a2; --current-row: #ffeaa2;
-  --button-bg: #f3f4f6; --button-text: #111827; --muted: rgba(17,24,39,0.45);
+  --button-bg: #f3f4f6; --button-text: #111827;
+  --muted: rgba(17,24,39,0.45);
 
-  --toc-link: #2563eb; --toc-link-hover-bg: #e0f2fe; --toc-link-hover-color: #1e40af;
+  /* TOC colors */
+  --toc-link: #2563eb;
+  --toc-link-hover-bg: #e0f2fe;
+  --toc-link-hover-color: #1e40af;
 }
 [data-theme="dark"] {
   --bg: #1e1e2f; --text: #e0e0e0; --panel: #2a2a3e; --border: #3c3c4f;
   --row-hover: #38384c; --highlight: #fffa8c; --current-row: #ffd86c;
-  --button-bg: #44445a; --button-text: #e0e0e0; --muted: rgba(224,224,224,0.35);
+  --button-bg: #44445a; --button-text: #e0e0e0;
+  --muted: rgba(224,224,224,0.35);
 
-  --toc-link: #93c5fd; --toc-link-hover-bg: #1e3a8a; --toc-link-hover-color: #ffffff;
+  --toc-link: #93c5fd;
+  --toc-link-hover-bg: #1e3a8a;
+  --toc-link-hover-color: #ffffff;
 }
 html, body { margin:0; background:var(--bg); color:var(--text); font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial; }
 a { color:inherit; text-decoration:none; }
 button { background:var(--button-bg); color:var(--button-text); border:1px solid var(--border); padding:6px 12px; border-radius:6px; cursor:pointer; font-size:14px; }
 button:active { transform:translateY(1px); }
-.table-wrapper { transition: all 0.18s ease; }
-.table-container { transition: max-height 0.28s ease, opacity 0.24s ease; overflow: hidden; }
-.table-container.collapsed { max-height: 0 !important; opacity: 0; padding: 0; margin: 0; }
 table { width:100%; border-collapse:collapse; table-layout:fixed; word-wrap:break-word; margin-bottom:18px; background:var(--bg); box-shadow:0 1px 2px rgba(0,0,0,0.03); }
 th, td { padding:10px; border:1px solid var(--border); vertical-align:top; font-size:14px; }
+
+/* UPDATED: hand cursor + hover for headers, smooth transition */
 thead th { background:var(--panel); position:sticky; top:48px; z-index:3; text-align:left; cursor:pointer; transition: background 0.18s ease; }
 thead th:hover { background-color:#e2e8f0; }
 [data-theme="dark"] thead th:hover { background-color:#50506a; }
+
+/* increase tappable area of sort button */
 .sort-btn { display:flex; align-items:center; gap:6px; background:transparent; border:0; padding:6px 8px; cursor:pointer; border-radius:8px; font-size:12px; color:var(--muted); }
 td:first-child { background:var(--panel); font-weight:500; position:sticky; left:0; z-index:2; min-width:140px; box-shadow:2px 0 5px -2px rgba(0,0,0,0.08); }
 tr:nth-child(even) { background:var(--bg); }
@@ -31,22 +39,25 @@ tr:hover td { background:var(--row-hover); }
 .highlight { background:var(--highlight) !important; transition: background 0.45s ease; }
 .current-row td { background:var(--current-row) !important; }
 
+/* TOC sidebar styles (simple color improvements) */
 #tocSidebar { background:var(--panel); padding:16px; border-right:1px solid var(--border); width:260px; position:fixed; top:0; bottom:0; overflow:auto; border-radius:8px; }
 #tocSidebar a { display:block; padding:6px 10px; margin:2px 0; color:var(--toc-link); border-radius:6px; transition: background 0.18s ease, color 0.18s ease; }
 #tocSidebar a:hover { background:var(--toc-link-hover-bg); color:var(--toc-link-hover-color); }
+
 #toc { max-height:1000px; transition:max-height 0.3s ease; overflow:hidden; }
 #toc.hide { max-height:0; }
 #stickyMainHeader { position:sticky; top:0; background:var(--bg); z-index:1000; padding:15px 0; border-bottom:1px solid var(--border); }
 #stickyMainHeader input { width:300px; padding:6px; font-size:16px; }
 #mainContent { margin-left:280px; padding:20px; }
 
+/* --- Sorting button styles --- */
 .th-with-sort { display:flex; align-items:center; gap:8px; }
 .sort-icon { width:12px; height:12px; display:inline-block; vertical-align:middle; }
-.sort-state-0 { opacity:0.45; } .sort-state-1 { color:var(--text); opacity:1; } .sort-state-2 { color:var(--text); opacity:1; }
+.sort-state-0 { opacity:0.45; } /* unsorted */
+.sort-state-1 { color:var(--text); opacity:1; } /* asc */
+.sort-state-2 { color:var(--text); opacity:1; } /* desc */
 
-.counter-badge { font-size:12px; color:var(--muted); margin-left:8px; }
-.collapse-btn { font-size:12px; padding:6px 8px; }
-
+/* small responsive tweaks */
 @media (max-width:900px) {
   #stickyMainHeader input { width:180px; }
   #tocSidebar { width:200px; }
