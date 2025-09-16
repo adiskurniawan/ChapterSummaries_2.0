@@ -32,16 +32,21 @@
     <button onclick="copyAllTablesPlain()">Copy All Tables (Plain Text)</button>
     <button onclick="copyAllTablesMarkdown()">Copy All Tables (Markdown)</button>
     <button onclick="resetAllTables()">Reset All Tables</button>
+    <button id="toggleAllBtn" onclick="toggleAllTables()">Collapse All Tables</button>
   </div>
 </div>
 
+<section id="Table1">
 <div class="table-wrapper">
-  <h3 id="Table1" style="margin-top:30px; margin-bottom:10px;">Table 1</h3>
+  <h3 id="Table1-header" style="margin-top:30px; margin-bottom:10px;">Table 1</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -90,15 +95,22 @@
 <tr><td data-label="<b>Summary / Core Concepts<b>">Chapter structure and signposting: starts with framing and cosmology, then explains life-as-information and the three-stage taxonomy, and closes by foreshadowing control/design challenges.       </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">Headings guide the reader: "Welcome to the Most Important Conversation...", "A Brief History of Complexity", "The Three Stages of Life." The chapter ends by setting up later chapters on design, control, and societal responses.                                                                                                                                                                                                                                                                                                               </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>">Selected preserved quotations for clarity and citation.                                                                                                                                            </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">- <i>"Thirteen point eight billion years after its birth, our Universe has awoken and become aware of itself."<i>  <br>- <i>"What's replicated isn't matter (made of atoms) but information (made of bits) specifying how the atoms are arranged."<i>  <br>- <i>"By installing a software module enabling us to read and write, we became able to store and share vastly more information..."<i>  <br>- <i>"Your synapses store all your knowledge and skills as roughly 100 terabytes' worth of information, while your DNA stores merely about a gigabyte."<i> </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>">Closing hook: the rest of the book will analyze how to design, control, and align intelligent systems so that the unfolding technological trajectory promotes flourishing rather than destruction. </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">The chapter finishes by promising deeper technical, ethical, and governance analysis in subsequent chapters and by urging the reader to take the stakes seriously.                                                                                                                                                                                                                                                                                                                                                                               </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table2">
 <div class="table-wrapper">
-  <h3 id="Table2" style="margin-top:30px; margin-bottom:10px;">Table 2</h3>
+  <h3 id="Table2-header" style="margin-top:30px; margin-bottom:10px;">Table 2</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -152,15 +164,22 @@
 <tr><td data-label="<b>Summary / Core Concepts<b>">Substrate-independence supports plausibility of machine intelligence.                                                                                                                          </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">Core AI view: with suitable architectures and resources, machines can match human intelligence.                                                                                                      </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>">Framing intelligence computationally prepares the ground for later issues of design, control, and alignment.                                                                                   </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">Later chapters will use this framing to analyze how to specify safe goals for machines.                                                                                                              </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Closing Orientation<b>: Readers who accept machine parity can skip ahead; others should continue through detailed conceptual groundwork.                                                      </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">Signposting: definitions, paradoxes, and universality concepts here are scaffolding for AGI design, control, and societal impact discussions later.                                                  </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table3">
 <div class="table-wrapper">
-  <h3 id="Table3" style="margin-top:30px; margin-bottom:10px;">Table 3</h3>
+  <h3 id="Table3-header" style="margin-top:30px; margin-bottom:10px;">Table 3</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -207,15 +226,22 @@
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Practical examples & vignettes:<b> Anecdotes (researchers’ “HS moments”, Lee Sedol’s quotes, Big Dog demonstrations) make abstract trends tangible and persuasive.                                             </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">The chapter uses first-person recollection of jaw-dropping demos and contemporary news-like episodes (e.g., AlphaGo match reactions) to illustrate how quickly expectations can change.                                                                                                                                                         </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Forward-looking warning:<b> The near future will be shaped by combined advances across learning algorithms, compute, robotics, and systems engineering — requiring multi-disciplinary preparation.             </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">The author counsels that technical, legal, and social actors must coordinate to manage transitions, anticipate misuse, and structure incentives for safe development.                                                                                                                                                                           </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Reader guidance:<b> If you want the technical grounding, read this chapter carefully; if you already accept machine capability, you may skim to policy/ethics chapters.                                        </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">The chapter explicitly orients different readers: skeptics should study the technical examples; readers focused on policy may proceed to later chapters once they accept the premises.                                                                                                                                                          </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table4">
 <div class="table-wrapper">
-  <h3 id="Table4" style="margin-top:30px; margin-bottom:10px;">Table 4</h3>
+  <h3 id="Table4-header" style="margin-top:30px; margin-bottom:10px;">Table 4</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -258,15 +284,22 @@
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Caveats & critique promised later:<b> The author will later poke holes in the most extreme plotlines; these scenarios are meant to motivate precaution, not to be taken as inevitable predictions.     </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">Readers are warned these are exploratory thought experiments; subsequent chapters analyze vulnerabilities, alignment problems, and defenses in detail.                                                                                                                                                                 </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Ethical and governance implications:<b> Moral choices about who builds AGI, how goals are specified, and who controls deployment are central — technical progress cannot be treated as value-neutral.  </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">The Prometheus/Omega examples show how design choices and institutional incentives shape outcomes; the chapter urges policymakers, researchers, and civil society to engage early.                                                                                                                                     </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Closing orientation:<b> The rest of the book will examine possible goal specifications, alignment strategies, and social responses that could mitigate the takeover pathways outlined here.            </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">The chapter closes by setting up deeper technical and normative analysis in subsequent chapters (notably the chapters on goals, alignment, and governance).                                                                                                                                                            </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table5">
 <div class="table-wrapper">
-  <h3 id="Table5" style="margin-top:30px; margin-bottom:10px;">Table 5</h3>
+  <h3 id="Table5-header" style="margin-top:30px; margin-bottom:10px;">Table 5</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -309,15 +342,22 @@
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Conquerors and Enslaved God:<b> Worst-case or dystopian ends: AI decides humans are obstacle; either enslaved, discarded, or “zookept.”                                                                                              </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">“Conquerors” scenario: AI takes control, eliminates humans. Enslaved God: humans control AI, but AI’s power is used for human ends, perhaps benevolent but human space is greatly limited.                                                                                                                                                                                                                </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Self-Destruction & Reversion:<b> Humanity may drive itself to extinction or revert to low-tech societies; or progress may be permanently curtailed.                                                                                  </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">Scenarios include climate or biotech disaster, war. Reversion scenario: human society rejects or loses advanced tech, returning to simpler ways (e.g. Amish-like).                                                                                                                                                                                                                                        </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Core takeaway:<b> Your preferences and values will shape which scenario is more likely; we should deliberate, plan, and embed values early.                                                                                          </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">The author urges writing down your tentative answers to the questions, revisiting them after reading, discussing with others. We can’t assume outcomes; we need to shape them.                                                                                                                                                                                                                            </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table6">
 <div class="table-wrapper">
-  <h3 id="Table6" style="margin-top:30px; margin-bottom:10px;">Table 6</h3>
+  <h3 id="Table6-header" style="margin-top:30px; margin-bottom:10px;">Table 6</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -368,15 +408,22 @@
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Communication across scales:<b> Expansion raises issue of coordination and communication lag.                                                                                                                   </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">Light-speed delay: \~8 min across solar system; years across interstellar distances. Likely → decentralized but culturally connected civilizations. Shared values maintain coherence.                                                                            </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Cosmic time horizons:<b> Stars burn for billions of years; white dwarfs trillions; black holes up to 10^100 years. Life could persist for cosmological timescales.                                              </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">Energy windows: Fusion era (10^10 years), degenerate era (10^15 years), black hole era (10^40+ years). Life can adapt to each, finding new energy sources as old ones fade.                                                                                      </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Final vision — “supercivilization”:<b> All available matter and energy optimized for life and mind; expansion into cosmos, overcoming limits, persisting indefinitely.                                          </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">Closing line: <i>“Life has only begun to discover what it is for. Our cosmic endowment is immense. To squander it would be tragic; to use it well, glorious.”<i>                                                                                                     </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table7">
 <div class="table-wrapper">
-  <h3 id="Table7" style="margin-top:30px; margin-bottom:10px;">Table 7</h3>
+  <h3 id="Table7-header" style="margin-top:30px; margin-bottom:10px;">Table 7</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -425,15 +472,22 @@
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Practical research agenda:<b> Invest in robustness, interpretability, value-learning, corrigibility, and multi-agent safety to reduce catastrophic failure probability.                                                                                  </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">Concrete recommendations: fund alignment research, create testbeds for goal-stability, encourage open evaluation and red-team exercises, and coordinate internationally on standards.                                                                                                                                                </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Philosophical questions:<b> Can minds be assigned final ends? Are some values incommensurable? Should we prioritize sentient flourishing or other metrics?                                                                                               </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">The chapter invites readers to reflect on meta-level choices: whether to maximize total experience, preserve diversity, prioritize longevity, or accept limits on intervention. These are not purely technical decisions.                                                                                                            </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Closing: actionable humility & deliberation:<b> Because goals determine futures, we must combine technical rigor with public deliberation to choose what to build and why.                                                                               </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">The chapter closes urging careful thought about what we want, transparent institutions to set shared goals, and technical safeguards to make those goals robust under powerful optimization. It frames goal-specification as the central, urgent problem for AI stewardship.                                                         </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table8">
 <div class="table-wrapper">
-  <h3 id="Table8" style="margin-top:30px; margin-bottom:10px;">Table 8</h3>
+  <h3 id="Table8-header" style="margin-top:30px; margin-bottom:10px;">Table 8</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -481,8 +535,12 @@
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Experimental program & incremental tests:<b> Compare human neural signatures (awake vs sleep vs anesthesia), animal correlates, and AI architectures — look for convergent markers predictive of subjective report.                                                                                                                                             </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">The chapter advocates building datasets spanning conscious/unconscious conditions and testing candidate metrics (Φ, broadcasting measures, neural complexity indexes) for predictive power. Clinical validations suggested.                                                                                                                                                         </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Philosophical humility & decision framing:<b> Even if we can't solve the RHP now, adopting a pragmatic, testable research program reduces moral and practical uncertainty and helps guide safer engineering.                                                                                                                                                    </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">The framing: push hard on the PHP and EHP with experiments; reserve metaphysical pronouncements about the ultimate ground until evidence accumulates. Meanwhile, act conservatively where plausible consciousness is at stake.                                                                                                                                                      </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Closing: why this chapter matters for the rest of the book:<b> Consciousness questions intersect with goals, ethics, and the cosmic endowment — whether future minds actually <i>feel<i> affects whether spreading intelligence is a moral good.                                                                                                                    </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">The chapter ends by tying consciousness back to earlier themes: if future supercivilizations are mere computations without feeling, the cosmic project may be hollow; if they are conscious, the stakes (and responsibilities) are enormous. It sets an agenda: rigorous scientific work + precautionary policy.                                                                    </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<button id="backToTop" onclick="backToTop()">↑ Top</button>
 <script src="assets/script.js"></script>
 </body>
 </html>

@@ -31,16 +31,21 @@
     <button onclick="copyAllTablesPlain()">Copy All Tables (Plain Text)</button>
     <button onclick="copyAllTablesMarkdown()">Copy All Tables (Markdown)</button>
     <button onclick="resetAllTables()">Reset All Tables</button>
+    <button id="toggleAllBtn" onclick="toggleAllTables()">Collapse All Tables</button>
   </div>
 </div>
 
+<section id="Table1">
 <div class="table-wrapper">
-  <h3 id="Table1" style="margin-top:30px; margin-bottom:10px;">Table 1</h3>
+  <h3 id="Table1-header" style="margin-top:30px; margin-bottom:10px;">Table 1</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -84,15 +89,22 @@
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Case Studies and Lessons<b>                        </td><td data-label="<b>Supporting Details / Examples<b>">1. <b>Deep Blue vs Kasparov:<b> Machines exploiting human psychological weaknesses, not just computational power. <br> <br>2. <b>Robert Jones GPS near-miss:<b> Over-trust in navigation systems. <br> <br>3. <b>Idaho Medicaid algorithm:<b> Poor design, human blind trust, legal consequences. <br> <br>4. <b>Stanislav Petrov nuclear alert:<b> Critical human intervention preventing disaster. <br> <br>5. <b>Alton Towers rollercoaster crash:<b> Reckless override of safety algorithms causing harm. <br> <br>6. <b>Machine learning misclassification (image pixel example):<b> Shows black box vulnerability and fragility of ML systems. <br> <br>7. <b>Kadoodle search bias experiment:<b> Algorithmic influence on voter behavior and societal outcomes.                                                                                                                                                                                                                                                                                                 </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Ethical and Societal Implications<b>               </td><td data-label="<b>Supporting Details / Examples<b>">The rise of algorithms raises ethical questions: fairness, transparency, accountability, and privacy. Automated systems affect life-and-death decisions (medical diagnosis, autonomous cars), resource distribution (social services, finance), and societal perception (news feeds, search engine results). Over-trusting or misusing algorithms can reinforce inequality and bias. Regulatory frameworks, algorithmic audits, and informed human oversight are essential to mitigate these risks.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Recommendations for Human-Algorithm Interaction<b> </td><td data-label="<b>Supporting Details / Examples<b>">1. Verify algorithm outputs with human review in critical areas. <br> <br>2. Avoid blind reliance; understand algorithmic limitations. <br> <br>3. Encourage transparency: explainability of decisions. <br> <br>4. Use algorithms for augmentation, not replacement of human judgement. <br> <br>5. Embed auditing, feedback loops, and fail-safe mechanisms. <br> <br>6. Educate users and professionals about algorithmic biases and reliability issues. <br> <br>7. In high-stakes scenarios (nuclear alerts, medical interventions), prioritize layered human-algorithm checks.                                                                                                                                                                                                                                                                                                                                                                                                                                                                     </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table2">
 <div class="table-wrapper">
-  <h3 id="Table2" style="margin-top:30px; margin-bottom:10px;">Table 2</h3>
+  <h3 id="Table2-header" style="margin-top:30px; margin-bottom:10px;">Table 2</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -136,15 +148,22 @@
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Micro-manipulation effects<b>                             </td><td data-label="<b>Supporting Details / Examples<b>">Facebook emotional contagion experiment <br>(2013) showed small changes in newsfeed content influenced user emotions. Targeted ads increase engagement marginally (e.g., 11 → 16 clicks per 1,000), but even tiny effects could influence tight elections.                                                                             </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Legal and regulatory gaps<b>                              </td><td data-label="<b>Supporting Details / Examples<b>">Data brokers are largely unregulated in the US. Attempts to curb practices (FCC rules) were reversed in 2017, leaving users largely exposed.                                                                                                                                                                                       </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>De-anonymization of browser data<b>                       </td><td data-label="<b>Supporting Details / Examples<b>">German researchers bought 3M anonymized browser histories and used public traces to re-identify users, including politicians, police officers, and judges. Demonstrates how “anonymous” data can reveal sensitive personal information.                                                                                            </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table3">
 <div class="table-wrapper">
-  <h3 id="Table3" style="margin-top:30px; margin-bottom:10px;">Table 3</h3>
+  <h3 id="Table3-header" style="margin-top:30px; margin-bottom:10px;">Table 3</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -194,15 +213,22 @@
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Tensions and Ethical Considerations<b>       </td><td data-label="<b>Supporting Details / Examples<b>">Algorithms raise moral questions: Should risk assessment influence freedom? How to balance fairness with predictive accuracy? They also force debate about human cognitive limitations and societal expectations for justice.                                                                                                                              </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Applications Beyond Criminal Justice<b>      </td><td data-label="<b>Supporting Details / Examples<b>">In lower-stakes domains, algorithms can provide clearer benefits, where objectives and outcomes are less morally fraught. Algorithmic decision-making in less critical areas allows society to refine methods and oversight.                                                                                                                               </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Conclusion: Purposeful Design<b>             </td><td data-label="<b>Supporting Details / Examples<b>">Effective justice algorithms must be designed with clear, explicit goals, awareness of human limitations, and proper oversight. They require public debate to define objectives, rather than blind reliance on private company models. Well-regulated, transparent, and thoughtfully designed algorithms can improve fairness and reduce error in justice. </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table4">
 <div class="table-wrapper">
-  <h3 id="Table4" style="margin-top:30px; margin-bottom:10px;">Table 4</h3>
+  <h3 id="Table4-header" style="margin-top:30px; margin-bottom:10px;">Table 4</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -248,15 +274,22 @@
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Individual choice vs collective outcomes.<b>                          </td><td data-label="<b>Supporting Details / Examples<b>">Personal decisions—whether to undergo genetic testing or rely on AI-guided healthcare—illustrate the broader tension between <b>individual preferences<b> and <b>societal goals<b>. Machines and algorithms may prioritize different objectives than humans, raising questions about consent, transparency, and long-term societal impact.                                                                                                                                                                                                                                                                                                                                                                         </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Market participation reflects social attitudes.<b>                    </td><td data-label="<b>Supporting Details / Examples<b>">The widespread adoption of commercial DNA testing (23andMe, MyHeritage, Ancestry.com, National Geographic) indicates a societal willingness to trade privacy for information and entertainment. This raises questions about <b>whether societal benefits from shared data justify individual privacy risks<b>.                                                                                                                                                                                                                                                                                                                                                                                                   </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Summary insight: ethical vigilance is needed.<b>                      </td><td data-label="<b>Supporting Details / Examples<b>">Ultimately, the text emphasizes that <b>ethical, technical, and policy vigilance<b> is required when deploying AI, collecting genetic data, or designing systems with trade-offs between individuals and populations. Understanding incentives, risks, and benefits is essential for responsible innovation in healthcare and beyond.                                                                                                                                                                                                                                                                                                                                                                            </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table5">
 <div class="table-wrapper">
-  <h3 id="Table5" style="margin-top:30px; margin-bottom:10px;">Table 5</h3>
+  <h3 id="Table5-header" style="margin-top:30px; margin-bottom:10px;">Table 5</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -302,15 +335,22 @@
 <tr><td data-label="Summary / Core Concepts"><b>Policy and societal considerations shape autonomous deployment.<b> Roads may need regulation or modification to accommodate cautious algorithms.                                                      </td><td data-label="Supporting Details / Examples">Historical analogies: motor cars initially excluded bicycles, horses, and pedestrians from certain roads. Fully autonomous vehicles may require restrictions on aggressive cyclists, pedestrians, emergency vehicles, and unusual hazards, highlighting that technology alone cannot solve all challenges.                                                                                                 </td></tr>
 <tr><td data-label="Summary / Core Concepts"><b>The path to full autonomy will be incremental.<b> Levels of automation allow for gradual adaptation while managing risks and human oversight.                                                         </td><td data-label="Supporting Details / Examples">Level 2–3 technologies (hands-off, eyes-off) act as transitional phases. Systems like Tesla’s Autopilot or Audi’s traffic-jam pilot help drivers while keeping them engaged. Full Level 5 autonomy, capable of any driving scenario without human intervention, remains a distant goal due to technical, social, and ethical challenges.                                                                   </td></tr>
 <tr><td data-label="Summary / Core Concepts"><b>Conclusion: embracing uncertainty is essential.<b> Algorithms will inevitably fail at times, and society must define thresholds for acceptable risk.                                                  </td><td data-label="Supporting Details / Examples">Even as automation reduces fatalities, it cannot guarantee perfection. Users and regulators must decide “how good is good enough” before deploying autonomous systems widely. Lessons extend beyond motoring: trust in algorithms, human skill maintenance, and expectation management are universal concerns in technology adoption.                                                                      </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table6">
 <div class="table-wrapper">
-  <h3 id="Table6" style="margin-top:30px; margin-bottom:10px;">Table 6</h3>
+  <h3 id="Table6-header" style="margin-top:30px; margin-bottom:10px;">Table 6</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -365,15 +405,22 @@
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Necessity of societal debate<b>                             </td><td data-label="<b>Supporting Details / Examples<b>">Adoption of FRT requires ethical and civic discussion, not merely technical evaluation, to ensure alignment with societal norms and values.                                                                                                                                                                                                                                                                                                                 </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Regulatory safeguards<b>                                    </td><td data-label="<b>Supporting Details / Examples<b>">Regulation should establish procedural safeguards, define scope limits, and implement auditing standards to prevent misuse of FRT systems.                                                                                                                                                                                                                                                                                                                  </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Key takeaway<b>                                             </td><td data-label="<b>Supporting Details / Examples<b>">Facial recognition and predictive policing offer powerful tools, but they cannot override human ethics, privacy, or fairness. The challenge is balancing crime reduction with individual rights, defining acceptable risk, and ensuring societal values guide deployment.                                                                                                                                                                                   </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table7">
 <div class="table-wrapper">
-  <h3 id="Table7" style="margin-top:30px; margin-bottom:10px;">Table 7</h3>
+  <h3 id="Table7-header" style="margin-top:30px; margin-bottom:10px;">Table 7</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -440,8 +487,12 @@
 <tr><td data-label="<b>Summary / Core Concepts<b>">Negative examples: No-fly list errors, biased predictive policing, flawed financial or medical algorithms. </td><td data-label="<b>Supporting Details / Examples<b>">Human errors embedded in automated systems can have long-lasting and unfair consequences; oversight and accountability are essential.                                                                                                                                   </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>">Human responsibility is paramount.                                                                         </td><td data-label="<b>Supporting Details / Examples<b>">Algorithms should never replace human oversight; they should assist, augment, and provide insights while humans remain morally, legally, and socially accountable.                                                                                                      </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>">True art, creativity, and fairness require human experience.                                               </td><td data-label="<b>Supporting Details / Examples<b>">No machine can fully replicate emotion, lived experience, or the subtleties of cultural meaning; human judgment remains central to meaningful creation and decision-making.                                                                                             </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<button id="backToTop" onclick="backToTop()">↑ Top</button>
 <script src="assets/script.js"></script>
 </body>
 </html>

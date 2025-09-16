@@ -33,16 +33,21 @@
     <button onclick="copyAllTablesPlain()">Copy All Tables (Plain Text)</button>
     <button onclick="copyAllTablesMarkdown()">Copy All Tables (Markdown)</button>
     <button onclick="resetAllTables()">Reset All Tables</button>
+    <button id="toggleAllBtn" onclick="toggleAllTables()">Collapse All Tables</button>
   </div>
 </div>
 
+<section id="Table1">
 <div class="table-wrapper">
-  <h3 id="Table1" style="margin-top:30px; margin-bottom:10px;">Table 1</h3>
+  <h3 id="Table1-header" style="margin-top:30px; margin-bottom:10px;">Table 1</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -88,15 +93,22 @@
 <tr><td data-label="<b>Summary<b>"><b>Philosophical dimensions of AI raise questions about intelligence and consciousness.<b> </td><td data-label="<b>Notes<b>">AI raises questions about intelligence and consciousness. By performing intelligent-seeming tasks without awareness, AI challenges assumptions about thinking and understanding, bridging technology and philosophy.                                                                                                                                          </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Early ethical considerations highlighted the impact of AI on society.<b>                </td><td data-label="<b>Notes<b>">Even early AI deployments raised ethical issues: automation impacts, trust in machine decisions, and fairness. Awareness of these implications informs guidelines for responsible AI design.                                                                                                                                                                  </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Chapter 1 summary emphasizes AI’s evolution and its implications.<b>                    </td><td data-label="<b>Notes<b>">AI’s evolution from mechanical curiosities to deep learning systems demonstrates both potential and limitations. Key concepts include symbolic AI, neural networks, Transformers, and RLHF. AI is an “alien mind” that simulates intelligence without consciousness, setting the stage for later chapters on capabilities, risks, and human-AI collaboration. </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table2">
 <div class="table-wrapper">
-  <h3 id="Table2" style="margin-top:30px; margin-bottom:10px;">Table 2</h3>
+  <h3 id="Table2-header" style="margin-top:30px; margin-bottom:10px;">Table 2</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -142,15 +154,22 @@
 <tr><td data-label="<b>Summary<b>"><b>Ethical and societal considerations are integral to alignment.<b>                                                  </td><td data-label="<b>Notes<b>">Beyond technical methods, alignment involves evaluating the societal impact of AI deployment. Issues include fairness, bias, transparency, privacy, and accountability. Alignment strategies must embed ethical reasoning and respect for human rights into both design and operational phases.                                                                                                                                                                                                   </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Case studies illustrate alignment challenges and successes.<b>                                                     </td><td data-label="<b>Notes<b>">Examples from content moderation, recommendation systems, and autonomous agents show the consequences of misalignment and the effectiveness of mitigation strategies. For instance, RLHF fine-tuning can reduce toxic outputs in chatbots, while poorly specified reward functions in recommendation systems can promote harmful content.                                                                                                                                                         </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Chapter 2 Summary / Key Takeaways<b>                                                                               </td><td data-label="<b>Notes<b>">Aligning AI with human intentions is critical for safety and usefulness. Core challenges include the complexity of human values, specification ambiguities, scalable oversight, interpretability, robustness, incentive design, and ethical considerations. Techniques like RLHF, debate, amplification, and human-in-the-loop evaluation improve alignment. Multi-disciplinary collaboration and forward-looking design are essential to manage risks as AI systems become increasingly capable. </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table3">
 <div class="table-wrapper">
-  <h3 id="Table3" style="margin-top:30px; margin-bottom:10px;">Table 3</h3>
+  <h3 id="Table3-header" style="margin-top:30px; margin-bottom:10px;">Table 3</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -194,15 +213,22 @@
 <tr><td data-label="<b>Summary<b>"><b>Challenges in co-intelligence include conflict and coordination complexity.<b>     </td><td data-label="<b>Notes<b>">Diverse perspectives can generate tension, miscommunication, and slower decision-making. Effective facilitation, clear norms, and iterative processes mitigate these risks. Recognizing conflict as an opportunity for learning rather than a barrier enhances group effectiveness.                                                                                                                                                                                                   </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Applications of co-intelligence extend to organizations and society.<b>            </td><td data-label="<b>Notes<b>">Co-intelligence principles apply to corporate strategy, community problem-solving, scientific research, and governance. For instance, multi-stakeholder collaborations in urban planning or environmental policy benefit from structured dialogue, iterative testing, and inclusive participation.                                                                                                                                                                                    </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Chapter 3 Summary / Key Takeaways<b>                                               </td><td data-label="<b>Notes<b>">Co-intelligence leverages group capacity to solve complex problems collaboratively. The Four Rules — inclusive participation, listen first/speak last, attention to context and relationships, and testing ideas — provide a framework for effective collective thinking. Supplementary practices include diversity, psychological safety, iterative learning, facilitative leadership, and structured tools, all of which strengthen group intelligence and improve decision-making. </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table4">
 <div class="table-wrapper">
-  <h3 id="Table4" style="margin-top:30px; margin-bottom:10px;">Table 4</h3>
+  <h3 id="Table4-header" style="margin-top:30px; margin-bottom:10px;">Table 4</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -245,15 +271,22 @@
 <tr><td data-label="<b>Summary<b>"><b>Design principles for personified AI include transparency, predictability, and ethical framing.<b> </td><td data-label="<b>Notes<b>">Transparency involves explaining how decisions are made. Predictability ensures consistency and minimizes surprise behaviors. Ethical framing emphasizes human oversight, fairness, and safety. Together, these principles guide the responsible development of personified AI systems.                                                                                                                                                                                                                                  </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Challenges include overreliance and misinterpretation.<b>                                          </td><td data-label="<b>Notes<b>">Users may over-trust AI due to anthropomorphic cues, leading to errors, misuse, or neglect of critical evaluation. Education, interface design, and clear communication about AI’s capabilities and limitations are essential to mitigate these risks.                                                                                                                                                                                                                                                                   </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Chapter 4 Summary / Key Takeaways<b>                                                               </td><td data-label="<b>Notes<b>">Treating AI as a “person” is a powerful conceptual tool that aids interaction, design, and alignment. Benefits include improved trust, engagement, and predictability, while risks involve overestimation of capabilities and ethical misperceptions. Maintaining clarity that AI is non-conscious, statistical, and human-directed is essential. Design principles of transparency, predictability, and ethical oversight ensure that personification enhances usability without compromising safety or responsibility. </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table5">
 <div class="table-wrapper">
-  <h3 id="Table5" style="margin-top:30px; margin-bottom:10px;">Table 5</h3>
+  <h3 id="Table5-header" style="margin-top:30px; margin-bottom:10px;">Table 5</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -296,15 +329,22 @@
 <tr><td data-label="<b>Summary<b>"><b>Evaluation of AI creativity involves novelty, quality, and relevance.<b>            </td><td data-label="<b>Notes<b>">Assessing AI outputs requires considering originality, coherence, aesthetic or functional quality, and contextual appropriateness. Human judgment is critical in interpreting and selecting AI-generated works, ensuring that creativity serves meaningful goals rather than superficial novelty.                                                                                                                                                                                                         </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>AI fosters exploration beyond human cognitive limits.<b>                            </td><td data-label="<b>Notes<b>">AI can analyze vast datasets, identify non-obvious patterns, and generate options beyond typical human intuition. This capability allows humans to explore previously inaccessible creative spaces, discover unexpected connections, and innovate more efficiently.                                                                                                                                                                                                                                       </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Chapter 5 Summary / Key Takeaways<b>                                                </td><td data-label="<b>Notes<b>">AI demonstrates a unique form of creativity by recombining patterns and knowledge. Human-AI collaboration amplifies creative potential, but AI creativity is constrained by training data and algorithms. Iterative experimentation, ethical consideration, style flexibility, and evaluation frameworks are essential for meaningful AI-assisted innovation. AI creativity democratizes access while challenging traditional notions of authorship, expanding both human imagination and creative reach. </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table6">
 <div class="table-wrapper">
-  <h3 id="Table6" style="margin-top:30px; margin-bottom:10px;">Table 6</h3>
+  <h3 id="Table6-header" style="margin-top:30px; margin-bottom:10px;">Table 6</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -346,15 +386,22 @@
 <tr><td data-label="<b>Summary<b>"><b>Conflict resolution and error management are essential.<b>                </td><td data-label="<b>Notes<b>">Mistakes or unexpected AI outputs can disrupt workflows. Establishing protocols for identifying, reporting, and correcting errors maintains trust and minimizes impact. Encouraging human judgment and oversight prevents AI from introducing compounding errors.                                                                                                                                  </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Measuring success in human-AI teams requires clear metrics.<b>            </td><td data-label="<b>Notes<b>">Evaluating collaboration effectiveness involves productivity, accuracy, creativity, and satisfaction metrics. Tracking how well AI supports human objectives, enhances decision quality, and integrates smoothly into workflows informs continuous improvement.                                                                                                                                    </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Chapter 6 Summary / Key Takeaways<b>                                      </td><td data-label="<b>Notes<b>">Treating AI as a coworker promotes effective human-AI collaboration, leveraging complementary strengths. Key factors include role clarity, trust, communication, mutual learning, ethical considerations, context adaptation, error management, and performance measurement. This approach ensures that AI augments human capabilities while maintaining safety, accountability, and productivity. </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table7">
 <div class="table-wrapper">
-  <h3 id="Table7" style="margin-top:30px; margin-bottom:10px;">Table 7</h3>
+  <h3 id="Table7-header" style="margin-top:30px; margin-bottom:10px;">Table 7</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -396,15 +443,22 @@
 <tr><td data-label="<b>Summary<b>"><b>AI complements rather than replaces human educators.<b>                               </td><td data-label="<b>Notes<b>">While AI tutors provide personalized support and scalable feedback, human teachers remain essential for mentorship, motivation, social-emotional learning, and complex judgment calls. The combination of human guidance and AI personalization maximizes educational outcomes.                                                                                                                  </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Applications span diverse educational contexts.<b>                                    </td><td data-label="<b>Notes<b>">From K-12 classrooms to higher education and corporate training, AI tutors provide scalable, individualized learning experiences. Use cases include language learning, STEM education, professional skill development, and exam preparation.                                                                                                                                                     </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Chapter 7 Summary / Key Takeaways<b>                                                  </td><td data-label="<b>Notes<b>">AI as a tutor offers personalized, adaptive, and data-driven instruction, enhancing engagement, comprehension, and skill acquisition. Key features include real-time feedback, scaffolding, adaptive testing, and metacognitive support. Ethical implementation, privacy protection, and human teacher collaboration are essential to maximize learning outcomes while ensuring responsible use. </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table8">
 <div class="table-wrapper">
-  <h3 id="Table8" style="margin-top:30px; margin-bottom:10px;">Table 8</h3>
+  <h3 id="Table8-header" style="margin-top:30px; margin-bottom:10px;">Table 8</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -445,15 +499,22 @@
 <tr><td data-label="<b>Summary<b>"><b>AI complements human coaches rather than replacing them.<b>                    </td><td data-label="<b>Notes<b>">While AI offers data-driven insights, real-time feedback, and scalable support, human coaches provide empathy, judgment, and nuanced understanding of context. Collaboration between human and AI coaches maximizes effectiveness.                                                                                                                                       </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Applications span sports, corporate training, and personal development.<b>     </td><td data-label="<b>Notes<b>">AI coaching can optimize athletic performance, enhance workplace productivity, support leadership development, and foster self-improvement. By providing individualized guidance at scale, AI extends coaching opportunities beyond traditional limitations.                                                                                                             </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Chapter 8 Summary / Key Takeaways<b>                                           </td><td data-label="<b>Notes<b>">AI as a coach provides personalized, real-time, and data-informed guidance to improve performance. Key elements include feedback, goal tracking, behavioral analysis, motivation, and ethical use. AI complements human coaches, enhancing skill development and engagement across diverse domains, while ensuring privacy, accountability, and responsible application. </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table9">
 <div class="table-wrapper">
-  <h3 id="Table9" style="margin-top:30px; margin-bottom:10px;">Table 9</h3>
+  <h3 id="Table9-header" style="margin-top:30px; margin-bottom:10px;">Table 9</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -494,8 +555,12 @@
 <tr><td data-label="<b>Summary<b>"><b>Global cooperation and cross-disciplinary engagement are essential.<b>          </td><td data-label="<b>Notes<b>">AI challenges transcend national and sectoral boundaries. International collaboration, interdisciplinary research, and knowledge sharing are necessary to address risks, standardize best practices, and harness AI for global benefit.                                                                                                                        </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Human-AI alignment ensures meaningful outcomes.<b>                              </td><td data-label="<b>Notes<b>">Ensuring that AI supports human values, goals, and well-being is critical. Alignment involves designing systems that enhance human capabilities, preserve autonomy, and reflect ethical principles, mitigating unintended consequences.                                                                                                                        </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Chapter 9 Summary / Key Takeaways<b>                                            </td><td data-label="<b>Notes<b>">AI’s future is defined by collaboration, ethical integration, education, creativity, and governance. Humans and AI together can achieve unprecedented problem-solving and innovation. Success depends on preparedness, adaptability, responsible policy, global cooperation, and alignment of AI with human values to create a sustainable, beneficial future. </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<button id="backToTop" onclick="backToTop()">↑ Top</button>
 <script src="assets/script.js"></script>
 </body>
 </html>

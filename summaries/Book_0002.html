@@ -34,16 +34,21 @@
     <button onclick="copyAllTablesPlain()">Copy All Tables (Plain Text)</button>
     <button onclick="copyAllTablesMarkdown()">Copy All Tables (Markdown)</button>
     <button onclick="resetAllTables()">Reset All Tables</button>
+    <button id="toggleAllBtn" onclick="toggleAllTables()">Collapse All Tables</button>
   </div>
 </div>
 
+<section id="Table1">
 <div class="table-wrapper">
-  <h3 id="Table1" style="margin-top:30px; margin-bottom:10px;">Table 1</h3>
+  <h3 id="Table1-header" style="margin-top:30px; margin-bottom:10px;">Table 1</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -88,15 +93,22 @@
 <tr><td data-label="<b>Summary<b>"><b>Checklist for Effective Prompting<b> </td><td data-label="Notes">- ✅ Give clear direction (purpose, audience, role)<br>- ✅ Specify format (list, table, JSON, essay)<br>- ✅ Provide examples (few-shot or single-shot)<br>- ✅ Evaluate quality (correctness, relevance, style)<br>- ✅ Divide labor (multi-step, modular tasks)<br>- ✅ Balance token usage (long enough for clarity, concise enough for efficiency)<br>- ✅ Iterate and refine prompts regularly                                                         </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Common Pitfalls<b>                   </td><td data-label="Notes">- Overly vague prompts → unpredictable outputs.<br>- Overly long prompts → confusion or wasted tokens.<br>- Lack of examples → inconsistent tone/style.<br>- Ignoring evaluation → repeated errors.<br>- Single-step complex tasks → incomplete or inaccurate outputs.                                                                                                                                                                                </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Key Takeaways / Summary<b>           </td><td data-label="Notes">The Five Principles—Direction, Format, Examples, Evaluation, Divide Labor—maximize AI output quality. Applying them to text, code, and images yields predictable, high-quality results. Iteration and refinement are integral. Small changes in wording, structure, or examples can drastically alter outcomes. Mastery of prompt engineering increases efficiency, reduces costs, and expands creative possibilities.                                </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table2">
 <div class="table-wrapper">
-  <h3 id="Table2" style="margin-top:30px; margin-bottom:10px;">Table 2</h3>
+  <h3 id="Table2-header" style="margin-top:30px; margin-bottom:10px;">Table 2</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -139,15 +151,22 @@
 <tr><td data-label="<b>Summary<b>"><b>Prompt Engineering for LLMs<b>                  </td><td data-label="Notes">Effective prompts improve performance. Prompts specify task, format, style, or examples. Multi-step prompts handle complex tasks. Example: “Summarize in 5 bullets, highlight stats, conclude in 1 sentence.” Good prompts reduce hallucinations and improve relevance.                                                    </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Evaluation of Generated Text<b>                 </td><td data-label="Notes">Outputs checked for:  <br>- Accuracy (facts).  <br>- Coherence (logical flow).  <br>- Relevance (aligned with prompt).  <br>- Style/Format (tone, structure). Example: Summaries must keep key points, stats, and structure.                                                                                                               </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Future Trends<b>                                </td><td data-label="Notes">Advances:  <br>- Larger models → more accuracy.  <br>- Multimodal: text, image, audio.  <br>- Better alignment: fewer hallucinations, safer outputs.  <br>- Efficiency: lower compute cost. Example: Future LLMs may generate reports with diagrams/tables from raw data.                                                                  </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table3">
 <div class="table-wrapper">
-  <h3 id="Table3" style="margin-top:30px; margin-bottom:10px;">Table 3</h3>
+  <h3 id="Table3-header" style="margin-top:30px; margin-bottom:10px;">Table 3</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -191,15 +210,22 @@
 <tr><td data-label="<b>Summary<b>"><b>Applications of Standard Practices<b>     </td><td data-label="Notes">- Content creation: articles, blogs, marketing copy. <br>- Summarization: reports, research papers, meeting notes. <br>- Code generation: scripts, queries, debugging assistance. <br>- Educational tools: exercises, explanations, tutorials. <br>Example: A prompt guiding ChatGPT to create a lesson plan can specify objectives, duration, activities, and learning outcomes for clear, actionable outputs.                                   </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Common Pitfalls to Avoid<b>               </td><td data-label="Notes">- Vague or under-specified prompts → unpredictable outputs. <br>- Ignoring output format → additional editing needed. <br>- Skipping iterative refinement → errors propagate. <br>- Attempting complex tasks in a single step → reduced accuracy. <br>- Not providing examples when style or tone matters → inconsistency.                                                                                                                        </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Key Takeaways / Summary<b>                </td><td data-label="Notes">Applying standard practices ensures high-quality, reliable, and contextually accurate text generation with ChatGPT. Explicit prompts, examples, output format, stepwise decomposition, iterative refinement, and careful evaluation form the foundation. Following these practices reduces errors, improves relevance, and enables the model to produce outputs that are ready for practical use across text, code, and educational applications. </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table4">
 <div class="table-wrapper">
-  <h3 id="Table4" style="margin-top:30px; margin-bottom:10px;">Table 4</h3>
+  <h3 id="Table4-header" style="margin-top:30px; margin-bottom:10px;">Table 4</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -242,15 +268,22 @@
 <tr><td data-label="<b>Summary<b>"><b>Error Handling and Robustness<b>                 </td><td data-label="Notes">- Validate inputs before LLM calls. <br>- Handle API or tool failures gracefully. <br>- Include fallback responses when LLM output is inadequate. <br>Example: If a tool fails to return data, generate a default summary indicating missing information.                                                                                                                                                                            </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Applications of Advanced LangChain Techniques<b> </td><td data-label="Notes">- Intelligent chatbots with memory and tool integration. <br>- Automated research assistants fetching and summarizing documents. <br>- Multi-step content generation pipelines (e.g., summarize, translate, format). <br>- Decision-making agents for business, finance, or analytics. <br>Example: An educational assistant generating stepwise explanations with citations and examples for students.                              </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Key Takeaways / Summary<b>                       </td><td data-label="Notes">LangChain extends LLM capabilities through structured chaining, memory, agents, tool integration, and retrieval mechanisms. Applying these advanced techniques allows developers to build robust, multi-step, context-aware applications that combine reasoning, external knowledge, and dynamic workflows. Iterative design, logging, and testing are essential for high-quality outputs.                                           </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table5">
 <div class="table-wrapper">
-  <h3 id="Table5" style="margin-top:30px; margin-bottom:10px;">Table 5</h3>
+  <h3 id="Table5-header" style="margin-top:30px; margin-bottom:10px;">Table 5</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -293,15 +326,22 @@
 <tr><td data-label="<b>Summary<b>"><b>Scaling and Performance<b>             </td><td data-label="<b>Notes<b>">FAISS and Pinecone handle scaling differently:<br>- FAISS: GPU acceleration, sharding, and optimized indexing for very large datasets.<br>- Pinecone: Auto-scaling, managed replication, multi-region deployment.<br>Consider latency vs throughput trade-offs, and select index types and configurations that match your workflow.<br>Example: Sharding FAISS across 4 GPUs to manage 100M embeddings, ensuring sub-second query time.                                                                                                                                                                                                                                                          </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Applications of Vector Databases<b>    </td><td data-label="<b>Notes<b>">- Semantic search: e.g., finding similar documents or FAQs.<br>- RAG pipelines: supplying relevant context to LLMs.<br>- Recommendation systems: content-based or hybrid recommendations.<br>- Clustering and deduplication: grouping similar items.<br>- Image/video similarity search: embeddings for multimedia data.<br>Example: A support chatbot retrieves top-5 relevant answers from a large FAQ database based on semantic similarity rather than exact keyword matching.                                                                                                                                                                                                               </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Key Takeaways / Summary<b>             </td><td data-label="<b>Notes<b>">Vector databases are critical for modern LLM workflows, enabling efficient similarity search and context-aware retrieval. FAISS provides high-performance local indexing, while Pinecone offers scalable cloud-based solutions. Effective embedding generation, indexing, querying, and integration with LangChain ensures robust, accurate, and scalable text generation pipelines. Following best practices guarantees high performance, maintainability, and quality outputs.                                                                                                                                                                                                                 </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table6">
 <div class="table-wrapper">
-  <h3 id="Table6" style="margin-top:30px; margin-bottom:10px;">Table 6</h3>
+  <h3 id="Table6-header" style="margin-top:30px; margin-bottom:10px;">Table 6</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -344,15 +384,22 @@
 <tr><td data-label="<b>Summary<b>"><b>Safety, Logging, and Feedback<b>     </td><td data-label="<b>Notes<b>">Agents must include monitoring and safety mechanisms:<br>- Log all observations, thoughts, actions, and results.<br>- Use feedback or rewards to refine reasoning and action selection.<br>- Handle errors gracefully (tool failures, API errors).<br>Example: If a tool fails, agent logs failure, chooses alternate action, and updates memory with outcome.                                                                                                                                                                                                                                                                                                                                                                                                </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Applications of Autonomous Agents<b> </td><td data-label="<b>Notes<b>">- Customer support chatbots capable of multi-turn problem solving.<br>- Research assistants retrieving, summarizing, and cross-referencing documents.<br>- Workflow automation, e.g., scheduling, monitoring, or data extraction.<br>- Multi-modal agents combining text, images, and API-based reasoning.<br>Example: A medical research agent queries databases, extracts relevant studies, summarizes key points, and outputs an integrated report for the user.                                                                                                                                                                                                                                                                                           </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Key Takeaways / Summary<b>           </td><td data-label="<b>Notes<b>">Autonomous agents with memory and tools extend LLM capabilities by enabling multi-step reasoning, action execution, and dynamic task management. Memory allows agents to maintain context, while tools provide external interaction and functional augmentation. The ReAct framework structures reasoning and actions in a loop, ensuring clarity and traceability. Proper design, logging, and error handling make agents reliable, scalable, and safe for complex workflows. Integrating agents with LangChain, vector databases, and custom APIs enables powerful, context-aware, autonomous text generation and task execution.                                                                                                                           </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table7">
 <div class="table-wrapper">
-  <h3 id="Table7" style="margin-top:30px; margin-bottom:10px;">Table 7</h3>
+  <h3 id="Table7-header" style="margin-top:30px; margin-bottom:10px;">Table 7</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -397,15 +444,22 @@
 <tr><td data-label="<b>Summary<b>"><b>Community Models and Versions<b>       </td><td data-label="Notes">MidJourney evolves with versions and community models. Versions differ in realism vs. stylization. Example: V5 = realism and high detail, earlier = more stylized.                                                                                                                   </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Applications of MidJourney<b>          </td><td data-label="Notes">Use cases: concept art, marketing visuals, storyboarding, game prototyping, education, creative exploration. Example: rapid mood boards without manual rendering.                                                                                                                    </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Key Takeaways / Summary<b>             </td><td data-label="Notes">Success with MidJourney = structured prompts, parameter control, iterative refinement. Core practices: prompt clarity, weighting, style/ratio guidance, seed reproducibility, variations/upscaling. Enables reproducible, high-quality, stylistically coherent images.               </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table8">
 <div class="table-wrapper">
-  <h3 id="Table8" style="margin-top:30px; margin-bottom:10px;">Table 8</h3>
+  <h3 id="Table8-header" style="margin-top:30px; margin-bottom:10px;">Table 8</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -450,15 +504,22 @@
 <tr><td data-label="<b>Summary<b>"><b>Safety and Filtering Controls<b>           </td><td data-label="Notes">Some builds include NSFW/harmful-content filters: <br>- Ensures responsible generation. <br>- Filters can be adjusted/disabled locally with caution. <br>- Important for research or curated artistic workflows.                                                                                                                                                                                                                         </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Applications of Stable Diffusion<b>        </td><td data-label="Notes">Use cases: <br>- Concept art, illustration, visual storytelling. <br>- Game asset generation and prototyping. <br>- Scientific visualization and educational imagery. <br>- Personalized marketing or social media content. <br>Example: Artist generates a fantasy world map → refines characters, landscapes, and lighting for game assets.                                                                                            </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Key Takeaways / Summary<b>                 </td><td data-label="Notes">Stable Diffusion is flexible and powerful for text→image generation. Best practices: <br>- Structured prompt engineering (style + content clarity). <br>- Control generation params (`steps`, `CFG`, `seed`). <br>- Use latent manipulation, img2img, inpainting, outpainting. <br>- Fine-tune with LoRA/DreamBooth for specific styles. <br>- Iterate, upscale, and apply responsible filtering for high-quality, reproducible outputs. </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table9">
 <div class="table-wrapper">
-  <h3 id="Table9" style="margin-top:30px; margin-bottom:10px;">Table 9</h3>
+  <h3 id="Table9-header" style="margin-top:30px; margin-bottom:10px;">Table 9</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -504,15 +565,22 @@
 <tr><td data-label="<b>Summary<b>"><b>Scalability and Optimization<b>            </td><td data-label="Notes">Optimization tactics: <br>- Batch requests for GPU efficiency. <br>- Use mixed precision or quantization for faster inference. <br>- Horizontally scale with microservices. <br>Example: Convert model weights to 8-bit quantization to reduce memory and inference time.                                                                                                                           </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>User Experience and Feedback Loops<b>      </td><td data-label="Notes">UX-focused practices: <br>- Log user interactions to fine-tune prompts/models. <br>- Provide fallback responses for errors. <br>- Iterate UX based on analytics. <br>Example: Retrain on misunderstood queries logged by chatbot to improve quality.                                                                                                                                                </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Key Takeaways / Summary<b>                 </td><td data-label="Notes">Building AI apps combines software engineering, ML, and user-centered design. Best practices: <br>- Clear frontend/backend/model/data architecture. <br>- Proper preprocessing, model selection, and integration. <br>- Use vector DBs, agents, and orchestration for intelligence. <br>- Emphasize testing, deployment, monitoring, optimization, and compliance for robust, maintainable systems. </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table10">
 <div class="table-wrapper">
-  <h3 id="Table10" style="margin-top:30px; margin-bottom:10px;">Table 10</h3>
+  <h3 id="Table10-header" style="margin-top:30px; margin-bottom:10px;">Table 10</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -558,8 +626,12 @@
 <tr><td data-label="<b>Summary<b>"><b>Scalability and Optimization<b>            </td><td data-label="<b>Notes<b>">Optimize for cost and performance:<br>- Batch requests for GPU efficiency.<br>- Use mixed precision or quantization for faster inference.<br>- Horizontal scaling with microservices.<br>Example: Convert LLM weights to 8-bit quantization → reduce memory usage and inference time without major accuracy loss.                                                                                                                                                                                                                                                                                                                                                            </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>User Experience and Feedback Loops<b>      </td><td data-label="<b>Notes<b>">A well-designed AI app requires iterative feedback:<br>- Collect user interactions → fine-tune prompts or models.<br>- Implement fallback responses for errors or unexpected outputs.<br>- Continuously improve UX based on analytics.<br>Example: Chatbot logs misunderstood queries → retrain model with additional examples → improve response quality.                                                                                                                                                                                                                                                                                                                   </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Key Takeaways / Summary<b>                 </td><td data-label="<b>Notes<b>">Building AI-powered applications combines software engineering, ML modeling, and user-centric design.<br>Best practices include:<br>- Clear architecture with frontend, backend, model, and data layers.<br>- Proper data preprocessing, model selection, and integration.<br>- Use vector databases, autonomous agents, and workflows for intelligent applications.<br>- Testing, deployment, monitoring, and optimization ensure robustness.<br>- Ethical, privacy, and compliance considerations guide responsible AI deployment.<br>Following these principles allows creation of scalable, maintainable, and intelligent AI applications suitable for real-world usage. </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<button id="backToTop" onclick="backToTop()">↑ Top</button>
 <script src="assets/script.js"></script>
 </body>
 </html>

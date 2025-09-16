@@ -32,16 +32,21 @@
     <button onclick="copyAllTablesPlain()">Copy All Tables (Plain Text)</button>
     <button onclick="copyAllTablesMarkdown()">Copy All Tables (Markdown)</button>
     <button onclick="resetAllTables()">Reset All Tables</button>
+    <button id="toggleAllBtn" onclick="toggleAllTables()">Collapse All Tables</button>
   </div>
 </div>
 
+<section id="Table1">
 <div class="table-wrapper">
-  <h3 id="Table1" style="margin-top:30px; margin-bottom:10px;">Table 1</h3>
+  <h3 id="Table1-header" style="margin-top:30px; margin-bottom:10px;">Table 1</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -91,15 +96,22 @@
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Future trajectory<b> — Recursive self-improvement possible: ML used to improve ML itself.                                                                                   </td><td data-label="<b>Supporting Details / Quotes / Examples<b>"><i>“When learning systems are deployed to discover new learning systems, progress can accelerate beyond human comprehension.”<i> Anticipated effects: AI developing new scientific theories, automating engineering, designing new drugs.                                                                                             </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Governance needed<b> — Ethical and policy challenges require foresight.                                                                                                     </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">Risks include job displacement, algorithmic discrimination, runaway financial trading, autonomous weapons. Recommendations: regulation, transparency, audit trails, algorithmic accountability.                                                                                                                                   </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Broader reflection<b> — ML is not just another technology; it is a meta-technology, automating the creation of new technologies.                                            </td><td data-label="<b>Supporting Details / Quotes / Examples<b>"><i>“Machine learning is a general-purpose method of invention. To control it wisely may be the most important governance challenge of our era.”<i>                                                                                                                                                                                    </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table2">
 <div class="table-wrapper">
-  <h3 id="Table2" style="margin-top:30px; margin-bottom:10px;">Table 2</h3>
+  <h3 id="Table2-header" style="margin-top:30px; margin-bottom:10px;">Table 2</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -147,15 +159,22 @@
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Philosophical & practical implications if the Master Algorithm is realized:<b>                                                                                                                                                                                                        </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">Inventing it would be a watershed: “the last thing we’ll have to invent” in the sense that it could then discover remaining inventions by learning from data. Given a universal learner, providing the right data could generate vision, language, physics, and biology knowledge—the book frames this as the route to sweeping automation of scientific and engineering discovery.                                                                                                                                                                                                                                                         </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Caveats & humility:<b>                                                                                                                                                                                                                                                                </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">The chapter stresses caution: the brain is messy, evolution is slow, and there are computational constraints. The Master Algorithm is a strong hypothesis, not a proven theorem. Practical realization could be centuries away or take unexpected hybrid forms; yet the hypothesis is valuable as a unifying research target.                                                                                                                                                                                                                                                                                                               </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Closing: the road map for the book<b>                                                                                                                                                                                                                                                 </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">The remainder of the book explores the five tribes of machine learning (symbolists, connectionists, evolutionaries, Bayesians, analogizers), evaluates their inductive biases and strengths, and searches for a synthesis that could realize the Master Algorithm. The chapter ends by inviting the reader to examine the evidence, hold an open mind, and consider both engineering and philosophical consequences.                                                                                                                                                                                                                        </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table3">
 <div class="table-wrapper">
-  <h3 id="Table3" style="margin-top:30px; margin-bottom:10px;">Table 3</h3>
+  <h3 id="Table3-header" style="margin-top:30px; margin-bottom:10px;">Table 3</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -203,15 +222,22 @@
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Transition to symbolism vs other tribes:<b> With Hume’s problem and the impossibility of bias-free learning established, the chapter frames the rest of the book as a tour through how different traditions encode different useful biases. </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">Each tribe contributes a distinct “philosopher’s stone” for converting data to knowledge: symbolists hand author rules, connectionists learn distributed representations, Bayesians encode priors, evolutionaries exploit search, and analogizers use similarity. Combining their strengths is the programmatic goal.                                                                                </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Engineering takeaway:<b> When building systems, be explicit about what you assume and why; perform stress tests under distributional shifts and adversarial conditions; prefer models whose biases you can explain or justify.              </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">Practical recommendations: document inductive assumptions, test on holdout environments that differ from training distributions, and maintain human oversight for high-stakes decisions—because theoretical guarantees don’t save you in the wrong world.                                                                                                                                            </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Closing: hope despite Hume — learning is possible because the world is not an adversarial anti-world.<b>                                                                                                                                    </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">The chapter ends by acknowledging the deep philosophical worry but insisting that, for the particular regularities of our universe, suitably biased learners can generalize and do profound work. This justified optimism motivates the detailed study of inductive biases in the following chapters.                                                                                                </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table4">
 <div class="table-wrapper">
-  <h3 id="Table4" style="margin-top:30px; margin-bottom:10px;">Table 4</h3>
+  <h3 id="Table4-header" style="margin-top:30px; margin-bottom:10px;">Table 4</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -259,15 +285,22 @@
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>S-curves and phase transitions: how sudden qualitative change emerges from gradual parameter shifts.<b>                                                                                                                                                  </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">The logistic/S curve models many phenomena: neuron firing rates, technology adoption, learning progress, and phase transitions. The book uses S-curves to explain why progress appears slow then suddenly rapid (and why exponential growth often plateaus). Understanding S-curves helps temper expectations about singularities and informs training/regime-change strategies.  </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Practical implications for ML engineers & neuroscientists:<b> Use distributed representations, smooth activations, gradient-based optimization, and probabilistic modeling while being mindful of energy, connectivity, and local optima.                </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">The chapter’s engineering takeaway: emulate the brain’s representational principles (distributed assemblies, overlapping codes), adopt continuous activations for learnability, and expect to combine statistical physics insights with algorithmic heuristics to scale learning in practice.                                                                                     </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Closing orientation:<b> Chapter 4 shows how connectionist ideas matured to solve the credit-assignment problem, setting the stage for deep learning’s later practical successes; it also cautions about limits and tradeoffs.                            </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">The narrative arc: Hebb → perceptron → Minsky critique → Hopfield/Boltzmann revival → backprop/S-curve → gradient methods and practical heuristics. This technical history explains why current deep methods work and where their vulnerabilities originate.                                                                                                                      </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table5">
 <div class="table-wrapper">
-  <h3 id="Table5" style="margin-top:30px; margin-bottom:10px;">Table 5</h3>
+  <h3 id="Table5-header" style="margin-top:30px; margin-bottom:10px;">Table 5</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -314,15 +347,22 @@
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>The speed imperative:<b> Evolution is slow; neural learning is faster; culture and technology accelerate learning much further; Master Algorithm desires learning in seconds/minutes not generations/millennia.                      </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">Quote: <i>“He who learns fastest wins, whether it’s the Baldwin effect speeding up evolution… or computers discovering patterns at the speed of light.”<i> Learning rate becomes central metric.                                                                                                                                                                                                   </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Hybrid learning algorithms:<b> Combining evolution and brain-like learning may yield better learners: structure search + parameter learning, crossover + gradient descent, evolutionary priors feeding into neural nets.             </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">The chapter argues that neither pure evolution nor pure neural methods suffice; hybrids (evolutionary structure plus parameter fine-tuning) seem promising.                                                                                                                                                                                                                                    </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Closing: evolution’s lessons for the Master Algorithm project:<b>                                                                                                                                                                    </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">The evolutionary paradigm shows how good learners can arise via variation + selection; shows importance of fitness functions; warns of tradeoffs between exploration and exploitation; highlights role of structural prior; and foreshadows that a Master Algorithm will likely adopt evolutionary ideas.                                                                                      </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table6">
 <div class="table-wrapper">
-  <h3 id="Table6" style="margin-top:30px; margin-bottom:10px;">Table 6</h3>
+  <h3 id="Table6-header" style="margin-top:30px; margin-bottom:10px;">Table 6</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -368,15 +408,22 @@
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Evaluation & model selection<b> — Need cross-validation, hold-out examples, and careful metric evaluation since similarity methods risk overfitting to the metric or features.                                                                     </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">Evaluate analogizer generalization by measuring performance on new, unseen input distributions; adversarial examples; check that similarity function aligns with task; tune hyperparameters (number of neighbors, kernel width, regularization).                             </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Analogizer’s future role in AGI/hybrid systems<b> — Potential component of a Master Algorithm: fast adaptation, few-shot learning, similarity-based memory modules, instance-based reasoning.                                                      </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">Domingos speculates that analogizers may help AGI in areas where massive data is unavailable, where fast adaptation is needed, or where explainability demands tracing to examples. Hybrid systems combining analogizers + neural nets etc. are promising.           </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Closing reflection<b> — Analogizers illustrate both simplicity and weakness: when used well, they are powerful; but alone they are insufficient. For universal learning we need multiple tribes.                                                   </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">The chapter ends by arguing that the analogizer tribe’s strengths and limitations teach us what the Master Algorithm must include: similarity, memory, metric learning—but also structural bias, feature learning, extrapolation from few examples.                          </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table7">
 <div class="table-wrapper">
-  <h3 id="Table7" style="margin-top:30px; margin-bottom:10px;">Table 7</h3>
+  <h3 id="Table7-header" style="margin-top:30px; margin-bottom:10px;">Table 7</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -420,15 +467,22 @@
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Unified learner insights:<b> The proposed learner uses representation = MLNs, evaluation = posterior probability, optimizer = genetic + gradient + hill cliffs; supports multiple tasks: clustering, relational learning, similarity, classification, etc.                 </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">Alchemy handles unsupervised learning, relational learning, clustering via unobserved variables; can build knowledge graphs like semantic networks from web data; integrates modules.                                                                                                                                       </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Remaining challenges & caution:<b> It is not quite Master Algorithm yet; must improve scalability, interpretability, usability; knowledge engineering and inference bottlenecks remain.                                                                                    </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">Alchemy does not yet include crossover in implementation; some problems unsolved; inference sometimes too slow; for large MLNs memory and time plague practical use.                                                                                                                                                        </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Closing integration theme:<b> The puzzle pieces (symbolists, connectionists, evolutionaries, Bayesians, analogizers) overlap and can be unified under Alchemy/MLNs; MLNs are the most promising candidate for a universal, or nearly universal, learner.                   </td><td data-label="<b>Supporting Details / Quotes / Examples<b>">The chapter ends by showing how combining these tribes’ strengths approximates what Master Algorithm might look like; but still leaves open whether further improvements or yet unknown ideas will improve on MLNs.                                                                                                         </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table8">
 <div class="table-wrapper">
-  <h3 id="Table8" style="margin-top:30px; margin-bottom:10px;">Table 8</h3>
+  <h3 id="Table8-header" style="margin-top:30px; margin-bottom:10px;">Table 8</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -470,8 +524,12 @@
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Phase Transitions & Future Outlook<b>           </td><td data-label="<b>Supporting Details / Examples / Verbatim Quotes<b>">Human-directed evolution and machine learning represent a <b>critical phase transition<b> in Earth’s history. Each bottleneck overcome leads to the next, creating successive limits rather than infinite growth. Over the next thousand years, life on Earth could experience the most dramatic transformations in its history. Humans will remain active participants, not passive observers. “The next thousand years could well be the most amazing in the life of planet Earth.”                                                                                                                                                              </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Ethics, Oversight, and Learning<b>              </td><td data-label="<b>Supporting Details / Examples / Verbatim Quotes<b>">Teaching robots ethics forces humans to examine and resolve contradictions in our own moral systems. Robots learn from curated examples to generalize ethical decision-making. Human oversight ensures alignment: if a robot errs, humans can correct it. Similarly, as machine learning permeates society, humans must monitor AI decisions collectively. Intelligence without will prevents AI from autonomous tyranny, but humans must avoid delegating decision-making blindly.                                                                                                                                                              </td></tr>
 <tr><td data-label="<b>Summary / Core Concepts<b>"><b>Machine Learning as Extension of Humanity<b>    </td><td data-label="<b>Supporting Details / Examples / Verbatim Quotes<b>">Machine learning accelerates cultural and biological evolution by removing human bottlenecks. Computers design solutions faster than humans can, while humans retain judgment and oversight. This coevolution is natural: fire and spears shaped Homo sapiens, and AI will shape Homo technicus. Computers serve as extensions of human problem-solving, exponentially amplifying our capabilities.                                                                                                                                                                                                                                              </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<button id="backToTop" onclick="backToTop()">↑ Top</button>
 <script src="assets/script.js"></script>
 </body>
 </html>

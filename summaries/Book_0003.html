@@ -36,16 +36,21 @@
     <button onclick="copyAllTablesPlain()">Copy All Tables (Plain Text)</button>
     <button onclick="copyAllTablesMarkdown()">Copy All Tables (Markdown)</button>
     <button onclick="resetAllTables()">Reset All Tables</button>
+    <button id="toggleAllBtn" onclick="toggleAllTables()">Collapse All Tables</button>
   </div>
 </div>
 
+<section id="Table1">
 <div class="table-wrapper">
-  <h3 id="Table1" style="margin-top:30px; margin-bottom:10px;">Table 1</h3>
+  <h3 id="Table1-header" style="margin-top:30px; margin-bottom:10px;">Table 1</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -93,15 +98,22 @@
 <tr><td data-label="<b>Summary<b>"><b>Delaying Why<b>                                             </td><td data-label="<b>Notes<b>">Avoids snap judgments and egocentrism, enabling recognition of exceptional opportunities like Woz’s Altair or van Gogh’s color exceptions.                                                                                                                                                                                                                     </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Integration into daily life<b>                              </td><td data-label="<b>Notes<b>">Applying museum and exercise techniques to work, social interactions, and observation of the environment nurtures the brain’s ability to see exceptions, fostering creative and innovative thinking.                                                                                                                                                           </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Next step<b>                                                </td><td data-label="<b>Notes<b>">Chapter 2 will focus on imagination, the second primal power, expanding the ability to act on exceptional information.                                                                                                                                                                                                                                         </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table2">
 <div class="table-wrapper">
-  <h3 id="Table2" style="margin-top:30px; margin-bottom:10px;">Table 2</h3>
+  <h3 id="Table2-header" style="margin-top:30px; margin-bottom:10px;">Table 2</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -156,15 +168,22 @@
 <tr><td data-label="<b>Summary<b>"><b>Practical Implications for Everyday Life<b>           </td><td data-label="<b>Notes<b>">Everyone can train imagination by:<br>- Defining a clear, single objective.<br>- Practicing multiple possible tactical responses.<br>- Observing exceptional information and leveraging intuition.<br>Applications: business, healthcare, education, parenting, athletics.                                   </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Integration of Past and Future for Adaptive Action<b> </td><td data-label="<b>Notes<b>">Operators’ integrated past provides momentum and clarity. Branching future enables adaptability to unforeseen challenges. The mental narrative allows efficient real-time decision-making in dynamic environments, whether foggy woods or organizational crises.                                             </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Conclusion: Story as Planning Engine<b>               </td><td data-label="<b>Notes<b>">Story is not merely a vehicle for entertainment or communication; it evolved as a cognitive mechanism for planning, predicting, and problem-solving. Training imagination through story-thinking enhances resilience, creativity, and effectiveness under uncertainty.                                       </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table3">
 <div class="table-wrapper">
-  <h3 id="Table3" style="margin-top:30px; margin-bottom:10px;">Table 3</h3>
+  <h3 id="Table3-header" style="margin-top:30px; margin-bottom:10px;">Table 3</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -213,15 +232,22 @@
 <tr><td data-label="<b>Summary<b>"><b>Emotion as a Diagnostic Tool<b>                                        </td><td data-label="<b>Notes<b>">Negative signals (fear, anger, grief, shame) indicate plan failure or misalignment; positive signals (pride, gratitude) point to effective actions aligned with purpose. Use these signals proactively: envision future steps and review past experiences to anticipate stressors, maintaining clarity and momentum.                                                                                                                                                                                                                                                </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Synthesis: Emotional Intelligence as Internal Compass<b>               </td><td data-label="<b>Notes<b>">Emotional intelligence is internal, not merely social. It functions as a compass for strategic, adaptive action, guiding the individual through uncertainty and reinforcing personal growth. Fear → first-step plans; anger → operational flexibility; grief/shame → narrative repair; dumb pride/maverick gratitude → mission alignment. Together, they sustain initiative, resilience, and purpose-driven action.                                                                                                                                                 </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Practical Recommendations<b>                                           </td><td data-label="<b>Notes<b>">1. Before action, identify primary objective and visualize first-step plan.<br>2. Reflect on past adaptive actions to enable Emotion Reset.<br>3. Track negative signals to preempt failures.<br>4. Use pride and gratitude to confirm personal purpose.<br>5. Integrate emotion, intuition, imagination, and commonsense for complex decisions.<br>Executives, military operators, children, and professionals alike can apply these methods. Example: stress-box at work → recall long-term strategy, identify tangible first step, act, then adjust iteratively. </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table4">
 <div class="table-wrapper">
-  <h3 id="Table4" style="margin-top:30px; margin-bottom:10px;">Table 4</h3>
+  <h3 id="Table4-header" style="margin-top:30px; margin-bottom:10px;">Table 4</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -279,15 +305,22 @@
 <tr><td data-label="<b>Summary<b>"><b>Core commonsense principle.<b>                                                 </td><td data-label="<b>Notes<b>">Know when you don’t know. Detect environmental volatility, use past experience for stability, and reserve action for emerging opportunities.                                                                                                                                                                                            </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Summary visualization – Primal Intelligence in action.<b>                      </td><td data-label="<b>Notes<b>">![Primal Intelligence Diagram](./OEBPS/9780593715307art16.jpg) Intuition (initiate) → Imagination (grow) → Emotion (maintain) → Commonsense (direct) → Life Plans → All Other Plans.                                                                                                                                                    </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Commonsense as adaptive intelligence.<b>                                       </td><td data-label="<b>Notes<b>">Works in life, finance, military, and other dynamic environments. Helps humans thrive where data-driven logic alone fails.                                                                                                                                                                                                              </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table5">
 <div class="table-wrapper">
-  <h3 id="Table5" style="margin-top:30px; margin-bottom:10px;">Table 5</h3>
+  <h3 id="Table5-header" style="margin-top:30px; margin-bottom:10px;">Table 5</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -355,15 +388,22 @@
 <tr><td data-label="<b>Summary<b>"><b>Failure-tolerant culture accelerates learning.<b>                                             </td><td data-label="<b>Notes<b>">Environments that reward experimentation and tolerate failure amplify the rate of exception-based discovery.                                                                                                                                                                                                                                                </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Innovation is a lifelong, iterative process.<b>                                               </td><td data-label="<b>Notes<b>">Clausewitzian approach implies continuous vigilance: each new rule, solution, or strategy opens space for further insight.                                                                                                                                                                                                                                  </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Legacy of Operators is systemic transformation.<b>                                            </td><td data-label="<b>Notes<b>">Innovations from individuals like Einstein, Darwin, Jobs, or Clausewitz ripple through society, industries, and knowledge itself.                                                                                                                                                                                                                           </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table6">
 <div class="table-wrapper">
-  <h3 id="Table6" style="margin-top:30px; margin-bottom:10px;">Table 6</h3>
+  <h3 id="Table6-header" style="margin-top:30px; margin-bottom:10px;">Table 6</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -432,15 +472,22 @@
 <tr><td data-label="<b>Summary<b>"><b>Implication for Education and Training<b>   </td><td data-label="<b>Notes<b>">Schools and organizations often overemphasize correctness and standardization, limiting adaptability. Programs like Swick exemplify how guided exercises in perspective, problem-solving, and work-arounds foster long-term resilience and antifragility.                                                     </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Broader Life Lesson<b>                      </td><td data-label="<b>Notes<b>">Growth from adversity is not restricted to extreme cases. Everyday challenges offer opportunities for antifragility. Focusing on positive surprises, authentic emotional engagement, and flexible planning strengthens mental and emotional resilience.                                                       </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Chapter Conclusion<b>                       </td><td data-label="<b>Notes<b>">Antifragility involves both reflection and action: integrating the past through optimism, embracing surprise, and developing the ability to adapt plans for the future. Through these practices, setbacks, failures, and trauma can become sources of strength.                                               </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table7">
 <div class="table-wrapper">
-  <h3 id="Table7" style="margin-top:30px; margin-bottom:10px;">Table 7</h3>
+  <h3 id="Table7-header" style="margin-top:30px; margin-bottom:10px;">Table 7</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -490,15 +537,22 @@
 <tr><td data-label="<b>Summary<b>"><b>Key Takeaway<b>                                  </td><td data-label="<b>Notes<b>">Effective decision-making integrates three principles:<br>1) Recognize when old plans no longer apply.<br>2) Act boldly on new or partial plans.<br>3) Calibrate risk-taking to uncertainty.<br>Following this framework ensures plan selection aligns with the novelty of the environment, maximizing adaptive success.                                                                                                                                                                                                                 </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Commonsense Indicator – Loss of Effectiveness<b> </td><td data-label="<b>Notes<b>">Monitor small declines in performance as early signals of environmental change. For example:<br>- Battle strategy still gains ground but at higher cost.<br>- Product sales slow despite stable operations.<br>- Employee engagement wanes while burnout rises.<br>Early detection allows plan adaptation before crises escalate.                                                                                                                                                                                                        </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Outcome for Learners<b>                          </td><td data-label="<b>Notes<b>">Individuals trained in these principles gain the ability to:<br>- Adapt rapidly to new conditions.<br>- Act boldly and proportionally to risk.<br>- Avoid frozen indecision.<br>- Apply expert advice selectively.<br>- Escape the optimization trap and ambush back.                                                                                                                                                                                                                                                                    </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table8">
 <div class="table-wrapper">
-  <h3 id="Table8" style="margin-top:30px; margin-bottom:10px;">Table 8</h3>
+  <h3 id="Table8-header" style="margin-top:30px; margin-bottom:10px;">Table 8</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -541,15 +595,22 @@
 <tr><td data-label="<b>Summary<b>"><b>Green Berets Example: Vietnam Village<b>                     </td><td data-label="<b>Notes<b>">U.S. Army Green Berets restored civil society not just via security but emotional security. Sharing personal biographies created rapport. Tadpoles analogy: insecure environment accelerates premature growth, stunting potential—same for human children.                                                                                                                                                                                                                                                                                                                                                                   </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Creating Authentic Connections<b>                            </td><td data-label="<b>Notes<b>">1. Commit to sharing the full story of your life.<br>2. Build rapport by reciprocal honesty.<br>3. Establish trust; listeners respond genuinely.<br>Example: Exec opens up for first time about personal struggles.                                                                                                                                                                                                                                                                                                                                                                                                          </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Conclusion: Core Communication Formulas<b>                   </td><td data-label="<b>Notes<b>">- External Comms = Inspire a Question, Then Answer It.<br>- Internal Comms = One (and Only One) Goal + Why.<br>Imagination, trust, and purpose are the engines of communication, whether marketing, team management, or personal relationships.                                                                                                                                                                                                                                                                                                                                                                              </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table9">
 <div class="table-wrapper">
-  <h3 id="Table9" style="margin-top:30px; margin-bottom:10px;">Table 9</h3>
+  <h3 id="Table9-header" style="margin-top:30px; margin-bottom:10px;">Table 9</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -598,15 +659,22 @@
 <tr><td data-label="<b>Summary<b>"><b>Historical Examples in Manufacturing<b> </td><td data-label="<b>Notes<b>">1. Robert Noyce entrusted million-dollar electronics projects to recent graduates.<br>2. This fostered innovation and accelerated technological progress in Silicon Valley.                                                                                                                                                                                                                                                                                                                                        </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Coaching Principle<b>                   </td><td data-label="<b>Notes<b>">1. Core concern: many coaches fear losing control.<br>2. Effective coaching prioritizes trust over micromanagement.<br>3. Unleashing the rookie enhances both the learner and the coach.<br>4. Applications extend beyond sports to improv, medicine, engineering, aviation, sales, and tech.                                                                                                                                                                                                                      </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Conclusion<b>                           </td><td data-label="<b>Notes<b>">1. Coaching success = trust + structured freedom.<br>2. Rookies reach full potential when empowered to explore.<br>3. Experts grow by responding to unexpected actions.<br>4. Structured autonomy leads to innovation, skill development, and resilience for both learner and mentor.<br>5. Legacy examples (Osler, Banting, Noyce, Apollo engineers) confirm that this principle drives progress.<br>6. Empowerment through controlled autonomy remains applicable today in teaching, leadership, and mentorship. </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table10">
 <div class="table-wrapper">
-  <h3 id="Table10" style="margin-top:30px; margin-bottom:10px;">Table 10</h3>
+  <h3 id="Table10-header" style="margin-top:30px; margin-bottom:10px;">Table 10</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -653,15 +721,22 @@
 <tr><td data-label="Summary"><b>Cultural and environmental awareness shapes leadership.<b> </td><td data-label="Notes">Effective leaders understand context—social norms, economics, political dynamics. Example: Nelson Mandela united South Africa by navigating cultural complexity. Ignoring context leads to misaligned strategy and reduced credibility. Adaptive leadership balances vision with situational intelligence.                                                                                                                                                                                                   </td></tr>
 <tr><td data-label="Summary"><b>Leadership is a lifelong journey.<b>                       </td><td data-label="Notes">Leadership is a practice requiring continuous learning, reflection, and mentorship. Leaders regularly evaluate decisions, personal growth, trends, and development opportunities for others. Example: CEOs who read widely and mentor successors sustain organizational innovation over decades.                                                                                                                                                                                                             </td></tr>
 <tr><td data-label="Summary"><b>Ethics and integrity underpin sustainable leadership.<b>   </td><td data-label="Notes">Leadership without trust collapses. Ethical leaders prioritize long-term value over short-term gains. Companies led by principled leaders retain employee loyalty, public trust, and resilience in crises. Integrity aligns vision, influence, and action with moral standards.                                                                                                                                                                                                                              </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table11">
 <div class="table-wrapper">
-  <h3 id="Table11" style="margin-top:30px; margin-bottom:10px;">Table 11</h3>
+  <h3 id="Table11-header" style="margin-top:30px; margin-bottom:10px;">Table 11</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -709,15 +784,22 @@
 <tr><td data-label="<b>Summary<b>"><b>Generative AI and Limitations<b>                </td><td data-label="<b>Notes<b>">AI embodies highly random (divergent) and highly logical (convergent) processing. Cannot fully innovate; operates without commonsense, imagination, or emotion. Computer lacks synaptic moto hardware evolved over 500 million years, limiting creative, strategic, and leadership capacities. Humans retain A → B capability critical for innovation, problem-solving, and strategy.                                                                                                                                                                            </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Special Operations Application<b>               </td><td data-label="<b>Notes<b>">Operators adopt Primal intelligence, integrating A → B thinking in missions. Theory tested and validated; author awarded Army medal (Jan <br>2023). Activation of primal brain power enables smarter decisions under chaos, exceeding AI capabilities.                                                                                                                                                                                                                                                                                                               </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Family Perspective<b>                           </td><td data-label="<b>Notes<b>">Author’s mother skeptical due to personal history with disciplined British army colonel. Learns that author collaborated with Special Operators, emphasizing unconventional, ancient science to enhance human intelligence beyond modern psychology.                                                                                                                                                                                                                                                                                                             </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<section id="Table12">
 <div class="table-wrapper">
-  <h3 id="Table12" style="margin-top:30px; margin-bottom:10px;">Table 12</h3>
+  <h3 id="Table12-header" style="margin-top:30px; margin-bottom:10px;">Table 12</h3>
   <div class="table-container">
     <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
       <div class="copy-buttons">
         <button onclick="copyTablePlain(this)">Copy Plain Table</button>
         <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
       </div>
     </div>
     <table>
@@ -771,8 +853,12 @@
 <tr><td data-label="<b>Summary<b>"><b>Boot Camp Fiasco<b>                                      </td><td data-label="<b>Notes<b>">Suffers catastrophic eyewear failure, pretends to see, leads to near-blind training.<br>Misfires on drills, injures foot (cellulitis risk).<br>Evacuated to hospital.<br>Blindsided by personal panic, shame, and inability to improvise under unexpected conditions.                                                                                                                                   </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Lessons Learned<b>                                       </td><td data-label="<b>Notes<b>">Despite failure, Special Operations values the author’s lack of natural instinct: if training works for him, it works universally.<br>Recognizes intelligence is not innate talent; can be developed through method and imagination.                                                                                                                                                                    </td></tr>
 <tr><td data-label="<b>Summary<b>"><b>Integration of Neuroscience, Literature, and Strategy<b> </td><td data-label="<b>Notes<b>">Combines synapse-level neuroscience, narrative analysis, and observational methods of natural history to develop a framework for real-world problem solving.<br>Creates lab and consulting model translating story mechanics into business and operational strategy.                                                                                                                                    </td></tr>
-</tbody></table></div></div>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+</section>
 
+<button id="backToTop" onclick="backToTop()">↑ Top</button>
 <script src="assets/script.js"></script>
 </body>
 </html>
