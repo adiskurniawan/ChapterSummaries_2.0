@@ -6,13 +6,27 @@
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
+<div id='mainContent'>
+<div id="stickyMainHeader">
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+    <h1 style="margin:0;">Tables Viewer v2.1</h1>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <button id="modeBtn" onclick="toggleMode()">Dark mode</button>
+      <button id="toggleAllBtn" onclick="toggleAllTables()">Collapse All Tables</button>
+      <button onclick="copyAllTablesPlain()">Copy All Tables (Plain Text)</button>
+      <button onclick="copyAllTablesMarkdown()">Copy All Tables (Markdown)</button>
+      <button onclick="resetAllTables()">Reset All Tables</button>
+    </div>
+  </div>
 
-<nav id="tocSidebar">
-<h2 style="display:flex; justify-content:space-between; align-items:center;">
-  Table of Contents
-  <button id="tocToggle" onclick="toggleTOC()">Hide <span id="tocArrow">▼</span></button>
-</h2>
-<ul id="toc">
+  <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
+    <input type="text" id="searchBox" onkeyup="searchTable()" placeholder="Search for keywords..." style="flex:1; min-width:220px; padding:6px;">
+    <button onclick="document.getElementById('searchBox').value=''; searchTable();">Reset</button>
+  </div>
+
+  <div id="tocBar" aria-label="Table of Contents">
+    <h2 style="margin:0; display:none;">TOC</h2>
+    <ul id="toc">
 <li><a href="#Table1">Table 1</a></li>
 <li><a href="#Table2">Table 2</a></li>
 <li><a href="#Table3">Table 3</a></li>
@@ -20,18 +34,8 @@
 <li><a href="#Table5">Table 5</a></li>
 <li><a href="#Table6">Table 6</a></li>
 <li><a href="#Table7">Table 7</a></li>
-</ul><button id='modeBtn' onclick='toggleMode()'>Dark mode</button></nav><div id='mainContent'>
-<div id="stickyMainHeader">
-  <h1 style="margin:0;">Tables Viewer v2.1</h1>
-  <div style="margin:10px 0; display:flex; align-items:center;">
-    <input type="text" id="searchBox" onkeyup="searchTable()" placeholder="Search for keywords...">
-    <button onclick="document.getElementById('searchBox').value=''; searchTable();">Reset</button>
-  </div>
-  <div style="margin-bottom:10px;">
-    <button onclick="copyAllTablesPlain()">Copy All Tables (Plain Text)</button>
-    <button onclick="copyAllTablesMarkdown()">Copy All Tables (Markdown)</button>
-    <button onclick="resetAllTables()">Reset All Tables</button>
-    <button id="toggleAllBtn" onclick="toggleAllTables()">Collapse All Tables</button>
+
+    </ul>
   </div>
 </div>
 
@@ -480,5 +484,6 @@
 
 <button id="backToTop" onclick="backToTop()">↑ Top</button>
 <script src="assets/script.js"></script>
+</div>
 </body>
 </html>
