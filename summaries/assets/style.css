@@ -39,16 +39,37 @@ tr:hover td { background:var(--row-hover); }
 .highlight { background:var(--highlight) !important; transition: background 0.45s ease; }
 .current-row td { background:var(--current-row) !important; }
 
-/* TOC sidebar styles (simple color improvements) */
-#tocSidebar { background:var(--panel); padding:16px; border-right:1px solid var(--border); width:260px; position:fixed; top:0; bottom:0; overflow:auto; border-radius:8px; }
-#tocSidebar a { display:block; padding:6px 10px; margin:2px 0; color:var(--toc-link); border-radius:6px; transition: background 0.18s ease, color 0.18s ease; }
-#tocSidebar a:hover { background:var(--toc-link-hover-bg); color:var(--toc-link-hover-color); }
+/* TOC moved into sticky top header */
+#stickyMainHeader {
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 1001;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
-#toc { max-height:1000px; transition:max-height 0.3s ease; overflow:hidden; }
-#toc.hide { max-height:0; }
-#stickyMainHeader { position:sticky; top:0; background:var(--bg); z-index:1000; padding:15px 0; border-bottom:1px solid var(--border); }
-#stickyMainHeader input { width:300px; padding:6px; font-size:16px; }
-#mainContent { margin-left:280px; padding:20px; }
+/* Top TOC horizontal bar inside header */
+#tocBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  overflow-x: auto;
+  padding: 6px 4px;
+  background: transparent;
+}
+#tocBar h2 { margin:0; font-size:16px; white-space:nowrap; }
+#tocBar ul { display: flex; gap: 8px; list-style: none; margin: 0; padding: 0; align-items:center; }
+#tocBar li { margin: 0; padding: 0; }
+#tocBar a { white-space: nowrap; display: inline-block; padding:6px 10px; color:var(--toc-link); border-radius:6px; transition: background 0.18s ease, color 0.18s ease; }
+#tocBar a:hover { background:var(--toc-link-hover-bg); color:var(--toc-link-hover-color); }
+
+/* main content no left margin now */
+#mainContent { padding:20px; }
 
 /* --- Sorting button styles --- */
 .th-with-sort { display:flex; align-items:center; gap:8px; }
@@ -60,8 +81,8 @@ tr:hover td { background:var(--row-hover); }
 /* small responsive tweaks */
 @media (max-width:900px) {
   #stickyMainHeader input { width:180px; }
-  #tocSidebar { width:200px; }
-  #mainContent { margin-left:220px; padding:12px; }
+  #tocBar { gap:8px; padding:4px; }
+  #mainContent { padding:12px; }
 }
 
 /* --- Expand/Collapse styles --- */
@@ -93,6 +114,3 @@ tr:hover td { background:var(--row-hover); }
 
 /* Row count styling (subtle) */
 .row-count { font-size:13px; color:var(--muted); margin-top:6px; margin-left:6px; }
-
-/* small fade for toggled TOC */
-#tocToggle { font-size:13px; padding:6px 8px; }

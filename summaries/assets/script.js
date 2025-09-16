@@ -292,26 +292,18 @@ function searchTable(){
   try { updateRowCounts(); } catch(e) {}
 }
 
-// TOC toggle
-function toggleTOC(){
-  const toc = document.getElementById('toc'); const btn = document.getElementById('tocToggle');
-  toc.classList.toggle('hide');
-  if(toc.classList.contains('hide')) btn.innerHTML = 'Show <span id="tocArrow" class="rotate">▼</span>';
-  else btn.innerHTML = 'Hide <span id="tocArrow">▼</span>';
-}
-
-// TOC click scroll
-document.querySelectorAll('#tocSidebar a[href^="#"]').forEach(a => {
-  a.addEventListener('click', function(e){
-    e.preventDefault();
-    const id = this.getAttribute('href').substring(1);
-    const container = document.getElementById(id)?.closest('.table-wrapper');
-    if(!container) return;
-    const headerHeight = document.getElementById('stickyMainHeader')?.offsetHeight || 0;
-    const containerTop = container.getBoundingClientRect().top + window.pageYOffset;
-    window.scrollTo({ top: containerTop - headerHeight - 5, behavior: 'smooth' });
-    try{ history.replaceState(null, '', '#' + id); }catch(e){}
-  });
+// TOC click scroll (works with top bar)
+document.addEventListener('click', function(e){
+  const a = e.target.closest && e.target.closest('#tocBar a[href^="#"]');
+  if(!a) return;
+  e.preventDefault();
+  const id = a.getAttribute('href').substring(1);
+  const container = document.getElementById(id)?.closest('.table-wrapper');
+  if(!container) return;
+  const headerHeight = document.getElementById('stickyMainHeader')?.offsetHeight || 0;
+  const containerTop = container.getBoundingClientRect().top + window.pageYOffset;
+  window.scrollTo({ top: containerTop - headerHeight - 5, behavior: 'smooth' });
+  try{ history.replaceState(null, '', '#' + id); }catch(e){}
 });
 
 // Back to Top button logic
