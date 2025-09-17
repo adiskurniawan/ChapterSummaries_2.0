@@ -19,25 +19,86 @@
   --toc-link-hover-bg: #1e3a8a;
   --toc-link-hover-color: #ffffff;
 }
-html, body { margin:0; background:var(--bg); color:var(--text); font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial; }
+
+/* Base page */
+html, body { margin:0; background:var(--bg); color:var(--text); font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial; }
 a { color:inherit; text-decoration:none; }
 button { background:var(--button-bg); color:var(--button-text); border:1px solid var(--border); padding:6px 12px; border-radius:6px; cursor:pointer; font-size:14px; }
 button:active { transform:translateY(1px); }
-table { width:100%; border-collapse:collapse; table-layout:fixed; word-wrap:break-word; margin-bottom:18px; background:var(--bg); box-shadow:0 1px 2px rgba(0,0,0,0.03); }
-th, td { padding:10px; border:1px solid var(--border); vertical-align:top; font-size:14px; }
 
-/* UPDATED: hand cursor + hover for headers, smooth transition */
-thead th { background:var(--panel); position:sticky; top:48px; z-index:3; text-align:left; cursor:pointer; transition: background 0.18s ease; }
-thead th:hover { background-color:#e2e8f0; }
-[data-theme="dark"] thead th:hover { background-color:#50506a; }
+/* ----- TABLE BASE (improvements to resemble ChatGPT) ----- */
+/* These rules are global for all tables. Row color rules below are preserved exactly as in your original file. */
+.table-container { width:100%; overflow-x:auto; -webkit-overflow-scrolling: touch; border-radius:6px; }
+table {
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+  word-wrap:break-word;
+  margin-bottom:18px;
+  background:transparent; /* keep underlying row colors unchanged */
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.98rem; /* slightly larger for readability */
+  line-height: 1.45;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  min-width: 480px; /* allow horizontal scroll on small screens */
+}
+thead th, th {
+  padding: 12px 14px;
+  text-align: left;
+  vertical-align: middle;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  font-weight: 700; /* stronger header weight */
+  font-size: 1.03rem; /* slightly larger header */
+  position: sticky;
+  top: 48px;
+  z-index: 3;
+}
+tbody td, td {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  vertical-align: top;
+  font-weight: 400;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
 
-/* increase tappable area of sort button */
-.sort-btn { display:flex; align-items:center; gap:6px; background:transparent; border:0; padding:6px 8px; cursor:pointer; border-radius:8px; font-size:12px; color:var(--muted); }
-td:first-child { background:var(--panel); font-weight:500; position:sticky; left:0; z-index:2; min-width:140px; box-shadow:2px 0 5px -2px rgba(0,0,0,0.08); }
+/* Make bold text inside tables more prominent like ChatGPT */
+table strong, table b {
+  font-weight: 700;
+  color: inherit;
+}
+
+/* Keep your original row color rules intact.
+   DO NOT change these lines if you rely on them elsewhere. */
 tr:nth-child(even) { background:var(--bg); }
+
+/* hover */
 tr:hover td { background:var(--row-hover); }
+
+/* highlight/current row */
 .highlight { background:var(--highlight) !important; transition: background 0.45s ease; }
 .current-row td { background:var(--current-row) !important; }
+
+/* sticky first column (summary) preserved but tuned for readability */
+td:first-child, th:first-child {
+  background: var(--panel);
+  font-weight: 600;
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  min-width: 140px;
+  box-shadow: 2px 0 5px -2px rgba(0,0,0,0.08);
+}
+
+/* thin, subtle separators (more chat-like) */
+table td, table th {
+  border-color: rgba(0,0,0,0.06);
+}
+
+/* make header sort controls comfortable to tap */
+.sort-btn { display:flex; align-items:center; gap:6px; background:transparent; border:0; padding:6px 8px; cursor:pointer; border-radius:8px; font-size:12px; color:var(--muted); }
 
 /* TOC moved into sticky top header */
 #stickyMainHeader {
@@ -115,51 +176,11 @@ tr:hover td { background:var(--row-hover); }
 /* Row count styling (subtle) */
 .row-count { font-size:13px; color:var(--muted); margin-top:6px; margin-left:6px; }
 
-/* === Mobile-friendly ChatGPT-like table improvements ===
-   NOTE: This block avoids changing your existing row color rules.
-   It only adds scrollability, sticky header/first-column behavior
-   and touch-smoothing for mobile. */
-.table-container {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: var(--bg);
-}
-
-table {
-  min-width: 500px; /* forces horizontal scroll on very small screens */
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-}
-
-/* keep header panel consistent with existing variables */
-thead th {
-  background: var(--panel);
-  font-weight: 600;
-}
-
-/* sticky first column uses existing panel background so row colors are preserved */
-tbody td:first-child,
-thead th:first-child {
-  position: sticky;
-  left: 0;
-  background: var(--panel);
-  border-right: 1px solid var(--border);
-  z-index: 2;
-  font-weight: 500;
-  width: 30%;
-}
-
-/* DO NOT override tr:nth-child striping here. Preserve your original row color rules. */
-
+/* Mobile-specific table behavior — scroll instead of breaking.
+   Does not change row color rules. */
 @media (max-width: 600px) {
-  table {
-    font-size: 15px;
-  }
-  td, th {
-    padding: 10px;
-  }
-  /* make header remain visible while scrolling horizontally */
+  table { font-size: 15px; }
+  td, th { padding: 10px 12px; }
   thead th { position: sticky; top: 48px; z-index: 4; }
+  .table-container { border-radius: 6px; }
 }
