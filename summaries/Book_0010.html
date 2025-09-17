@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tables Viewer v2.1</title>
+<link rel="stylesheet" href="assets/style.css?v=1758098926"></head>
+<body>
+<div id='mainContent'>
+<div id="stickyMainHeader">
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+    <h1 style="margin:0;">Tables Viewer v2.1</h1>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <button id="modeBtn" onclick="toggleMode()">Dark mode</button>
+      <button id="toggleAllBtn" onclick="toggleAllTables()">Collapse All Tables</button>
+      <button onclick="copyAllTablesPlain()">Copy All Tables (Plain Text)</button>
+      <button onclick="copyAllTablesMarkdown()">Copy All Tables (Markdown)</button>
+      <button onclick="resetAllTables()">Reset All Tables</button>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
+    <input type="text" id="searchBox" onkeyup="searchTable()" placeholder="Search for keywords..." style="flex:1; min-width:220px; padding:6px;">
+    <button onclick="document.getElementById('searchBox').value=''; searchTable();">Reset</button>
+  </div>
+
+  <div id="tocBar" aria-label="Table of Contents">
+    <h2 style="margin:0; display:none;">TOC</h2>
+    <ul id="toc">
+<li><a href="#Table1">Table 1</a></li>
+
+    </ul>
+  </div>
+</div>
+
+<div class="table-wrapper">
+  <h3 id="Table1" style="margin-top:30px; margin-bottom:10px;">Table 1</h3>
+  <div class="table-container">
+    <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+      <div class="copy-buttons">
+        <button onclick="copyTablePlain(this)">Copy Plain Table</button>
+        <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
+      </div>
+      <div style="display:flex; align-items:center;">
+        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
+      </div>
+    </div>
+    <table>
+      <thead><tr>
+
+        <th style="width:28.57%;" onclick="sortTableByColumn(0,0)" role="button" aria-label="Sort by operation">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">operation</div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(0,1)" role="button" aria-label="Sort by description">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">description</div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 14l5-5 5 5"></path>
+                  <path d="M7 10l5 5 5-5"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="operation"><p>Import multiple files from folder/cloud</p></td><td data-label="description"><p>Combine all CSV files from folder into one table.</p></td></tr>
+<tr><td data-label="operation"><p>Consolidate multiple source files</p></td><td data-label="description"><p>Merge Excel & CSV with similar schema into one dataset.</p></td></tr>
+<tr><td data-label="operation"><p>Import legacy DBF/dBase</p></td><td data-label="description"><p>Load `.dbf` files and convert into modern tables.</p></td></tr>
+<tr><td data-label="operation"><p>Handle compressed files</p></td><td data-label="description"><p>Extract and load CSV from ZIP/GZIP.</p></td></tr>
+<tr><td data-label="operation"><p>Import binary content</p></td><td data-label="description"><p>Load image/PDF metadata (file name, type, size).</p></td></tr>
+<tr><td data-label="operation"><p>Incremental API loads</p></td><td data-label="description"><p>Fetch only new API records by timestamp.</p></td></tr>
+<tr><td data-label="operation"><p>Auto-detect schema changes</p></td><td data-label="description"><p>Adjust query when new columns appear.</p></td></tr>
+<tr><td data-label="operation"><p>Parameter-driven source switch</p></td><td data-label="description"><p>Switch between test/prod databases dynamically.</p></td></tr>
+<tr><td data-label="operation"><p>Auto-refresh connections</p></td><td data-label="description"><p>Refresh at schedule (e.g., daily 2 AM).</p></td></tr>
+<tr><td data-label="operation"><p>Incremental import with change detection</p></td><td data-label="description"><p>Load rows changed since last import.</p></td></tr>
+<tr><td data-label="operation"><p>Importing streaming API data</p></td><td data-label="description"><p>Pull real-time stock price data and update dashboard every minute.</p></td></tr>
+<tr><td data-label="operation"><p>Importing IoT device data</p></td><td data-label="description"><p>Connect to MQTT broker and ingest sensor readings into Power Query.</p></td></tr>
+<tr><td data-label="operation"><p>Importing Google Ads API data</p></td><td data-label="description"><p>Retrieve daily ad spend and impressions from Google Ads API.</p></td></tr>
+<tr><td data-label="operation"><p>Importing Facebook Ads API data</p></td><td data-label="description"><p>Fetch campaign metrics and combine with internal cost data.</p></td></tr>
+<tr><td data-label="operation"><p>Importing LinkedIn Ads API data</p></td><td data-label="description"><p>Get job ad impressions, clicks, and costs by campaign.</p></td></tr>
+<tr><td data-label="operation"><p>Importing Twitter/X API data</p></td><td data-label="description"><p>Load tweet engagement data into Power Query for analysis.</p></td></tr>
+<tr><td data-label="operation"><p>Importing YouTube Analytics data</p></td><td data-label="description"><p>Retrieve channel performance metrics via YouTube API.</p></td></tr>
+<tr><td data-label="operation"><p>Importing TikTok Ads API data</p></td><td data-label="description"><p>Fetch campaign CTR, spend, and impressions daily.</p></td></tr>
+<tr><td data-label="operation"><p>Importing Shopify API data</p></td><td data-label="description"><p>Pull orders and product details from Shopify REST API.</p></td></tr>
+<tr><td data-label="operation"><p>Importing Stripe API data</p></td><td data-label="description"><p>Load payment transactions and customer data from Stripe API.</p></td></tr>
+<tr><td data-label="operation"><p>Importing PayPal API data</p></td><td data-label="description"><p>Retrieve PayPal transactions with status and amounts.</p></td></tr>
+<tr><td data-label="operation"><p>Importing QuickBooks Online data</p></td><td data-label="description"><p>Fetch accounting data from QuickBooks Online API.</p></td></tr>
+<tr><td data-label="operation"><p>Importing Xero API data</p></td><td data-label="description"><p>Retrieve invoice and expense data from Xero.</p></td></tr>
+<tr><td data-label="operation"><p>Importing Jira API data</p></td><td data-label="description"><p>Get issue tracking data including project, status, assignee.</p></td></tr>
+<tr><td data-label="operation"><p>Importing GitHub API data</p></td><td data-label="description"><p>Load repository commits and contributors into a table.</p></td></tr>
+<tr><td data-label="operation"><p>Importing GitLab API data</p></td><td data-label="description"><p>Fetch project merge requests and issues.</p></td></tr>
+<tr><td data-label="operation"><p>Importing Bitbucket API data</p></td><td data-label="description"><p>Retrieve pull request history and contributors.</p></td></tr>
+<tr><td data-label="operation"><p>Importing Slack API data</p></td><td data-label="description"><p>Extract messages from a given Slack channel.</p></td></tr>
+<tr><td data-label="operation"><p>Importing Microsoft Teams API data</p></td><td data-label="description"><p>Load chat message metadata for compliance reporting.</p></td></tr>
+<tr><td data-label="operation"><p>Importing Zoom API data</p></td><td data-label="description"><p>Retrieve meeting attendance and duration logs.</p></td></tr>
+<tr><td data-label="operation"><p>Importing Trello API data</p></td><td data-label="description"><p>Get board, list, and card data for task tracking.</p></td></tr>
+<tr><td data-label="operation"><p>Importing Asana API data</p></td><td data-label="description"><p>Load project tasks, due dates, and assignees.</p></td></tr>
+<tr><td data-label="operation"><p>Importing Monday.com API data</p></td><td data-label="description"><p>Extract project timelines and resource allocation.</p></td></tr>
+<tr><td data-label="operation"><p>Importing Notion API data</p></td><td data-label="description"><p>Load workspace data including pages and databases.</p></td></tr>
+<tr><td data-label="operation"><p>Importing Airtable API data</p></td><td data-label="description"><p>Retrieve tables and records from Airtable workspace.</p></td></tr>
+<tr><td data-label="operation"><p>Importing ClickUp API data</p></td><td data-label="description"><p>Fetch tasks, comments, and project milestones.</p></td></tr>
+<tr><td data-label="operation"><p>Importing ServiceNow API data</p></td><td data-label="description"><p>Load incident and ticketing data for ITSM.</p></td></tr>
+<tr><td data-label="operation"><p>Importing Zendesk API data</p></td><td data-label="description"><p>Retrieve support ticket history including status and agent.</p></td></tr>
+<tr><td data-label="operation"><p>Importing Freshdesk API data</p></td><td data-label="description"><p>Load customer support requests from Freshdesk.</p></td></tr>
+<tr><td data-label="operation"><p>Importing Intercom API data</p></td><td data-label="description"><p>Fetch user interactions and chat history from Intercom.</p></td></tr>
+<tr><td data-label="operation"><p>Importing Zoho CRM API data</p></td><td data-label="description"><p>Retrieve leads and contact data from Zoho CRM.</p></td></tr>
+<tr><td data-label="operation"><p>Importing Pipedrive API data</p></td><td data-label="description"><p>Fetch deal pipelines and activities from Pipedrive.</p></td></tr>
+<tr><td data-label="operation"><p>Creating relationships between tables</p></td><td data-label="description"><p>Explain how to link two tables in a relational model and define their relationship in Power BI.</p></td></tr>
+<tr><td data-label="operation"><p>Creating one-to-one relationships</p></td><td data-label="description"><p>Demonstrate setting up a one-to-one relationship between Customer and CustomerDetails tables in SQL.</p></td></tr>
+<tr><td data-label="operation"><p>Creating one-to-many relationships</p></td><td data-label="description"><p>Show how to create a one-to-many relationship between Orders and Customers using primary and foreign keys.</p></td></tr>
+<tr><td data-label="operation"><p>Creating many-to-one relationships</p></td><td data-label="description"><p>Illustrate creating a many-to-one relationship where multiple Orders link to a single Customer.</p></td></tr>
+<tr><td data-label="operation"><p>Creating many-to-many relationships</p></td><td data-label="description"><p>Explain creating a many-to-many relationship between Students and Courses using a bridge table.</p></td></tr>
+<tr><td data-label="operation"><p>Defining primary keys</p></td><td data-label="description"><p>Describe how to choose and define a primary key for a Product table in a database.</p></td></tr>
+<tr><td data-label="operation"><p>Defining foreign keys</p></td><td data-label="description"><p>Show how to add a foreign key to Orders table that references Customers table.</p></td></tr>
+<tr><td data-label="operation"><p>Defining composite keys</p></td><td data-label="description"><p>Provide an example of a composite key combining OrderID and ProductID in an OrderDetails table.</p></td></tr>
+<tr><td data-label="operation"><p>Defining unique constraints</p></td><td data-label="description"><p>Explain how to enforce uniqueness on the Email column in a Users table.</p></td></tr>
+<tr><td data-label="operation"><p>Defining referential integrity</p></td><td data-label="description"><p>Illustrate how to enforce referential integrity between Orders and Customers.</p></td></tr>
+<tr><td data-label="operation"><p>Handling circular relationships</p></td><td data-label="description"><p>Demonstrate detecting and resolving circular relationships between tables in Power BI.</p></td></tr>
+<tr><td data-label="operation"><p>Handling inactive relationships</p></td><td data-label="description"><p>Explain how to manage inactive relationships in a data model.</p></td></tr>
+<tr><td data-label="operation"><p>Activating and deactivating relationships</p></td><td data-label="description"><p>Show steps to activate or deactivate a relationship between two tables in DAX.</p></td></tr>
+<tr><td data-label="operation"><p>Setting cross-filter direction</p></td><td data-label="description"><p>Demonstrate setting single-direction vs bi-directional cross-filtering between tables.</p></td></tr>
+<tr><td data-label="operation"><p>Setting single-direction relationship</p></td><td data-label="description"><p>Explain why single-direction filtering is used and show an example.</p></td></tr>
+<tr><td data-label="operation"><p>Setting bi-directional relationship</p></td><td data-label="description"><p>Provide an example where bi-directional filtering is necessary in a model.</p></td></tr>
+<tr><td data-label="operation"><p>Creating calculated tables</p></td><td data-label="description"><p>Illustrate how to create a calculated table in Power BI using DAX.</p></td></tr>
+<tr><td data-label="operation"><p>Creating lookup tables</p></td><td data-label="description"><p>Show how to build a lookup table for product categories.</p></td></tr>
+<tr><td data-label="operation"><p>Creating dimension tables</p></td><td data-label="description"><p>Explain creating a dimension table for Customers with attributes like City, Region.</p></td></tr>
+<tr><td data-label="operation"><p>Creating fact tables</p></td><td data-label="description"><p>Demonstrate creating a fact table for sales transactions including measures and keys.</p></td></tr>
+<tr><td data-label="operation"><p>Creating bridge tables</p></td><td data-label="description"><p>Provide an example of a bridge table to connect Students and Courses for many-to-many mapping.</p></td></tr>
+<tr><td data-label="operation"><p>Creating role-playing dimensions</p></td><td data-label="description"><p>Show how to create multiple instances of a Date table to handle OrderDate and ShipDate.</p></td></tr>
+<tr><td data-label="operation"><p>Creating surrogate keys</p></td><td data-label="description"><p>Explain generating surrogate keys for dimension tables.</p></td></tr>
+<tr><td data-label="operation"><p>Creating natural keys</p></td><td data-label="description"><p>Describe using natural keys like SocialSecurityNumber for uniqueness.</p></td></tr>
+<tr><td data-label="operation"><p>Creating hierarchical relationships</p></td><td data-label="description"><p>Illustrate parent-child hierarchy in an Employee table.</p></td></tr>
+<tr><td data-label="operation"><p>Creating parent-child hierarchies</p></td><td data-label="description"><p>Show building a hierarchy where managers link to employees.</p></td></tr>
+<tr><td data-label="operation"><p>Creating multiple hierarchy levels</p></td><td data-label="description"><p>Demonstrate a hierarchy with Country → Region → City.</p></td></tr>
+<tr><td data-label="operation"><p>Creating flattened hierarchies</p></td><td data-label="description"><p>Explain how to flatten a multi-level hierarchy for easier reporting.</p></td></tr>
+<tr><td data-label="operation"><p>Creating user-defined hierarchies</p></td><td data-label="description"><p>Provide steps to create a hierarchy in Power BI for ProductCategory → ProductSubCategory → Product.</p></td></tr>
+<tr><td data-label="operation"><p>Aggregating data across hierarchies</p></td><td data-label="description"><p>Show how to sum sales across a hierarchical region structure.</p></td></tr>
+<tr><td data-label="operation"><p>Filtering data through relationships</p></td><td data-label="description"><p>Demonstrate filtering Orders based on selected Customers.</p></td></tr>
+<tr><td data-label="operation"><p>Enforcing referential integrity during ETL</p></td><td data-label="description"><p>Explain how to validate foreign keys during ETL load to avoid orphan records.</p></td></tr>
+<tr><td data-label="operation"><p>Validating relationships between tables</p></td><td data-label="description"><p>Provide a method to check that all foreign keys have matching primary keys.</p></td></tr>
+<tr><td data-label="operation"><p>Detecting relationship conflicts</p></td><td data-label="description"><p>Demonstrate detecting conflicting relationships in Power BI or SQL.</p></td></tr>
+<tr><td data-label="operation"><p>Resolving ambiguous relationships</p></td><td data-label="description"><p>Show resolving multiple paths between the same tables using USERELATIONSHIP in DAX.</p></td></tr>
+<tr><td data-label="operation"><p>Modeling relationships with time-series data</p></td><td data-label="description"><p>Demonstrate linking Date table to multiple time-stamped fact tables.</p></td></tr>
+<tr><td data-label="operation"><p>Managing slowly changing dimensions (SCD)</p></td><td data-label="description"><p>Explain handling Type 1 vs Type 2 changes in dimension tables.</p></td></tr>
+<tr><td data-label="operation"><p>Creating snapshot fact tables for periodic data</p></td><td data-label="description"><p>Show building monthly snapshot fact table for balances.</p></td></tr>
+<tr><td data-label="operation"><p>Building accumulating snapshot fact tables</p></td><td data-label="description"><p>Provide example tracking order process stages in snapshot fact table.</p></td></tr>
+<tr><td data-label="operation"><p>Designing factless fact tables</p></td><td data-label="description"><p>Illustrate capturing events without measures, e.g., student attendance.</p></td></tr>
+<tr><td data-label="operation"><p>Creating degenerate dimensions</p></td><td data-label="description"><p>Show using OrderNumber as dimension key without separate table.</p></td></tr>
+<tr><td data-label="operation"><p>Handling junk dimensions</p></td><td data-label="description"><p>Demonstrate combining low-cardinality attributes into junk dimension.</p></td></tr>
+<tr><td data-label="operation"><p>Creating mini-dimensions</p></td><td data-label="description"><p>Explain creating sub-dimension for frequently changing attributes.</p></td></tr>
+<tr><td data-label="operation"><p>Designing conformed dimensions</p></td><td data-label="description"><p>Show sharing a common Date dimension across multiple fact tables.</p></td></tr>
+<tr><td data-label="operation"><p>Creating role-playing dimensions</p></td><td data-label="description"><p>Provide multiple uses of Date dimension (OrderDate, ShipDate).</p></td></tr>
+<tr><td data-label="operation"><p>Handling schema evolution in dimensions</p></td><td data-label="description"><p>Explain adding new attributes to dimensions over time.</p></td></tr>
+<tr><td data-label="operation"><p>Using surrogate keys in fact tables</p></td><td data-label="description"><p>Demonstrate replacing natural keys with surrogate keys in fact table.</p></td></tr>
+<tr><td data-label="operation"><p>Linking facts to multiple dimensions</p></td><td data-label="description"><p>Show connecting Sales fact table to Product, Customer, and Date dimensions.</p></td></tr>
+<tr><td data-label="operation"><p>Creating bridge tables for many-to-many facts</p></td><td data-label="description"><p>Provide example linking Doctors and Patients via Appointment table.</p></td></tr>
+<tr><td data-label="operation"><p>Designing star schemas</p></td><td data-label="description"><p>Explain creating star schema with central fact and dimension tables.</p></td></tr>
+<tr><td data-label="operation"><p>Designing snowflake schemas</p></td><td data-label="description"><p>Illustrate normalized dimensions in snowflake schema.</p></td></tr>
+<tr><td data-label="operation"><p>Choosing between star and snowflake schemas</p></td><td data-label="description"><p>Compare pros and cons of both schema designs.</p></td></tr>
+<tr><td data-label="operation"><p>Creating galaxy schemas (fact constellation)</p></td><td data-label="description"><p>Show multiple fact tables sharing common dimensions.</p></td></tr>
+<tr><td data-label="operation"><p>Handling late-arriving facts</p></td><td data-label="description"><p>Explain strategies for handling transactions arriving late.</p></td></tr>
+<tr><td data-label="operation"><p>Handling late-arriving dimensions</p></td><td data-label="description"><p>Demonstrate creating placeholder rows for late dimension data.</p></td></tr>
+<tr><td data-label="operation"><p>Managing surrogate key lookups during ETL</p></td><td data-label="description"><p>Show process of looking up surrogate keys in ETL pipelines.</p></td></tr>
+<tr><td data-label="operation"><p>Designing audit tables for ETL processes</p></td><td data-label="description"><p>Provide structure for ETL logging and auditing.</p></td></tr>
+<tr><td data-label="operation"><p>Capturing slowly changing facts</p></td><td data-label="description"><p>Demonstrate tracking changes in fact table values.</p></td></tr>
+<tr><td data-label="operation"><p>Handling null values in fact and dimension tables</p></td><td data-label="description"><p>Explain strategies to handle NULLs in keys and attributes.</p></td></tr>
+<tr><td data-label="operation"><p>Designing cumulative fact tables</p></td><td data-label="description"><p>Provide example of cumulative balances per period.</p></td></tr>
+<tr><td data-label="operation"><p>Creating aggregate fact tables</p></td><td data-label="description"><p>Show building pre-aggregated summary fact tables.</p></td></tr>
+<tr><td data-label="operation"><p>Creating fact partitioning strategies</p></td><td data-label="description"><p>Explain splitting large fact tables into partitions for performance.</p></td></tr>
+<tr><td data-label="operation"><p>Designing dimension hierarchies for drill-down</p></td><td data-label="description"><p>Provide example Product Category → Subcategory → Product.</p></td></tr>
+<tr><td data-label="operation"><p>Managing surrogate key maintenance</p></td><td data-label="description"><p>Demonstrate regenerating surrogate keys after schema change.</p></td></tr>
+<tr><td data-label="operation"><p>Creating metadata tables for data lineage</p></td><td data-label="description"><p>Provide table capturing source-to-target mapping.</p></td></tr>
+<tr><td data-label="operation"><p>Implementing change data capture (CDC) in ETL</p></td><td data-label="description"><p>Show capturing incremental changes from source.</p></td></tr>
+<tr><td data-label="operation"><p>Handling schema drift in source data</p></td><td data-label="description"><p>Explain dynamically adjusting ETL for new/removed columns.</p></td></tr>
+<tr><td data-label="operation"><p>Designing time-variant dimensions</p></td><td data-label="description"><p>Demonstrate creating dimensions that track attribute changes over time.</p></td></tr>
+<tr><td data-label="operation"><p>Creating historical snapshot dimensions</p></td><td data-label="description"><p>Provide example tracking Customer attributes historically.</p></td></tr>
+<tr><td data-label="operation"><p>Handling rapidly changing attributes</p></td><td data-label="description"><p>Show mini-dimensions approach for volatile attributes.</p></td></tr>
+<tr><td data-label="operation"><p>Designing hybrid SCD strategies</p></td><td data-label="description"><p>Explain combining Type 1 and Type 2 SCD handling.</p></td></tr>
+<tr><td data-label="operation"><p>Managing surrogate vs natural key conflicts</p></td><td data-label="description"><p>Illustrate resolving mismatches between surrogate and natural keys.</p></td></tr>
+<tr><td data-label="operation"><p>Creating metadata-driven ETL for dimensions</p></td><td data-label="description"><p>Show dynamically generating dimension loads from metadata.</p></td></tr>
+<tr><td data-label="operation"><p>Designing factless fact tables for coverage analysis</p></td><td data-label="description"><p>Provide example student-course enrollment without measures.</p></td></tr>
+<tr><td data-label="operation"><p>Using bridge tables for survey response modeling</p></td><td data-label="description"><p>Demonstrate handling many-to-many survey responses.</p></td></tr>
+<tr><td data-label="operation"><p>Handling ragged hierarchies</p></td><td data-label="description"><p>Explain managing uneven hierarchies like Org charts.</p></td></tr>
+<tr><td data-label="operation"><p>Creating parent-child hierarchies with recursive joins</p></td><td data-label="description"><p>Show recursive SQL for Employee-Manager hierarchy.</p></td></tr>
+<tr><td data-label="operation"><p>Designing recursive CTEs for hierarchies</p></td><td data-label="description"><p>Provide example recursive CTE to navigate hierarchies.</p></td></tr>
+<tr><td data-label="operation"><p>Handling unbalanced hierarchies</p></td><td data-label="description"><p>Demonstrate flattening unbalanced hierarchy to fixed depth.</p></td></tr>
+<tr><td data-label="operation"><p>Creating alternate hierarchies</p></td><td data-label="description"><p>Show providing multiple hierarchies for same dimension.</p></td></tr>
+<tr><td data-label="operation"><p>Designing flexible hierarchies</p></td><td data-label="description"><p>Explain parameter-driven hierarchy navigation.</p></td></tr>
+<tr><td data-label="operation"><p>Handling role-playing fact tables</p></td><td data-label="description"><p>Demonstrate same fact table used with different dimensions.</p></td></tr>
+<tr><td data-label="operation"><p>Designing hybrid schemas</p></td><td data-label="description"><p>Show combining star and snowflake schemas.</p></td></tr>
+<tr><td data-label="operation"><p>Creating aggregate navigation in OLAP cubes</p></td><td data-label="description"><p>Provide design for cube using pre-aggregated tables.</p></td></tr>
+<tr><td data-label="operation"><p>Designing bridge tables for multivalued dimensions</p></td><td data-label="description"><p>Explain linking Customers to multiple Accounts.</p></td></tr>
+<tr><td data-label="operation"><p>Handling semi-additive measures</p></td><td data-label="description"><p>Demonstrate measures like Balance that aggregate differently over time.</p></td></tr>
+<tr><td data-label="operation"><p>Designing periodic snapshot fact tables</p></td><td data-label="description"><p>Show periodic balances per day/month snapshot.</p></td></tr>
+<tr><td data-label="operation"><p>Creating transactional fact tables</p></td><td data-label="description"><p>Provide example line-level sales transactions.</p></td></tr>
+<tr><td data-label="operation"><p>Designing accumulating snapshot fact tables</p></td><td data-label="description"><p>Demonstrate fact table capturing order lifecycle.</p></td></tr>
+<tr><td data-label="operation"><p>Designing audit dimensions</p></td><td data-label="description"><p>Show adding metadata like LoadDate to dimensions.</p></td></tr>
+<tr><td data-label="operation"><p>Handling degenerate dimensions in ETL</p></td><td data-label="description"><p>Explain extracting degenerate dimension values from fact.</p></td></tr>
+<tr><td data-label="operation"><p>Designing junk dimension consolidation</p></td><td data-label="description"><p>Demonstrate merging flags and indicators into junk dimension.</p></td></tr>
+<tr><td data-label="operation"><p>Creating snowflaked dimension normalization</p></td><td data-label="description"><p>Provide example splitting Customer dimension into sub-tables.</p></td></tr>
+<tr><td data-label="operation"><p>Designing schema evolution handling in ETL</p></td><td data-label="description"><p>Explain adding columns without breaking load.</p></td></tr>
+<tr><td data-label="operation"><p>Creating dynamic data vault structures</p></td><td data-label="description"><p>Demonstrate Hubs, Links, and Satellites in Data Vault modeling.</p></td></tr>
+<tr><td data-label="operation"><p>Handling historical satellite tables in Data Vault</p></td><td data-label="description"><p>Show storing attribute history in Satellites.</p></td></tr>
+<tr><td data-label="operation"><p>Designing bridge links in Data Vault</p></td><td data-label="description"><p>Provide example many-to-many in Data Vault using Links.</p></td></tr>
+<tr><td data-label="operation"><p>Creating Point-in-Time tables in Data Vault</p></td><td data-label="description"><p>Demonstrate PIT table for historical querying.</p></td></tr>
+<tr><td data-label="operation"><p>Designing bridge tables for hierarchy traversal</p></td><td data-label="description"><p>Show handling multi-level hierarchies with bridge table.</p></td></tr>
+<tr><td data-label="operation"><p>Creating reference tables for lookup codes</p></td><td data-label="description"><p>Provide example reference table for Status codes.</p></td></tr>
+<tr><td data-label="operation"><p>Designing mini-dimensions for performance</p></td><td data-label="description"><p>Explain splitting volatile attributes into smaller dimension.</p></td></tr>
+<tr><td data-label="operation"><p>Handling conforming dimensions across systems</p></td><td data-label="description"><p>Demonstrate standardizing dimensions across multiple sources.</p></td></tr>
+<tr><td data-label="operation"><p>Designing surrogate key management</p></td><td data-label="description"><p>Demonstrate generating surrogate keys with identity or sequence.</p></td></tr>
+<tr><td data-label="operation"><p>Creating natural key lookup process</p></td><td data-label="description"><p>Show using natural key to identify existing dimension rows.</p></td></tr>
+<tr><td data-label="operation"><p>Handling late-arriving dimension rows</p></td><td data-label="description"><p>Explain inserting inferred dimension rows for early facts.</p></td></tr>
+<tr><td data-label="operation"><p>Designing inferred members</p></td><td data-label="description"><p>Provide example inferred Product row with default attributes.</p></td></tr>
+<tr><td data-label="operation"><p>Managing slowly arriving facts</p></td><td data-label="description"><p>Show holding facts until related dimensions are available.</p></td></tr>
+<tr><td data-label="operation"><p>Handling missing dimension keys</p></td><td data-label="description"><p>Demonstrate using Unknown or Default dimension members.</p></td></tr>
+<tr><td data-label="operation"><p>Designing dimension hierarchy flattening</p></td><td data-label="description"><p>Explain storing all hierarchy levels in single dimension row.</p></td></tr>
+<tr><td data-label="operation"><p>Creating role-playing dimensions with views</p></td><td data-label="description"><p>Show using SQL views for OrderDate, ShipDate roles.</p></td></tr>
+<tr><td data-label="operation"><p>Designing snowflake hierarchy navigation</p></td><td data-label="description"><p>Provide example joining multiple normalized tables.</p></td></tr>
+<tr><td data-label="operation"><p>Handling unbalanced recursive hierarchies</p></td><td data-label="description"><p>Demonstrate closure tables for all ancestor-descendant paths.</p></td></tr>
+<tr><td data-label="operation"><p>Designing dimension outriggers</p></td><td data-label="description"><p>Explain using outrigger dimensions for secondary attributes.</p></td></tr>
+<tr><td data-label="operation"><p>Creating late arriving fact handling</p></td><td data-label="description"><p>Provide example holding staging facts until dimensions arrive.</p></td></tr>
+<tr><td data-label="operation"><p>Designing temporal consistency checks</p></td><td data-label="description"><p>Show verifying dates fall within dimension row effective dates.</p></td></tr>
+<tr><td data-label="operation"><p>Handling early arriving facts with inferred members</p></td><td data-label="description"><p>Demonstrate resolving fact-dimension mismatch.</p></td></tr>
+<tr><td data-label="operation"><p>Designing aggregate fact tables</p></td><td data-label="description"><p>Provide example monthly sales summary fact.</p></td></tr>
+<tr><td data-label="operation"><p>Creating partitioned fact tables</p></td><td data-label="description"><p>Explain partitioning by Date for performance.</p></td></tr>
+<tr><td data-label="operation"><p>Designing fact table surrogate key usage</p></td><td data-label="description"><p>Show using surrogate keys for dimension joins.</p></td></tr>
+<tr><td data-label="operation"><p>Handling null foreign keys in facts</p></td><td data-label="description"><p>Demonstrate substituting Unknown dimension key.</p></td></tr>
+<tr><td data-label="operation"><p>Designing schema-on-read approaches</p></td><td data-label="description"><p>Explain querying semi-structured data as dimensions/facts.</p></td></tr>
+<tr><td data-label="operation"><p>Creating late arriving dimensions with backfill</p></td><td data-label="description"><p>Show updating inferred rows with actual values.</p></td></tr>
+<tr><td data-label="operation"><p>Designing temporal fact-dimension joins</p></td><td data-label="description"><p>Provide SQL joining facts with effective-dated dimensions.</p></td></tr>
+<tr><td data-label="operation"><p>Handling heterogeneous fact measures</p></td><td data-label="description"><p>Demonstrate normalizing units for consistent aggregation.</p></td></tr>
+<tr><td data-label="operation"><p>Designing multi-fact table conformance</p></td><td data-label="description"><p>Explain sharing dimensions across different fact tables.</p></td></tr>
+<tr><td data-label="operation"><p>Creating aggregate navigation metadata</p></td><td data-label="description"><p>Provide metadata-driven navigation between fact levels.</p></td></tr>
+<tr><td data-label="operation"><p>Designing incremental fact loads</p></td><td data-label="description"><p>Show detecting and loading only new transactions.</p></td></tr>
+<tr><td data-label="operation"><p>Handling slowly changing measures</p></td><td data-label="description"><p>Demonstrate updating facts with corrected measures.</p></td></tr>
+<tr><td data-label="operation"><p>Designing temporal measure validity</p></td><td data-label="description"><p>Explain validity ranges for measures in fact tables.</p></td></tr>
+<tr><td data-label="operation"><p>Creating degenerate dimension keys</p></td><td data-label="description"><p>Provide example OrderNumber in fact table.</p></td></tr>
+<tr><td data-label="operation"><p>Designing metadata audit fact tables</p></td><td data-label="description"><p>Show recording ETL run stats in fact-like table.</p></td></tr>
+<tr><td data-label="operation"><p>Handling null measures</p></td><td data-label="description"><p>Demonstrate defaulting or flagging null measures.</p></td></tr>
+<tr><td data-label="operation"><p>Designing fact table compression</p></td><td data-label="description"><p>Explain partitioning and columnstore usage.</p></td></tr>
+<tr><td data-label="operation"><p>Creating bridge tables for multivalued facts</p></td><td data-label="description"><p>Provide example invoice fact with multiple discounts.</p></td></tr>
+<tr><td data-label="operation"><p>Designing derived facts</p></td><td data-label="description"><p>Show computing derived measures like Margin%.</p></td></tr>
+<tr><td data-label="operation"><p>Handling early arriving facts with inferred members</p></td><td data-label="description"><p>Demonstrate inserting placeholder dimension members.</p></td></tr>
+<tr><td data-label="operation"><p>Designing late arriving dimensions with surrogate backfill</p></td><td data-label="description"><p>Explain updating surrogate keys once actual dimension arrives.</p></td></tr>
+<tr><td data-label="operation"><p>Creating virtual bridge tables for complex relationships</p></td><td data-label="description"><p>Demonstrate calculated tables simulating bridge for many-to-many relationships.</p></td></tr>
+<tr><td data-label="operation"><p>Implementing many-to-many relationships with DAX</p></td><td data-label="description"><p>Show using DAX functions to handle many-to-many without physical bridge.</p></td></tr>
+<tr><td data-label="operation"><p>Designing hierarchical aggregation measures</p></td><td data-label="description"><p>Provide example summing sales across multi-level product hierarchy.</p></td></tr>
+<tr><td data-label="operation"><p>Creating role-playing dimension measures</p></td><td data-label="description"><p>Illustrate switching between multiple roles of a Date dimension.</p></td></tr>
+<tr><td data-label="operation"><p>Handling inactive relationships in calculations</p></td><td data-label="description"><p>Show activating inactive relationships using USERELATIONSHIP in measures.</p></td></tr>
+<tr><td data-label="operation"><p>Managing multiple relationship paths in DAX</p></td><td data-label="description"><p>Demonstrate resolving ambiguous paths when multiple relationships exist.</p></td></tr>
+<tr><td data-label="operation"><p>Calculating cross-table KPIs dynamically</p></td><td data-label="description"><p>Provide example KPI adjusting based on related table filters.</p></td></tr>
+<tr><td data-label="operation"><p>Using relationships in time intelligence calculations</p></td><td data-label="description"><p>Show calculating YTD and MTD across related fact and Date tables.</p></td></tr>
+<tr><td data-label="operation"><p>Building virtual hierarchies in calculated tables</p></td><td data-label="description"><p>Illustrate creating hierarchy structures dynamically with calculated tables.</p></td></tr>
+<tr><td data-label="operation"><p>Aggregating measures with bidirectional filtering</p></td><td data-label="description"><p>Demonstrate using bi-directional relationships in aggregate calculations.</p></td></tr>
+<tr><td data-label="operation"><p>Implementing dynamic cross-filtering in dashboards</p></td><td data-label="description"><p>Show filter propagation across multiple related tables in visuals.</p></td></tr>
+<tr><td data-label="operation"><p>Resolving circular relationships using inactive links</p></td><td data-label="description"><p>Explain breaking loops by deactivating specific relationships.</p></td></tr>
+<tr><td data-label="operation"><p>Optimizing model performance with relationships</p></td><td data-label="description"><p>Provide strategies for large fact tables and multiple relationships.</p></td></tr>
+<tr><td data-label="operation"><p>Documenting relationships for governance</p></td><td data-label="description"><p>Show template capturing all relationships, active/inactive status, and roles.</p></td></tr>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+
+<button id="backToTop" onclick="backToTop()">↑ Top</button>
+<script src="assets/script.js?v=1758098926"></script>
+</div>
+</body>
+</html>
