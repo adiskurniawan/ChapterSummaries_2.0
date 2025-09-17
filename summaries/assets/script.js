@@ -1,3 +1,14 @@
+// Ensure tables inside .table-wrapper are wrapped with .table-container (safe, non-destructive)
+document.querySelectorAll('.table-wrapper').forEach(wrapper => {
+  if(wrapper.querySelector('.table-container')) return;
+  const table = wrapper.querySelector('table');
+  if(!table) return;
+  const container = document.createElement('div');
+  container.className = 'table-container';
+  wrapper.insertBefore(container, table);
+  container.appendChild(table);
+});
+
 // Store original table rows and sort states
 let originalTableRows = [];
 let sortStates = [];
