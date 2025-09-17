@@ -34,7 +34,41 @@ thead th[role="button"]:hover{background:#eef6ff}
 #backToTop{display:none;position:fixed;bottom:24px;right:24px;z-index:1100;padding:10px 14px;font-size:14px;border-radius:8px;background:var(--button-bg);color:var(--button-text);border:1px solid var(--border);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.15);transition:opacity .3s ease}
 #backToTop:hover{opacity:.85}
 .row-count{font-size:13px;color:var(--muted);margin-top:6px;margin-left:6px}
-td ul,td ol{margin:.45rem 0;padding-left:1.25rem}
-td li{margin-bottom:.3rem}
+
+/* Lists inside table cells: force consistent markers
+   - Unordered lists use an en-dash marker (–)
+   - Ordered lists use numeric counters
+   Using list-style:none and adding ::before markers so appearance is consistent across browsers.
+*/
+td ul, td ol {
+  margin: .45rem 0;
+  padding-left: 1.25rem;
+  list-style: none; /* remove default markers */
+}
+td ul li {
+  margin-bottom: .3rem;
+}
+td ul li::before {
+  content: "– "; /* en dash + space */
+  color: var(--text);
+  display: inline-block;
+  width: 1.1ch;
+  margin-left: -1.1ch;
+}
+td ol {
+  counter-reset: table-ol;
+}
+td ol li {
+  counter-increment: table-ol;
+  margin-bottom: .3rem;
+}
+td ol li::before {
+  content: counter(table-ol) ". ";
+  color: var(--text);
+  display: inline-block;
+  width: 2.2ch;
+  margin-left: -2.2ch;
+}
+
 td code{background:#f3f4f6;padding:2px 6px;border-radius:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92em}
 @media (max-width:600px){table{font-size:15px}td,th{padding:10px 12px}thead th{position:sticky;top:48px;z-index:4}.table-container{border-radius:6px}}
