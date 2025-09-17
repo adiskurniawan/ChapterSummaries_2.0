@@ -267,7 +267,8 @@ function resetAllTables(){
   });
   const toggleAllBtn = document.getElementById('toggleAllBtn');
   if(toggleAllBtn) toggleAllBtn.textContent = "Collapse All Tables";
-  document.getElementById('searchBox').value = "";
+  const sb = document.getElementById('searchBox');
+  if(sb) sb.value = "";
   searchTable();
   // update counts after reset
   try { updateRowCounts(); } catch(e) {}
@@ -276,7 +277,7 @@ function resetAllTables(){
 
 // Search
 function searchTable(){
-  let filter = document.getElementById("searchBox").value.toLowerCase();
+  let filter = (document.getElementById("searchBox")?.value || "").toLowerCase();
   let firstMatch = null;
   document.querySelectorAll(".table-container table").forEach(table => {
     Array.from(table.rows).slice(1).forEach(row => {
@@ -295,9 +296,9 @@ function searchTable(){
   });
   if(firstMatch){
     const rect = firstMatch.getBoundingClientRect();
-    const headerHeight = document.getElementById('stickyMainHeader').offsetHeight + 10;
+    const headerHeight = document.getElementById('stickyMainHeader')?.offsetHeight || 0;
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    window.scrollTo({ top: scrollTop + rect.top - headerHeight, behavior: 'smooth' });
+    window.scrollTo({ top: scrollTop + rect.top - headerHeight - 5, behavior: 'smooth' });
   }
   // update counts after search
   try { updateRowCounts(); } catch(e) {}
