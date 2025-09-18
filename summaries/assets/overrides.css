@@ -46,3 +46,44 @@
   color: #e6eef6;            /* light text for contrast */
   border-color: #3c3f4a;
 }
+
+/* --- Lists inside table cells: force consistent markers --- */
+/* top-level unordered lists: use en-dash marker (–) */
+.table-container table td > ul, .table-container table td > ol {
+  margin: .45rem 0;
+  padding-left: 1.25rem;
+  list-style: none;
+}
+.table-container table td > ul > li, .table-container table td > ol > li {
+  margin-bottom: .3rem;
+  line-height: 1.36;
+}
+.table-container table td > ul > li::before {
+  content: "– ";
+  color: var(--text);
+  display: inline-block;
+  width: 1.1ch;
+  margin-left: -1.1ch;
+}
+.table-container table td ul ul > li::before {
+  content: "• ";
+  display: inline-block;
+  width: 1.1ch;
+  margin-left: -1.1ch;
+  color: var(--muted);
+  font-size: 0.9em;
+}
+.table-container table td ol {
+  counter-reset: table-ol;
+  padding-left: 1.6rem;
+}
+.table-container table td ol > li {
+  counter-increment: table-ol;
+}
+.table-container table td ol > li::before {
+  content: counter(table-ol) ". ";
+  color: var(--text);
+  display: inline-block;
+  width: 2.2ch;
+  margin-left: -2.2ch;
+}
