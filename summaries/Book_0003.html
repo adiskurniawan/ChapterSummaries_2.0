@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <title>Tables Viewer v2.1</title>
-<link rel="stylesheet" href="assets/style.css?v=1758194501">
-<link rel="stylesheet" href="assets/overrides.css?v=1758194501">
+<link rel="stylesheet" href="assets/style.css?v=1758195883">
+<link rel="stylesheet" href="assets/overrides.css?v=1758195883">
 <style>
 :root {
   --header-bg: #f3f4f6;
@@ -18,9 +18,12 @@
 [data-theme="dark"], body.dark-mode {
   --header-bg: #2a2e3a;
   --header-color: #e6eef6;
+  /* improved header highlight for dark mode (keeps contrast and readability) */
+  --header-highlight-bg: #33363f;
+  --header-highlight-color: #ffffff;
   --row-odd-bg: #242834;
   --row-even-bg: #2a2e3a;
-  --row-hover-bg: rgba(255,255,255,0.04);
+  --row-hover-bg: rgba(255,255,255,0.08);
   --muted: #9aa0b2;
   --text: #e6eef6;
 }
@@ -50,6 +53,24 @@
 /* Hover */
 .table-container table tbody tr:hover td { background-color: var(--row-hover-bg) !important; }
 .table-container table tbody tr:hover td:first-child { background-color: var(--row-hover-bg) !important; }
+
+/* Header hover/focus/active — duplicated inline for consistency */
+[data-theme="dark"] .table-container table thead th:hover,
+[data-theme="dark"] .table-container table thead th:focus,
+[data-theme="dark"] .table-container table thead th.sort-active,
+body.dark-mode .table-container table thead th:hover,
+body.dark-mode .table-container table thead th:focus,
+body.dark-mode .table-container table thead th.sort-active {
+  background-color: var(--header-highlight-bg) !important;
+  color: var(--header-highlight-color) !important;
+  transition: background-color 120ms ease, color 120ms ease;
+  outline: 2px solid rgba(255,255,255,0.03);
+}
+[data-theme="dark"] .table-container table thead th:first-child:hover,
+body.dark-mode .table-container table thead th:first-child:hover {
+  background-color: var(--header-highlight-bg) !important;
+  color: var(--header-highlight-color) !important;
+}
 
 /* widths */
 .table-container table thead th:first-child { width: 28.57%; }
@@ -952,7 +973,7 @@
 </div>
 
 <button id="backToTop" onclick="backToTop()">↑ Top</button>
-<script src="assets/script.js?v=1758194501"></script>
+<script src="assets/script.js?v=1758195883"></script>
 </div>
 </body>
 </html>
