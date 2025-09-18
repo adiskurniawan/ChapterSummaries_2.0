@@ -3,7 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <title>Tables Viewer v2.1</title>
-<link rel="stylesheet" href="assets/style.css?v=1758098903"></head>
+<link rel="stylesheet" href="assets/style.css?v=1758147566">
+<link rel="stylesheet" href="assets/overrides.css?v=1758147566">
+<style>
+/* Inline targeted header fix (after linked sheets). No tr->flex changes. */
+.table-container table { table-layout: fixed; border-collapse: collapse; width:100%; box-sizing: border-box; }
+.table-container table thead th {
+  vertical-align: middle;
+  padding: 10px;
+  box-sizing: border-box;
+  white-space: normal;
+}
+.table-container table thead th .th-with-sort,
+.table-container table thead th .th-with-sort > div {
+  display:flex; align-items:center; height:100%; gap:8px; min-height:1px; box-sizing:border-box; overflow:hidden;
+}
+.table-container table thead th:first-child { position:sticky; left:0; z-index:4; min-width:140px; }
+.table-container table tbody td:first-child { position:sticky; left:0; z-index:2; min-width:140px; box-shadow:2px 0 5px -2px rgba(0,0,0,0.08); }
+.table-container table thead th:first-child { width: 28.57%; }
+.table-container table thead th:not(:first-child) { width: 71.43%; }
+.table-container table tbody td:first-child { width: 28.57%; }
+.table-container table tbody td:not(:first-child) { width: 71.43%; }
+</style>
+</head>
 <body>
 <div id='mainContent'>
 <div id="stickyMainHeader">
@@ -528,7 +550,7 @@
 </div>
 
 <button id="backToTop" onclick="backToTop()">↑ Top</button>
-<script src="assets/script.js?v=1758098903"></script>
+<script src="assets/script.js?v=1758147566"></script>
 </div>
 </body>
 </html>
