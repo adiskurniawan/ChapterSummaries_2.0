@@ -39,3 +39,10 @@
 .table-container table thead th:not(:first-child) { width: 71.43%; }
 .table-container table tbody td:first-child { width: 28.57%; }
 .table-container table tbody td:not(:first-child) { width: 71.43%; }
+
+/* Dark-mode header contrast fix (targets document when dark mode is enabled via data-theme="dark") */
+[data-theme="dark"] .table-container table thead th {
+  background-color: #2a2e3a; /* darker header panel */
+  color: #e6eef6;            /* light text for contrast */
+  border-color: #3c3f4a;
+}
