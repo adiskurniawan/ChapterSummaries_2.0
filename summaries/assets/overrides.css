@@ -1,13 +1,37 @@
 
+/* Theme variables (defaults for light mode) */
+:root {
+  --header-bg: #f3f4f6;
+  --header-color: #111827;
+  --row-odd-bg: #ffffff;
+  --row-even-bg: #fbfbfb;
+  --row-hover-bg: rgba(0,0,0,0.04);
+  --muted: #6b7280;
+  --text: #111827;
+}
+
+/* Dark-mode overrides (supports data-theme="dark" and body.dark-mode) */
+[data-theme="dark"], body.dark-mode {
+  --header-bg: #2a2e3a;
+  --header-color: #e6eef6;
+  --row-odd-bg: #242834;
+  --row-even-bg: #2a2e3a;
+  --row-hover-bg: rgba(255,255,255,0.04);
+  --muted: #9aa0b2;
+  --text: #e6eef6;
+}
+
 /* Targeted header alignment overrides */
 .table-container table { table-layout: fixed; border-collapse: collapse; width:100%; box-sizing: border-box; }
-/* Keep the standard table semantics. Do not change tr -> flex.
-   Instead make the header content a full-height flex container so content centers. */
+/* Do not change tr -> flex: keep table semantics */
 .table-container table thead th {
   vertical-align: middle;
   padding: 10px;
   box-sizing: border-box;
   white-space: normal;        /* allow multi-line headings when needed */
+  background-color: var(--header-bg);
+  color: var(--header-color);
+  border-color: transparent;
 }
 /* Ensure header inner wrapper takes full height and centers content */
 .table-container table thead th .th-with-sort,
@@ -20,32 +44,56 @@
   box-sizing: border-box;
   overflow: hidden;
 }
-/* sticky first column cell visuals (preserve original sticky behavior) */
+
+/* Sticky first column header: use the same header background */
 .table-container table thead th:first-child {
   position: sticky;
   left: 0;
-  z-index: 4;
-  min-width: 140px;
+  z-index: 6;
+  background-color: var(--header-bg) !important;
+  color: var(--header-color) !important;
 }
+
+/* Sticky first column cells: sync explicitly with row backgrounds */
 .table-container table tbody td:first-child {
   position: sticky;
   left: 0;
-  z-index: 2;
-  min-width: 140px;
+  z-index: 4;
   box-shadow: 2px 0 5px -2px rgba(0,0,0,0.08);
+  /* fallback */
+  background-color: inherit !important;
+  color: inherit !important;
 }
-/* proportional widths based on total_units */
+
+/* Zebra rows: set row background for all cells (so first column can copy it) */
+.table-container table tbody tr:nth-child(odd) td {
+  background-color: var(--row-odd-bg);
+}
+.table-container table tbody tr:nth-child(even) td {
+  background-color: var(--row-even-bg);
+}
+
+/* Ensure the sticky first column copies the same zebra colors (explicit to avoid stacking issues) */
+.table-container table tbody tr:nth-child(odd) td:first-child {
+  background-color: var(--row-odd-bg) !important;
+}
+.table-container table tbody tr:nth-child(even) td:first-child {
+  background-color: var(--row-even-bg) !important;
+}
+
+/* Hover highlight: applied to entire row (including first column) */
+.table-container table tbody tr:hover td {
+  background-color: var(--row-hover-bg) !important;
+}
+.table-container table tbody tr:hover td:first-child {
+  background-color: var(--row-hover-bg) !important;
+}
+
+/* proportional widths based on total_units (kept for compatibility) */
 .table-container table thead th:first-child { width: 28.57%; }
 .table-container table thead th:not(:first-child) { width: 71.43%; }
 .table-container table tbody td:first-child { width: 28.57%; }
 .table-container table tbody td:not(:first-child) { width: 71.43%; }
-
-/* Dark-mode header contrast fix (targets document when dark mode is enabled via data-theme="dark") */
-[data-theme="dark"] .table-container table thead th {
-  background-color: #2a2e3a; /* darker header panel */
-  color: #e6eef6;            /* light text for contrast */
-  border-color: #3c3f4a;
-}
 
 /* --- Lists inside table cells: force consistent markers --- */
 /* top-level unordered lists: use en-dash marker (–) */
@@ -86,4 +134,24 @@
   display: inline-block;
   width: 2.2ch;
   margin-left: -2.2ch;
+}
+
+/* Debug fallback: ensure list markers apply if other sheets are heavy-handed */
+.table-container td ul,
+.table-container td ol {
+  list-style: none !important;
+  margin: .45rem 0 !important;
+  padding-left: 1.25rem !important;
+}
+.table-container td ul > li::before {
+  content: "– " !important;
+  display: inline-block !important;
+  width: 1.4ch !important;
+  margin-left: -1.4ch !important;
+  color: var(--text) !important;
+}
+.table-container td ul ul > li::before {
+  content: "• " !important;
+  font-size: 0.9em !important;
+  color: var(--muted) !important;
 }
