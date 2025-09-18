@@ -16,3 +16,7 @@
 
 :root{--bg:#f9fafb}
 #tables-viewer .table-wrapper{box-shadow:0 1px 2px rgba(0,0,0,.04)}
+/* tv-inline-overrides */
+#tables-viewer .table-wrapper .copy-buttons button{margin-left:6px;padding:6px 10px}
+#tables-viewer button{border-radius:6px}
+#stickyMainHeader { box-shadow: none }
