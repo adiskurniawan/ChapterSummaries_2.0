@@ -1,39 +1,41 @@
 
-/* Header-flex override: ensures header cells in a row share the same visual height.
-   Uses a controlled flex layout for the thead row only. This can change layout behavior
-   for some table semantics but fixes header-height mismatches. */
+/* Targeted header alignment overrides */
 .table-container table { table-layout: fixed; border-collapse: collapse; width:100%; box-sizing: border-box; }
-.table-container table thead tr {
-  display: flex;               /* make header row a flex container */
-  align-items: stretch;
-  width: 100%;
-  box-sizing: border-box;
-}
+/* Keep the standard table semantics. Do not change tr -> flex.
+   Instead make the header content a full-height flex container so content centers. */
 .table-container table thead th {
-  display: flex;
-  align-items: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  vertical-align: middle;
   padding: 10px;
   box-sizing: border-box;
+  white-space: normal;        /* allow multi-line headings when needed */
 }
-/* first column sticky semantics preserved; flex-basis controls proportional width */
+/* Ensure header inner wrapper takes full height and centers content */
+.table-container table thead th .th-with-sort,
+.table-container table thead th .th-with-sort > div {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  gap: 8px;
+  min-height: 1px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+/* sticky first column cell visuals (preserve original sticky behavior) */
 .table-container table thead th:first-child {
   position: sticky;
   left: 0;
   z-index: 4;
   min-width: 140px;
-  flex: 0 0 28.57%;
 }
-.table-container table thead th:not(:first-child) {
-  flex: 0 0 71.43%;
+.table-container table tbody td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  min-width: 140px;
+  box-shadow: 2px 0 5px -2px rgba(0,0,0,0.08);
 }
-/* ensure body rows remain table rows for correct layout */
-.table-container table tbody, .table-container table tbody tr, .table-container table tbody td {
-  display: table-row-group;
-}
-/* ensure cell borders and visuals still render */
-.table-container table thead th, .table-container table tbody td {
-  border: 1px solid #e5e7eb;
-}
+/* proportional widths based on total_units */
+.table-container table thead th:first-child { width: 28.57%; }
+.table-container table thead th:not(:first-child) { width: 71.43%; }
+.table-container table tbody td:first-child { width: 28.57%; }
+.table-container table tbody td:not(:first-child) { width: 71.43%; }
