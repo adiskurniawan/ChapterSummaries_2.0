@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <title>Tables Viewer v2.1</title>
-<link rel="stylesheet" href="assets/style.css?v=1758147598">
-<link rel="stylesheet" href="assets/overrides.css?v=1758147598">
+<link rel="stylesheet" href="assets/style.css?v=1758163008">
+<link rel="stylesheet" href="assets/overrides.css?v=1758163008">
 <style>
 /* Inline targeted header fix (after linked sheets). No tr->flex changes. */
 .table-container table { table-layout: fixed; border-collapse: collapse; width:100%; box-sizing: border-box; }
@@ -24,6 +24,75 @@
 .table-container table thead th:not(:first-child) { width: 71.43%; }
 .table-container table tbody td:first-child { width: 28.57%; }
 .table-container table tbody td:not(:first-child) { width: 71.43%; }
+
+/* Inline dark-mode header contrast (same as overrides.css) */
+[data-theme="dark"] .table-container table thead th {
+  background-color: #2a2e3a;
+  color: #e6eef6;
+  border-color: #3c3f4a;
+}
+
+/* --- Inline list marker rules to ensure consistent output --- */
+.table-container table td > ul, .table-container table td > ol {
+  margin: .45rem 0;
+  padding-left: 1.25rem;
+  list-style: none;
+}
+.table-container table td > ul > li, .table-container table td > ol > li {
+  margin-bottom: .3rem;
+  line-height: 1.36;
+}
+.table-container table td > ul > li::before {
+  content: "– ";
+  color: var(--text);
+  display: inline-block;
+  width: 1.1ch;
+  margin-left: -1.1ch;
+}
+.table-container table td ul ul > li::before {
+  content: "• ";
+  display: inline-block;
+  width: 1.1ch;
+  margin-left: -1.1ch;
+  color: var(--muted);
+  font-size: 0.9em;
+}
+.table-container table td ol {
+  counter-reset: table-ol;
+  padding-left: 1.6rem;
+}
+.table-container table td ol > li {
+  counter-increment: table-ol;
+}
+.table-container table td ol > li::before {
+  content: counter(table-ol) ". ";
+  color: var(--text);
+  display: inline-block;
+  width: 2.2ch;
+  margin-left: -2.2ch;
+}
+
+/* --- Debug override: force markers last-resort --- */
+.table-container td ul,
+.table-container td ol {
+  list-style: none !important;
+  margin: .45rem 0 !important;
+  padding-left: 1.25rem !important;
+}
+.table-container td ul > li::before {
+  content: "– " !important;
+  display: inline-block !important;
+  width: 1.4ch !important;
+  margin-left: -1.4ch !important;
+  color: var(--text) !important;
+}
+.table-container td ul ul > li::before {
+  content: "• " !important;
+  font-size: 0.9em !important;
+  color: var(--muted) !important;
+}
+
+/* End inline */
 </style>
 </head>
 <body>
@@ -292,7 +361,7 @@
 </div>
 
 <button id="backToTop" onclick="backToTop()">↑ Top</button>
-<script src="assets/script.js?v=1758147598"></script>
+<script src="assets/script.js?v=1758163008"></script>
 </div>
 </body>
 </html>
