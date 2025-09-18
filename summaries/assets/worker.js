@@ -1,0 +1,1 @@
+self.onmessage = function(e){ self.postMessage({status:'ok', msg:'worker received'}); };
