@@ -3,36 +3,61 @@
 <head>
 <meta charset="UTF-8">
 <title>Tables Viewer v2.1</title>
-<link rel="stylesheet" href="assets/style.css?v=1758162756">
-<link rel="stylesheet" href="assets/overrides.css?v=1758162756">
+<link rel="stylesheet" href="assets/style.css?v=1758194501">
+<link rel="stylesheet" href="assets/overrides.css?v=1758194501">
 <style>
-/* Inline targeted header fix (after linked sheets). No tr->flex changes. */
+:root {
+  --header-bg: #f3f4f6;
+  --header-color: #111827;
+  --row-odd-bg: #ffffff;
+  --row-even-bg: #fbfbfb;
+  --row-hover-bg: rgba(0,0,0,0.04);
+  --muted: #6b7280;
+  --text: #111827;
+}
+[data-theme="dark"], body.dark-mode {
+  --header-bg: #2a2e3a;
+  --header-color: #e6eef6;
+  --row-odd-bg: #242834;
+  --row-even-bg: #2a2e3a;
+  --row-hover-bg: rgba(255,255,255,0.04);
+  --muted: #9aa0b2;
+  --text: #e6eef6;
+}
+
 .table-container table { table-layout: fixed; border-collapse: collapse; width:100%; box-sizing: border-box; }
 .table-container table thead th {
   vertical-align: middle;
   padding: 10px;
   box-sizing: border-box;
   white-space: normal;
+  background-color: var(--header-bg);
+  color: var(--header-color);
 }
 .table-container table thead th .th-with-sort,
 .table-container table thead th .th-with-sort > div {
   display:flex; align-items:center; height:100%; gap:8px; min-height:1px; box-sizing:border-box; overflow:hidden;
 }
-.table-container table thead th:first-child { position:sticky; left:0; z-index:4; min-width:140px; }
-.table-container table tbody td:first-child { position:sticky; left:0; z-index:2; min-width:140px; box-shadow:2px 0 5px -2px rgba(0,0,0,0.08); }
+.table-container table thead th:first-child { position:sticky; left:0; z-index:6; background-color: var(--header-bg) !important; color:var(--header-color) !important; }
+.table-container table tbody td:first-child { position:sticky; left:0; z-index:4; box-shadow:2px 0 5px -2px rgba(0,0,0,0.08); background-color:inherit !important; color:inherit !important; }
+
+/* Zebra rows */
+.table-container table tbody tr:nth-child(odd) td { background-color: var(--row-odd-bg); }
+.table-container table tbody tr:nth-child(even) td { background-color: var(--row-even-bg); }
+.table-container table tbody tr:nth-child(odd) td:first-child { background-color: var(--row-odd-bg) !important; }
+.table-container table tbody tr:nth-child(even) td:first-child { background-color: var(--row-even-bg) !important; }
+
+/* Hover */
+.table-container table tbody tr:hover td { background-color: var(--row-hover-bg) !important; }
+.table-container table tbody tr:hover td:first-child { background-color: var(--row-hover-bg) !important; }
+
+/* widths */
 .table-container table thead th:first-child { width: 28.57%; }
 .table-container table thead th:not(:first-child) { width: 71.43%; }
 .table-container table tbody td:first-child { width: 28.57%; }
 .table-container table tbody td:not(:first-child) { width: 71.43%; }
 
-/* Inline dark-mode header contrast (same as overrides.css) */
-[data-theme="dark"] .table-container table thead th {
-  background-color: #2a2e3a;
-  color: #e6eef6;
-  border-color: #3c3f4a;
-}
-
-/* --- Inline list marker rules to ensure consistent output --- */
+/* Lists markers */
 .table-container table td > ul, .table-container table td > ol {
   margin: .45rem 0;
   padding-left: 1.25rem;
@@ -72,7 +97,7 @@
   margin-left: -2.2ch;
 }
 
-/* --- Debug override: force markers last-resort --- */
+/* Last-resort list marker forced */
 .table-container td ul,
 .table-container td ol {
   list-style: none !important;
@@ -91,8 +116,6 @@
   font-size: 0.9em !important;
   color: var(--muted) !important;
 }
-
-/* End inline */
 </style>
 </head>
 <body>
@@ -929,7 +952,7 @@
 </div>
 
 <button id="backToTop" onclick="backToTop()">↑ Top</button>
-<script src="assets/script.js?v=1758162756"></script>
+<script src="assets/script.js?v=1758194501"></script>
 </div>
 </body>
 </html>
