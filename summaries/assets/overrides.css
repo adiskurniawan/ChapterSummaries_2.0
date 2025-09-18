@@ -1,0 +1,39 @@
+
+/* Header-flex override: ensures header cells in a row share the same visual height.
+   Uses a controlled flex layout for the thead row only. This can change layout behavior
+   for some table semantics but fixes header-height mismatches. */
+.table-container table { table-layout: fixed; border-collapse: collapse; width:100%; box-sizing: border-box; }
+.table-container table thead tr {
+  display: flex;               /* make header row a flex container */
+  align-items: stretch;
+  width: 100%;
+  box-sizing: border-box;
+}
+.table-container table thead th {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 10px;
+  box-sizing: border-box;
+}
+/* first column sticky semantics preserved; flex-basis controls proportional width */
+.table-container table thead th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 4;
+  min-width: 140px;
+  flex: 0 0 28.57%;
+}
+.table-container table thead th:not(:first-child) {
+  flex: 0 0 71.43%;
+}
+/* ensure body rows remain table rows for correct layout */
+.table-container table tbody, .table-container table tbody tr, .table-container table tbody td {
+  display: table-row-group;
+}
+/* ensure cell borders and visuals still render */
+.table-container table thead th, .table-container table tbody td {
+  border: 1px solid #e5e7eb;
+}
