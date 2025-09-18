@@ -3,23 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <title>Tables Viewer v2.1</title>
-<link rel="stylesheet" href="assets/style.css?v=1758143993">
+<link rel="stylesheet" href="assets/style.css?v=1758146540">
+<link rel="stylesheet" href="assets/overrides.css?v=1758146540">
 <style>
-  /* Injected override: normalize header height and column widths */
-  table thead th {
-    vertical-align: middle;
-    white-space: nowrap;
-    line-height: 1.4;
-    padding: 8px 12px;
-    height: 50px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  table thead th:first-child { width: 28.57%; }
-  table thead th:not(:first-child) { width: 71.43%; }
-  table tbody td:first-child { width: 28.57%; }
-  table tbody td:not(:first-child) { width: 71.43%; }
-  table { table-layout: fixed; }
+/* Inline fallback for header-flex fix (applies after linked sheets) */
+.table-container table { table-layout: fixed; border-collapse: collapse; width:100%; box-sizing: border-box; }
+.table-container table thead tr { display: flex; align-items: stretch; width:100%; box-sizing: border-box; }
+.table-container table thead th {
+  display: flex; align-items: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  padding: 10px; box-sizing: border-box;
+}
+.table-container table thead th:first-child { position: sticky; left:0; z-index:4; min-width:140px; flex: 0 0 28.57%; }
+.table-container table thead th:not(:first-child) { flex: 0 0 71.43%; }
+.table-container table tbody, .table-container table tbody tr, .table-container table tbody td { display: table-row-group; }
 </style>
 </head>
 <body>
@@ -299,7 +295,7 @@
 </div>
 
 <button id="backToTop" onclick="backToTop()">↑ Top</button>
-<script src="assets/script.js?v=1758143993"></script>
+<script src="assets/script.js?v=1758146540"></script>
 </div>
 </body>
 </html>
