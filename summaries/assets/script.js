@@ -1,383 +1,300 @@
-// script.js — cleaned, class-based, complete
-// Revised: 2025-09-19
-(() => {
-  "use strict";
+/* assets/script.js — Tables Viewer v2.1
+   Minimal, robust interactive bindings. Exposes required globals:
+   toggleMode, toggleAllTables, copyAllTablesPlain, copyAllTablesMarkdown,
+   resetAllTables, searchTable, copyTablePlain, copyTableMarkdown,
+   toggleTable, sortTableByColumn, headerSortButtonClicked, backToTop
+*/
+(function () {
+  document.addEventListener('DOMContentLoaded', init);
 
-  // --- State
-  let originalTableRows = [];
-  let sortStates = [];
-
-  // --- Helpers
-  const getTables = () => Array.from(document.querySelectorAll(".table-container table"));
-
-  function ensureInitState() {
-    const tables = getTables();
-    originalTableRows = tables.map((table) => {
-      const tbody = table.tBodies[0];
-      if (!tbody) return [];
-      return Array.from(tbody.rows).map(r => r.cloneNode(true));
-    });
-    sortStates = tables.map((table) => {
-      const headerRow = table.tHead && table.tHead.rows[0] ? table.tHead.rows[0] : table.rows[0];
-      const cols = headerRow ? headerRow.cells.length : 0;
-      return Array(cols).fill(0);
-    });
-  }
-
-  // --- Theme (dark/light)
-  const modeBtn = document.getElementById("modeBtn");
-  function setModeButtonText(isDark) {
-    if (!modeBtn) return;
-    modeBtn.textContent = isDark ? "Light mode" : "Dark mode";
-  }
-  function applySavedMode() {
-    const saved = localStorage.getItem("uiMode");
-    const isDark = saved === "dark";
-    if (isDark) document.documentElement.setAttribute("data-theme", "dark");
-    else document.documentElement.removeAttribute("data-theme");
-    setModeButtonText(isDark);
-  }
-  function toggleMode() {
-    const wantDark = document.documentElement.getAttribute("data-theme") !== "dark";
-    if (wantDark) {
-      document.documentElement.setAttribute("data-theme", "dark");
-      localStorage.setItem("uiMode", "dark");
-    } else {
-      document.documentElement.removeAttribute("data-theme");
-      localStorage.setItem("uiMode", "light");
-    }
-    setModeButtonText(wantDark);
-  }
-
-  // --- Sorting UI
-  function _svgForState(state) {
-    if (state === 0) return '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 14l5-5 5 5"></path><path d="M7 10l5 5 5-5"></path></svg>';
-    if (state === 1) return '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6"></path><path d="M5 12l7-7 7 7"></path></svg>';
-    return '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v13"></path><path d="M19 12l-7 7-7-7"></path></svg>';
-  }
-
-  function updateHeaderSortUI(tableIdx) {
-    const tables = getTables();
-    const table = tables[tableIdx];
-    if (!table || !table.tHead) return;
-    const ths = table.tHead.rows[0].cells;
-    for (let c = 0; c < ths.length; c++) {
-      const btn = ths[c].querySelector(".sort-btn");
-      if (!btn) continue;
-      btn.classList.remove("sort-state-0", "sort-state-1", "sort-state-2");
-      const state = (sortStates[tableIdx] && sortStates[tableIdx][c]) || 0;
-      btn.classList.add("sort-state-" + state);
-      if (state === 1) ths[c].setAttribute("aria-sort", "ascending");
-      else if (state === 2) ths[c].setAttribute("aria-sort", "descending");
-      else ths[c].setAttribute("aria-sort", "none");
-      const iconSpan = btn.querySelector(".sort-icon");
-      if (iconSpan) iconSpan.innerHTML = _svgForState(state);
-    }
-  }
-
-  // --- Sorting logic
-  function sortTableByColumn(tableIdx, colIdx) {
-    const tables = getTables();
-    const table = tables[tableIdx];
-    if (!table || !table.tBodies[0]) return;
-    let state = (sortStates[tableIdx] && sortStates[tableIdx][colIdx]) || 0;
-    const tbody = table.tBodies[0];
-    let rows = Array.from(tbody.rows);
-
-    const compare = (a, b, asc = true) => {
-      const valA = a.cells[colIdx] ? a.cells[colIdx].textContent.trim() : "";
-      const valB = b.cells[colIdx] ? b.cells[colIdx].textContent.trim() : "";
-      const numA = parseFloat(valA.replace(/,/g, ""));
-      const numB = parseFloat(valB.replace(/,/g, ""));
-      if (!isNaN(numA) && !isNaN(numB)) return asc ? numA - numB : numB - numA;
-      return asc ? valA.localeCompare(valB) : valB.localeCompare(valA);
-    };
-
-    if (state === 0) {
-      rows.sort((a, b) => compare(a, b, true));
-      sortStates[tableIdx][colIdx] = 1;
-    } else if (state === 1) {
-      rows.sort((a, b) => compare(a, b, false));
-      sortStates[tableIdx][colIdx] = 2;
-    } else {
-      rows = (originalTableRows[tableIdx] || []).map(r => r.cloneNode(true));
-      sortStates[tableIdx][colIdx] = 0;
-    }
-
-    // reset other columns
-    for (let i = 0; i < sortStates[tableIdx].length; i++) {
-      if (i !== colIdx) sortStates[tableIdx][i] = 0;
-    }
-
-    tbody.innerHTML = "";
-    rows.forEach(r => tbody.appendChild(r.cloneNode(true)));
-    updateHeaderSortUI(tableIdx);
-    try { updateRowCounts(); } catch (e) {}
-  }
-
-  function headerSortButtonClicked(tableIdx, colIdx, btnEl) {
-    sortTableByColumn(tableIdx, colIdx);
-    if (btnEl && typeof btnEl.focus === "function") btnEl.focus();
-  }
-
-  // --- Collapse / expand
-  function toggleTable(btn) {
-    const wrapper = btn && btn.closest && btn.closest(".table-wrapper");
-    if (!wrapper) return;
-    const collapsed = wrapper.classList.toggle("table-collapsed");
-    btn.textContent = collapsed ? "Expand Table" : "Collapse Table";
-    updateToggleAllBtn();
-    try { updateRowCounts(); } catch (e) {}
-  }
-
-  function updateToggleAllBtn() {
-    const anyExpanded = document.querySelectorAll(".table-wrapper:not(.table-collapsed)").length > 0;
-    const toggleAllBtn = document.getElementById("toggleAllBtn");
-    if (!toggleAllBtn) return;
-    toggleAllBtn.textContent = anyExpanded ? "Collapse All Tables" : "Expand All Tables";
-  }
-
-  function toggleAllTables() {
-    const wrappers = Array.from(document.querySelectorAll(".table-wrapper"));
-    if (!wrappers.length) return;
-    const anyExpanded = wrappers.some(w => !w.classList.contains("table-collapsed"));
-    if (anyExpanded) {
-      wrappers.forEach(w => {
-        w.classList.add("table-collapsed");
-        const btn = w.querySelector(".toggle-table-btn");
-        if (btn) btn.textContent = "Expand Table";
-      });
-      const toggleAllBtn = document.getElementById("toggleAllBtn");
-      if (toggleAllBtn) toggleAllBtn.textContent = "Expand All Tables";
-    } else {
-      wrappers.forEach(w => {
-        w.classList.remove("table-collapsed");
-        const btn = w.querySelector(".toggle-table-btn");
-        if (btn) btn.textContent = "Collapse Table";
-      });
-      const toggleAllBtn = document.getElementById("toggleAllBtn");
-      if (toggleAllBtn) toggleAllBtn.textContent = "Collapse All Tables";
-    }
-    try { updateRowCounts(); } catch (e) {}
-  }
-
-  // --- Row counts & visibility
-  function updateRowCounts() {
-    document.querySelectorAll(".table-wrapper").forEach((wrapper) => {
-      const table = wrapper.querySelector("table");
-      const countDiv = wrapper.querySelector(".row-count");
-      if (!table || !countDiv) return;
-      const rows = table.tBodies[0] ? Array.from(table.tBodies[0].rows) : [];
-      const total = rows.length;
-      const visible = rows.filter(r => !r.hidden).length;
-      if (total === 0) countDiv.textContent = "Showing 0 rows";
-      else if (visible === total) countDiv.textContent = `Showing ${total} rows`;
-      else countDiv.textContent = `Showing ${visible} of ${total} rows`;
-    });
-  }
-
-  // --- Copy helpers
-  function getTableFromButton(btn) {
-    if (!btn) return null;
-    const wrapper = btn.closest && btn.closest(".table-wrapper");
-    if (wrapper) return wrapper.querySelector("table");
-    const container = btn.closest && btn.closest(".table-container");
-    if (container) return container.querySelector("table");
-    return null;
-  }
-
-  function _rowsForExport(table) {
-    if (!table) return { header: null, bodyRows: [] };
-    const header = table.tHead && table.tHead.rows[0] ? Array.from(table.tHead.rows[0].cells).map(c => c.textContent.trim()) : null;
-    const bodyRows = table.tBodies[0] ? Array.from(table.tBodies[0].rows).filter(r => !r.hidden) : [];
-    return { header, bodyRows };
-  }
-
-  function copyTablePlain(btn) {
-    const table = getTableFromButton(btn);
-    if (!table) return;
-    const title = table.closest(".table-wrapper")?.querySelector("h3")?.textContent || "";
-    const { header, bodyRows } = _rowsForExport(table);
-    let text = title ? title + "\n" : "";
-    if (header) text += header.join("\t") + "\n";
-    text += bodyRows.map(r => Array.from(r.cells).map(c => c.textContent.trim()).join("\t")).join("\n");
-    navigator.clipboard.writeText(text).then(() => { try { alert("Table copied as plain text!"); } catch (e) {} });
-  }
-
-  function copyTableMarkdown(btn) {
-    const table = getTableFromButton(btn);
-    if (!table) return;
-    const title = table.closest(".table-wrapper")?.querySelector("h3")?.textContent || "";
-    const { header, bodyRows } = _rowsForExport(table);
-    if (!header) return copyTablePlain(btn);
-    let text = title ? `**${title}**\n` : "";
-    text += `| ${header.join(" | ")} |\n`;
-    text += `| ${header.map(() => '---').join(" | ")} |\n`;
-    text += bodyRows.map(r => `| ${Array.from(r.cells).map(c => c.textContent.trim()).join(" | ")} |`).join("\n");
-    navigator.clipboard.writeText(text).then(() => { try { alert("Table copied in Markdown format!"); } catch (e) {} });
-  }
-
-  function copyAllTablesPlain() {
-    let text = "";
-    document.querySelectorAll(".table-wrapper").forEach(wrapper => {
-      const title = wrapper.querySelector("h3")?.textContent || "";
-      const table = wrapper.querySelector("table");
+  function init() {
+    // store original row order for each table
+    document.querySelectorAll('.table-wrapper').forEach(function (wrapper) {
+      const table = wrapper.querySelector('table') || wrapper.querySelector('.data-table') || wrapper.querySelector('.chat-table');
       if (!table) return;
-      const header = table.tHead && table.tHead.rows[0] ? Array.from(table.tHead.rows[0].cells).map(c => c.textContent.trim()) : null;
-      const bodyRows = table.tBodies[0] ? Array.from(table.tBodies[0].rows).filter(r => !r.hidden) : [];
-      text += title ? title + "\n" : "";
-      if (header) text += header.join("\t") + "\n";
-      text += bodyRows.map(r => Array.from(r.cells).map(c => c.textContent.trim()).join("\t")).join("\n");
-      text += "\n";
-    });
-    navigator.clipboard.writeText(text).then(() => { try { alert("All tables copied as plain text!"); } catch (e) {} });
-  }
-
-  function copyAllTablesMarkdown() {
-    let text = "";
-    document.querySelectorAll(".table-wrapper").forEach(wrapper => {
-      const title = wrapper.querySelector("h3")?.textContent || "";
-      const table = wrapper.querySelector("table");
-      if (!table) return;
-      const header = table.tHead && table.tHead.rows[0] ? Array.from(table.tHead.rows[0].cells).map(c => c.textContent.trim()) : null;
-      const bodyRows = table.tBodies[0] ? Array.from(table.tBodies[0].rows).filter(r => !r.hidden) : [];
-      text += title ? `**${title}**\n` : "";
-      if (header) {
-        text += `| ${header.join(" | ")} |\n`;
-        text += `| ${header.map(() => '---').join(" | ")} |\n`;
-      }
-      text += bodyRows.map(r => `| ${Array.from(r.cells).map(c => c.textContent.trim()).join(" | ")} |`).join("\n");
-      text += "\n";
-    });
-    navigator.clipboard.writeText(text).then(() => { try { alert("All tables copied in Markdown format!"); } catch (e) {} });
-  }
-
-  function resetAllTables() {
-    const tables = getTables();
-    tables.forEach((table, idx) => {
       const tbody = table.tBodies[0];
       if (!tbody) return;
-      tbody.innerHTML = "";
-      (originalTableRows[idx] || []).forEach(r => tbody.appendChild(r.cloneNode(true)));
-      sortStates[idx] = Array(table.rows[0] ? table.rows[0].cells.length : 0).fill(0);
-      updateHeaderSortUI(idx);
-    });
-    document.querySelectorAll(".table-wrapper").forEach(w => {
-      w.classList.remove("table-collapsed");
-      const btn = w.querySelector(".toggle-table-btn");
-      if (btn) btn.textContent = "Collapse Table";
-    });
-    const toggleAllBtn = document.getElementById("toggleAllBtn");
-    if (toggleAllBtn) toggleAllBtn.textContent = "Collapse All Tables";
-    const sb = document.getElementById("searchBox");
-    if (sb) sb.value = "";
-    searchTable();
-    try { updateRowCounts(); } catch (e) {}
-    try { alert("All tables reset!"); } catch (e) {}
-  }
-
-  // --- Search / highlight (uses hidden property to hide rows)
-  function searchTable() {
-    const filter = (document.getElementById("searchBox")?.value || "").toLowerCase();
-    let firstMatch = null;
-    getTables().forEach(table => {
-      const rows = table.tBodies[0] ? Array.from(table.tBodies[0].rows) : [];
-      rows.forEach(row => {
-        let rowMatches = false;
-        Array.from(row.cells).forEach(cell => {
-          const text = (cell.textContent || "").toLowerCase();
-          if (filter && text.includes(filter)) {
-            cell.classList.add("highlight");
-            rowMatches = true;
-            if (!firstMatch) firstMatch = row;
-          } else {
-            cell.classList.remove("highlight");
-          }
-        });
-        row.hidden = !(rowMatches || filter === "");
+      Array.from(tbody.rows).forEach(function (tr, i) {
+        tr.dataset.origIndex = i;
       });
     });
+  }
 
-    if (firstMatch) {
-      try {
-        const headerHeight = document.getElementById("stickyMainHeader")?.offsetHeight || 0;
-        const rect = firstMatch.getBoundingClientRect();
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        window.scrollTo({ top: scrollTop + rect.top - headerHeight - 5, behavior: "smooth" });
-      } catch (e) {}
+  // theme toggle
+  window.toggleMode = function () {
+    const body = document.body;
+    const btn = document.getElementById('modeBtn');
+    const isDark = body.classList.toggle('dark-mode');
+    if (isDark) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      if (btn) btn.textContent = 'Light mode';
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      if (btn) btn.textContent = 'Dark mode';
     }
-    try { updateRowCounts(); } catch (e) {}
-  }
+  };
 
-  // --- TOC click smooth scroll
-  function onTocClick(e) {
-    const a = e.target.closest && e.target.closest('#tocBar a[href^="#"]');
-    if (!a) return;
-    e.preventDefault();
-    const id = a.getAttribute("href").substring(1);
-    const container = document.getElementById(id)?.closest(".table-wrapper");
-    if (!container) return;
-    const headerHeight = document.getElementById("stickyMainHeader")?.offsetHeight || 0;
-    const containerTop = container.getBoundingClientRect().top + window.pageYOffset;
-    window.scrollTo({ top: containerTop - headerHeight - 5, behavior: "smooth" });
-    try { history.replaceState(null, '', '#' + id); } catch (err) {}
-  }
-
-  // --- Back to top
-  function updateBackToTopVisibility() {
-    const btn = document.getElementById("backToTop");
-    if (!btn) return;
-    const visible = document.documentElement.scrollTop > 200 || window.pageYOffset > 200;
-    btn.hidden = !visible;
-  }
-  function backToTop() {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  // --- Keyboard handling
-  function onGlobalKeydown(e) {
-    try {
-      const active = document.activeElement;
-      const tag = (active && (active.tagName || "")).toLowerCase();
-      if (e.key === "/" && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        if (tag === "input" || tag === "textarea" || (active && active.isContentEditable)) return;
-        e.preventDefault();
-        const sb = document.getElementById("searchBox");
-        if (sb) { sb.focus(); sb.select(); }
-      } else if (e.key === "Escape") {
-        backToTop();
-      }
-    } catch (err) {}
-  }
-
-  // --- Public bindings (used by core.py inline onclicks)
-  window.toggleMode = toggleMode;
-  window.sortTableByColumn = sortTableByColumn;
-  window.headerSortButtonClicked = headerSortButtonClicked;
-  window.toggleTable = toggleTable;
-  window.toggleAllTables = toggleAllTables;
-  window.copyTablePlain = copyTablePlain;
-  window.copyTableMarkdown = copyTableMarkdown;
-  window.copyAllTablesPlain = copyAllTablesPlain;
-  window.copyAllTablesMarkdown = copyAllTablesMarkdown;
-  window.resetAllTables = resetAllTables;
-  window.searchTable = searchTable;
-  window.backToTop = backToTop;
-
-  // --- Init on DOM ready
-  document.addEventListener("DOMContentLoaded", () => {
-    ensureInitState();
-    getTables().forEach((t, idx) => updateHeaderSortUI(idx));
-    document.querySelectorAll(".table-wrapper").forEach(w => {
-      const btn = w.querySelector(".toggle-table-btn");
-      if (btn) btn.textContent = w.classList.contains("table-collapsed") ? "Expand Table" : "Collapse Table";
+  // collapse / expand all tables
+  window.toggleAllTables = function () {
+    const wrappers = Array.from(document.querySelectorAll('.table-wrapper'));
+    if (wrappers.length === 0) return;
+    const anyOpen = wrappers.some(w => !w.classList.contains('table-collapsed'));
+    wrappers.forEach(w => {
+      if (anyOpen) w.classList.add('table-collapsed');
+      else w.classList.remove('table-collapsed');
     });
-    updateToggleAllBtn();
-    applySavedMode();
-    document.addEventListener("keydown", onGlobalKeydown);
-    document.addEventListener("click", onTocClick);
-    window.addEventListener("scroll", updateBackToTopVisibility);
-    updateBackToTopVisibility();
-    try { updateRowCounts(); } catch (e) {}
-  });
+    const btn = document.getElementById('toggleAllBtn');
+    if (btn) btn.textContent = anyOpen ? 'Expand All Tables' : 'Collapse All Tables';
+  };
+
+  // copy helpers
+  async function writeToClipboard(text) {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        showToast('Copied to clipboard');
+        return true;
+      }
+    } catch (e) {
+      // fallthrough to prompt
+    }
+    try {
+      window.prompt('Copy to clipboard (Ctrl+C, Enter)', text);
+      return true;
+    } catch (e) {
+      alert('Copy failed');
+      return false;
+    }
+  }
+
+  function showToast(msg) {
+    const id = 'tv-toast';
+    let el = document.getElementById(id);
+    if (!el) {
+      el = document.createElement('div');
+      el.id = id;
+      el.style.position = 'fixed';
+      el.style.bottom = '18px';
+      el.style.right = '18px';
+      el.style.padding = '8px 12px';
+      el.style.background = 'rgba(0,0,0,0.75)';
+      el.style.color = '#fff';
+      el.style.borderRadius = '8px';
+      el.style.zIndex = 99999;
+      el.style.fontSize = '13px';
+      document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.style.opacity = '1';
+    setTimeout(function () {
+      el.style.transition = 'opacity 400ms';
+      el.style.opacity = '0';
+    }, 1200);
+  }
+
+  function findTableFromButton(btn) {
+    if (!btn) return null;
+    const wrapper = btn.closest ? btn.closest('.table-wrapper') : getClosest(btn, '.table-wrapper');
+    if (!wrapper) return null;
+    return wrapper.querySelector('table') || wrapper.querySelector('.data-table') || wrapper.querySelector('.chat-table') || null;
+  }
+
+  // copy all tables (plain)
+  window.copyAllTablesPlain = async function () {
+    let out = '';
+    document.querySelectorAll('.table-wrapper').forEach(function (w, idx) {
+      const table = w.querySelector('table') || w.querySelector('.data-table') || w.querySelector('.chat-table');
+      if (!table) return;
+      out += 'Table ' + (idx + 1) + '\n';
+      out += tableToPlainText(table) + '\n\n';
+    });
+    await writeToClipboard(out);
+  };
+
+  // copy all tables (markdown)
+  window.copyAllTablesMarkdown = async function () {
+    let md = '';
+    document.querySelectorAll('.table-wrapper').forEach(function (w, idx) {
+      const table = w.querySelector('table') || w.querySelector('.data-table') || w.querySelector('.chat-table');
+      if (!table) return;
+      md += '### Table ' + (idx + 1) + '\n\n';
+      md += tableToMarkdown(table) + '\n\n';
+    });
+    await writeToClipboard(md);
+  };
+
+  // reset interface
+  window.resetAllTables = function () {
+    document.querySelectorAll('.table-wrapper').forEach(w => w.classList.remove('table-collapsed'));
+    const sb = document.getElementById('searchBox');
+    if (sb) sb.value = '';
+    searchTable();
+    const btn = document.getElementById('toggleAllBtn');
+    if (btn) btn.textContent = 'Collapse All Tables';
+  };
+
+  // search across tables; hides rows that don't match and hides whole table if no rows match
+  window.searchTable = function () {
+    const q = (document.getElementById('searchBox') || { value: '' }).value.trim().toLowerCase();
+    const wrappers = document.querySelectorAll('.table-wrapper');
+    wrappers.forEach(function (w) {
+      const table = w.querySelector('table') || w.querySelector('.data-table') || w.querySelector('.chat-table');
+      if (!table) return;
+      const tbody = table.tBodies[0];
+      if (!tbody) return;
+      let anyMatch = false;
+      Array.from(tbody.rows).forEach(function (tr) {
+        const text = tr.textContent.toLowerCase();
+        const match = q === '' || text.indexOf(q) !== -1;
+        tr.style.display = match ? '' : 'none';
+        if (match) anyMatch = true;
+        if (q && match) tr.classList.add('highlight'); else tr.classList.remove('highlight');
+      });
+      w.style.display = anyMatch ? '' : 'none';
+    });
+  };
+
+  // copy single table (plain)
+  window.copyTablePlain = async function (btn) {
+    const table = findTableFromButton(btn);
+    if (!table) return;
+    await writeToClipboard(tableToPlainText(table));
+  };
+
+  // copy single table (markdown)
+  window.copyTableMarkdown = async function (btn) {
+    const table = findTableFromButton(btn);
+    if (!table) return;
+    await writeToClipboard(tableToMarkdown(table));
+  };
+
+  // toggle a single table (collapse/expand)
+  window.toggleTable = function (btn) {
+    const wrapper = btn.closest ? btn.closest('.table-wrapper') : getClosest(btn, '.table-wrapper');
+    if (!wrapper) return;
+    wrapper.classList.toggle('table-collapsed');
+    const collapsed = wrapper.classList.contains('table-collapsed');
+    btn.textContent = collapsed ? 'Expand Table' : 'Collapse Table';
+  };
+
+  // convenience: call headerSortButtonClicked via this wrapper (keeps backward compatibility)
+  window.sortTableByColumn = function (tableIndex, colIndex) {
+    const wrappers = document.querySelectorAll('.table-wrapper');
+    const wrapper = wrappers[tableIndex];
+    if (!wrapper) return;
+    const sortBtns = wrapper.querySelectorAll('.sort-btn');
+    const btn = sortBtns[colIndex] || sortBtns[0] || null;
+    return headerSortButtonClicked(tableIndex, colIndex, btn);
+  };
+
+  // header sort button handler: cycles 0 -> asc -> desc -> 0
+  window.headerSortButtonClicked = function (tableIndex, colIndex, btn) {
+    const wrappers = document.querySelectorAll('.table-wrapper');
+    const wrapper = wrappers[tableIndex];
+    if (!wrapper) return;
+    const table = wrapper.querySelector('table') || wrapper.querySelector('.data-table') || wrapper.querySelector('.chat-table');
+    if (!table) return;
+    const tbody = table.tBodies[0];
+    if (!tbody) return;
+
+    const sortBtns = Array.from(wrapper.querySelectorAll('.sort-btn'));
+    if (!btn) {
+      // if no button passed, pick the relevant one and re-call
+      const chosen = sortBtns[colIndex] || sortBtns[0];
+      if (!chosen) return;
+      return window.headerSortButtonClicked(tableIndex, colIndex, chosen);
+    }
+
+    // toggle state for this button only
+    const current = parseInt(btn.dataset.sortState || '0', 10);
+    const next = (current + 1) % 3; // 0 none, 1 asc, 2 desc
+
+    // reset other buttons
+    sortBtns.forEach(function (b) {
+      b.dataset.sortState = '0';
+      b.classList.remove('sort-state-1', 'sort-state-2');
+      b.classList.add('sort-state-0');
+    });
+
+    btn.dataset.sortState = String(next);
+    btn.classList.remove('sort-state-0', 'sort-state-1', 'sort-state-2');
+    btn.classList.add('sort-state-' + next);
+
+    // collect rows with keys
+    const rows = Array.from(tbody.rows);
+    const items = rows.map(function (r) {
+      const cell = r.cells[colIndex];
+      const txt = cell ? cell.textContent.trim() : '';
+      return {
+        row: r,
+        key: txt.toLowerCase(),
+        num: parseNumber(txt),
+        idx: parseInt(r.dataset.origIndex || '0', 10)
+      };
+    });
+
+    if (next === 0) {
+      // restore original order
+      items.sort(function (a, b) { return a.idx - b.idx; });
+    } else {
+      const allNumeric = items.every(i => !isNaN(i.num));
+      items.sort(function (a, b) {
+        if (allNumeric) {
+          return (isNaN(a.num) ? -Infinity : a.num) - (isNaN(b.num) ? -Infinity : b.num);
+        }
+        return a.key.localeCompare(b.key);
+      });
+      if (next === 2) items.reverse();
+    }
+
+    // reattach rows in new order
+    items.forEach(function (it) { tbody.appendChild(it.row); });
+  };
+
+  // back to top
+  window.backToTop = function () {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // helpers
+  function parseNumber(txt) {
+    if (!txt) return NaN;
+    const cleaned = String(txt).replace(/[^0-9\.\-]/g, '');
+    if (cleaned === '' || cleaned === '-' || cleaned === '.' || cleaned === '-.') return NaN;
+    const n = parseFloat(cleaned);
+    return isNaN(n) ? NaN : n;
+  }
+
+  function tableToPlainText(table) {
+    const rows = Array.from(table.rows);
+    return rows.map(function (r) {
+      return Array.from(r.cells).map(function (c) { return c.textContent.trim(); }).join('\t');
+    }).join('\n');
+  }
+
+  function tableToMarkdown(table) {
+    const thead = table.tHead;
+    const tbody = table.tBodies[0];
+    let md = '';
+    if (thead && thead.rows.length) {
+      const headers = Array.from(thead.rows[0].cells).map(c => c.textContent.trim());
+      md += '| ' + headers.join(' | ') + ' |\n';
+      md += '| ' + headers.map(() => '---').join(' | ') + ' |\n';
+    }
+    if (tbody) {
+      Array.from(tbody.rows).forEach(function (r) {
+        const cols = Array.from(r.cells).map(function (c) {
+          return c.textContent.trim().replace(/\|/g, '\\|');
+        });
+        md += '| ' + cols.join(' | ') + ' |\n';
+      });
+    }
+    return md;
+  }
+
+  // polyfill/utility for old browsers where closest may not exist
+  function getClosest(el, sel) {
+    while (el && el.matches && !el.matches(sel)) el = el.parentElement;
+    return el;
+  }
 })();
