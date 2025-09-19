@@ -31,7 +31,7 @@
   vertical-align: middle;
   padding: 10px;
   box-sizing: border-box;
-  white-space: normal;        /* allow multi-line headings when needed */
+  white-space: normal;
   background-color: var(--header-bg);
   color: var(--header-color);
 }
