@@ -1,216 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang='en'>
 <head>
-<meta charset="UTF-8">
-<title>Tables Viewer v2.1</title>
-<link rel="stylesheet" href="assets/style.css?v=1758263077">
-<link rel="stylesheet" href="assets/overrides.css?v=1758263077">
-<style>
-:root {
-  --header-bg: #f3f4f6;
-  --header-color: #111827;
-  --row-odd-bg: #ffffff;
-  --row-even-bg: #fbfbfb;
-  --row-hover-bg: rgba(0,0,0,0.04);
-  --muted: #6b7280;
-  --text: #111827;
-}
-[data-theme="dark"], body.dark-mode {
-  --header-bg: #2a2e3a;
-  --header-color: #e6eef6;
-  --header-highlight-bg: #33363f;
-  --header-highlight-color: #ffffff;
-  --row-odd-bg: #242834;
-  --row-even-bg: #2a2e3a;
-  --row-hover-bg: rgba(255,255,255,0.08);
-  --muted: #9aa0b2;
-  --text: #e6eef6;
-}
-
-.table-container table { table-layout: fixed; border-collapse: collapse; width:100%; box-sizing: border-box; }
-.table-container table thead th {
-  vertical-align: middle;
-  padding: 10px;
-  box-sizing: border-box;
-  white-space: normal;
-  background-color: var(--header-bg);
-  color: var(--header-color);
-}
-.table-container table thead th .th-with-sort,
-.table-container table thead th .th-with-sort > div {
-  display:flex; align-items:center; height:100%; gap:8px; min-height:1px; box-sizing:border-box; overflow:hidden;
-}
-.table-container table thead th:first-child { position:sticky; left:0; z-index:6; background-color: var(--header-bg) !important; color:var(--header-color) !important; }
-.table-container table tbody td:first-child { position:sticky; left:0; z-index:4; box-shadow:2px 0 5px -2px rgba(0,0,0,0.08); background-color:inherit !important; color:inherit !important; }
-
-/* Zebra rows */
-.table-container table tbody tr:nth-child(odd) td { background-color: var(--row-odd-bg); }
-.table-container table tbody tr:nth-child(even) td { background-color: var(--row-even-bg); }
-.table-container table tbody tr:nth-child(odd) td:first-child { background-color: var(--row-odd-bg) !important; }
-.table-container table tbody tr:nth-child(even) td:first-child { background-color: var(--row-even-bg) !important; }
-
-/* Hover */
-.table-container table tbody tr:hover td { background-color: var(--row-hover-bg) !important; }
-.table-container table tbody tr:hover td:first-child { background-color: var(--row-hover-bg) !important; }
-
-/* Header hover/focus/active — duplicated inline for consistency */
-[data-theme="dark"] .table-container table thead th:hover,
-[data-theme="dark"] .table-container table thead th:focus,
-[data-theme="dark"] .table-container table thead th.sort-active,
-body.dark-mode .table-container table thead th:hover,
-body.dark-mode .table-container table thead th:focus,
-body.dark-mode .table-container table thead th.sort-active {
-  background-color: var(--header-highlight-bg) !important;
-  color: var(--header-highlight-color) !important;
-  transition: background-color 120ms ease, color 120ms ease;
-  outline: 2px solid rgba(255,255,255,0.03);
-}
-[data-theme="dark"] .table-container table thead th:first-child:hover,
-body.dark-mode .table-container table thead th:first-child:hover {
-  background-color: var(--header-highlight-bg) !important;
-  color: var(--header-highlight-color) !important;
-}
-
-/* widths */
-.table-container table thead th:first-child { width: 28.57%; }
-.table-container table thead th:not(:first-child) { width: 71.43%; }
-.table-container table tbody td:first-child { width: 28.57%; }
-.table-container table tbody td:not(:first-child) { width: 71.43%; }
-
-/* Lists markers (inline duplicate kept for maximum compatibility) */
-.table-container table td > ul, .table-container table td > ol {
-  margin: .45rem 0;
-  padding-left: 1.25rem;
-  list-style: none;
-}
-.table-container table td > ul > li, .table-container table td > ol > li {
-  margin-bottom: .3rem;
-  line-height: 1.36;
-}
-.table-container table td > ul > li::before {
-  content: "– ";
-  color: var(--text);
-  display: inline-block;
-  width: 1.1ch;
-  margin-left: -1.1ch;
-}
-.table-container table td ul ul > li::before {
-  content: "• ";
-  display: inline-block;
-  width: 1.1ch;
-  margin-left: -1.1ch;
-  color: var(--muted);
-  font-size: 0.9em;
-}
-.table-container table td ol {
-  counter-reset: table-ol;
-  padding-left: 1.6rem;
-}
-.table-container table td ol > li {
-  counter-increment: table-ol;
-}
-.table-container table td ol > li::before {
-  content: counter(table-ol) ". ";
-  color: var(--text);
-  display: inline-block;
-  width: 2.2ch;
-  margin-left: -2.2ch;
-}
-
-/* Last-resort list marker forced */
-.table-container td ul,
-.table-container td ol {
-  list-style: none !important;
-  margin: .45rem 0 !important;
-  padding-left: 1.25rem !important;
-}
-.table-container td ul > li::before {
-  content: "– " !important;
-  display: inline-block !important;
-  width: 1.4ch !important;
-  margin-left: -1.4ch !important;
-  color: var(--text) !important;
-}
-.table-container td ul ul > li::before {
-  content: "• " !important;
-  font-size: 0.9em !important;
-  color: var(--muted) !important;
-}
-</style>
-</head>
-<body>
-<div id='mainContent'>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+<link rel="stylesheet" href="assets/style.css?v=1758302403">
+<link rel="stylesheet" href="assets/overrides.css?v=1758302403">
+</head><body>
+<div id="tables-viewer" role="application" aria-label="Tables viewer">
 <div id="stickyMainHeader">
-  <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
-    <h1 style="margin:0;">Tables Viewer v2.1</h1>
-    <div style="display:flex; gap:8px; align-items:center;">
-      <button id="modeBtn" onclick="toggleMode()">Dark mode</button>
-      <button id="toggleAllBtn" onclick="toggleAllTables()">Collapse All Tables</button>
-      <button onclick="copyAllTablesPlain()">Copy All Tables (Plain Text)</button>
-      <button onclick="copyAllTablesMarkdown()">Copy All Tables (Markdown)</button>
-      <button onclick="resetAllTables()">Reset All Tables</button>
-    </div>
-  </div>
-
-  <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
-    <input type="text" id="searchBox" onkeyup="searchTable()" placeholder="Search for keywords..." style="flex:1; min-width:220px; padding:6px;">
-    <button onclick="document.getElementById('searchBox').value=''; searchTable();">Reset</button>
-  </div>
-
-  <div id="tocBar" aria-label="Table of Contents">
-    <h2 style="margin:0; display:none;">TOC</h2>
-    <ul id="toc">
-<li><a href="#Table1">Table 1</a></li>
-<li><a href="#Table2">Table 2</a></li>
-<li><a href="#Table3">Table 3</a></li>
-<li><a href="#Table4">Table 4</a></li>
-<li><a href="#Table5">Table 5</a></li>
-<li><a href="#Table6">Table 6</a></li>
-<li><a href="#Table7">Table 7</a></li>
-<li><a href="#Table8">Table 8</a></li>
-
-    </ul>
-  </div>
-</div>
-
-<div class="table-wrapper">
-  <h3 id="Table1" style="margin-top:30px; margin-bottom:10px;">Table 1</h3>
-  <div class="table-container">
-    <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-      <div class="copy-buttons">
-        <button onclick="copyTablePlain(this)">Copy Plain Table</button>
-        <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
-      </div>
-      <div style="display:flex; align-items:center;">
-        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
-      </div>
-    </div>
-    <table>
-      <thead><tr>
-
-        <th style="width:28.57%;" onclick="sortTableByColumn(0,0)" role="button" aria-label="Sort by <strong>Summary / Core Concepts</strong>">
+<div id="tv-header"><div><h1>Tables Viewer v2.1</h1></div><div style="display:flex;gap:8px;align-items:center;"><input id="searchBox" type="search" placeholder="Search" aria-label="Search tables" style="min-width:420px; width:44ch;"/><button id="modeBtn" onclick="toggleMode()" aria-label="Toggle theme">Theme</button><button id="toggleAllBtn" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button><button onclick="copyAllTablesPlain()">Copy All Tables (Plain Text)</button><button onclick="copyAllTablesMarkdown()">Copy All Tables (Markdown)</button><button onclick="resetAllTables()">Reset All Tables</button></div></div>
+<noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
+<div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1-title">Table 1</a></li>
+<li class="toc-item"><a class="toc-link" href="#Table2-title">Table 2</a></li>
+<li class="toc-item"><a class="toc-link" href="#Table3-title">Table 3</a></li>
+<li class="toc-item"><a class="toc-link" href="#Table4-title">Table 4</a></li>
+<li class="toc-item"><a class="toc-link" href="#Table5-title">Table 5</a></li>
+<li class="toc-item"><a class="toc-link" href="#Table6-title">Table 6</a></li>
+<li class="toc-item"><a class="toc-link" href="#Table7-title">Table 7</a></li>
+<li class="toc-item"><a class="toc-link" href="#Table8-title">Table 8</a></li></ul></div></div>
+<div class="table-wrapper" id="Table1"><h3 id="Table1-title">Table 1</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
+        <th style="width:28.57%;" onclick="sortTableByColumn(0,0)" role="button" aria-label="Sort by **Summary / Core Concepts**">
           <div class="th-with-sort">
             <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Summary / Core Concepts</strong></div>
             <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,0, this)" title="Toggle sort" aria-label="Toggle sort">
-              <span class="sort-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M7 14l5-5 5 5"></path>
-                  <path d="M7 10l5 5 5-5"></path>
-                </svg>
-              </span>
+              <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
         </th>
-        <th style="width:71.43%;" onclick="sortTableByColumn(0,1)" role="button" aria-label="Sort by <strong>Supporting Details / Quotes / Examples</strong>">
+        <th style="width:71.43%;" onclick="sortTableByColumn(0,1)" role="button" aria-label="Sort by **Supporting Details / Quotes / Examples**">
           <div class="th-with-sort">
             <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Supporting Details / Quotes / Examples</strong></div>
             <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,1, this)" title="Toggle sort" aria-label="Toggle sort">
-              <span class="sort-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M7 14l5-5 5 5"></path>
-                  <path d="M7 10l5 5 5-5"></path>
-                </svg>
-              </span>
+              <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
         </th></tr></thead><tbody><tr><td data-label="<strong>Summary / Core Concepts</strong>"><p><strong>Algorithms are now ubiquitous</strong> — They silently operate in banks, homes, cars, hospitals, logistics, power grids. If they all stopped, civilization would grind to a halt.</p></td><td data-label="<strong>Supporting Details / Quotes / Examples</strong>"><p>Quote: <em>“We live in an algorithmic society. From the thermostat that controls your furnace to the software that schedules airline crews, algorithms invisibly orchestrate our lives.”</em> Even ATMs, credit checks, and factory robots depend on algorithmic processes.</p></td></tr>
@@ -236,44 +56,20 @@ body.dark-mode .table-container table thead th:first-child:hover {
   <div class='row-count'></div>
 </div>
 
-<div class="table-wrapper">
-  <h3 id="Table2" style="margin-top:30px; margin-bottom:10px;">Table 2</h3>
-  <div class="table-container">
-    <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-      <div class="copy-buttons">
-        <button onclick="copyTablePlain(this)">Copy Plain Table</button>
-        <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
-      </div>
-      <div style="display:flex; align-items:center;">
-        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
-      </div>
-    </div>
-    <table>
-      <thead><tr>
-
-        <th style="width:28.57%;" onclick="sortTableByColumn(1,0)" role="button" aria-label="Sort by <strong>Summary / Core Concepts</strong>">
+<div class="table-wrapper" id="Table2"><h3 id="Table2-title">Table 2</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
+        <th style="width:28.57%;" onclick="sortTableByColumn(1,0)" role="button" aria-label="Sort by **Summary / Core Concepts**">
           <div class="th-with-sort">
             <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Summary / Core Concepts</strong></div>
             <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(1,0, this)" title="Toggle sort" aria-label="Toggle sort">
-              <span class="sort-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M7 14l5-5 5 5"></path>
-                  <path d="M7 10l5 5 5-5"></path>
-                </svg>
-              </span>
+              <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
         </th>
-        <th style="width:71.43%;" onclick="sortTableByColumn(1,1)" role="button" aria-label="Sort by <strong>Supporting Details / Quotes / Examples</strong>">
+        <th style="width:71.43%;" onclick="sortTableByColumn(1,1)" role="button" aria-label="Sort by **Supporting Details / Quotes / Examples**">
           <div class="th-with-sort">
             <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Supporting Details / Quotes / Examples</strong></div>
             <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(1,1, this)" title="Toggle sort" aria-label="Toggle sort">
-              <span class="sort-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M7 14l5-5 5 5"></path>
-                  <path d="M7 10l5 5 5-5"></path>
-                </svg>
-              </span>
+              <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
         </th></tr></thead><tbody><tr><td data-label="<strong>Summary / Core Concepts</strong>"><p><strong>Thesis — a single, universal learner (the “Master Algorithm”) could in principle induce all useful knowledge from data.</strong></p></td><td data-label="<strong>Supporting Details / Quotes / Examples</strong>"><p>The chapter opens with the central hypothesis: <em>All knowledge—past, present, and future—can be derived from data by a single, universal learning algorithm.</em> If such an algorithm exists, it would be the “Master Algorithm” capable of learning vision from video, reading from libraries, and discovering physics from experiments. This claim is defended by three converging arguments (neuroscience, evolution, and physics). </p></td></tr>
@@ -297,44 +93,20 @@ body.dark-mode .table-container table thead th:first-child:hover {
   <div class='row-count'></div>
 </div>
 
-<div class="table-wrapper">
-  <h3 id="Table3" style="margin-top:30px; margin-bottom:10px;">Table 3</h3>
-  <div class="table-container">
-    <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-      <div class="copy-buttons">
-        <button onclick="copyTablePlain(this)">Copy Plain Table</button>
-        <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
-      </div>
-      <div style="display:flex; align-items:center;">
-        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
-      </div>
-    </div>
-    <table>
-      <thead><tr>
-
-        <th style="width:28.57%;" onclick="sortTableByColumn(2,0)" role="button" aria-label="Sort by <strong>Summary / Core Concepts</strong>">
+<div class="table-wrapper" id="Table3"><h3 id="Table3-title">Table 3</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
+        <th style="width:28.57%;" onclick="sortTableByColumn(2,0)" role="button" aria-label="Sort by **Summary / Core Concepts**">
           <div class="th-with-sort">
             <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Summary / Core Concepts</strong></div>
             <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(2,0, this)" title="Toggle sort" aria-label="Toggle sort">
-              <span class="sort-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M7 14l5-5 5 5"></path>
-                  <path d="M7 10l5 5 5-5"></path>
-                </svg>
-              </span>
+              <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
         </th>
-        <th style="width:71.43%;" onclick="sortTableByColumn(2,1)" role="button" aria-label="Sort by <strong>Supporting Details / Quotes / Examples</strong>">
+        <th style="width:71.43%;" onclick="sortTableByColumn(2,1)" role="button" aria-label="Sort by **Supporting Details / Quotes / Examples**">
           <div class="th-with-sort">
             <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Supporting Details / Quotes / Examples</strong></div>
             <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(2,1, this)" title="Toggle sort" aria-label="Toggle sort">
-              <span class="sort-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M7 14l5-5 5 5"></path>
-                  <path d="M7 10l5 5 5-5"></path>
-                </svg>
-              </span>
+              <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
         </th></tr></thead><tbody><tr><td data-label="<strong>Summary / Core Concepts</strong>"><p><strong>Opening problem — Hume’s challenge:</strong> How can we ever justify generalizing from past observations to future cases? Every learning algorithm is, in a sense, an attempt to answer Hume’s problem of induction.</p></td><td data-label="<strong>Supporting Details / Quotes / Examples</strong>"><p>The chapter begins with a gentle stroll through the rationalist vs empiricist divide and quickly lands on Hume’s knife: <em>How can we be justified in generalizing from what we’ve seen to what we haven’t?</em> This tension lies at the heart of machine learning: we want systems that generalize to new cases, yet philosophically there is no guaranteed bridge from past data to unseen situations. </p></td></tr>
@@ -358,44 +130,20 @@ body.dark-mode .table-container table thead th:first-child:hover {
   <div class='row-count'></div>
 </div>
 
-<div class="table-wrapper">
-  <h3 id="Table4" style="margin-top:30px; margin-bottom:10px;">Table 4</h3>
-  <div class="table-container">
-    <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-      <div class="copy-buttons">
-        <button onclick="copyTablePlain(this)">Copy Plain Table</button>
-        <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
-      </div>
-      <div style="display:flex; align-items:center;">
-        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
-      </div>
-    </div>
-    <table>
-      <thead><tr>
-
-        <th style="width:28.57%;" onclick="sortTableByColumn(3,0)" role="button" aria-label="Sort by <strong>Summary / Core Concepts</strong>">
+<div class="table-wrapper" id="Table4"><h3 id="Table4-title">Table 4</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
+        <th style="width:28.57%;" onclick="sortTableByColumn(3,0)" role="button" aria-label="Sort by **Summary / Core Concepts**">
           <div class="th-with-sort">
             <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Summary / Core Concepts</strong></div>
             <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(3,0, this)" title="Toggle sort" aria-label="Toggle sort">
-              <span class="sort-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M7 14l5-5 5 5"></path>
-                  <path d="M7 10l5 5 5-5"></path>
-                </svg>
-              </span>
+              <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
         </th>
-        <th style="width:71.43%;" onclick="sortTableByColumn(3,1)" role="button" aria-label="Sort by <strong>Supporting Details / Quotes / Examples</strong>">
+        <th style="width:71.43%;" onclick="sortTableByColumn(3,1)" role="button" aria-label="Sort by **Supporting Details / Quotes / Examples**">
           <div class="th-with-sort">
             <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Supporting Details / Quotes / Examples</strong></div>
             <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(3,1, this)" title="Toggle sort" aria-label="Toggle sort">
-              <span class="sort-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M7 14l5-5 5 5"></path>
-                  <path d="M7 10l5 5 5-5"></path>
-                </svg>
-              </span>
+              <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
         </th></tr></thead><tbody><tr><td data-label="<strong>Summary / Core Concepts</strong>"><p><strong>Opening claim — learning is wiring: “neurons that fire together wire together.”</strong></p></td><td data-label="<strong>Supporting Details / Quotes / Examples</strong>"><p>Donald Hebb’s rule: <em>“When an axon of cell A is near enough cell B and repeatedly or persistently takes part in firing it, some growth process… takes place… A’s efficiency… is increased.”</em> The chapter frames connectionism around this simple association principle and uses it as the mechanistic core for distributed representations. </p></td></tr>
@@ -419,44 +167,20 @@ body.dark-mode .table-container table thead th:first-child:hover {
   <div class='row-count'></div>
 </div>
 
-<div class="table-wrapper">
-  <h3 id="Table5" style="margin-top:30px; margin-bottom:10px;">Table 5</h3>
-  <div class="table-container">
-    <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-      <div class="copy-buttons">
-        <button onclick="copyTablePlain(this)">Copy Plain Table</button>
-        <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
-      </div>
-      <div style="display:flex; align-items:center;">
-        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
-      </div>
-    </div>
-    <table>
-      <thead><tr>
-
-        <th style="width:28.57%;" onclick="sortTableByColumn(4,0)" role="button" aria-label="Sort by <strong>Summary / Core Concepts</strong>">
+<div class="table-wrapper" id="Table5"><h3 id="Table5-title">Table 5</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
+        <th style="width:28.57%;" onclick="sortTableByColumn(4,0)" role="button" aria-label="Sort by **Summary / Core Concepts**">
           <div class="th-with-sort">
             <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Summary / Core Concepts</strong></div>
             <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(4,0, this)" title="Toggle sort" aria-label="Toggle sort">
-              <span class="sort-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M7 14l5-5 5 5"></path>
-                  <path d="M7 10l5 5 5-5"></path>
-                </svg>
-              </span>
+              <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
         </th>
-        <th style="width:71.43%;" onclick="sortTableByColumn(4,1)" role="button" aria-label="Sort by <strong>Supporting Details / Quotes / Examples</strong>">
+        <th style="width:71.43%;" onclick="sortTableByColumn(4,1)" role="button" aria-label="Sort by **Supporting Details / Quotes / Examples**">
           <div class="th-with-sort">
             <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Supporting Details / Quotes / Examples</strong></div>
             <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(4,1, this)" title="Toggle sort" aria-label="Toggle sort">
-              <span class="sort-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M7 14l5-5 5 5"></path>
-                  <path d="M7 10l5 5 5-5"></path>
-                </svg>
-              </span>
+              <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
         </th></tr></thead><tbody><tr><td data-label="<strong>Summary / Core Concepts</strong>"><p><strong>Thought experiment — “Robotic Park”:</strong> Robots evolve in a walled enclosure; best performers spawn through 3D printers; invisible wall, sentries, danger, survival, death — evolution optimized for “deadliness” or fitness.</p></td><td data-label="<strong>Supporting Details / Quotes / Examples</strong>"><p><em>“Robotic Park is a massive robot factory surrounded by ten thousand square miles of jungle… the winning robots get to spawn, their reproduction accomplished by programming the banks of 3-D printers inside.”</em> The park’s inhabitants, millions of robots battling for survival and control, illustrate evolution’s pressures and fitness selection.</p></td></tr>
@@ -479,44 +203,20 @@ body.dark-mode .table-container table thead th:first-child:hover {
   <div class='row-count'></div>
 </div>
 
-<div class="table-wrapper">
-  <h3 id="Table6" style="margin-top:30px; margin-bottom:10px;">Table 6</h3>
-  <div class="table-container">
-    <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-      <div class="copy-buttons">
-        <button onclick="copyTablePlain(this)">Copy Plain Table</button>
-        <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
-      </div>
-      <div style="display:flex; align-items:center;">
-        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
-      </div>
-    </div>
-    <table>
-      <thead><tr>
-
-        <th style="width:28.57%;" onclick="sortTableByColumn(5,0)" role="button" aria-label="Sort by <strong>Summary / Core Concepts</strong>">
+<div class="table-wrapper" id="Table6"><h3 id="Table6-title">Table 6</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
+        <th style="width:28.57%;" onclick="sortTableByColumn(5,0)" role="button" aria-label="Sort by **Summary / Core Concepts**">
           <div class="th-with-sort">
             <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Summary / Core Concepts</strong></div>
             <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(5,0, this)" title="Toggle sort" aria-label="Toggle sort">
-              <span class="sort-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M7 14l5-5 5 5"></path>
-                  <path d="M7 10l5 5 5-5"></path>
-                </svg>
-              </span>
+              <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
         </th>
-        <th style="width:71.43%;" onclick="sortTableByColumn(5,1)" role="button" aria-label="Sort by <strong>Supporting Details / Quotes / Examples</strong>">
+        <th style="width:71.43%;" onclick="sortTableByColumn(5,1)" role="button" aria-label="Sort by **Supporting Details / Quotes / Examples**">
           <div class="th-with-sort">
             <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Supporting Details / Quotes / Examples</strong></div>
             <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(5,1, this)" title="Toggle sort" aria-label="Toggle sort">
-              <span class="sort-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M7 14l5-5 5 5"></path>
-                  <path d="M7 10l5 5 5-5"></path>
-                </svg>
-              </span>
+              <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
         </th></tr></thead><tbody><tr><td data-label="<strong>Summary / Core Concepts</strong>"><p><strong>What the Analogizer tribe is</strong> — Learners who use similarity judgments: classify new items based on how similar they are to past examples.</p></td><td data-label="<strong>Supporting Details / Quotes / Examples</strong>"><p>The analogizers encompass methods like nearest-neighbor, support vector machines, kernel machines, and more broadly all “learning by analogy.” In Domingos’s taxonomy, they are less cohesive than other tribes but united by reliance on similarity. </p></td></tr>
@@ -538,44 +238,20 @@ body.dark-mode .table-container table thead th:first-child:hover {
   <div class='row-count'></div>
 </div>
 
-<div class="table-wrapper">
-  <h3 id="Table7" style="margin-top:30px; margin-bottom:10px;">Table 7</h3>
-  <div class="table-container">
-    <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-      <div class="copy-buttons">
-        <button onclick="copyTablePlain(this)">Copy Plain Table</button>
-        <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
-      </div>
-      <div style="display:flex; align-items:center;">
-        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
-      </div>
-    </div>
-    <table>
-      <thead><tr>
-
-        <th style="width:28.57%;" onclick="sortTableByColumn(6,0)" role="button" aria-label="Sort by <strong>Summary / Core Concepts</strong>">
+<div class="table-wrapper" id="Table7"><h3 id="Table7-title">Table 7</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
+        <th style="width:28.57%;" onclick="sortTableByColumn(6,0)" role="button" aria-label="Sort by **Summary / Core Concepts**">
           <div class="th-with-sort">
             <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Summary / Core Concepts</strong></div>
             <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(6,0, this)" title="Toggle sort" aria-label="Toggle sort">
-              <span class="sort-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M7 14l5-5 5 5"></path>
-                  <path d="M7 10l5 5 5-5"></path>
-                </svg>
-              </span>
+              <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
         </th>
-        <th style="width:71.43%;" onclick="sortTableByColumn(6,1)" role="button" aria-label="Sort by <strong>Supporting Details / Quotes / Examples</strong>">
+        <th style="width:71.43%;" onclick="sortTableByColumn(6,1)" role="button" aria-label="Sort by **Supporting Details / Quotes / Examples**">
           <div class="th-with-sort">
             <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Supporting Details / Quotes / Examples</strong></div>
             <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(6,1, this)" title="Toggle sort" aria-label="Toggle sort">
-              <span class="sort-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M7 14l5-5 5 5"></path>
-                  <path d="M7 10l5 5 5-5"></path>
-                </svg>
-              </span>
+              <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
         </th></tr></thead><tbody><tr><td data-label="<strong>Summary / Core Concepts</strong>"><p><strong>Unifier motif:</strong> Many previously separate ideas in ML are shown to share a common underlying structure; this chapter begins by highlighting how disparate phenomena in science became unified through single theories.</p></td><td data-label="<strong>Supporting Details / Quotes / Examples</strong>"><p>Examples: Newton uniting falling apples & moon’s orbit; Maxwell merging electricity & magnetism; periodic table predicting unknown elements. The same unifying impulse underlies a search in ML for a unifying learner. </p></td></tr>
@@ -595,44 +271,20 @@ body.dark-mode .table-container table thead th:first-child:hover {
   <div class='row-count'></div>
 </div>
 
-<div class="table-wrapper">
-  <h3 id="Table8" style="margin-top:30px; margin-bottom:10px;">Table 8</h3>
-  <div class="table-container">
-    <div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-      <div class="copy-buttons">
-        <button onclick="copyTablePlain(this)">Copy Plain Table</button>
-        <button onclick="copyTableMarkdown(this)">Copy Markdown Table</button>
-      </div>
-      <div style="display:flex; align-items:center;">
-        <button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button>
-      </div>
-    </div>
-    <table>
-      <thead><tr>
-
-        <th style="width:28.57%;" onclick="sortTableByColumn(7,0)" role="button" aria-label="Sort by <strong>Summary / Core Concepts</strong>">
+<div class="table-wrapper" id="Table8"><h3 id="Table8-title">Table 8</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
+        <th style="width:28.57%;" onclick="sortTableByColumn(7,0)" role="button" aria-label="Sort by **Summary / Core Concepts**">
           <div class="th-with-sort">
             <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Summary / Core Concepts</strong></div>
             <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(7,0, this)" title="Toggle sort" aria-label="Toggle sort">
-              <span class="sort-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M7 14l5-5 5 5"></path>
-                  <path d="M7 10l5 5 5-5"></path>
-                </svg>
-              </span>
+              <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
         </th>
-        <th style="width:71.43%;" onclick="sortTableByColumn(7,1)" role="button" aria-label="Sort by <strong>Supporting Details / Examples / Verbatim Quotes</strong>">
+        <th style="width:71.43%;" onclick="sortTableByColumn(7,1)" role="button" aria-label="Sort by **Supporting Details / Examples / Verbatim Quotes**">
           <div class="th-with-sort">
             <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Supporting Details / Examples / Verbatim Quotes</strong></div>
             <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(7,1, this)" title="Toggle sort" aria-label="Toggle sort">
-              <span class="sort-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M7 14l5-5 5 5"></path>
-                  <path d="M7 10l5 5 5-5"></path>
-                </svg>
-              </span>
+              <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
         </th></tr></thead><tbody><tr><td data-label="<strong>Summary / Core Concepts</strong>"><p><strong>Personal Data Banks</strong></p></td><td data-label="<strong>Supporting Details / Examples / Verbatim Quotes</strong>"><p>The text envisions a company that acts as a personal data bank, analogous to how banks handle money. It would store all user data, from online interactions to potential future 24/7 video streams, anonymize activity, and create a complete model of the individual to act on their behalf. “The company's basic commitment to you is that your data and your model will never be used against your interests.” Current cloud providers and startups either lock users in or exploit their data, but the envisioned model prioritizes user control and trust.</p></td></tr>
@@ -650,8 +302,38 @@ body.dark-mode .table-container table thead th:first-child:hover {
   <div class='row-count'></div>
 </div>
 
-<button id="backToTop" onclick="backToTop()">↑ Top</button>
-<script src="assets/script.js?v=1758263077"></script>
-</div>
-</body>
-</html>
+<script src="assets/script.js?v=1758302403" defer></script>
+
+<script>
+(function(){
+  const template = "{table}_{date}";
+  function formatName(tableName) {
+    const date = (new Date()).toISOString().slice(0,10);
+    return template.replace('{table}', tableName).replace('{date}', date).replace('{user}', '');
+  }
+  const btn = document.getElementById('exportBtn');
+  if(btn) {
+    btn.addEventListener('click', async function() {
+      try {
+        const html = document.documentElement.outerHTML;
+        if(html.length > 2000000) {
+          alert('Export refused: html too large');
+          return;
+        }
+        if(window.Worker) {
+          const worker = new Worker('assets/worker.js');
+          worker.postMessage({html:html, format:'pdf'});
+          worker.onmessage = function(e){ console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+        } else {
+          alert('Export worker not supported in this environment.');
+        }
+      } catch(err) {
+        console.warn('Export failed', err);
+        alert('Export worker not available. See console for details.');
+      }
+    });
+  }
+})();
+</script>
+
+</div></body></html>
