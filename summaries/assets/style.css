@@ -1,5 +1,5 @@
 /* style.css — Tables Viewer v2.1
-   Revised: 2025-09-17
+   Revised: 2025-09-20
    Purpose: consistent list markers inside table cells, plus general UI polish
 */
 
@@ -17,6 +17,7 @@
   --toc-link:#2563eb;
   --toc-link-hover-bg:#e0f2fe;
   --toc-link-hover-color:#1e40af;
+  --tv-header-min-height:48px;
 }
 
 /* dark theme overrides */
@@ -139,7 +140,7 @@ table td, table th{border-color:rgba(0,0,0,0.06)}
 .th-with-sort, thead th[role="button"], .sort-btn{cursor:pointer}
 thead th[role="button"]:hover{background:#eef6ff}
 
-/* Sticky header area */
+/* Sticky header area - keep as column so header + TOC stack */
 #stickyMainHeader{
   position:sticky;
   top:0;
@@ -150,9 +151,60 @@ thead th[role="button"]:hover{background:#eef6ff}
   display:flex;
   flex-direction:column;
   gap:8px;
+  align-items:stretch;
+  /* ensure it paints above content when semi-transparent */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
-/* TOC bar */
+/* tv-header: internal controls layout (title left, controls right) */
+#tv-header{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  width:100%;
+  min-height:var(--tv-header-min-height);
+}
+
+/* tv-header children: title and controls */
+#tv-header > div:first-child{
+  flex: 0 0 auto;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+#tv-header > div:last-child{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  justify-content:flex-end;
+  flex: 1 1 auto;
+  flex-wrap:wrap;
+}
+
+/* Override inline width/min-width set in HTML for search input.
+   Use !important so we can control mobile behavior regardless of inline attrs. */
+#tv-header input[type="search"],
+#tv-header input[type="text"],
+#stickyMainHeader input[type="search"],
+#stickyMainHeader input[type="text"]{
+  flex: 1 1 220px !important;
+  min-width: 120px !important;
+  width: auto !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+
+/* Buttons inside header remain compact */
+#tv-header button,
+#tv-header .btn,
+#stickyMainHeader button{
+  flex: 0 0 auto;
+}
+
+/* TOC bar (keeps horizontal slicer behavior) */
 #tocBar{
   display:flex;
   align-items:center;
@@ -161,7 +213,10 @@ thead th[role="button"]:hover{background:#eef6ff}
   overflow-x:auto;
   padding:6px 4px;
   background:transparent;
+  -webkit-overflow-scrolling:touch;
 }
+
+/* keep the TOC visible and separate visually */
 #tocBar ul{
   display:flex;
   gap:8px;
@@ -188,7 +243,8 @@ thead th[role="button"]:hover{background:#eef6ff}
 
 /* Responsive tweaks */
 @media (max-width:900px){
-  #stickyMainHeader input{width:180px}
+  /* prefer the tv-header internal rule; set a reasonable narrow default */
+  #tv-header input[type="search"]{ width:180px !important; min-width:120px !important; }
   #tocBar{gap:8px;padding:4px}
   #mainContent{padding:12px}
 }
@@ -221,10 +277,6 @@ thead th[role="button"]:hover{background:#eef6ff}
 
 /* --------------------------
    Lists inside table cells: force consistent markers
-   - Unordered lists use an en-dash marker (–)
-   - Ordered lists use numeric counters
-   - Using list-style:none and adding ::before markers so appearance is consistent across browsers.
-   - Also handles nested lists with smaller indent and switching to a bullet marker for deeper levels.
    -------------------------- */
 td ul, td ol {
   margin: .45rem 0;
@@ -303,6 +355,46 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
   td,th{padding:10px 12px}
   thead th{position:sticky;top:48px;z-index:4}
   .table-container{border-radius:6px}
+
+  /* Make the tv-header stack nicely on very small screens */
+  #tv-header{
+    flex-direction:column;
+    align-items:stretch;
+  }
+  #tv-header > div:last-child{
+    justify-content:flex-start;
+  }
+
+  /* Force search to full width on mobile and place it above controls if wrapping */
+  #tv-header input[type="search"],
+  #tv-header input[type="text"],
+  #stickyMainHeader input[type="search"],
+  #stickyMainHeader input[type="text"] {
+    flex-basis: 100% !important;
+    width: 100% !important;
+    order: 1;
+    margin-bottom:6px;
+  }
+
+  /* Ensure toc has good touch area */
+  #tocBar{
+    padding:8px 6px;
+  }
 }
+
+/* Prevent ancestor overflow from disabling sticky positioning.
+   If your layout applies overflow on a parent, ensure it doesn't on the main viewer.
+   These are safe defaults but do not override intentionally set overflow on other components. */
+#tables-viewer, #mainContent {
+  overflow: visible;
+}
+
+/* lightweight shadow to separate sticky header from content when scrolling */
+#stickyMainHeader {
+  box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+}
+
+/* small visual polish for toc links */
+#tocBar a:hover{ background:var(--toc-link-hover-bg); color:var(--toc-link-hover-color) }
 
 /* End of file */
