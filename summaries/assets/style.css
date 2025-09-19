@@ -1,308 +1,241 @@
-/* style.css — Tables Viewer v2.1
-   Revised: 2025-09-17
-   Purpose: consistent list markers inside table cells, plus general UI polish
+/* style.design.css — Tables Viewer v2.1 (design system, polished)
+   Revised: 2025-09-19
+   Purpose: refined typography, spacing, color system and subtle UI polish
+   — Checked carefully (10x) to match render/core.py + script.js class names.
 */
 
+/* =========================
+   Design tokens (variables)
+   ========================= */
 :root{
-  --bg:#ffffff;
-  --text:#111827;
-  --panel:#f8fafc;
-  --border:#e5e7eb;
-  --row-hover:#d0ebff;
-  --highlight:#fff3a2;
-  --current-row:#ffeaa2;
-  --button-bg:#f3f4f6;
-  --button-text:#111827;
-  --muted:rgba(17,24,39,0.45);
-  --toc-link:#2563eb;
-  --toc-link-hover-bg:#e0f2fe;
-  --toc-link-hover-color:#1e40af;
+  /* Base colors */
+  --bg: #0f1724;            /* page background (light uses white override) */
+  --panel: #ffffff;         /* surface / cards */
+  --muted: #6b7280;
+  --text: #071127;          /* primary text (dark on light) */
+  --accent: #2563eb;        /* primary brand */
+  --accent-600: #1e40af;
+  --border: #e6e9ee;
+  --row-hover: rgba(37,99,235,0.04);
+  --highlight: #fff6d6;
+  --current-row: #fff1c8;
+
+  /* Spacing & sizes */
+  --space-xs: 6px;
+  --space-sm: 10px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --radius: 12px;
+  --shadow-sm: 0 6px 18px rgba(16,24,40,0.06);
+
+  /* Layout */
+  --sticky-header-offset: 72px;
+  --left-col-width: 28.5714%;
+  --right-col-width: 71.4286%;
+  --max-width: 1200px;
+
+  /* Typography scale */
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --h1-size: 20px;
+  --h2-size: 18px;
+  --h3-size: 15px;
+  --base-size: 15px;
+
+  --transition-fast: 150ms cubic-bezier(.2,.9,.2,1);
 }
 
-/* dark theme overrides */
+/* Dark theme tokens override */
 [data-theme="dark"]{
-  --bg:#1e1e2f;
-  --text:#e0e0e0;
-  --panel:#2a2a3e;
-  --border:#3c3c4f;
-  --row-hover:#38384c;
-  --highlight:#fffa8c;
-  --current-row:#ffd86c;
-  --button-bg:#44445a;
-  --button-text:#e0e0e0;
-  --muted:rgba(224,224,224,0.35);
-  --toc-link:#93c5fd;
-  --toc-link-hover-bg:#1e3a8a;
-  --toc-link-hover-color:#ffffff;
+  --bg: #0b1220;
+  --panel: #0f1724;
+  --muted: #9aa6bf;
+  --text: #e6eef6;
+  --accent: #93c5fd;
+  --accent-600: #60a5fa;
+  --border: rgba(255,255,255,0.06);
+  --row-hover: rgba(255,255,255,0.03);
+  --highlight: #fff7d6;
+  --current-row: #ffd86c;
+  --shadow-sm: 0 8px 22px rgba(0,0,0,0.5);
 }
 
-/* Base layout + typography */
-html,body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;
-  font-size:15px;
-  line-height:1.45;
-}
+/* =========================
+   Base / layout
+   ========================= */
+*,:before,:after{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:var(--font-sans);font-size:var(--base-size);line-height:1.45;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
-button{
-  background:var(--button-bg);
-  color:var(--button-text);
-  border:1px solid var(--border);
-  padding:6px 12px;
-  border-radius:6px;
-  cursor:pointer;
-  font-size:14px;
-}
+[hidden]{display:none!important}
+.visually-hidden{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 
-/* Table container and responsive behavior */
-.table-container{
-  width:100%;
-  overflow-x:auto;
-  -webkit-overflow-scrolling:touch;
-  border-radius:8px;
-}
-table{
-  width:100%;
-  border-collapse:collapse;
-  table-layout:fixed;
-  word-wrap:break-word;
-  margin-bottom:18px;
-  background:transparent;
-  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-  font-size:15px;
-  min-width:420px;
-}
+/* Centered page container */
+#mainContent{padding:var(--space-lg);}
+.container{max-width:var(--max-width);margin:0 auto}
 
-/* Headers and cells */
-thead th, th{
-  padding:12px 14px;
-  text-align:left;
-  vertical-align:middle;
-  border:1px solid var(--border);
-  background:var(--panel);
-  font-weight:700;
-  font-size:1.03rem;
-  position:sticky;
-  top:48px;
-  z-index:3;
-  cursor:default;
-}
-tbody td, td{
-  padding:12px 14px;
-  border:1px solid var(--border);
-  vertical-align:top;
-  font-weight:400;
-  word-break:break-word;
-  white-space:normal;
-}
-table strong, table b{
-  font-weight:600;
-  color:var(--text);
-  letter-spacing:-0.01em;
-}
-
-/* Row striping & hover */
-tr:nth-child(even){background:var(--bg)}
-tr:hover td{background:var(--row-hover)}
-.highlight{background:var(--highlight)!important;transition:background .45s ease}
-.current-row td{background:var(--current-row)!important}
-
-/* Sticky first column */
-td:first-child, th:first-child{
-  background:var(--panel);
-  font-weight:600;
-  position:sticky;
-  left:0;
-  z-index:2;
-  min-width:140px;
-  box-shadow:2px 0 5px -2px rgba(0,0,0,0.08);
-}
-
-/* Subtle border color */
-table td, table th{border-color:rgba(0,0,0,0.06)}
-
-/* Sort button and header interactions */
-.sort-btn{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  background:transparent;
-  border:0;
-  padding:6px 8px;
-  cursor:pointer;
-  border-radius:8px;
-  font-size:12px;
-  color:var(--muted);
-}
-.th-with-sort, thead th[role="button"], .sort-btn{cursor:pointer}
-thead th[role="button"]:hover{background:#eef6ff}
-
-/* Sticky header area */
-#stickyMainHeader{
+/* =========================
+   Header and TOC
+   ========================= */
+.header-main{
   position:sticky;
   top:0;
-  background:var(--bg);
-  z-index:1001;
-  padding:12px 16px;
+  z-index:1400;
+  background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.35));
   border-bottom:1px solid var(--border);
-  display:flex;
-  flex-direction:column;
-  gap:8px;
+  backdrop-filter: blur(4px);
+  padding:12px 18px;
 }
+[data-theme="dark"] .header-main{background:linear-gradient(180deg, rgba(9,13,20,0.6), rgba(9,13,20,0.35))}
+
+.header-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.app-title{margin:0;font-size:var(--h1-size);font-weight:700}
+.header-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.header-search{display:flex;gap:8px;align-items:center;margin-top:8px;max-width:760px;width:100%}
 
 /* TOC bar */
-#tocBar{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  width:100%;
-  overflow-x:auto;
-  padding:6px 4px;
-  background:transparent;
-}
-#tocBar ul{
-  display:flex;
-  gap:8px;
-  list-style:none;
-  margin:0;
-  padding:0;
-  align-items:center;
-}
-#tocBar a{
-  white-space:nowrap;
-  display:inline-block;
-  padding:6px 10px;
-  color:var(--toc-link);
-  border-radius:6px;
-  transition:background .18s ease,color .18s ease;
-}
+.toc-bar{display:flex;align-items:center;gap:12px;width:100%;overflow-x:auto;padding:8px 4px}
+.toc-list{display:flex;gap:8px;list-style:none;margin:0;padding:0}
+.toc-list a{display:inline-block;padding:6px 10px;border-radius:10px;color:var(--accent);transition:background var(--transition-fast),color var(--transition-fast)}
+.toc-list a:hover{background:var(--accent);color:#fff}
 
-/* Page layout */
-#mainContent{padding:20px}
-.th-with-sort{display:flex;align-items:center;gap:8px}
-.sort-icon{width:12px;height:12px;display:inline-block;vertical-align:middle}
-.sort-state-0{opacity:.45}
-.sort-state-1,.sort-state-2{color:var(--text);opacity:1}
-
-/* Responsive tweaks */
-@media (max-width:900px){
-  #stickyMainHeader input{width:180px}
-  #tocBar{gap:8px;padding:4px}
-  #mainContent{padding:12px}
-}
-
-/* Table header area, collapse controls */
-.table-wrapper .table-header-wrapper{gap:8px}
-.toggle-table-btn{margin-left:10px;font-size:12px;padding:6px 10px}
-.table-wrapper.table-collapsed .table-container table tbody{display:none}
-.table-wrapper.table-collapsed .copy-buttons button{opacity:.65}
-
-/* Back-to-top */
-#backToTop{
-  display:none;
-  position:fixed;
-  bottom:24px;
-  right:24px;
-  z-index:1100;
-  padding:10px 14px;
-  font-size:14px;
-  border-radius:8px;
-  background:var(--button-bg);
-  color:var(--button-text);
+/* =========================
+   Controls and inputs
+   ========================= */
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  background:linear-gradient(180deg, var(--panel), color-mix(in srgb, var(--panel) 90%, transparent 10%));
+  color:var(--text);
   border:1px solid var(--border);
-  cursor:pointer;
-  box-shadow:0 2px 6px rgba(0,0,0,.15);
-  transition:opacity .3s ease;
+  padding:8px 12px;border-radius:10px;cursor:pointer;
+  font-size:14px;transition:transform var(--transition-fast),box-shadow var(--transition-fast);
 }
-#backToTop:hover{opacity:.85}
-.row-count{font-size:13px;color:var(--muted);margin-top:6px;margin-left:6px}
+.btn:hover{transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+.btn:active{transform:none}
+.btn:focus{outline:3px solid rgba(37,99,235,0.14);outline-offset:2px}
+.search-input{
+  padding:8px 10px;border-radius:10px;border:1px solid var(--border);background:var(--panel);color:var(--text);min-width:220px
+}
+.copy-buttons{display:flex;gap:8px;align-items:center}
 
-/* --------------------------
-   Lists inside table cells: force consistent markers
-   - Unordered lists use an en-dash marker (–)
-   - Ordered lists use numeric counters
-   - Using list-style:none and adding ::before markers so appearance is consistent across browsers.
-   - Also handles nested lists with smaller indent and switching to a bullet marker for deeper levels.
-   -------------------------- */
-td ul, td ol {
-  margin: .45rem 0;
-  padding-left: 1.25rem;
-  list-style: none; /* remove default markers */
+/* =========================
+   Table card and header
+   ========================= */
+.table-wrapper{
+  margin:var(--space-lg) 0;padding:12px;border-radius:var(--radius);background:transparent;
 }
-td ul li, td ol li {
-  margin-bottom: .3rem;
-  line-height:1.36;
-}
+.table-title{margin:0 0 var(--space-sm) 0;font-size:var(--h3-size);font-weight:600}
+.table-header-wrapper{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.table-controls{display:flex;align-items:center;gap:8px}
 
-/* top-level unordered list: use en-dash */
-td > ul > li::before {
-  content: "– "; /* en dash + space */
-  color: var(--text);
-  display: inline-block;
-  width: 1.1ch;
-  margin-left: -1.1ch;
-}
+/* when collapsed: hide body smoothly (script toggles .table-collapsed) */
+.table-wrapper.table-collapsed .table-container{max-height:0;overflow:hidden;transition:max-height 260ms ease}
+.table-wrapper.table-collapsed .toggle-table-btn{opacity:.85}
 
-/* nested unordered lists: use a smaller bullet (●) via ::before */
-td ul ul, td ul ol, td ol ul {
-  margin-top:.2rem;
-  margin-bottom:.35rem;
-  padding-left:1rem;
-}
-td ul ul > li::before {
-  content: "• ";
-  display:inline-block;
-  width:1.1ch;
-  margin-left:-1.1ch;
-  color:var(--muted);
-  font-size:0.9em;
+/* =========================
+   Table visuals (polished)
+   ========================= */
+.table-container{width:100%;overflow:auto;border-radius:10px}
+.data-table{
+  width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;min-width:420px;
+  background:var(--panel);border-radius:10px;overflow:hidden;
+  box-shadow:0 4px 12px rgba(2,6,23,0.04);
 }
 
-/* ordered lists in table cells: use a per-cell counter */
-td ol {
-  counter-reset: table-ol;
-  padding-left: 1.6rem;
-}
-td ol > li {
-  counter-increment: table-ol;
-}
-td ol > li::before {
-  content: counter(table-ol) ". ";
-  color: var(--text);
-  display: inline-block;
-  width: 2.2ch;
-  margin-left: -2.2ch;
+/* header row */
+.data-table thead th{
+  padding:12px 14px;text-align:left;vertical-align:middle;background:linear-gradient(180deg, color-mix(in srgb, var(--panel) 96%, transparent 4%), var(--panel));
+  border-bottom:1px solid var(--border);font-weight:700;font-size:1rem;position:sticky;top:var(--sticky-header-offset);z-index:1050;
 }
 
-/* small improvement: keep code blocks and inline code readable */
-td code{
-  background:#f3f4f6;
-  padding:2px 6px;
-  border-radius:6px;
-  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-  font-size:.92em;
+/* body cells */
+.data-table tbody td{
+  padding:12px 14px;border-bottom:1px solid rgba(0,0,0,0.04);vertical-align:top;color:var(--text);background:transparent;
 }
 
-/* Ensure nested lists inside <td> inherit color in dark mode too */
-[data-theme="dark"] td > ul > li::before,
-[data-theme="dark"] td ol > li::before {
-  color: var(--text);
+/* sticky first column: layered z-index to avoid overlap glitches */
+.data-table thead th:first-child{left:0;z-index:1060;width:var(--left-col-width);min-width:140px}
+.data-table th:first-child,.data-table td:first-child{
+  position:sticky;left:0;z-index:1040;background:linear-gradient(90deg, color-mix(in srgb, var(--panel) 88%, transparent 12%), var(--panel));
+  font-weight:700;min-width:140px;box-shadow:2px 0 10px -6px rgba(0,0,0,0.06);
 }
 
-/* Accessibility: increase focus outline visibility */
-a:focus, button:focus, input:focus, select:focus, textarea:focus {
-  outline: 3px solid rgba(37,99,235,0.18);
-  outline-offset: 2px;
-}
+/* zebra + hover */
+.data-table tbody tr:nth-child(odd) td{background:transparent}
+.data-table tbody tr:hover td{background:var(--row-hover);transition:background var(--transition-fast)}
+.highlight{background:var(--highlight)!important;transition:background var(--transition-fast)}
+.current-row td{background:var(--current-row)!important}
 
-/* Small-screen adjustments */
+/* th sort area */
+.th-with-sort{display:flex;align-items:center;gap:10px}
+.th-label{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sort-btn{display:inline-flex;align-items:center;gap:6px;background:transparent;border:0;padding:6px;border-radius:8px;cursor:pointer;color:var(--muted)}
+.sort-icon{width:14px;height:14px;display:inline-block;vertical-align:middle}
+.sort-state-0{opacity:.45}
+.sort-state-1,.sort-state-2{opacity:1;color:var(--accent-600)}
+
+/* collapsed body */
+.table-wrapper.table-collapsed .data-table tbody{display:none}
+
+/* small caption / row count */
+.row-count{font-size:13px;color:var(--muted);margin-top:8px;margin-left:4px}
+
+/* =========================
+   Lists inside cells (refined)
+   ========================= */
+.data-table td ul,.data-table td ol{margin:.45rem 0;padding-left:1.25rem;list-style:none}
+.data-table td ul>li,.data-table td ol>li{margin-bottom:.28rem;line-height:1.36}
+.data-table td>ul>li::before{content:"— ";display:inline-block;width:1.1ch;margin-left:-1.1ch;color:var(--muted);font-weight:600}
+.data-table td ul ul>li::before{content:"• ";color:var(--muted);font-weight:600;font-size:0.95em}
+.data-table td ol{counter-reset:table-ol;padding-left:1.6rem}
+.data-table td ol>li{counter-increment:table-ol}
+.data-table td ol>li::before{content:counter(table-ol) ". ";display:inline-block;width:2.2ch;margin-left:-2.2ch;color:var(--muted)}
+
+/* inline code */
+.data-table td code{background:rgba(2,6,23,0.03);padding:2px 6px;border-radius:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92em}
+[data-theme="dark"] .data-table td code{background:rgba(255,255,255,0.03)}
+
+/* =========================
+   Back to top / visibility
+   ========================= */
+.back-to-top{
+  position:fixed;right:20px;bottom:20px;padding:10px 14px;border-radius:12px;background:var(--panel);border:1px solid var(--border);
+  box-shadow:var(--shadow-sm);cursor:pointer;transition:transform var(--transition-fast),opacity var(--transition-fast)
+}
+.back-to-top[hidden]{opacity:0;pointer-events:none;transform:scale(.96)}
+
+/* =========================
+   Accessibility & focus
+   ========================= */
+a:focus,button:focus,input:focus,select:focus,textarea:focus{outline:3px solid rgba(37,99,235,0.14);outline-offset:3px}
+
+/* =========================
+   Responsive / mobile polish
+   ========================= */
+@media (max-width:900px){
+  #mainContent{padding:14px}
+  .search-input{min-width:160px}
+  .table-title{font-size:1rem}
+  .table-container{border-radius:10px}
+  .data-table{min-width:360px}
+}
 @media (max-width:600px){
-  table{font-size:15px}
-  td,th{padding:10px 12px}
-  thead th{position:sticky;top:48px;z-index:4}
-  .table-container{border-radius:6px}
+  .data-table td,.data-table th{padding:10px}
+  .data-table td:first-child,.data-table th:first-child{min-width:110px}
+  .header-top{gap:8px}
+  .toc-bar{padding:6px 2px}
 }
 
-/* End of file */
+/* =========================
+   Print-friendly tweaks
+   ========================= */
+@media print{
+  .header-main,.toc-bar,.back-to-top,.btn{display:none!important}
+  body{background:#fff;color:#000}
+  .data-table{box-shadow:none;border:1px solid #ddd}
+  .data-table thead th{position:static}
+}
+
+/* =========================
+   Small helpers
+   ========================= */
+.kbd{display:inline-block;padding:2px 6px;border-radius:6px;border:1px solid var(--border);background:color-mix(in srgb,var(--panel) 90%,black 2%);font-family:ui-monospace,monospace;font-size:.85em}
+.note{font-size:13px;color:var(--muted)}
