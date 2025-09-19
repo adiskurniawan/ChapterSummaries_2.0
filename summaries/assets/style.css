@@ -1,5 +1,5 @@
 /* style.css — Tables Viewer v2.1
-   Revised: 2025-09-20
+   Revised: 2025-09-20 (compact header buttons + compact search)
    Purpose: consistent list markers inside table cells, plus general UI polish
 */
 
@@ -47,6 +47,8 @@ html,body{
   line-height:1.45;
 }
 a{color:inherit;text-decoration:none}
+
+/* Base button style (used broadly). Header buttons are overridden below. */
 button{
   background:var(--button-bg);
   color:var(--button-text);
@@ -140,7 +142,7 @@ table td, table th{border-color:rgba(0,0,0,0.06)}
 .th-with-sort, thead th[role="button"], .sort-btn{cursor:pointer}
 thead th[role="button"]:hover{background:#eef6ff}
 
-/* Sticky header area - keep as column so header + TOC stack */
+/* Sticky header area - header + TOC stack and remain sticky */
 #stickyMainHeader{
   position:sticky;
   top:0;
@@ -152,9 +154,9 @@ thead th[role="button"]:hover{background:#eef6ff}
   flex-direction:column;
   gap:8px;
   align-items:stretch;
-  /* ensure it paints above content when semi-transparent */
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.03);
 }
 
 /* tv-header: internal controls layout (title left, controls right) */
@@ -184,8 +186,18 @@ thead th[role="button"]:hover{background:#eef6ff}
   flex-wrap:wrap;
 }
 
-/* Override inline width/min-width set in HTML for search input.
-   Use !important so we can control mobile behavior regardless of inline attrs. */
+/* Compact top buttons (override header buttons only) */
+#tv-header button,
+#tv-header .btn,
+#stickyMainHeader button {
+  flex: 0 0 auto;
+  padding: 4px 8px;
+  font-size: 13px;
+  border-radius: 5px;
+  line-height: 1.2;
+}
+
+/* Compact header search inputs */
 #tv-header input[type="search"],
 #tv-header input[type="text"],
 #stickyMainHeader input[type="search"],
@@ -195,13 +207,10 @@ thead th[role="button"]:hover{background:#eef6ff}
   width: auto !important;
   max-width: 100% !important;
   box-sizing: border-box;
-}
-
-/* Buttons inside header remain compact */
-#tv-header button,
-#tv-header .btn,
-#stickyMainHeader button{
-  flex: 0 0 auto;
+  padding: 4px 8px;
+  font-size: 13px;
+  border-radius: 5px;
+  height: 30px;
 }
 
 /* TOC bar (keeps horizontal slicer behavior) */
@@ -243,7 +252,6 @@ thead th[role="button"]:hover{background:#eef6ff}
 
 /* Responsive tweaks */
 @media (max-width:900px){
-  /* prefer the tv-header internal rule; set a reasonable narrow default */
   #tv-header input[type="search"]{ width:180px !important; min-width:120px !important; }
   #tocBar{gap:8px;padding:4px}
   #mainContent{padding:12px}
@@ -281,23 +289,19 @@ thead th[role="button"]:hover{background:#eef6ff}
 td ul, td ol {
   margin: .45rem 0;
   padding-left: 1.25rem;
-  list-style: none; /* remove default markers */
+  list-style: none;
 }
 td ul li, td ol li {
   margin-bottom: .3rem;
   line-height:1.36;
 }
-
-/* top-level unordered list: use en-dash */
 td > ul > li::before {
-  content: "– "; /* en dash + space */
+  content: "– ";
   color: var(--text);
   display: inline-block;
   width: 1.1ch;
   margin-left: -1.1ch;
 }
-
-/* nested unordered lists: use a smaller bullet (●) via ::before */
 td ul ul, td ul ol, td ol ul {
   margin-top:.2rem;
   margin-bottom:.35rem;
@@ -311,8 +315,6 @@ td ul ul > li::before {
   color:var(--muted);
   font-size:0.9em;
 }
-
-/* ordered lists in table cells: use a per-cell counter */
 td ol {
   counter-reset: table-ol;
   padding-left: 1.6rem;
@@ -356,7 +358,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
   thead th{position:sticky;top:48px;z-index:4}
   .table-container{border-radius:6px}
 
-  /* Make the tv-header stack nicely on very small screens */
+  /* Make the tv-header stack on very small screens */
   #tv-header{
     flex-direction:column;
     align-items:stretch;
@@ -365,7 +367,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
     justify-content:flex-start;
   }
 
-  /* Force search to full width on mobile and place it above controls if wrapping */
+  /* Force search full width on mobile and place above controls if wrapping */
   #tv-header input[type="search"],
   #tv-header input[type="text"],
   #stickyMainHeader input[type="search"],
@@ -374,6 +376,17 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
     width: 100% !important;
     order: 1;
     margin-bottom:6px;
+    height:28px;
+    font-size:12px;
+    padding:3px 7px;
+  }
+
+  /* Slightly tighter header buttons on very small screens */
+  #tv-header button,
+  #tv-header .btn,
+  #stickyMainHeader button {
+    padding: 3px 7px;
+    font-size: 12px;
   }
 
   /* Ensure toc has good touch area */
@@ -382,16 +395,9 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
   }
 }
 
-/* Prevent ancestor overflow from disabling sticky positioning.
-   If your layout applies overflow on a parent, ensure it doesn't on the main viewer.
-   These are safe defaults but do not override intentionally set overflow on other components. */
+/* Prevent ancestor overflow from disabling sticky positioning */
 #tables-viewer, #mainContent {
   overflow: visible;
-}
-
-/* lightweight shadow to separate sticky header from content when scrolling */
-#stickyMainHeader {
-  box-shadow: 0 1px 0 rgba(0,0,0,0.03);
 }
 
 /* small visual polish for toc links */
