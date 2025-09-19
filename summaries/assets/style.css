@@ -1,7 +1,11 @@
-/* assets/style.css — Tables Viewer v2.1 (neutral, readable, robust)
-   Revised: careful 10x checks for selectors used by core.py + script.js
+/* assets/style.css — Tables Viewer v2.1
+   Revised: enforce clean line breaks inside cells (pre-line).
+   Checked carefully.
 */
 
+/* -----------------------
+   Design tokens
+   ----------------------- */
 :root{
   --bg: #ffffff;
   --panel: #ffffff;
@@ -30,17 +34,22 @@
   --transition-fast: 150ms cubic-bezier(.2,.9,.2,1);
 }
 
-/* base layout */
+/* -----------------------
+   Base / layout
+   ----------------------- */
 *,:before,:after{box-sizing:border-box}
 html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:var(--font-sans);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
 [hidden]{display:none!important}
 .visually-hidden{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 
-/* page container and header */
+/* Page container */
 #mainContent{padding:var(--space-lg)}
 .container{max-width:var(--max-width);margin:0 auto}
 
+/* -----------------------
+   Header / TOC / Controls
+   ----------------------- */
 .header-main{
   position:sticky;
   top:0;
@@ -61,7 +70,7 @@ a{color:inherit;text-decoration:none}
 .toc-list a{display:inline-block;padding:6px 10px;border-radius:10px;color:var(--accent);transition:background var(--transition-fast),color var(--transition-fast)}
 .toc-list a:hover{background:var(--accent);color:#fff}
 
-/* controls */
+/* Buttons */
 .btn{
   display:inline-flex;align-items:center;gap:8px;
   background:linear-gradient(180deg,#fff,#fafafa);
@@ -77,50 +86,81 @@ a{color:inherit;text-decoration:none}
   padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--panel);color:var(--text);min-width:220px
 }
 
-/* table wrapper and header */
+/* -----------------------
+   Table wrapper / header
+   ----------------------- */
 .table-wrapper{margin:20px 0;padding:12px;border-radius:var(--radius);background:transparent}
 .table-title{margin:0 0 8px 0;font-size:15px;font-weight:600}
 .table-header-wrapper{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
 .table-controls{display:flex;align-items:center;gap:8px}
 
-/* collapse behavior */
+/* toggle button */
+.toggle-table-btn{background:transparent;border:1px solid var(--border);padding:6px 10px;border-radius:8px;cursor:pointer}
+.toggle-table-btn:hover{background:rgba(37,99,235,0.03);}
+
+/* collapsed behavior */
 .table-wrapper.table-collapsed .table-container{max-height:0;overflow:hidden;transition:max-height 220ms ease}
 .table-wrapper.table-collapsed .toggle-table-btn{opacity:.9}
 .table-wrapper.table-collapsed .data-table tbody{display:none}
 
-/* table visuals */
+/* -----------------------
+   Table visuals (polished)
+   ----------------------- */
 .table-container{width:100%;overflow:auto;border-radius:8px}
-.data-table{
+.data-table, table.chat-table{
   width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;min-width:420px;
   background:var(--panel);border-radius:8px;overflow:hidden;
   box-shadow:0 6px 18px rgba(2,6,23,0.04);
 }
 
 /* header row */
-.data-table thead th{
+.data-table thead th, table.chat-table thead th{
   padding:12px 14px;text-align:left;vertical-align:middle;background:#f7f7f9;
   border-bottom:1px solid var(--border);font-weight:700;font-size:1rem;position:sticky;top:var(--sticky-header-offset);z-index:1050;
+  cursor:pointer; /* clickable header */
 }
 
-/* first column sticky */
-.data-table thead th:first-child{left:0;z-index:1060;width:var(--left-col-width);min-width:140px}
-.data-table th:first-child,.data-table td:first-child{
+/* sticky first column */
+.data-table thead th:first-child, table.chat-table thead th:first-child{left:0;z-index:1060;width:var(--left-col-width);min-width:140px}
+.data-table th:first-child,.data-table td:first-child, table.chat-table th:first-child, table.chat-table td:first-child{
   position:sticky;left:0;z-index:1040;background:linear-gradient(90deg, rgba(255,255,255,0.9), var(--panel));
   font-weight:700;min-width:140px;box-shadow:2px 0 10px -6px rgba(0,0,0,0.06);
 }
 
-/* body cells:
-   preserve line breaks from sanitize step and allow wrapping
+/* -----------------------
+   Preserve line breaks in cells (pre-line)
+   -----------------------
+   pre-line converts \n into line breaks while collapsing other whitespace.
 */
-.data-table tbody td{
-  padding:12px 14px;border-bottom:1px solid rgba(0,0,0,0.04);vertical-align:top;color:var(--text);
-  white-space:pre-wrap;               /* preserve \n and wrap */
+.data-table tbody td,
+table.chat-table td,
+.data-table thead th,
+table.chat-table thead th {
+  white-space: pre-line;     /* enforce line-breaks from \n */
+  vertical-align: top;
+  padding:12px 14px;
+  line-height:1.48;
   word-break:break-word;
-  line-height:1.42;
-  background:transparent;
 }
 
-/* zebra / hover */
+/* lists inside cells should use normal whitespace */
+.data-table td ul, .data-table td ol, table.chat-table td ul, table.chat-table td ol {
+  white-space: normal;
+  margin:.45rem 0;
+  padding-left:1.25rem;
+  list-style:none;
+}
+
+/* list marker styling */
+.data-table td > ul > li::before, table.chat-table td > ul > li::before {
+  content: "— ";
+  color:var(--muted);
+  display:inline-block;
+  width:1.1ch;
+  margin-left:-1.1ch;
+}
+
+/* stripe & hover */
 .data-table tbody tr:nth-child(odd) td{background:transparent}
 .data-table tbody tr:hover td{background:var(--row-hover);transition:background var(--transition-fast)}
 .highlight{background:var(--highlight)!important;transition:background var(--transition-fast)}
@@ -137,17 +177,8 @@ a{color:inherit;text-decoration:none}
 /* small caption / row count */
 .row-count{font-size:13px;color:var(--muted);margin-top:8px;margin-left:4px}
 
-/* lists inside cells */
-.data-table td ul,.data-table td ol{margin:.45rem 0;padding-left:1.25rem;list-style:none}
-.data-table td ul>li,.data-table td ol>li{margin-bottom:.28rem;line-height:1.36}
-.data-table td>ul>li::before{content:"— ";display:inline-block;width:1.1ch;margin-left:-1.1ch;color:var(--muted);font-weight:600}
-.data-table td ul ul>li::before{content:"• ";color:var(--muted);font-weight:600;font-size:0.95em}
-.data-table td ol{counter-reset:table-ol;padding-left:1.6rem}
-.data-table td ol>li{counter-increment:table-ol}
-.data-table td ol>li::before{content:counter(table-ol) ". ";display:inline-block;width:2.2ch;margin-left:-2.2ch;color:var(--muted)}
-
 /* inline code */
-.data-table td code{background:rgba(2,6,23,0.03);padding:2px 6px;border-radius:6px;font-family:ui-monospace,monospace;font-size:.92em}
+.data-table td code, table.chat-table td code{background:rgba(2,6,23,0.03);padding:2px 6px;border-radius:6px;font-family:ui-monospace,monospace;font-size:.92em}
 
 /* back to top */
 .back-to-top{
