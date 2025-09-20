@@ -448,7 +448,7 @@
       // Toggle all button state
       const anyExpanded = document.querySelectorAll('.table-wrapper:not(.table-collapsed)').length > 0;
       const toggleAll = document.getElementById('toggleAllBtn');
-      if (toggleAll) toggleAll.textContent = anyExpanded ? "Collapse All Tables" : "Collapse All Tables";
+      if (toggleAll) toggleAll.textContent = anyExpanded ? "Collapse All Tables" : "Expand All Tables";
 
       // Ensure backToTop exists
       if (!document.getElementById('backToTop')) {
@@ -496,6 +496,25 @@
       // Initial row counts
       try { updateRowCounts(); } catch (e) { }
     } catch (e) { /* silent */ }
+  });
+
+  // delegated click: sorting (bind header clicks to sort behavior)
+  document.addEventListener('click', function (e) {
+    try {
+      const el = e.target;
+      const hit = el.closest && (el.closest('.sort-btn') || el.closest('.th-with-sort') || (el.tagName && el.tagName.toLowerCase() === 'th' && el.getAttribute('role') === 'button' ? el : null));
+      if (!hit) return;
+      const th = hit.closest('th') || (hit.tagName && hit.tagName.toLowerCase() === 'th' ? hit : null);
+      if (!th) return;
+      const table = th.closest('table');
+      if (!table) return;
+      const tables = Array.from(document.querySelectorAll('.table-container table'));
+      const tableIdx = tables.indexOf(table);
+      const colIdx = th.cellIndex;
+      if (tableIdx === -1 || typeof colIdx === 'undefined' || colIdx < 0) return;
+      headerSortButtonClicked(tableIdx, colIdx, hit);
+      e.preventDefault();
+    } catch (err) { /* silent */ }
   });
 
   // delegated click: TOC anchor scroll
