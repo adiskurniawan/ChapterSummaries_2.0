@@ -1,470 +1,438 @@
-/* style.css — Tables Viewer (complete) */
-/* Corrected for accessibility, sticky TOC consolidation, zebra rows, and floating controls. */
+/* style.css — Tables Viewer v2.1
+   Revised: 2025-09-20 (compact header buttons, mobile hide rules)
+   Purpose: consistent list markers inside table cells, plus general UI polish
+*/
 
-/* -------------------------
-   Theme variables
-   ------------------------- */
 :root{
-  --bg: #ffffff;
-  --fg: #111111;
-  --muted: #6b7280;
-  --accent: #0b74de;
-  --surface: #f8fafc;
-  --surface-2: #f1f5f9;
-  --border: #e6edf3;
-  --shadow: 0 4px 10px rgba(16,24,40,0.06);
-  --topbar-height: 56px;
-  --toc-width: 280px;
-  --radius: 8px;
-  --focus-ring: 3px solid rgba(11,116,222,0.25);
-  --toast-bg: rgba(0,0,0,0.88);
-  --toast-fg: #fff;
-  --btn-padding: 8px 12px;
-  --font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --bg:#ffffff;
+  --text:#111827;
+  --panel:#f8fafc;
+  --border:#e5e7eb;
+  --row-hover:#d0ebff;
+  --highlight:#fff3a2;
+  --current-row:#ffeaa2;
+  --button-bg:#f3f4f6;
+  --button-text:#111827;
+  --muted:rgba(17,24,39,0.45);
+  --toc-link:#2563eb;
+  --toc-link-hover-bg:#e0f2fe;
+  --toc-link-hover-color:#1e40af;
+  --tv-header-min-height:48px;
 }
 
+/* dark theme overrides */
 [data-theme="dark"]{
-  --bg: #0b0f13;
-  --fg: #e6eef6;
-  --muted: #98a4b3;
-  --accent: #3aa0ff;
-  --surface: #071019;
-  --surface-2: #08131a;
-  --border: rgba(255,255,255,0.06);
-  --shadow: 0 6px 18px rgba(2,6,23,0.6);
-  --toast-bg: rgba(255,255,255,0.06);
-  --toast-fg: #e6eef6;
+  --bg:#1e1e2f;
+  --text:#e0e0e0;
+  --panel:#2a2a3e;
+  --border:#3c3c4f;
+  --row-hover:#38384c;
+  --highlight:#fffa8c;
+  --current-row:#ffd86c;
+  --button-bg:#44445a;
+  --button-text:#e0e0e0;
+  --muted:rgba(224,224,224,0.35);
+  --toc-link:#93c5fd;
+  --toc-link-hover-bg:#1e3a8a;
+  --toc-link-hover-color:#ffffff;
 }
 
-/* Respect user preference */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) { color-scheme: dark; }
+/* Base layout + typography */
+html,body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;
+  font-size:15px;
+  line-height:1.45;
+}
+a{color:inherit;text-decoration:none}
+
+/* Base button style (used broadly). Header buttons overridden below. */
+button{
+  background:var(--button-bg);
+  color:var(--button-text);
+  border:1px solid var(--border);
+  padding:6px 12px;
+  border-radius:6px;
+  cursor:pointer;
+  font-size:14px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
 }
 
-/* -------------------------
-   Base reset
-   ------------------------- */
-*,
-*::before,
-*::after { box-sizing: border-box; }
-html,body{ height:100%; margin:0; padding:0; background:var(--bg); color:var(--fg); font-family:var(--font-family); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; line-height:1.45; }
-a{ color:var(--accent); text-decoration:none; }
+/* Table container and responsive behavior */
+.table-container{
+  width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  border-radius:8px;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+  word-wrap:break-word;
+  margin-bottom:18px;
+  background:transparent;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-size:15px;
+  min-width:420px;
+}
 
-/* Accessible focus handling */
-:focus:not(:focus-visible) { outline: none; }
-:focus-visible { outline: var(--focus-ring); border-radius: 6px; }
+/* Headers and cells */
+thead th, th{
+  padding:12px 14px;
+  text-align:left;
+  vertical-align:middle;
+  border:1px solid var(--border);
+  background:var(--panel);
+  font-weight:700;
+  font-size:1.03rem;
+  position:sticky;
+  top:48px;
+  z-index:3;
+  cursor:default;
+}
+tbody td, td{
+  padding:12px 14px;
+  border:1px solid var(--border);
+  vertical-align:top;
+  font-weight:400;
+  word-break:break-word;
+  white-space:normal;
+}
+table strong, table b{
+  font-weight:600;
+  color:var(--text);
+  letter-spacing:-0.01em;
+}
 
-/* -------------------------
-   Layout
-   ------------------------- */
-.header, .topbar, header {
-  height: var(--topbar-height);
+/* Row striping & hover */
+tr:nth-child(even){background:var(--bg)}
+tr:hover td{background:var(--row-hover)}
+.highlight{background:var(--highlight)!important;transition:background .45s ease}
+.current-row td{background:var(--current-row)!important}
+
+/* Sticky first column */
+td:first-child, th:first-child{
+  background:var(--panel);
+  font-weight:600;
+  position:sticky;
+  left:0;
+  z-index:2;
+  min-width:140px;
+  box-shadow:2px 0 5px -2px rgba(0,0,0,0.08);
+}
+
+/* Subtle border color */
+table td, table th{border-color:rgba(0,0,0,0.06)}
+
+/* Sort button and header interactions */
+.sort-btn{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  background:transparent;
+  border:0;
+  padding:6px 8px;
+  cursor:pointer;
+  border-radius:8px;
+  font-size:12px;
+  color:var(--muted);
+}
+.th-with-sort, thead th[role="button"], .sort-btn{cursor:pointer}
+thead th[role="button"]:hover{background:#eef6ff}
+
+/* Sticky header area - header + TOC stack and remain sticky */
+#stickyMainHeader{
+  position:sticky;
+  top:0;
+  background:var(--bg);
+  z-index:1001;
+  padding:10px 14px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  align-items:stretch;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+}
+
+/* tv-header: internal controls layout (title left, controls right) */
+#tv-header{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  width:100%;
+  min-height:var(--tv-header-min-height);
+}
+
+/* tv-header children: title and controls */
+#tv-header > div:first-child{
+  flex: 0 0 auto;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+#tv-header > div:last-child{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  justify-content:flex-end;
+  flex: 1 1 auto;
+  flex-wrap:wrap;
+  overflow:visible;
+}
+
+/* Compact top buttons (header only) */
+#tv-header button,
+#tv-header .btn,
+#stickyMainHeader button {
+  flex: 0 0 auto;
+  padding: 4px 8px;
+  font-size: 13px;
+  border-radius: 5px;
+  line-height: 1.1;
+  min-height: 40px;     /* preserves touch target */
+  min-width: 36px;
+  white-space:nowrap;
+  gap:6px;
+}
+
+/* Provide slightly tighter visual for icon-only buttons if used */
+#tv-header button.icon-only,
+#tv-header .btn.icon-only {
+  padding: 6px;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  font-size: 0; /* icon fonts or SVG only */
+}
+
+/* Compact header search inputs */
+#tv-header input[type="search"],
+#tv-header input[type="text"],
+#stickyMainHeader input[type="search"],
+#stickyMainHeader input[type="text"]{
+  flex: 1 1 220px !important;
+  min-width: 110px !important;
+  width: auto !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  font-size: 13px;
+  border-radius: 6px;
+  height: 34px;
+}
+
+/* TOC bar (keeps horizontal slicer behavior) */
+#tocBar{
   display:flex;
   align-items:center;
   gap:12px;
-  padding:8px 12px;
+  width:100%;
+  overflow-x:auto;
+  padding:6px 4px;
   background:transparent;
-  border-bottom:1px solid var(--border);
-  position:relative;
-  z-index:50;
+  -webkit-overflow-scrolling:touch;
 }
 
-.container {
+/* keep the TOC visible and separate visually */
+#tocBar ul{
   display:flex;
-  gap:16px;
-  padding:16px;
-  width:100%;
-}
-
-/* TOC column (consolidated) */
-nav.toc, .toc {
-  width: var(--toc-width);
-  flex: 0 0 var(--toc-width);
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  padding:8px;
-  box-shadow:var(--shadow);
-  max-height: calc(100vh - var(--topbar-height) - 32px);
-  overflow:auto;
-  position: sticky;
-  top: calc(var(--topbar-height) + 12px);
-  -webkit-overflow-scrolling: touch;
-  z-index: 60;
-}
-
-/* TOC list and items */
-.toc ul, nav.toc ul { list-style:none; margin:0; padding:0; }
-.toc li { margin:0 0 6px 0; }
-.toc a {
-  display:block;
-  padding:12px 14px;              /* larger hit area for touch */
-  line-height:1.25;
-  border-radius:6px;
-  color:var(--fg);
-  background:transparent;
-  transition: background .12s ease;
-  text-decoration:none;
-  font-size:15px;
-}
-.toc a:hover, .toc a:focus-visible {
-  background:var(--surface-2);
-  box-shadow:none;
-}
-.toc a.active {
-  background: linear-gradient(90deg, rgba(11,116,222,0.06), transparent);
-  box-shadow: inset 3px 0 0 var(--accent);
-  padding-left:14px; /* keep spacing consistent */
-}
-
-/* Expand/collapse controls inside TOC */
-.toc .toc-toggle { display:inline-flex; align-items:center; gap:6px; cursor:pointer; }
-
-/* -------------------------
-   Main content and tables
-   ------------------------- */
-.main {
-  flex:1 1 auto;
-  min-width:0;
-}
-
-/* Table container responsive */
-.table-container {
-  width:100%;
-  overflow:auto;
-  margin-bottom:20px;
-  border-radius:6px;
-  background:transparent;
-  border:1px solid var(--border);
-}
-
-/* Table base styles */
-table {
-  width:100%;
-  border-collapse:collapse;
-  font-size:13px;
-  background:transparent;
-}
-thead th {
-  text-align:left;
-  font-weight:600;
-  padding:8px 10px;
-  border-bottom:1px solid var(--border);
-  background: linear-gradient(180deg, rgba(0,0,0,0.02), transparent);
-}
-tbody td {
-  padding:8px 10px;
-  border-bottom:1px dashed var(--border);
-  vertical-align:top;
-}
-/* Allow overrides to control zebra coloring */
-tbody tr:nth-child(even) td { background: inherit; }
-
-/* small screens: allow horizontal scroll */
-@media (max-width: 900px){
-  .container { padding:10px; gap:10px; flex-direction:column; }
-  nav.toc, .toc { width:100%; max-height:none; top:calc(var(--topbar-height) + 8px); border-radius:6px; }
-  .table-container { overflow:auto; }
-}
-
-/* -------------------------
-   Buttons and controls
-   ------------------------- */
-.btn {
-  display:inline-flex;
-  align-items:center;
   gap:8px;
-  padding: var(--btn-padding);
-  background:var(--accent);
-  color:#fff;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-  font-size:13px;
-  transition: transform .08s ease, box-shadow .12s ease, opacity .12s ease;
-}
-.btn[disabled]{ opacity: .5; cursor: not-allowed; transform:none; }
-.btn.inline { display:inline-block; background:transparent; color:var(--fg); border:1px solid var(--border); padding:6px 8px; }
-
-/* copy buttons */
-.copy-btn, .copy-button, .btn.copy {
-  display:inline-flex;
-  gap:8px;
+  list-style:none;
+  margin:0;
+  padding:0;
   align-items:center;
-  padding:6px 10px;
-  background:transparent;
-  border:1px solid var(--border);
-  color:var(--fg);
-  border-radius:6px;
-  cursor:pointer;
 }
-.copy-btn:focus-visible, .copy-button:focus-visible { box-shadow:var(--focus-ring); outline:none; }
-
-/* floating controls (legacy support) */
-.floating, .floating-btn {
-  position:fixed;
-  right:16px;
-  bottom:16px;
-  z-index:80;
-}
-
-/* back-to-top (placed above floating-buttons to avoid overlap) */
-.back-to-top, #backToTop, .backToTop {
-  position:fixed;
-  right:20px;
-  bottom:88px; /* raised above floating buttons */
-  width:44px;
-  height:44px;
-  border-radius:999px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:var(--surface);
-  border:1px solid var(--border);
-  box-shadow:var(--shadow);
-  cursor:pointer;
-  z-index:90;
-}
-.back-to-top:focus-visible { box-shadow:var(--focus-ring); outline:none; }
-
-/* search */
-.search, .search-bar { display:flex; gap:8px; align-items:center; }
-.search input[type="search"], .search input[type="text"], #searchInput {
-  padding:8px 10px;
-  border:1px solid var(--border);
-  border-radius:8px;
-  min-width:220px;
-  font-size:14px;
-  background:var(--surface-2);
-  color:var(--fg);
-}
-#searchInput:focus-visible { box-shadow:var(--focus-ring); outline:none; }
-
-/* small inline spinner for search */
-#searchLoading {
+#tocBar a{
+  white-space:nowrap;
   display:inline-block;
-  width:16px;
-  height:16px;
-  border-radius:50%;
-  border:2px solid rgba(0,0,0,0.12);
-  border-top-color:var(--accent);
-  animation:spin 800ms linear infinite;
-  vertical-align:middle;
-  margin-left:6px;
-}
-#searchLoading[hidden] { display:none; }
-
-/* table chunk/load controls */
-.table-load-controls {
-  display:flex;
-  gap:8px;
-  align-items:center;
-  margin:8px 0;
-}
-.table-load-controls button {
   padding:6px 10px;
+  color:var(--toc-link);
   border-radius:6px;
-  border:1px solid var(--border);
-  background:var(--surface);
-  cursor:pointer;
+  transition:background .18s ease,color .18s ease;
 }
 
-/* -------------------------
-   Toast / non-blocking notification
-   ------------------------- */
-.toast, #toast {
+/* Page layout */
+#mainContent{padding:20px}
+.th-with-sort{display:flex;align-items:center;gap:8px}
+.sort-icon{width:12px;height:12px;display:inline-block;vertical-align:middle}
+.sort-state-0{opacity:.45}
+.sort-state-1,.sort-state-2{color:var(--text);opacity:1}
+
+/* Responsive tweaks */
+@media (max-width:900px){
+  #tv-header input[type="search"]{ width:180px !important; min-width:120px !important; }
+  #tocBar{gap:8px;padding:4px}
+  #mainContent{padding:12px}
+}
+
+/* Table header area, collapse controls */
+.table-wrapper .table-header-wrapper{gap:8px}
+.toggle-table-btn{margin-left:10px;font-size:12px;padding:6px 10px}
+.table-wrapper.table-collapsed .table-container table tbody{display:none}
+.table-wrapper.table-collapsed .copy-buttons button{opacity:.65}
+
+/* Back-to-top */
+#backToTop{
+  display:none;
   position:fixed;
-  left:50%;
-  bottom:22px;
-  transform:translateX(-50%) translateY(12px);
-  background:var(--toast-bg);
-  color:var(--toast-fg);
+  bottom:24px;
+  right:24px;
+  z-index:1100;
   padding:10px 14px;
+  font-size:14px;
   border-radius:8px;
-  box-shadow:0 8px 24px rgba(2,6,23,0.4);
-  opacity:0;
-  visibility:hidden;
-  transition: all .22s cubic-bezier(.2,.9,.2,1);
-  z-index:120;
-  max-width:92%;
-  font-size:13px;
+  background:var(--button-bg);
+  color:var(--button-text);
+  border:1px solid var(--border);
+  cursor:pointer;
+  box-shadow:0 2px 6px rgba(0,0,0,.15);
+  transition:opacity .3s ease;
 }
-.toast.show, #toast.show {
-  opacity:1;
-  visibility:visible;
-  transform:translateX(-50%) translateY(0);
+#backToTop:hover{opacity:.85}
+.row-count{font-size:13px;color:var(--muted);margin-top:6px;margin-left:6px}
+
+/* --------------------------
+   Lists inside table cells: force consistent markers
+   -------------------------- */
+td ul, td ol {
+  margin: .45rem 0;
+  padding-left: 1.25rem;
+  list-style: none;
+}
+td ul li, td ol li {
+  margin-bottom: .3rem;
+  line-height:1.36;
+}
+td > ul > li::before {
+  content: "– ";
+  color: var(--text);
+  display: inline-block;
+  width: 1.1ch;
+  margin-left: -1.1ch;
+}
+td ul ul, td ul ol, td ol ul {
+  margin-top:.2rem;
+  margin-bottom:.35rem;
+  padding-left:1rem;
+}
+td ul ul > li::before {
+  content: "• ";
+  display:inline-block;
+  width:1.1ch;
+  margin-left:-1.1ch;
+  color:var(--muted);
+  font-size:0.9em;
+}
+td ol {
+  counter-reset: table-ol;
+  padding-left: 1.6rem;
+}
+td ol > li {
+  counter-increment: table-ol;
+}
+td ol > li::before {
+  content: counter(table-ol) ". ";
+  color: var(--text);
+  display: inline-block;
+  width: 2.2ch;
+  margin-left: -2.2ch;
 }
 
-/* -------------------------
-   Details / collapsible
-   ------------------------- */
-details[open] > summary::after { content: "▲"; float:right; }
-details > summary::after { content: "▼"; float:right; }
-details summary { list-style:none; cursor:pointer; padding:8px; border-radius:6px; }
-.collapsed, .collapse, .is-collapsed { display:none; }
-
-/* -------------------------
-   Accessibility / focus (global)
-   ------------------------- */
-button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { box-shadow:var(--focus-ring); border-radius:6px; }
-
-/* reduce motion */
-@media (prefers-reduced-motion: reduce){
-  * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+/* small improvement: keep code blocks and inline code readable */
+td code{
+  background:#f3f4f6;
+  padding:2px 6px;
+  border-radius:6px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:.92em;
 }
 
-/* -------------------------
-   Dark mode helper classes (explicit)
-   ------------------------- */
-.theme-toggle, .theme-control { cursor:pointer; display:inline-flex; align-items:center; gap:8px; padding:6px 8px; border-radius:6px; border:1px solid var(--border); background:var(--surface); }
+/* Ensure nested lists inside <td> inherit color in dark mode too */
+[data-theme="dark"] td > ul > li::before,
+[data-theme="dark"] td ol > li::before {
+  color: var(--text);
+}
 
-/* -------------------------
-   Utilities
-   ------------------------- */
-.hidden { display:none !important; }
-.no-print { display:none !important; }
-.center { display:flex; align-items:center; justify-content:center; }
+/* Accessibility: increase focus outline visibility */
+a:focus, button:focus, input:focus, select:focus, textarea:focus {
+  outline: 3px solid rgba(37,99,235,0.18);
+  outline-offset: 2px;
+}
 
-/* -------------------------
-   Print optimizations (careful rules)
-   ------------------------- */
-@media print {
-  :root { color-scheme: light; }
-  html, body {
-    background: #fff !important;
-    color: #000 !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
+/* Small-screen adjustments */
+@media (max-width:600px){
+  table{font-size:15px}
+  td,th{padding:10px 12px}
+  thead th{position:sticky;top:48px;z-index:4}
+  .table-container{border-radius:6px}
+
+  /* Make the tv-header stack on very small screens */
+  #tv-header{
+    flex-direction:column;
+    align-items:stretch;
   }
-  * {
-    background: transparent !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-  }
-
-  nav.toc, .toc, .toc-controls, .toc-toggle,
-  .search, .search-bar, #searchInput, .search-input, input[type="search"],
-  .controls, .header, .topbar, .toast, #toast,
-  .theme-toggle, .theme-control, .copy-btn, .copy-button, .btn.copy, .table-load-controls,
-  .floating, .floating-btn, .back-to-top, #backToTop, .backToTop,
-  .pagination-controls, .filter-controls, .sticky-controls {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
+  #tv-header > div:last-child{
+    justify-content:flex-start;
   }
 
-  header, footer { position: static !important; display:block !important; }
-
-  .collapsed, .collapse, .is-collapsed, .hidden, .no-collapse, [aria-hidden="true"] {
-    display: block !important;
-    visibility: visible !important;
-    height: auto !important;
-    overflow: visible !important;
-  }
-  details { display: block !important; }
-  details > summary { display: none !important; }
-
-  table {
+  /* Force search full width on mobile and place above controls if wrapping */
+  #tv-header input[type="search"],
+  #tv-header input[type="text"],
+  #stickyMainHeader input[type="search"],
+  #stickyMainHeader input[type="text"] {
+    flex-basis: 100% !important;
     width: 100% !important;
-    border-collapse: collapse !important;
-    font-size: 12pt !important;
-    background: transparent !important;
+    order: 1;
+    margin-bottom:6px;
+    height:32px;
+    font-size:12px;
+    padding:4px 7px;
   }
-  thead { display: table-header-group; }
-  tfoot { display: table-footer-group; }
-  tr, th, td {
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
+
+  /* Slightly tighter header buttons on very small screens */
+  #tv-header button,
+  #tv-header .btn,
+  #stickyMainHeader button {
+    padding: 3px 7px;
+    font-size: 12px;
+    min-height:36px;
   }
-  th, td {
-    border: 1px solid #ccc !important;
-    padding: 4px 6px !important;
-    color: #000 !important;
-    background: transparent !important;
+
+  /* Hide less-essential header buttons on very narrow screens while keeping key ones */
+  /* Keeps #modeBtn and #toggleAllBtn visible; hides other text buttons to save space */
+  @media (max-width:420px){
+    #tv-header > div:last-child{
+      overflow-x:auto;
+      -webkit-overflow-scrolling:touch;
+    }
+    #tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) {
+      display:none !important;
+    }
   }
-  .table-container, table, tbody {
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
+
+  /* Ensure toc has good touch area */
+  #tocBar{
+    padding:8px 6px;
   }
-  .table-separator, .table-container + .table-container, h1, h2, h3 {
-    page-break-before: always;
-    page-break-after: avoid;
-  }
-  img, svg { max-width:100% !important; height:auto !important; }
-  a[href]:after { content: " (" attr(href) ")"; font-size:90%; color:#000; }
-  body { line-height:1.25 !important; font-size:12pt !important; -webkit-print-color-adjust: exact !important; }
-  .sticky, .fixed, .is-fixed, [style*="position:fixed"], [style*="position: sticky"] { position: static !important; }
-  .no-print, .no-print * { display: none !important; }
-
-  @page { margin: 12mm; size: auto; }
 }
 
-/* -------------------------
-   Animations
-   ------------------------- */
-@keyframes spin { from { transform: rotate(0deg);} to { transform: rotate(360deg);} }
-
-/* -------------------------
-   End of file
-   ------------------------- */
-
-/* --- Integrated floating Print + Top buttons (append only) --- */
-.floating-buttons {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  z-index: 9999;
-  pointer-events: auto;
+/* Prevent ancestor overflow from disabling sticky positioning */
+#tables-viewer, #mainContent {
+  overflow: visible;
 }
 
-/* Button visuals follow existing tokens (non-destructive) */
-.floating-buttons button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-width: 44px;
-  height: 44px;
-  padding: 8px 12px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--fg);
-  box-shadow: var(--shadow);
-  cursor: pointer;
-  font-size: 14px;
-  transition: transform .08s ease, box-shadow .12s ease, opacity .12s ease;
-}
+/* small visual polish for toc links */
+#tocBar a:hover{ background:var(--toc-link-hover-bg); color:var(--toc-link-hover-color) }
 
-/* Match focus / accessibility styles used elsewhere */
-.floating-buttons button:focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
-  border-radius: 10px;
-}
-
-/* Subtle hover/active micro-interactions */
-.floating-buttons button:hover { transform: translateY(-2px); }
-.floating-buttons button:active { transform: translateY(0); }
-
-/* Specific helper classes (use in HTML): */
-.print-btn { /* print button */
-  background: var(--surface);
-  color: var(--fg);
-  border: 1px solid var(--border);
-}
-.top-btn { /* top button if you want a named hook */
-  background: var(--surface);
-  color: var(--fg);
-  border: 1px solid var(--border);
-}
-
-/* Hide floating controls when printing */
-@media print {
-  .floating-buttons { display: none !important; }
-}
+/* End of file */
