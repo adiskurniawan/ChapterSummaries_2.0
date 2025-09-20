@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+<link rel="stylesheet" href="assets/style.css?v=1758327761">
+<link rel="stylesheet" href="assets/overrides.css?v=1758327761">
+</head><body>
+<div id="tables-viewer" role="application" aria-label="Tables viewer">
+<div id="stickyMainHeader">
+<div id="tv-header"><div><h1>Tables Viewer v2.1</h1></div><div style="display:flex;gap:8px;align-items:center;"><input id="searchBox" type="search" placeholder="Search" aria-label="Search tables" style="min-width:420px; width:44ch;"/><button id="modeBtn" onclick="toggleMode()" aria-label="Toggle theme">Theme</button><button id="toggleAllBtn" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button><button onclick="copyAllTablesPlain()">Copy All Tables (Plain Text)</button><button onclick="copyAllTablesMarkdown()">Copy All Tables (Markdown)</button><button onclick="resetAllTables()">Reset All Tables</button></div></div>
+<noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
+<div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1-title">Table 1</a></li></ul></div></div>
+<div class="table-wrapper" id="Table1"><h3 id="Table1-title">Table 1</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
+        <th style="width:28.57%;" onclick="sortTableByColumn(0,0)" role="button" aria-label="Sort by Category">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Category</div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true"></span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(0,1)" role="button" aria-label="Sort by Improvements">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Improvements</div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true"></span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="Category"><p>[UI/UX Enhancements]</p></td><td data-label="Improvements"><p><ul> <li>Add keyboard shortcuts (e.g., press "/" to focus search, "T" for theme toggle)<br></li> <li>Provide a "jump to next/previous table" navigation with arrow buttons<br></li> <li>Allow resizing of table columns by dragging headers<br></li> <li>Add a floating "mini TOC" that stays visible when scrolling inside a large table<br></li> <li>Improve table collapse: remember collapsed/expanded state across sessions (localStorage)<br></li> <li>Add an option to collapse all tables or expand all with one button<br></li> <li>Smooth scroll animation when jumping from TOC link to a table<br></li> <li>Show a tooltip with a preview when hovering over TOC items<br></li> <li>Add breadcrumbs or page progress indicator for long documents<br></li> <li>Sticky action bar at bottom with quick controls (theme toggle, collapse all, back to top)</li> </ul></p></td></tr>
+<tr><td data-label="Category"><p>[Table Features]</p></td><td data-label="Improvements"><p><ul> <li>Add row striping with alternating subtle colors for better readability<br></li> <li>Provide per-column filters (dropdowns or text inputs)<br></li> <li>Highlight search matches inside tables with yellow background<br></li> <li>Add row selection (checkboxes) with the ability to export selected rows<br></li> <li>Enable drag-and-drop reordering of rows<br></li> <li>Add a "transpose table" button (swap rows/columns)<br></li> <li>Allow freezing multiple columns, not just the first<br></li> <li>Enable column hiding/showing with a settings panel<br></li> <li>Merge small tables into a "compact view" with cards instead of grid<br></li> <li>Add pagination for very large tables (split into chunks of 50/100 rows)</li> </ul></p></td></tr>
+<tr><td data-label="Category"><p>[Copy & Export Improvements]</p></td><td data-label="Improvements"><p><ul> <li>Copy button: allow choosing "Copy as plain text", "Copy as Markdown", "Copy as CSV", "Copy as Excel"<br></li> <li>Add "Download table" buttons with formats: CSV, Excel, JSON<br></li> <li>Provide "Copy with headers" vs "Copy without headers"<br></li> <li>Allow multi-table export: "Download all tables as Excel workbook" (each table on separate sheet)<br></li> <li>Add export-to-PDF (using client-side jsPDF)<br></li> <li>Add "Share link to this table" with anchor<br></li> <li>Copy button: provide visual confirmation (toast message "Copied!")<br></li> <li>Allow copying only selected rows or columns</li> </ul></p></td></tr>
+<tr><td data-label="Category"><p>[Search & Filtering]</p></td><td data-label="Improvements"><p><ul> <li>Global search: highlight all matching tables, not just filter<br></li> <li>Per-table search box inside each table’s header<br></li> <li>Advanced filtering: support regex, multiple terms, AND/OR filters<br></li> <li>Add fuzzy search (so "govern" matches "governance")<br></li> <li>Search matches show a counter ("3 matches in Table 7")<br></li> <li>Highlight results in TOC ("Table 7 (3 matches)")<br></li> <li>Implement "Find next / previous match" navigation with arrow keys</li> </ul></p></td></tr>
+<tr><td data-label="Category"><p>[Sorting & Data Handling]</p></td><td data-label="Improvements"><p><ul> <li>Enable multi-column sorting (shift-click headers)<br></li> <li>Add numeric-aware sorting (so "2, 10, 100" is sorted correctly)<br></li> <li>Date-aware sorting (detect YYYY-MM-DD, DD/MM/YYYY, etc.)<br></li> <li>Sort by custom order (e.g., "High > Medium > Low")<br></li> <li>Add a "Reset sorting" button on each table<br></li> <li>Persist sort order in localStorage so it stays after refresh<br></li> <li>Visual arrows/icons more distinct (▲▼)</li> </ul></p></td></tr>
+<tr><td data-label="Category"><p>[Theme & Styling Improvements]</p></td><td data-label="Improvements"><p><ul> <li>Add multiple themes beyond light/dark (sepia, solarized, etc.)<br></li> <li>Support custom CSS themes loaded dynamically<br></li> <li>Allow user font size adjustment (small, medium, large)<br></li> <li>Improve accessibility with higher-contrast color palette<br></li> <li>Add a dyslexia-friendly font option (e.g., OpenDyslexic)<br></li> <li>Responsive tables: on small screens, show rows as stacked cards<br></li> <li>Add subtle animations when toggling dark mode or collapsing tables</li> </ul></p></td></tr>
+<tr><td data-label="Category"><p>[Performance Optimizations]</p></td><td data-label="Improvements"><p><ul> <li>Lazy load tables: render only visible tables, load others as user scrolls<br></li> <li>Virtual scrolling for very large tables (10k+ rows)<br></li> <li>Optimize sticky headers/columns for smoother scrolling<br></li> <li>Precompute table-of-contents for faster rendering<br></li> <li>Debounce search/filter input to avoid lag<br></li> <li>Split CSS/JS into smaller chunks for faster page load</li> </ul></p></td></tr>
+<tr><td data-label="Category"><p>[Accessibility (a11y)]</p></td><td data-label="Improvements"><p><ul> <li>Add ARIA roles for tables, headers, and buttons<br></li> <li>Keyboard navigation: allow moving between cells with arrow keys<br></li> <li>Screen reader support: announce table names and column headers<br></li> <li>Provide "skip to content" link<br></li> <li>Ensure contrast ratios meet WCAG standards<br></li> <li>Add focus states (outline) on interactive elements</li> </ul></p></td></tr>
+<tr><td data-label="Category"><p>[Collaboration Features]</p></td><td data-label="Improvements"><p><ul> <li>Add "comment" feature: users can leave notes on specific rows<br></li> <li>Table versioning: track changes between table versions<br></li> <li>Allow exporting annotated tables as PDF with comments<br></li> <li>Shareable filtered views via URL parameters (?filter=keyword)<br></li> <li>Add "favorites" or "pin table" to easily return to important tables</li> </ul></p></td></tr>
+<tr><td data-label="Category"><p>[Analytics & Insights]</p></td><td data-label="Improvements"><p><ul> <li>Add automatic summary per table (count rows, most common values)<br></li> <li>Provide quick charts/graphs (bar, pie) from selected columns<br></li> <li>Highlight anomalies (very long text, missing values)<br></li> <li>Add "compare two tables" mode (side-by-side diff)<br></li> <li>Show table metadata (created date, file source)<br></li> <li>Display column stats (min, max, avg, count)</li> </ul></p></td></tr>
+<tr><td data-label="Category"><p>[Developer / Power-User Features]</p></td><td data-label="Improvements"><p><ul> <li>Add keyboard shortcut cheatsheet (press "?" to view)<br></li> <li>Provide a JSON config file to customize behavior (default theme, collapsed tables)<br></li> <li>Add support for external plugins (user-defined JS injected)<br></li> <li>Allow embedding tables in iframes on other sites<br></li> <li>API endpoints for serving table data as JSON/CSV</li> </ul></p></td></tr>
+<tr><td data-label="Category"><p>[Mobile Experience]</p></td><td data-label="Improvements"><p><ul> <li>Swipe left/right to scroll columns easily<br></li> <li>Pinch-to-zoom support for dense tables<br></li> <li>Provide a mobile-friendly toggle: show only 2–3 key columns<br></li> <li>Replace hover effects with tap-based highlights<br></li> <li>Floating action button (FAB) for "back to top" and "collapse all"</li> </ul></p></td></tr>
+<tr><td data-label="Category"><p>[Security / Reliability]</p></td><td data-label="Improvements"><p><ul> <li>Sanitize copied/exported HTML to prevent injection<br></li> <li>Ensure theme/filters are stored securely (not leaking data)<br></li> <li>Offline support: cache assets via service worker<br></li> <li>Version number & build date shown in footer<br></li> <li>Graceful error handling if tables are malformed</li> </ul></p></td></tr>
+<tr><td data-label="Category"><p>[Polish & Visual Additions]</p></td><td data-label="Improvements"><p><ul> <li>Add subtle row highlighting for current search match<br></li> <li>Zebra striping with gradient fade<br></li> <li>Animate sorting arrow with rotation<br></li> <li>Add table captions with icons (📊, 📋, 📑)<br></li> <li>Make TOC links show a small progress bar (how far scrolled)<br></li> <li>Floating "row number" column for quick reference<br></li> <li>Option to show images/icons inside cells</li> </ul></p></td></tr>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+
+<script src="assets/script.js?v=1758327761" defer></script>
+
+<script>
+(function(){
+  const template = "{table}_{date}";
+  function formatName(tableName) {
+    const date = (new Date()).toISOString().slice(0,10);
+    return template.replace('{table}', tableName).replace('{date}', date).replace('{user}', '');
+  }
+  const btn = document.getElementById('exportBtn');
+  if(btn) {
+    btn.addEventListener('click', async function() {
+      try {
+        const html = document.documentElement.outerHTML;
+        if(html.length > 2000000) {
+          alert('Export refused: html too large');
+          return;
+        }
+        if(window.Worker) {
+          const worker = new Worker('assets/worker.js');
+          worker.postMessage({html:html, format:'pdf'});
+          worker.onmessage = function(e){ console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+        } else {
+          alert('Export worker not supported in this environment.');
+        }
+      } catch(err) {
+        console.warn('Export failed', err);
+        alert('Export worker not available. See console for details.');
+      }
+    });
+  }
+})();
+</script>
+
+</div></body></html>
