@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Tables Viewer v2.1</title>
+<style>:root{--main-header-height:56px;}</style>
+<link rel="stylesheet" href="assets/style.css?v=1758389395">
+<link rel="stylesheet" href="assets/overrides.css?v=1758389395">
+</head><body>
+<div id="tables-viewer" role="region" aria-label="Tables viewer">
+<div id="stickyMainHeader">
+<div id="tv-header"><div><h1>Tables Viewer v2.1</h1></div><div style="display:flex;gap:8px;align-items:center;"><input id="searchBox" type="search" placeholder="Search" aria-label="Search tables" style="min-width:420px; width:44ch;"/><button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button><button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button><button id="copyAllPlainBtn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button><button id="copyAllMdBtn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy all tables as markdown">Copy All Tables (Markdown)</button><button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset all tables">Reset All Tables</button></div></div>
+<noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
+<div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1-title">Table 1</a></li></ul></div></div>
+<div class="table-wrapper" id="Table1"><h3 id="Table1-title">Table 1</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
+        <th style="width:28.57%;" onclick="sortTableByColumn(0,0)" role="button" aria-label="Sort by **Module**">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Module</strong></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true"></span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(0,1)" role="button" aria-label="Sort by **Notes**">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Notes</strong></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true"></span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="<strong>Module</strong>"><p>`render/<strong>init</strong>.py`</p></td><td data-label="<strong>Notes</strong>"><p>Depends on: `core` <br> Notes: Re-exports `render<em>page`, `render</em>table`, `render&#95;html`</p></td></tr>
+<tr><td data-label="<strong>Module</strong>"><p>`render/core.py`</p></td><td data-label="<strong>Notes</strong>"><p>Depends on: `io&#95;utils`, `sanitize`, `markdown`, `convert`, `assets`, `types` <br> Notes: Core rendering engine; full logic for table HTML generation</p></td></tr>
+<tr><td data-label="<strong>Module</strong>"><p>`render/io&#95;utils.py`</p></td><td data-label="<strong>Notes</strong>"><p>Depends on: `os` <br> Notes: Minimal I/O helpers; no external dependencies</p></td></tr>
+<tr><td data-label="<strong>Module</strong>"><p>`render/sanitize.py`</p></td><td data-label="<strong>Notes</strong>"><p>Depends on: `re`, `html`, `logging` <br> Notes: Provides `<em>unescape</em>brackets<em>outside</em>code`; safe HTML fallback</p></td></tr>
+<tr><td data-label="<strong>Module</strong>"><p>`render/markdown.py`</p></td><td data-label="<strong>Notes</strong>"><p>Depends on: `re`, `html`, `logging` <br> Notes: Converts markdown to HTML; prefers `markdown` package but falls back safely</p></td></tr>
+<tr><td data-label="<strong>Module</strong>"><p>`render/convert.py`</p></td><td data-label="<strong>Notes</strong>"><p>Depends on: `os`, `shutil` <br> Notes: Handles copying assets, writing `overrides.css`; fallback CSS/JS</p></td></tr>
+<tr><td data-label="<strong>Module</strong>"><p>`render/assets.py`</p></td><td data-label="<strong>Notes</strong>"><p>Depends on: `os`, `shutil` <br> Notes: Similar to `convert.py`; ensures assets are copied to the output folder</p></td></tr>
+<tr><td data-label="<strong>Module</strong>"><p>`render/cli.py`</p></td><td data-label="<strong>Notes</strong>"><p>Depends on: `argparse`, `core`, `types`, `markdown` <br> Notes: Provides command-line interface for table rendering</p></td></tr>
+<tr><td data-label="<strong>Module</strong>"><p>`render/types.py`</p></td><td data-label="<strong>Notes</strong>"><p>Depends on: `dataclasses`, `threading`, `typing`, `pathlib` <br> Notes: Defines `RenderConfig` and type hints</p></td></tr>
+<tr><td data-label="<strong>Module</strong>"><p>`html&#95;renderer.py`</p></td><td data-label="<strong>Notes</strong>"><p>Depends on: `render.core` <br> Notes: Wrapper for backward compatibility; dynamic import fallback</p></td></tr>
+<tr><td data-label="<strong>Module</strong>"><p>`utils.py`</p></td><td data-label="<strong>Notes</strong>"><p>Depends on: `re` <br> Notes: Helpers for sanitizing HTML, converting markdown lists</p></td></tr>
+<tr><td data-label="<strong>Module</strong>"><p>`helpers.py`</p></td><td data-label="<strong>Notes</strong>"><p>Depends on: `utils` <br> Notes: Thin re-export; fallback no-op if `utils` not available</p></td></tr>
+<tr><td data-label="<strong>Module</strong>"><p>`main.py`</p></td><td data-label="<strong>Notes</strong>"><p>Depends on: `pandas`, `glob`, `os`, `io.StringIO`, `re`, `sys`, `importlib`, `pathlib`, `shutil` <br> Notes: Loads markdown files, parses tables, calls `render&#95;html` if available, otherwise fallback HTML</p></td></tr>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+
+<script src="assets/script.js?v=1758389395" defer></script>
+
+<script>
+(function(){
+  const template = "{table}_{date}";
+  function formatName(tableName) {
+    const date = (new Date()).toISOString().slice(0,10);
+    return template.replace('{table}', tableName).replace('{date}', date).replace('{user}', '');
+  }
+  const btn = document.getElementById('exportBtn');
+  if(btn) {
+    btn.addEventListener('click', async function() {
+      try {
+        const html = document.documentElement.outerHTML;
+        if(html.length > 2000000) {
+          alert('Export refused: html too large');
+          return;
+        }
+        if(window.Worker) {
+          const worker = new Worker('assets/worker.js');
+          worker.postMessage({html:html, format:'pdf'});
+          worker.onmessage = function(e){ console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+        } else {
+          alert('Export worker not supported in this environment.');
+        }
+      } catch(err) {
+        console.warn('Export failed', err);
+        alert('Export worker not available. See console for details.');
+      }
+    });
+  }
+})();
+</script>
+
+</div></body></html>

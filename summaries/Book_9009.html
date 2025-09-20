@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Tables Viewer v2.1</title>
+<style>:root{--main-header-height:56px;}</style>
+<link rel="stylesheet" href="assets/style.css?v=1758389395">
+<link rel="stylesheet" href="assets/overrides.css?v=1758389395">
+</head><body>
+<div id="tables-viewer" role="region" aria-label="Tables viewer">
+<div id="stickyMainHeader">
+<div id="tv-header"><div><h1>Tables Viewer v2.1</h1></div><div style="display:flex;gap:8px;align-items:center;"><input id="searchBox" type="search" placeholder="Search" aria-label="Search tables" style="min-width:420px; width:44ch;"/><button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button><button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button><button id="copyAllPlainBtn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button><button id="copyAllMdBtn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy all tables as markdown">Copy All Tables (Markdown)</button><button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset all tables">Reset All Tables</button></div></div>
+<noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
+<div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1-title">Table 1</a></li></ul></div></div>
+<div class="table-wrapper" id="Table1"><h3 id="Table1-title">Table 1</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
+        <th style="width:28.57%;" onclick="sortTableByColumn(0,0)" role="button" aria-label="Sort by **Cause**">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Cause</strong></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true"></span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(0,1)" role="button" aria-label="Sort by **Details**">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Details</strong></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true"></span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="<strong>Cause</strong>"><p>JS runtime error during init</p></td><td data-label="<strong>Details</strong>"><p><strong>Symptom:</strong> Controls missing. Table wrappers not created. Interactive features broken.<br><strong>How to confirm:</strong> Console shows uncaught exception (TypeError, ReferenceError). Disabling JS shows static layout.<br><strong>Fix (minimal patch):</strong> Wrap init in DOMContentLoaded and try/catch. See code below.</p></td></tr>
+<tr><td data-label="<strong>Cause</strong>"><p>Sticky header hidden / wrong offset</p></td><td data-label="<strong>Details</strong>"><p><strong>Symptom:</strong> Thead appears behind top header when scrolling. Sticky not visible.<br><strong>How to confirm:</strong> Computed `top` smaller than main header height.<br><strong>Fix (minimal patch):</strong> Make `thead th { top: var(--main-header-height); }` and set `--main-header-height` to actual header height.</p></td></tr>
+<tr><td data-label="<strong>Cause</strong>"><p>Sticky fails due to overflow/transform ancestor</p></td><td data-label="<strong>Details</strong>"><p><strong>Symptom:</strong> Thead not sticking or sticking inside scroll area (not viewport).<br><strong>How to confirm:</strong> Ancestor has `overflow:auto/hidden` or `transform` in computed styles.<br><strong>Fix (minimal patch):</strong> Remove/relocate overflow or move sticky header out of that scroll container.<br>Alternative: use fixed header or clone header.</p></td></tr>
+<tr><td data-label="<strong>Cause</strong>"><p>Virtualization or DOM replace</p></td><td data-label="<strong>Details</strong>"><p><strong>Symptom:</strong> Rows missing or layout jumps.<br><strong>How to confirm:</strong> Script replaces table DOM; CSS selectors no longer apply.<br><strong>Fix (minimal patch):</strong> Ensure virtualizer keeps `thead` in DOM and preserves classes.</p></td></tr>
+<tr><td data-label="<strong>Cause</strong>"><p>Invalid HTML (unclosed tags)</p></td><td data-label="<strong>Details</strong>"><p><strong>Symptom:</strong> Layout breaks unpredictably.<br><strong>How to confirm:</strong> Validator complains.<br><strong>Fix (minimal patch):</strong> Fix markup. Close tags and keep table structure valid.</p></td></tr>
+<tr><td data-label="<strong>Cause</strong>"><p>Clipboard / large content exceptions</p></td><td data-label="<strong>Details</strong>"><p><strong>Symptom:</strong> "Copy All" crashes script mid-init.<br><strong>How to confirm:</strong> Console error during copy or memory-related exceptions.<br><strong>Fix (minimal patch):</strong> Add size guard. Use download stream instead of clipboard for very large exports.</p></td></tr>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+
+<script src="assets/script.js?v=1758389395" defer></script>
+
+<script>
+(function(){
+  const template = "{table}_{date}";
+  function formatName(tableName) {
+    const date = (new Date()).toISOString().slice(0,10);
+    return template.replace('{table}', tableName).replace('{date}', date).replace('{user}', '');
+  }
+  const btn = document.getElementById('exportBtn');
+  if(btn) {
+    btn.addEventListener('click', async function() {
+      try {
+        const html = document.documentElement.outerHTML;
+        if(html.length > 2000000) {
+          alert('Export refused: html too large');
+          return;
+        }
+        if(window.Worker) {
+          const worker = new Worker('assets/worker.js');
+          worker.postMessage({html:html, format:'pdf'});
+          worker.onmessage = function(e){ console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+        } else {
+          alert('Export worker not supported in this environment.');
+        }
+      } catch(err) {
+        console.warn('Export failed', err);
+        alert('Export worker not available. See console for details.');
+      }
+    });
+  }
+})();
+</script>
+
+</div></body></html>
