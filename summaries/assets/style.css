@@ -1,9 +1,11 @@
 /* style.css — Tables Viewer v2.1
-   Revised: 2025-09-20 (compact header buttons, mobile hide rules)
-   Purpose: consistent list markers inside table cells, plus general UI polish
+   Revised: 2025-09-21 (patched: sticky offset, copy-buttons flex, list counters, safer defaults)
+   Purpose: consistent list markers inside table cells, accessibility and sticky header fixes
 */
 
 :root{
+  --main-header-height:56px;
+  --tv-header-min-height:var(--main-header-height);
   --bg:#ffffff;
   --text:#111827;
   --panel:#f8fafc;
@@ -17,7 +19,6 @@
   --toc-link:#2563eb;
   --toc-link-hover-bg:#e0f2fe;
   --toc-link-hover-color:#1e40af;
-  --tv-header-min-height:48px;
 }
 
 /* dark theme overrides */
@@ -91,7 +92,7 @@ thead th, th{
   font-weight:700;
   font-size:1.03rem;
   position:sticky;
-  top:48px;
+  top:var(--main-header-height);
   z-index:3;
   cursor:default;
 }
@@ -160,6 +161,8 @@ thead th[role="button"]:hover{background:#eef6ff}
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+  /* ensure sticky header height maps to css var */
+  min-height:var(--main-header-height);
 }
 
 /* tv-header: internal controls layout (title left, controls right) */
@@ -188,6 +191,20 @@ thead th[role="button"]:hover{background:#eef6ff}
   flex: 1 1 auto;
   flex-wrap:wrap;
   overflow:visible;
+}
+
+/* copy-buttons layout for per-table controls */
+.copy-buttons{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.copy-buttons button{
+  padding:6px 10px;
+  font-size:13px;
+  border-radius:6px;
+  min-height:34px;
 }
 
 /* Compact top buttons (header only) */
@@ -321,7 +338,7 @@ td > ul > li::before {
   width: 1.1ch;
   margin-left: -1.1ch;
 }
-td ul ul, td ul ol, td ol ul {
+td ul ul, td ul ol, td ol ul, td ol ol {
   margin-top:.2rem;
   margin-bottom:.35rem;
   padding-left:1rem;
@@ -374,7 +391,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
 @media (max-width:600px){
   table{font-size:15px}
   td,th{padding:10px 12px}
-  thead th{position:sticky;top:48px;z-index:4}
+  thead th{position:sticky;top:var(--main-header-height);z-index:4}
   .table-container{border-radius:6px}
 
   /* Make the tv-header stack on very small screens */
@@ -409,21 +426,20 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
     min-height:36px;
   }
 
-  /* Hide less-essential header buttons on very narrow screens while keeping key ones */
-  /* Keeps #modeBtn and #toggleAllBtn visible; hides other text buttons to save space */
-  @media (max-width:420px){
-    #tv-header > div:last-child{
-      overflow-x:auto;
-      -webkit-overflow-scrolling:touch;
-    }
-    #tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) {
-      display:none !important;
-    }
-  }
-
   /* Ensure toc has good touch area */
   #tocBar{
     padding:8px 6px;
+  }
+}
+
+/* Hide less-essential header buttons on very narrow screens while keeping key ones */
+@media (max-width:420px){
+  #tv-header > div:last-child{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  #tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) {
+    display:none !important;
   }
 }
 
