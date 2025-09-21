@@ -1,66 +1,84 @@
 <!DOCTYPE html>
 <html lang='en'>
 <head>
-<meta charset='utf-8'>
-<meta name='viewport' content='width=device-width,initial-scale=1'>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
 <title>Tables Viewer v2.1</title>
-<meta name='description' content='Tables Viewer'>
-<meta name='author' content=''>
-<style>:root{--main-header-height:56px;--tv-header-min-height:56px;}</style>
-<link rel="stylesheet" href="assets/style.css?v=1758422927">
-<link rel="stylesheet" href="assets/overrides.css?v=1758422927">
-</head>
-<body>
+<style>:root{--main-header-height:56px;}</style>
+<link rel="stylesheet" href="assets/style.css?v=1758459913">
+<link rel="stylesheet" href="assets/overrides.css?v=1758459913">
+</head><body>
 <div id="tables-viewer" role="region" aria-label="Tables viewer">
 <div id="stickyMainHeader">
-  <div id="tv-header">
-    <div class="tv-title"><h1>Tables Viewer v2.1</h1></div>
-    <div class="tv-controls" style="display:flex;gap:8px;align-items:center;">
-      <input id="searchBox" type="search" placeholder="Search" aria-label="Search tables" style="min-width:360px; width:44ch;">
-      <button id="modeBtn" type="button" data-action="toggle-mode" aria-label="Toggle theme">Theme</button>
-      <button id="toggleAllBtn" type="button" data-action="toggle-all" aria-label="Toggle all">Collapse All Tables</button>
-      <button id="copyAllPlainBtn" type="button" data-action="copy-all-plain" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button>
-      <button id="copyAllMdBtn" type="button" data-action="copy-all-md" aria-label="Copy all tables as markdown">Copy All Tables (Markdown)</button>
-      <button id="resetAllBtn" type="button" data-action="reset-all" aria-label="Reset all tables">Reset All Tables</button>
-    </div>
-  </div>
-<div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#table1">Table 1</a></li></ul></div>
+<div id="tv-header"><div><h1>Tables Viewer v2.1</h1></div><div style="display:flex;gap:8px;align-items:center;"><input id="searchBox" type="search" placeholder="Search" aria-label="Search tables" style="min-width:420px; width:44ch;"/><button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button><button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button><button id="copyAllPlainBtn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button><button id="copyAllMdBtn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy all tables as markdown">Copy All Tables (Markdown)</button><button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset all tables">Reset All Tables</button></div></div>
+<noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
+<div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1-title">Table 1</a></li></ul></div></div>
+<div class="table-wrapper" id="Table1"><h3 id="Table1-title">Table 1</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
+        <th style="width:28.57%;" onclick="sortTableByColumn(0,0)" role="button" aria-label="Sort by **Area**">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Area</strong></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true"></span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(0,1)" role="button" aria-label="Sort by **Analysis &amp; Findings**">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Analysis & Findings</strong></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true"></span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="<strong>Area</strong>"><p><strong>General Safety & Structure</strong></p></td><td data-label="<strong>Analysis & Findings</strong>"><p>Script is wrapped in an IIFE with `'use strict'.`<br>No globals leaked except a small controlled API (`window.headerSortButtonClicked`, `toggleTable`, etc.).<br>Good encapsulation.</p></td></tr>
+<tr><td data-label="<strong>Area</strong>"><p><strong>Helpers</strong></p></td><td data-label="<strong>Analysis & Findings</strong>"><p>`normalizeForSearch` trims/normalizes whitespace and lowercases → robust for search.<br>`debounce` is clean and memory-safe.<br>`copyToClipboard` has two fallbacks: modern API and `execCommand`, with cleanup.<br>No memory leaks.</p></td></tr>
+<tr><td data-label="<strong>Area</strong>"><p><strong>Toast Notifications</strong></p></td><td data-label="<strong>Analysis & Findings</strong>"><p>`&#95;ensureToastContainer` creates a fixed container with safe styles.<br>`showToast` handles errors, supports `success` and `warn` colors, auto-removes with fade-out, click-to-dismiss.<br>Fallback to `alert` if DOM fails → very robust.</p></td></tr>
+<tr><td data-label="<strong>Area</strong>"><p><strong>DOM Safety</strong></p></td><td data-label="<strong>Analysis & Findings</strong>"><p>Many guards: `safeGetTBody`, null checks, silent try/catch.<br>This prevents runtime crashes if tables/search box are missing.</p></td></tr>
+<tr><td data-label="<strong>Area</strong>"><p><strong>Sorting</strong></p></td><td data-label="<strong>Analysis & Findings</strong>"><p>Maintains `originalTableRows` snapshots for reset.<br>Sort order cycles: unsorted → ascending → descending → reset.<br>Numeric detection: removes commas, tries `parseFloat`, falls back to locale compare.<br>`updateHeaderSortUI` updates ARIA attributes + SVG icons.<br>Edge cases handled: empty cells, missing rows, tbody guard.</p></td></tr>
+<tr><td data-label="<strong>Area</strong>"><p><strong>Table Toggling</strong></p></td><td data-label="<strong>Analysis & Findings</strong>"><p>`toggleTable` and `toggleAllTables` switch wrapper class `.table-collapsed`.<br>Update button labels and sync “Collapse All” button.<br>Row counts updated afterward.<br>No risk of desync.</p></td></tr>
+<tr><td data-label="<strong>Area</strong>"><p><strong>Row Counts</strong></p></td><td data-label="<strong>Analysis & Findings</strong>"><p>Displays correct “Showing N rows” or “Showing X of Y rows” with search applied.<br>Handles missing tbody (shows <br>0).</p></td></tr>
+<tr><td data-label="<strong>Area</strong>"><p><strong>Copy & Export</strong></p></td><td data-label="<strong>Analysis & Findings</strong>"><p>Single table copy in plain text or Markdown.<br>All tables copy in plain text or Markdown.<br>Titles included (from \`\`).<br>Uses `\t` for plain and proper Markdown formatting.<br>Fallback to `prompt` if clipboard fails.</p></td></tr>
+<tr><td data-label="<strong>Area</strong>"><p><strong>Reset Function</strong></p></td><td data-label="<strong>Analysis & Findings</strong>"><p>Restores all rows from `originalTableRows`.<br>Resets sorting states.<br>Expands all tables.<br>Clears search box.<br>Triggers fresh search + row count update.<br>Shows success toast. Very complete.</p></td></tr>
+<tr><td data-label="<strong>Area</strong>"><p><strong>Search Functionality</strong></p></td><td data-label="<strong>Analysis & Findings</strong>"><p>Normalized search (trim, lower, collapse spaces).<br>Per-row matching, hides non-matching rows.<br>Highlights matched cells with `.highlight`.<br>Clears placeholders left by virtualizer.<br>Scrolls smoothly to first match (adjusts for sticky header).<br>Refreshes `tableVirtualizer` if present.<br>Updates row counts.</p></td></tr>
+<tr><td data-label="<strong>Area</strong>"><p><strong>Keyboard Shortcuts</strong></p></td><td data-label="<strong>Analysis & Findings</strong>"><p>`/` focuses search (unless typing in input/textarea/contentEditable).<br>`Escape` triggers `backToTop`.</p></td></tr>
+<tr><td data-label="<strong>Area</strong>"><p><strong>TOC & Scroll</strong></p></td><td data-label="<strong>Analysis & Findings</strong>"><p>TOC links smoothly scroll to table wrapper offset (minus header height).<br>Updates URL fragment with `history.replaceState`.</p></td></tr>
+<tr><td data-label="<strong>Area</strong>"><p><strong>Back to Top</strong></p></td><td data-label="<strong>Analysis & Findings</strong>"><p>Auto-created if missing.<br>Smooth scroll.<br>Visibility toggled on `scroll` (appears after 200px).</p></td></tr>
+<tr><td data-label="<strong>Area</strong>"><p><strong>Dark Mode Toggle</strong></p></td><td data-label="<strong>Analysis & Findings</strong>"><p>Persists theme in `localStorage` as `uiMode`.<br>Updates button label.<br>Adds/removes `data-theme="dark"`.</p></td></tr>
+<tr><td data-label="<strong>Area</strong>"><p><strong>Performance & Resilience</strong></p></td><td data-label="<strong>Analysis & Findings</strong>"><p>Uses `debounce` for search (120ms).<br>Minimal DOM writes: batch updates via `tbody.innerHTML = ""` then append.<br>`try/catch` shields from runtime errors everywhere.<br>No infinite loops, no leaks.</p></td></tr>
+<tr><td data-label="<strong>Area</strong>"><p><strong>Accessibility</strong></p></td><td data-label="<strong>Analysis & Findings</strong>"><p>Sort headers update `aria-sort` attribute properly.<br>Search is keyboard accessible (`/` shortcut, Enter triggers).<br>Toasts dismiss on click.<br>Needs ARIA live region for toasts if targeting screen readers (optional).</p></td></tr>
+</tbody></table></div>
+  <div class='row-count'></div>
 </div>
-<noscript><div style="margin:8px 0;padding:6px;border:1px solid #ddd;background:#fff9;">JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
-<div class="table-wrapper" id="table1"><div class="table-header-wrapper" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;"><div class="copy-buttons"><button type="button" class="copy-plain-btn" onclick="copyTablePlain(this)" aria-label="Copy table as plain text">Copy Plain Table</button><button type="button" class="copy-md-btn" onclick="copyTableMarkdown(this)" aria-label="Copy table as markdown">Copy Markdown Table</button></div><div style="display:flex;align-items:center;"><button type="button" class="toggle-table-btn" onclick="toggleTable(this)" aria-label="Toggle table">Collapse Table</button></div></div><div class="table-container"><table><thead><tr><th class="col-text" id="table1-th-0" role="button" data-col-index="0" data-table-index="0" aria-label="Sort by Area"><div class="th-with-sort"><div style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><strong>Area</strong></div><button type="button" class="sort-btn" onclick="headerSortButtonClicked(0,0, this)" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th><th class="col-text" id="table1-th-1" role="button" data-col-index="1" data-table-index="0" aria-label="Sort by Analysis &amp; Findings"><div class="th-with-sort"><div style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><strong>Analysis & Findings</strong></div><button type="button" class="sort-btn" onclick="headerSortButtonClicked(0,1, this)" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th></tr></thead><tbody><tr><td data-label="Area"><strong>General Safety & Structure</strong> </td><td data-label="Analysis &amp;amp; Findings">Script is wrapped in an IIFE with `'use strict'.`<br>No globals leaked except a small controlled API (`window.headerSortButtonClicked`, `toggleTable`, etc.).<br>Good encapsulation.                                                                                                                                                    </td></tr>
-<tr><td data-label="Area"><strong>Helpers</strong>                    </td><td data-label="Analysis &amp;amp; Findings">`normalizeForSearch` trims/normalizes whitespace and lowercases → robust for search.<br>`debounce` is clean and memory-safe.<br>`copyToClipboard` has two fallbacks: modern API and `execCommand`, with cleanup.<br>No memory leaks.                                                                                                    </td></tr>
-<tr><td data-label="Area"><strong>Toast Notifications</strong>        </td><td data-label="Analysis &amp;amp; Findings">`_ensureToastContainer` creates a fixed container with safe styles.<br>`showToast` handles errors, supports `success` and `warn` colors, auto-removes with fade-out, click-to-dismiss.<br>Fallback to `alert` if DOM fails → very robust.                                                                                               </td></tr>
-<tr><td data-label="Area"><strong>DOM Safety</strong>                 </td><td data-label="Analysis &amp;amp; Findings">Many guards: `safeGetTBody`, null checks, silent try/catch.<br>This prevents runtime crashes if tables/search box are missing.                                                                                                                                                                                                          </td></tr>
-<tr><td data-label="Area"><strong>Sorting</strong>                    </td><td data-label="Analysis &amp;amp; Findings">Maintains `originalTableRows` snapshots for reset.<br>Sort order cycles: unsorted → ascending → descending → reset.<br>Numeric detection: removes commas, tries `parseFloat`, falls back to locale compare.<br>`updateHeaderSortUI` updates ARIA attributes + SVG icons.<br>Edge cases handled: empty cells, missing rows, tbody guard. </td></tr>
-<tr><td data-label="Area"><strong>Table Toggling</strong>             </td><td data-label="Analysis &amp;amp; Findings">`toggleTable` and `toggleAllTables` switch wrapper class `.table-collapsed`.<br>Update button labels and sync “Collapse All” button.<br>Row counts updated afterward.<br>No risk of desync.                                                                                                                                             </td></tr>
-<tr><td data-label="Area"><strong>Row Counts</strong>                 </td><td data-label="Analysis &amp;amp; Findings">Displays correct “Showing N rows” or “Showing X of Y rows” with search applied.<br>Handles missing tbody (shows <br>0).                                                                                                                                                                                                                     </td></tr>
-<tr><td data-label="Area"><strong>Copy & Export</strong>              </td><td data-label="Analysis &amp;amp; Findings">Single table copy in plain text or Markdown.<br>All tables copy in plain text or Markdown.<br>Titles included (from \`\`).<br>Uses `\t` for plain and proper Markdown formatting.<br>Fallback to `prompt` if clipboard fails.                                                                                                           </td></tr>
-<tr><td data-label="Area"><strong>Reset Function</strong>             </td><td data-label="Analysis &amp;amp; Findings">Restores all rows from `originalTableRows`.<br>Resets sorting states.<br>Expands all tables.<br>Clears search box.<br>Triggers fresh search + row count update.<br>Shows success toast. Very complete.                                                                                                                                  </td></tr>
-<tr><td data-label="Area"><strong>Search Functionality</strong>       </td><td data-label="Analysis &amp;amp; Findings">Normalized search (trim, lower, collapse spaces).<br>Per-row matching, hides non-matching rows.<br>Highlights matched cells with `.highlight`.<br>Clears placeholders left by virtualizer.<br>Scrolls smoothly to first match (adjusts for sticky header).<br>Refreshes `tableVirtualizer` if present.<br>Updates row counts.           </td></tr>
-<tr><td data-label="Area"><strong>Keyboard Shortcuts</strong>         </td><td data-label="Analysis &amp;amp; Findings">`/` focuses search (unless typing in input/textarea/contentEditable).<br>`Escape` triggers `backToTop`.                                                                                                                                                                                                                                 </td></tr>
-<tr><td data-label="Area"><strong>TOC & Scroll</strong>               </td><td data-label="Analysis &amp;amp; Findings">TOC links smoothly scroll to table wrapper offset (minus header height).<br>Updates URL fragment with `history.replaceState`.                                                                                                                                                                                                           </td></tr>
-<tr><td data-label="Area"><strong>Back to Top</strong>                </td><td data-label="Analysis &amp;amp; Findings">Auto-created if missing.<br>Smooth scroll.<br>Visibility toggled on `scroll` (appears after 200px).                                                                                                                                                                                                                                     </td></tr>
-<tr><td data-label="Area"><strong>Dark Mode Toggle</strong>           </td><td data-label="Analysis &amp;amp; Findings">Persists theme in `localStorage` as `uiMode`.<br>Updates button label.<br>Adds/removes `data-theme="dark"`.                                                                                                                                                                                                                             </td></tr>
-<tr><td data-label="Area"><strong>Performance & Resilience</strong>   </td><td data-label="Analysis &amp;amp; Findings">Uses `debounce` for search (120ms).<br>Minimal DOM writes: batch updates via `tbody.innerHTML = ""` then append.<br>`try/catch` shields from runtime errors everywhere.<br>No infinite loops, no leaks.                                                                                                                                 </td></tr>
-<tr><td data-label="Area"><strong>Accessibility</strong>              </td><td data-label="Analysis &amp;amp; Findings">Sort headers update `aria-sort` attribute properly.<br>Search is keyboard accessible (`/` shortcut, Enter triggers).<br>Toasts dismiss on click.<br>Needs ARIA live region for toasts if targeting screen readers (optional).                                                                                                           </td></tr>
-</tbody></table></div><div class="row-count"></div><div class="table-summary">Rows: 16 | Columns: 2</div></div>
-<script src="assets/worker.js" defer></script>
-<script src="assets/script.js" defer></script>
+
+<script src="assets/script.js?v=1758459913" defer></script>
+
 <script>
 (function(){
-document.addEventListener('DOMContentLoaded',function(){
-  window.__tv_export_template = "{table}_{date}";
-  window.__tv_user = "";
-  window.__tv_format_export = function(table,date){ return String(window.__tv_export_template).replace(/\{table\}/g,String(table)).replace(/\{date\}/g,String(date)); };
-  try{
-    var mb=document.getElementById('modeBtn'); if(mb) mb.addEventListener('click',function(){ if(window.toggleMode) return window.toggleMode(); });
-    var tb=document.getElementById('toggleAllBtn'); if(tb) tb.addEventListener('click',function(){ if(window.toggleAllTables) return window.toggleAllTables(); });
-    var cp=document.getElementById('copyAllPlainBtn'); if(cp) cp.addEventListener('click',function(){ if(window.copyAllTablesPlain) return window.copyAllTablesPlain(); });
-    var cm=document.getElementById('copyAllMdBtn'); if(cm) cm.addEventListener('click',function(){ if(window.copyAllTablesMarkdown) return window.copyAllTablesMarkdown(); });
-    var rs=document.getElementById('resetAllBtn'); if(rs) rs.addEventListener('click',function(){ if(window.resetAllTables) return window.resetAllTables(); else location.reload(); });
-    var sb=document.getElementById('searchBox'); if(sb) { sb.addEventListener('input',function(){ if(window.searchTable) { if(window.__tv_search_debounce) clearTimeout(window.__tv_search_debounce); window.__tv_search_debounce=setTimeout(window.searchTable,250); } }); }
-  }catch(e){}
-});
+  const template = "{table}_{date}";
+  function formatName(tableName) {
+    const date = (new Date()).toISOString().slice(0,10);
+    return template.replace('{table}', tableName).replace('{date}', date).replace('{user}', '');
+  }
+  const btn = document.getElementById('exportBtn');
+  if(btn) {
+    btn.addEventListener('click', async function() {
+      try {
+        const html = document.documentElement.outerHTML;
+        if(html.length > 2000000) {
+          alert('Export refused: html too large');
+          return;
+        }
+        if(window.Worker) {
+          const worker = new Worker('assets/worker.js');
+          worker.postMessage({html:html, format:'pdf'});
+          worker.onmessage = function(e){ console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+        } else {
+          alert('Export worker not supported in this environment.');
+        }
+      } catch(err) {
+        console.warn('Export failed', err);
+        alert('Export worker not available. See console for details.');
+      }
+    });
+  }
 })();
 </script>
 

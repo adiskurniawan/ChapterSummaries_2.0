@@ -1,72 +1,90 @@
 <!DOCTYPE html>
 <html lang='en'>
 <head>
-<meta charset='utf-8'>
-<meta name='viewport' content='width=device-width,initial-scale=1'>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
 <title>Tables Viewer v2.1</title>
-<meta name='description' content='Tables Viewer'>
-<meta name='author' content=''>
-<style>:root{--main-header-height:56px;--tv-header-min-height:56px;}</style>
-<link rel="stylesheet" href="assets/style.css?v=1758422927">
-<link rel="stylesheet" href="assets/overrides.css?v=1758422927">
-</head>
-<body>
+<style>:root{--main-header-height:56px;}</style>
+<link rel="stylesheet" href="assets/style.css?v=1758459913">
+<link rel="stylesheet" href="assets/overrides.css?v=1758459913">
+</head><body>
 <div id="tables-viewer" role="region" aria-label="Tables viewer">
 <div id="stickyMainHeader">
-  <div id="tv-header">
-    <div class="tv-title"><h1>Tables Viewer v2.1</h1></div>
-    <div class="tv-controls" style="display:flex;gap:8px;align-items:center;">
-      <input id="searchBox" type="search" placeholder="Search" aria-label="Search tables" style="min-width:360px; width:44ch;">
-      <button id="modeBtn" type="button" data-action="toggle-mode" aria-label="Toggle theme">Theme</button>
-      <button id="toggleAllBtn" type="button" data-action="toggle-all" aria-label="Toggle all">Collapse All Tables</button>
-      <button id="copyAllPlainBtn" type="button" data-action="copy-all-plain" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button>
-      <button id="copyAllMdBtn" type="button" data-action="copy-all-md" aria-label="Copy all tables as markdown">Copy All Tables (Markdown)</button>
-      <button id="resetAllBtn" type="button" data-action="reset-all" aria-label="Reset all tables">Reset All Tables</button>
-    </div>
-  </div>
-<div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#table1">Table 1</a></li></ul></div>
+<div id="tv-header"><div><h1>Tables Viewer v2.1</h1></div><div style="display:flex;gap:8px;align-items:center;"><input id="searchBox" type="search" placeholder="Search" aria-label="Search tables" style="min-width:420px; width:44ch;"/><button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button><button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button><button id="copyAllPlainBtn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button><button id="copyAllMdBtn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy all tables as markdown">Copy All Tables (Markdown)</button><button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset all tables">Reset All Tables</button></div></div>
+<noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
+<div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1-title">Table 1</a></li></ul></div></div>
+<div class="table-wrapper" id="Table1"><h3 id="Table1-title">Table 1</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
+        <th style="width:28.57%;" onclick="sortTableByColumn(0,0)" role="button" aria-label="Sort by **Feature / Component**">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Feature / Component</strong></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true"></span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(0,1)" role="button" aria-label="Sort by **Explanation / Notes**">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Explanation / Notes</strong></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true"></span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="<strong>Feature / Component</strong>"><p><strong>HTML Structure</strong></p></td><td data-label="<strong>Explanation / Notes</strong>"><p>`<!doctype html>` with `<html lang="en">` and `<head>` containing meta tags for UTF-8 charset, viewport, and title `PasteToTable <br>- Self-contained`.</p></td></tr>
+<tr><td data-label="<strong>Feature / Component</strong>"><p><strong>Inlined CSS</strong></p></td><td data-label="<strong>Explanation / Notes</strong>"><p>Entire `assets/style.css` is embedded in `<style>` for self-contained functionality. Includes CSS variables for light/dark theme, table styling, headers, buttons, TOC, sticky headers, responsive behavior, row highlighting, nested lists, code blocks, and accessibility outlines.</p></td></tr>
+<tr><td data-label="<strong>Feature / Component</strong>"><p><strong>CSS Variables</strong></p></td><td data-label="<strong>Explanation / Notes</strong>"><p>`:root` defines main colors: background, text, panel, borders, hover, highlight, current row, buttons, muted, TOC links. `data-theme="dark"` overrides colors for dark mode.</p></td></tr>
+<tr><td data-label="<strong>Feature / Component</strong>"><p><strong>Base Layout</strong></p></td><td data-label="<strong>Explanation / Notes</strong>"><p>`html, body` zero margin, font `Inter`, size `15px`, line-height `1.45`. Links inherit color, no underline. Buttons have uniform styling: padding, border-radius, cursor pointer, inline-flex alignment.</p></td></tr>
+<tr><td data-label="<strong>Feature / Component</strong>"><p><strong>Table Styling</strong></p></td><td data-label="<strong>Explanation / Notes</strong>"><p>`.table-container` makes tables horizontally scrollable. Tables are fixed layout, word-wrap, min-width `420px`. `thead th` sticky at top `48px`, sticky first column with shadow. Row striping and hover effects included. Nested lists styled for consistent bullets.</p></td></tr>
+<tr><td data-label="<strong>Feature / Component</strong>"><p><strong>Sticky Header</strong></p></td><td data-label="<strong>Explanation / Notes</strong>"><p>`#stickyMainHeader` contains `#tv-header` with left-aligned title, right-aligned controls. TOC bar `#tocBar` is scrollable and visually separate.</p></td></tr>
+<tr><td data-label="<strong>Feature / Component</strong>"><p><strong>Controls</strong></p></td><td data-label="<strong>Explanation / Notes</strong>"><p>Search input, Dark Mode toggle (`#modeBtn`), Collapse All (`#toggleAllBtn`), Reset (`#resetBtn`). Compact button sizing for small screens.</p></td></tr>
+<tr><td data-label="<strong>Feature / Component</strong>"><p><strong>Tables Section</strong></p></td><td data-label="<strong>Explanation / Notes</strong>"><p>`#tablesContainer` contains `.table-wrapper` with `.table-header-wrapper` (title + toggle), `.table-container` (actual table), row-count display, copy buttons (`Copy Plain`, `Copy Markdown`). Example table included.</p></td></tr>
+<tr><td data-label="<strong>Feature / Component</strong>"><p><strong>Back-to-Top Button</strong></p></td><td data-label="<strong>Explanation / Notes</strong>"><p>`#backToTop` fixed, hidden by default, shows up after scrolling. Smooth fade-in/out on hover.</p></td></tr>
+<tr><td data-label="<strong>Feature / Component</strong>"><p><strong>JavaScript (Self-contained)</strong></p></td><td data-label="<strong>Explanation / Notes</strong>"><p>Inlined `assets/script.js` manages: copy to clipboard, toast notifications, debounce, search/filtering, row highlighting, sorting, table collapse/expand, reset, back-to-top scroll.</p></td></tr>
+<tr><td data-label="<strong>Feature / Component</strong>"><p><strong>Toast Notifications</strong></p></td><td data-label="<strong>Explanation / Notes</strong>"><p>`&#95;ensureToastContainer()` creates container, `showToast(msg, options)` shows success/warn/info messages with auto-hide and click-to-dismiss.</p></td></tr>
+<tr><td data-label="<strong>Feature / Component</strong>"><p><strong>Clipboard Handling</strong></p></td><td data-label="<strong>Explanation / Notes</strong>"><p>`copyToClipboard()` handles modern async API and fallback with textarea + `execCommand`. `copyTablePlain`, `copyTableMarkdown`, `copyAllTablesPlain`, `copyAllTablesMarkdown` for table export.</p></td></tr>
+<tr><td data-label="<strong>Feature / Component</strong>"><p><strong>Table Sorting</strong></p></td><td data-label="<strong>Explanation / Notes</strong>"><p>`sortTableByColumn(tableIdx, colIdx)` sorts numeric or string values, toggles between ascending/descending/reset. `headerSortButtonClicked` triggers sort, updates icons (`sort-state-0/1/2`).</p></td></tr>
+<tr><td data-label="<strong>Feature / Component</strong>"><p><strong>Table Collapse / Expand</strong></p></td><td data-label="<strong>Explanation / Notes</strong>"><p>`toggleTable(btn)` collapses/expands a single table. `toggleAllTables()` collapses/expands all tables and updates button labels accordingly.</p></td></tr>
+<tr><td data-label="<strong>Feature / Component</strong>"><p><strong>Row Count Updates</strong></p></td><td data-label="<strong>Explanation / Notes</strong>"><p>`updateRowCounts()` updates `.row-count` for each table, shows `Showing X of Y rows` based on filtered/search results.</p></td></tr>
+<tr><td data-label="<strong>Feature / Component</strong>"><p><strong>Search Functionality</strong></p></td><td data-label="<strong>Explanation / Notes</strong>"><p>`searchTable()` filters tables by input, highlights matching cells, scrolls first match into view, works with virtualized tables if present.</p></td></tr>
+<tr><td data-label="<strong>Feature / Component</strong>"><p><strong>Initialization</strong></p></td><td data-label="<strong>Explanation / Notes</strong>"><p>`initTablesOnce()` wraps tables in `.table-container` if missing, saves original rows for reset, sets up sort states, updates toggle button texts, and prepares header UI.</p></td></tr>
+<tr><td data-label="<strong>Feature / Component</strong>"><p><strong>Responsive Behavior</strong></p></td><td data-label="<strong>Explanation / Notes</strong>"><p>Media queries adjust input width, padding, stacking of header elements, compact buttons, hiding less important buttons on very narrow screens, and TOC padding.</p></td></tr>
+<tr><td data-label="<strong>Feature / Component</strong>"><p><strong>Accessibility</strong></p></td><td data-label="<strong>Explanation / Notes</strong>"><p>Focus outlines on `a, button, input, select, textarea`, color adjustments in dark mode, semantic roles on headers/buttons.</p></td></tr>
+<tr><td data-label="<strong>Feature / Component</strong>"><p><strong>Nested Lists in Cells</strong></p></td><td data-label="<strong>Explanation / Notes</strong>"><p>`td ul/li` and `td ol/li` have consistent markers (`–` for ul, counter for ol), handle nested lists with proper indentation and color adjustments in dark mode.</p></td></tr>
+<tr><td data-label="<strong>Feature / Component</strong>"><p><strong>Inline Code</strong></p></td><td data-label="<strong>Explanation / Notes</strong>"><p>`td code` styled with monospace, background, padding, border-radius for readability inside tables.</p></td></tr>
+<tr><td data-label="<strong>Feature / Component</strong>"><p><strong>Prevent Overflow Issues</strong></p></td><td data-label="<strong>Explanation / Notes</strong>"><p>`#tables-viewer`, `#mainContent` `overflow: visible` to allow sticky positioning to function correctly.</p></td></tr>
+</tbody></table></div>
+  <div class='row-count'></div>
 </div>
-<noscript><div style="margin:8px 0;padding:6px;border:1px solid #ddd;background:#fff9;">JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
-<div class="table-wrapper" id="table1"><div class="table-header-wrapper" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;"><div class="copy-buttons"><button type="button" class="copy-plain-btn" onclick="copyTablePlain(this)" aria-label="Copy table as plain text">Copy Plain Table</button><button type="button" class="copy-md-btn" onclick="copyTableMarkdown(this)" aria-label="Copy table as markdown">Copy Markdown Table</button></div><div style="display:flex;align-items:center;"><button type="button" class="toggle-table-btn" onclick="toggleTable(this)" aria-label="Toggle table">Collapse Table</button></div></div><div class="table-container"><table><thead><tr><th class="col-text" id="table1-th-0" role="button" data-col-index="0" data-table-index="0" aria-label="Sort by Feature / Component"><div class="th-with-sort"><div style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><strong>Feature / Component</strong></div><button type="button" class="sort-btn" onclick="headerSortButtonClicked(0,0, this)" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th><th class="col-text" id="table1-th-1" role="button" data-col-index="1" data-table-index="0" aria-label="Sort by Explanation / Notes"><div class="th-with-sort"><div style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><strong>Explanation / Notes</strong></div><button type="button" class="sort-btn" onclick="headerSortButtonClicked(0,1, this)" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th></tr></thead><tbody><tr><td data-label="Feature / Component"><strong>HTML Structure</strong>              </td><td data-label="Explanation / Notes">`<!doctype html>` with `<html lang="en">` and `<head>` containing meta tags for UTF-8 charset, viewport, and title `PasteToTable <br>- Self-contained`.                                                                                                                                   </td></tr>
-<tr><td data-label="Feature / Component"><strong>Inlined CSS</strong>                 </td><td data-label="Explanation / Notes">Entire `assets/style.css` is embedded in `<style>` for self-contained functionality. Includes CSS variables for light/dark theme, table styling, headers, buttons, TOC, sticky headers, responsive behavior, row highlighting, nested lists, code blocks, and accessibility outlines. </td></tr>
-<tr><td data-label="Feature / Component"><strong>CSS Variables</strong>               </td><td data-label="Explanation / Notes">`:root` defines main colors: background, text, panel, borders, hover, highlight, current row, buttons, muted, TOC links. `data-theme="dark"` overrides colors for dark mode.                                                                                                          </td></tr>
-<tr><td data-label="Feature / Component"><strong>Base Layout</strong>                 </td><td data-label="Explanation / Notes">`html, body` zero margin, font `Inter`, size `15px`, line-height `1.45`. Links inherit color, no underline. Buttons have uniform styling: padding, border-radius, cursor pointer, inline-flex alignment.                                                                              </td></tr>
-<tr><td data-label="Feature / Component"><strong>Table Styling</strong>               </td><td data-label="Explanation / Notes">`.table-container` makes tables horizontally scrollable. Tables are fixed layout, word-wrap, min-width `420px`. `thead th` sticky at top `48px`, sticky first column with shadow. Row striping and hover effects included. Nested lists styled for consistent bullets.                </td></tr>
-<tr><td data-label="Feature / Component"><strong>Sticky Header</strong>               </td><td data-label="Explanation / Notes">`#stickyMainHeader` contains `#tv-header` with left-aligned title, right-aligned controls. TOC bar `#tocBar` is scrollable and visually separate.                                                                                                                                     </td></tr>
-<tr><td data-label="Feature / Component"><strong>Controls</strong>                    </td><td data-label="Explanation / Notes">Search input, Dark Mode toggle (`#modeBtn`), Collapse All (`#toggleAllBtn`), Reset (`#resetBtn`). Compact button sizing for small screens.                                                                                                                                            </td></tr>
-<tr><td data-label="Feature / Component"><strong>Tables Section</strong>              </td><td data-label="Explanation / Notes">`#tablesContainer` contains `.table-wrapper` with `.table-header-wrapper` (title + toggle), `.table-container` (actual table), row-count display, copy buttons (`Copy Plain`, `Copy Markdown`). Example table included.                                                               </td></tr>
-<tr><td data-label="Feature / Component"><strong>Back-to-Top Button</strong>          </td><td data-label="Explanation / Notes">`#backToTop` fixed, hidden by default, shows up after scrolling. Smooth fade-in/out on hover.                                                                                                                                                                                         </td></tr>
-<tr><td data-label="Feature / Component"><strong>JavaScript (Self-contained)</strong> </td><td data-label="Explanation / Notes">Inlined `assets/script.js` manages: copy to clipboard, toast notifications, debounce, search/filtering, row highlighting, sorting, table collapse/expand, reset, back-to-top scroll.                                                                                                  </td></tr>
-<tr><td data-label="Feature / Component"><strong>Toast Notifications</strong>         </td><td data-label="Explanation / Notes">`_ensureToastContainer()` creates container, `showToast(msg, options)` shows success/warn/info messages with auto-hide and click-to-dismiss.                                                                                                                                          </td></tr>
-<tr><td data-label="Feature / Component"><strong>Clipboard Handling</strong>          </td><td data-label="Explanation / Notes">`copyToClipboard()` handles modern async API and fallback with textarea + `execCommand`. `copyTablePlain`, `copyTableMarkdown`, `copyAllTablesPlain`, `copyAllTablesMarkdown` for table export.                                                                                       </td></tr>
-<tr><td data-label="Feature / Component"><strong>Table Sorting</strong>               </td><td data-label="Explanation / Notes">`sortTableByColumn(tableIdx, colIdx)` sorts numeric or string values, toggles between ascending/descending/reset. `headerSortButtonClicked` triggers sort, updates icons (`sort-state-0/1/2`).                                                                                        </td></tr>
-<tr><td data-label="Feature / Component"><strong>Table Collapse / Expand</strong>     </td><td data-label="Explanation / Notes">`toggleTable(btn)` collapses/expands a single table. `toggleAllTables()` collapses/expands all tables and updates button labels accordingly.                                                                                                                                          </td></tr>
-<tr><td data-label="Feature / Component"><strong>Row Count Updates</strong>           </td><td data-label="Explanation / Notes">`updateRowCounts()` updates `.row-count` for each table, shows `Showing X of Y rows` based on filtered/search results.                                                                                                                                                                </td></tr>
-<tr><td data-label="Feature / Component"><strong>Search Functionality</strong>        </td><td data-label="Explanation / Notes">`searchTable()` filters tables by input, highlights matching cells, scrolls first match into view, works with virtualized tables if present.                                                                                                                                          </td></tr>
-<tr><td data-label="Feature / Component"><strong>Initialization</strong>              </td><td data-label="Explanation / Notes">`initTablesOnce()` wraps tables in `.table-container` if missing, saves original rows for reset, sets up sort states, updates toggle button texts, and prepares header UI.                                                                                                            </td></tr>
-<tr><td data-label="Feature / Component"><strong>Responsive Behavior</strong>         </td><td data-label="Explanation / Notes">Media queries adjust input width, padding, stacking of header elements, compact buttons, hiding less important buttons on very narrow screens, and TOC padding.                                                                                                                       </td></tr>
-<tr><td data-label="Feature / Component"><strong>Accessibility</strong>               </td><td data-label="Explanation / Notes">Focus outlines on `a, button, input, select, textarea`, color adjustments in dark mode, semantic roles on headers/buttons.                                                                                                                                                            </td></tr>
-<tr><td data-label="Feature / Component"><strong>Nested Lists in Cells</strong>       </td><td data-label="Explanation / Notes">`td ul/li` and `td ol/li` have consistent markers (`–` for ul, counter for ol), handle nested lists with proper indentation and color adjustments in dark mode.                                                                                                                       </td></tr>
-<tr><td data-label="Feature / Component"><strong>Inline Code</strong>                 </td><td data-label="Explanation / Notes">`td code` styled with monospace, background, padding, border-radius for readability inside tables.                                                                                                                                                                                    </td></tr>
-<tr><td data-label="Feature / Component"><strong>Prevent Overflow Issues</strong>     </td><td data-label="Explanation / Notes">`#tables-viewer`, `#mainContent` `overflow: visible` to allow sticky positioning to function correctly.                                                                                                                                                                               </td></tr>
-</tbody></table></div><div class="row-count"></div><div class="table-summary">Rows: 22 | Columns: 2</div></div>
-<script src="assets/worker.js" defer></script>
-<script src="assets/script.js" defer></script>
+
+<script src="assets/script.js?v=1758459913" defer></script>
+
 <script>
 (function(){
-document.addEventListener('DOMContentLoaded',function(){
-  window.__tv_export_template = "{table}_{date}";
-  window.__tv_user = "";
-  window.__tv_format_export = function(table,date){ return String(window.__tv_export_template).replace(/\{table\}/g,String(table)).replace(/\{date\}/g,String(date)); };
-  try{
-    var mb=document.getElementById('modeBtn'); if(mb) mb.addEventListener('click',function(){ if(window.toggleMode) return window.toggleMode(); });
-    var tb=document.getElementById('toggleAllBtn'); if(tb) tb.addEventListener('click',function(){ if(window.toggleAllTables) return window.toggleAllTables(); });
-    var cp=document.getElementById('copyAllPlainBtn'); if(cp) cp.addEventListener('click',function(){ if(window.copyAllTablesPlain) return window.copyAllTablesPlain(); });
-    var cm=document.getElementById('copyAllMdBtn'); if(cm) cm.addEventListener('click',function(){ if(window.copyAllTablesMarkdown) return window.copyAllTablesMarkdown(); });
-    var rs=document.getElementById('resetAllBtn'); if(rs) rs.addEventListener('click',function(){ if(window.resetAllTables) return window.resetAllTables(); else location.reload(); });
-    var sb=document.getElementById('searchBox'); if(sb) { sb.addEventListener('input',function(){ if(window.searchTable) { if(window.__tv_search_debounce) clearTimeout(window.__tv_search_debounce); window.__tv_search_debounce=setTimeout(window.searchTable,250); } }); }
-  }catch(e){}
-});
+  const template = "{table}_{date}";
+  function formatName(tableName) {
+    const date = (new Date()).toISOString().slice(0,10);
+    return template.replace('{table}', tableName).replace('{date}', date).replace('{user}', '');
+  }
+  const btn = document.getElementById('exportBtn');
+  if(btn) {
+    btn.addEventListener('click', async function() {
+      try {
+        const html = document.documentElement.outerHTML;
+        if(html.length > 2000000) {
+          alert('Export refused: html too large');
+          return;
+        }
+        if(window.Worker) {
+          const worker = new Worker('assets/worker.js');
+          worker.postMessage({html:html, format:'pdf'});
+          worker.onmessage = function(e){ console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+        } else {
+          alert('Export worker not supported in this environment.');
+        }
+      } catch(err) {
+        console.warn('Export failed', err);
+        alert('Export worker not available. See console for details.');
+      }
+    });
+  }
 })();
 </script>
 

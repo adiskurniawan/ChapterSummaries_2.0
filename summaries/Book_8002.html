@@ -13,27 +13,26 @@
 <noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
 <div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1-title">Table 1</a></li></ul></div></div>
 <div class="table-wrapper" id="Table1"><h3 id="Table1-title">Table 1</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
-        <th style="width:28.57%;" onclick="sortTableByColumn(0,0)" role="button" aria-label="Sort by **Cause**">
+        <th style="width:28.57%;" onclick="sortTableByColumn(0,0)" role="button" aria-label="Sort by **Col A**">
           <div class="th-with-sort">
-            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Cause</strong></div>
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Col A</strong></div>
             <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,0, this)" title="Toggle sort" aria-label="Toggle sort">
               <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
         </th>
-        <th style="width:71.43%;" onclick="sortTableByColumn(0,1)" role="button" aria-label="Sort by **Details**">
+        <th style="width:71.43%;" onclick="sortTableByColumn(0,1)" role="button" aria-label="Sort by **Col B**">
           <div class="th-with-sort">
-            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Details</strong></div>
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Col B</strong></div>
             <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,1, this)" title="Toggle sort" aria-label="Toggle sort">
               <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
-        </th></tr></thead><tbody><tr><td data-label="<strong>Cause</strong>"><p>JS runtime error during init</p></td><td data-label="<strong>Details</strong>"><p><strong>Symptom:</strong> Controls missing. Table wrappers not created. Interactive features broken.<br><strong>How to confirm:</strong> Console shows uncaught exception (TypeError, ReferenceError). Disabling JS shows static layout.<br><strong>Fix (minimal patch):</strong> Wrap init in DOMContentLoaded and try/catch. See code below.</p></td></tr>
-<tr><td data-label="<strong>Cause</strong>"><p>Sticky header hidden / wrong offset</p></td><td data-label="<strong>Details</strong>"><p><strong>Symptom:</strong> Thead appears behind top header when scrolling. Sticky not visible.<br><strong>How to confirm:</strong> Computed `top` smaller than main header height.<br><strong>Fix (minimal patch):</strong> Make `thead th { top: var(--main-header-height); }` and set `--main-header-height` to actual header height.</p></td></tr>
-<tr><td data-label="<strong>Cause</strong>"><p>Sticky fails due to overflow/transform ancestor</p></td><td data-label="<strong>Details</strong>"><p><strong>Symptom:</strong> Thead not sticking or sticking inside scroll area (not viewport).<br><strong>How to confirm:</strong> Ancestor has `overflow:auto/hidden` or `transform` in computed styles.<br><strong>Fix (minimal patch):</strong> Remove/relocate overflow or move sticky header out of that scroll container.<br>Alternative: use fixed header or clone header.</p></td></tr>
-<tr><td data-label="<strong>Cause</strong>"><p>Virtualization or DOM replace</p></td><td data-label="<strong>Details</strong>"><p><strong>Symptom:</strong> Rows missing or layout jumps.<br><strong>How to confirm:</strong> Script replaces table DOM; CSS selectors no longer apply.<br><strong>Fix (minimal patch):</strong> Ensure virtualizer keeps `thead` in DOM and preserves classes.</p></td></tr>
-<tr><td data-label="<strong>Cause</strong>"><p>Invalid HTML (unclosed tags)</p></td><td data-label="<strong>Details</strong>"><p><strong>Symptom:</strong> Layout breaks unpredictably.<br><strong>How to confirm:</strong> Validator complains.<br><strong>Fix (minimal patch):</strong> Fix markup. Close tags and keep table structure valid.</p></td></tr>
-<tr><td data-label="<strong>Cause</strong>"><p>Clipboard / large content exceptions</p></td><td data-label="<strong>Details</strong>"><p><strong>Symptom:</strong> "Copy All" crashes script mid-init.<br><strong>How to confirm:</strong> Console error during copy or memory-related exceptions.<br><strong>Fix (minimal patch):</strong> Add size guard. Use download stream instead of clipboard for very large exports.</p></td></tr>
+        </th></tr></thead><tbody><tr><td data-label="<strong>Col A</strong>"><p>Nested emphasis <strong>bold <em>italic ~~strike~~</strong></em></p></td><td data-label="<strong>Col B</strong>"><p>Mixed highlight ==marked <strong>bold</strong>==</p></td></tr>
+<tr><td data-label="<strong>Col A</strong>"><p>Inline + display math \$f(x)=\frac{1}{x^2+1}\$ and $\int&#95;0^1 x^2 dx$</p></td><td data-label="<strong>Col B</strong>"><p>Subscript H\~2\~O and superscript x^2^</p></td></tr>
+<tr><td data-label="<strong>Col A</strong>"><p>Collapsible block <details><summary>Open</summary>Hidden <b>bold</b></details></p></td><td data-label="<strong>Col B</strong>"><p>Inline HTML <mark>highlighted text</mark></p></td></tr>
+<tr><td data-label="<strong>Col A</strong>"><p>Multilingual sample العربية مع русский язык</p></td><td data-label="<strong>Col B</strong>"><p>Emoji family 👨‍👩‍👧‍👦 and variation selector ☺️</p></td></tr>
+<tr><td data-label="<strong>Col A</strong>"><p>Escaped script \<script>alert(1)\</script></p></td><td data-label="<strong>Col B</strong>"><p>Attribute injection test <img src=x onerror=alert(1)></p></td></tr>
 </tbody></table></div>
   <div class='row-count'></div>
 </div>
