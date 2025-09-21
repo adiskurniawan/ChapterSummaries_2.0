@@ -1,137 +1,130 @@
-/* overrides.css — Merged: yesterday's stable layout + caption/button fixes
-   Purpose: keep sticky headers, first column, zebra rows, hover highlights,
-   dark mode, consistent list markers, responsive tweaks, fix double-caption and mobile button alignment.
+/* overrides.css — Merged and hardened for Book_0002
+   Keeps yesterday's stable layout, forces caption visibility,
+   prevents duplicate title when a real <caption> exists,
+   fixes mobile button alignment, preserves sticky headers/first-column.
 */
 
 /* -----------------------------
    Theme variables
 ----------------------------- */
-:root {
-  --header-bg: #f3f4f6;
-  --header-color: #111827;
-  --row-odd-bg: #ffffff;
-  --row-even-bg: #fbfbfb;
-  --row-hover-bg: rgba(0,0,0,0.04);
-  --muted: #6b7280;
-  --text: #111827;
-
-  --caption-color: var(--muted);
-  --caption-font-weight: 600;
-  --caption-padding: 6px 10px;
+:root{
+  --header-bg:#f3f4f6;
+  --header-color:#111827;
+  --row-odd-bg:#ffffff;
+  --row-even-bg:#fbfbfb;
+  --row-hover-bg:rgba(0,0,0,0.04);
+  --muted:#6b7280;
+  --text:#111827;
+  --caption-color:var(--muted);
+  --caption-font-weight:600;
+  --caption-padding:6px 10px;
+  --header-highlight-bg:#e0e7ff;
+  --header-highlight-color:#111827;
 }
 
-[data-theme="dark"], body.dark-mode {
-  --header-bg: #2a2e3a;
-  --header-color: #e6eef6;
-  --header-highlight-bg: #33363f;
-  --header-highlight-color: #ffffff;
-  --row-odd-bg: #242834;
-  --row-even-bg: #2a2e3a;
-  --row-hover-bg: rgba(255,255,255,0.08);
-  --muted: #9aa0b2;
-  --text: #e6eef6;
-
-  --caption-color: var(--muted);
+[data-theme="dark"], body.dark-mode{
+  --header-bg:#2a2e3a;
+  --header-color:#e6eef6;
+  --header-highlight-bg:#33363f;
+  --header-highlight-color:#ffffff;
+  --row-odd-bg:#242834;
+  --row-even-bg:#2a2e3a;
+  --row-hover-bg:rgba(255,255,255,0.08);
+  --muted:#9aa0b2;
+  --text:#e6eef6;
+  --caption-color:var(--muted);
 }
 
 /* -----------------------------
    Base table layout
 ----------------------------- */
-.table-container { box-sizing: border-box; }
+.table-container{box-sizing:border-box;}
 
-.table-container table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-  box-sizing: border-box;
-  word-wrap: break-word;
-  -webkit-font-smoothing: antialiased;
+.table-container table{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+  box-sizing:border-box;
+  word-wrap:break-word;
+  -webkit-font-smoothing:antialiased;
 }
 
 /* Caption: explicit and consistent, always visible when present */
-.table-container caption {
-  display: table-caption !important;
-  caption-side: top;
-  text-align: left;
-  color: var(--caption-color);
-  font-weight: var(--caption-font-weight);
-  padding: var(--caption-padding);
-  margin-bottom: 4px;
-  line-height: 1.2;
-  position: relative;
-  z-index: 8;
-  background: transparent;
-  white-space: normal;
-  word-break: break-word;
+.table-container caption{
+  display:table-caption !important;
+  caption-side:top;
+  text-align:left;
+  color:var(--caption-color);
+  font-weight:var(--caption-font-weight);
+  padding:var(--caption-padding);
+  margin-bottom:4px;
+  line-height:1.2;
+  position:relative;
+  z-index:8;
+  background:transparent;
+  white-space:normal;
+  word-break:break-word;
 }
 
 /* -----------------------------
-   Table header cells
+   Table header cells (sticky)
 ----------------------------- */
-.table-container table thead th {
-  vertical-align: middle;
-  padding: 10px;
-  box-sizing: border-box;
-  white-space: normal;
-  background-color: var(--header-bg);
-  color: var(--header-color);
+.table-container table thead th{
+  vertical-align:middle;
+  padding:10px;
+  box-sizing:border-box;
+  white-space:normal;
+  background-color:var(--header-bg);
+  color:var(--header-color);
+  position:sticky;
+  top:0;
+  z-index:5;
 }
 
 /* keep sort wrapper layout safe */
 .table-container table thead th .th-with-sort,
-.table-container table thead th .th-with-sort > div {
-  display: flex;
-  align-items: center;
-  height: 100%;
-  gap: 8px;
-  min-height: 1px;
-  box-sizing: border-box;
-  overflow: hidden;
+.table-container table thead th .th-with-sort > div{
+  display:flex;
+  align-items:center;
+  height:100%;
+  gap:8px;
+  min-height:1px;
+  box-sizing:border-box;
+  overflow:hidden;
 }
 
 /* -----------------------------
    Sticky first column
 ----------------------------- */
-/* Header first-cell sticky */
-.table-container table thead th:first-child {
-  position: sticky;
-  left: 0;
-  z-index: 6;
-  background-color: var(--header-bg);
-  color: var(--header-color);
+.table-container table thead th:first-child{
+  position:sticky;
+  left:0;
+  z-index:6;
+  background-color:var(--header-bg);
+  color:var(--header-color);
 }
 
-/* Body first-column sticky */
-.table-container table tbody td:first-child {
-  position: sticky;
-  left: 0;
-  z-index: 4;
-  box-shadow: 2px 0 5px -2px rgba(0,0,0,0.08);
-  background-color: inherit !important;
-  color: inherit !important;
+.table-container table tbody td:first-child{
+  position:sticky;
+  left:0;
+  z-index:4;
+  box-shadow:2px 0 5px -2px rgba(0,0,0,0.08);
+  background-color:inherit !important;
+  color:inherit !important;
 }
 
 /* -----------------------------
    Zebra rows and hover
 ----------------------------- */
-.table-container table tbody tr:nth-child(odd) td {
-  background-color: var(--row-odd-bg);
-}
-.table-container table tbody tr:nth-child(even) td {
-  background-color: var(--row-even-bg);
-}
+.table-container table tbody tr:nth-child(odd) td{ background-color:var(--row-odd-bg); }
+.table-container table tbody tr:nth-child(even) td{ background-color:var(--row-even-bg); }
 
-/* Ensure first column reflects zebra row color */
-.table-container table tbody tr:nth-child(odd) td:first-child {
-  background-color: var(--row-odd-bg) !important;
-}
-.table-container table tbody tr:nth-child(even) td:first-child {
-  background-color: var(--row-even-bg) !important;
-}
+.table-container table tbody tr:nth-child(odd) td:first-child{ background-color:var(--row-odd-bg) !important; }
+.table-container table tbody tr:nth-child(even) td:first-child{ background-color:var(--row-even-bg) !important; }
 
 .table-container table tbody tr:hover td,
-.table-container table tbody tr:hover td:first-child {
-  background-color: var(--row-hover-bg) !important;
+.table-container table tbody tr:hover td:first-child{
+  background-color:var(--row-hover-bg) !important;
 }
 
 /* -----------------------------
@@ -139,140 +132,228 @@
 ----------------------------- */
 .table-container table thead th:hover,
 .table-container table thead th:focus,
-.table-container table thead th.sort-active {
-  background-color: var(--header-highlight-bg) !important;
-  color: var(--header-highlight-color) !important;
-  transition: background-color 120ms ease, color 120ms ease;
-  outline: 2px solid rgba(255,255,255,0.03);
+.table-container table thead th.sort-active{
+  background-color:var(--header-highlight-bg) !important;
+  color:var(--header-highlight-color) !important;
+  transition:background-color 120ms ease, color 120ms ease;
+  outline:2px solid rgba(255,255,255,0.03);
 }
 
-/* Dark-mode header highlights (explicit) */
+/* Dark-mode header highlight explicit */
 [data-theme="dark"] .table-container table thead th:hover,
 [data-theme="dark"] .table-container table thead th:focus,
 [data-theme="dark"] .table-container table thead th.sort-active,
 body.dark-mode .table-container table thead th:hover,
 body.dark-mode .table-container table thead th:focus,
-body.dark-mode .table-container table thead th.sort-active {
-  background-color: var(--header-highlight-bg) !important;
-  color: var(--header-highlight-color) !important;
+body.dark-mode .table-container table thead th.sort-active{
+  background-color:var(--header-highlight-bg) !important;
+  color:var(--header-highlight-color) !important;
 }
 
 /* ensure sticky first column header respects highlight */
 [data-theme="dark"] .table-container table thead th:first-child:hover,
-body.dark-mode .table-container table thead th:first-child:hover {
-  background-color: var(--header-highlight-bg) !important;
-  color: var(--header-highlight-color) !important;
+body.dark-mode .table-container table thead th:first-child:hover{
+  background-color:var(--header-highlight-bg) !important;
+  color:var(--header-highlight-color) !important;
 }
 
 /* -----------------------------
    Column widths (proportional)
 ----------------------------- */
 .table-container table thead th:first-child,
-.table-container table tbody td:first-child { width: 28.57%; }
+.table-container table tbody td:first-child{ width:28.57%; }
 .table-container table thead th:not(:first-child),
-.table-container table tbody td:not(:first-child) { width: 71.43%; }
+.table-container table tbody td:not(:first-child){ width:71.43%; }
 
 /* -----------------------------
    Lists inside table cells
 ----------------------------- */
 .table-container td ul,
-.table-container td ol {
-  margin: 0.45rem 0;
-  padding-left: 1.25rem;
-  list-style: none !important;
+.table-container td ol{
+  margin:0.45rem 0;
+  padding-left:1.25rem;
+  list-style:none !important;
 }
 
 .table-container td ul > li,
-.table-container td ol > li {
-  margin-bottom: 0.3rem;
-  line-height: 1.36;
+.table-container td ol > li{
+  margin-bottom:0.3rem;
+  line-height:1.36;
 }
 
-.table-container td > ul > li::before {
-  content: "– ";
-  color: var(--text);
-  display: inline-block;
-  width: 1.1ch;
-  margin-left: -1.1ch;
+.table-container td > ul > li::before{
+  content:"– ";
+  color:var(--text);
+  display:inline-block;
+  width:1.1ch;
+  margin-left:-1.1ch;
 }
 
-.table-container td ul ul > li::before {
-  content: "• ";
-  color: var(--muted);
-  font-size: 0.9em;
-  display: inline-block;
-  width: 1.1ch;
-  margin-left: -1.1ch;
+.table-container td ul ul > li::before{
+  content:"• ";
+  color:var(--muted);
+  font-size:0.9em;
+  display:inline-block;
+  width:1.1ch;
+  margin-left:-1.1ch;
 }
 
-.table-container td ol {
-  counter-reset: table-ol;
-  padding-left: 1.6rem;
-}
-
-.table-container td ol > li {
-  counter-increment: table-ol;
-}
-
-.table-container td ol > li::before {
-  content: counter(table-ol) ". ";
-  color: var(--text);
-  display: inline-block;
-  width: 2.2ch;
-  margin-left: -2.2ch;
+.table-container td ol{ counter-reset:table-ol; padding-left:1.6rem; }
+.table-container td ol > li{ counter-increment:table-ol; }
+.table-container td ol > li::before{
+  content:counter(table-ol) ". ";
+  color:var(--text);
+  display:inline-block;
+  width:2.2ch;
+  margin-left:-2.2ch;
 }
 
 /* -----------------------------
    Code blocks inside table cells
 ----------------------------- */
-.table-container td code {
-  background: #f3f4f6;
-  padding: 2px 6px;
-  border-radius: 6px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.92em;
+.table-container td code{
+  background:#f3f4f6;
+  padding:2px 6px;
+  border-radius:6px;
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:0.92em;
 }
 
 /* -----------------------------
    Accessibility focus
 ----------------------------- */
-a:focus,
-button:focus,
-input:focus,
-select:focus,
-textarea:focus {
-  outline: 3px solid rgba(37,99,235,0.18);
-  outline-offset: 2px;
+a:focus, button:focus, input:focus, select:focus, textarea:focus{
+  outline:3px solid rgba(37,99,235,0.18);
+  outline-offset:2px;
 }
 
 /* -----------------------------
    Misc table wrapper / copy buttons / collapsible tables
 ----------------------------- */
-.table-wrapper { margin-bottom: 18px; }
+.table-wrapper{ margin-bottom:18px; }
 
-.table-wrapper .table-header-wrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-  flex-wrap: nowrap;
+.table-wrapper .table-header-wrapper{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  margin-bottom:6px;
+  flex-wrap:nowrap; /* default desktop behavior */
 }
 
-/* Title area if present (used when there is no <caption>) */
-.table-wrapper .table-header-wrapper .table-title {
-  font-weight: 600;
-  color: var(--text);
-  line-height: 1.2;
-  margin: 0;
-  padding: 0;
-  flex: 1 1 auto;
-  min-width: 0;
-  word-break: break-word;
-  order: 0;
+/* Title area used when there is no <caption> */
+.table-wrapper .table-header-wrapper .table-title{
+  font-weight:600;
+  color:var(--text);
+  line-height:1.2;
+  margin:0;
+  padding:0;
+  flex:1 1 auto;
+  min-width:0;
+  word-break:break-word;
+  order:0;
 }
 
 /* Copy buttons container */
-.table-wrapper .copy-buttons {
-  display: flex;
-  gap: 8px;
+.table-wrapper .copy-buttons{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-left:auto;
+}
+
+/* Individual copy button styling */
+.table-wrapper .copy-buttons button{
+  padding:6px 8px;
+  border-radius:6px;
+  border:1px solid rgba(0,0,0,0.08);
+  background:transparent;
+  color:var(--text);
+  font-size:0.92em;
+  cursor:pointer;
+  min-width:36px;
+  flex:none;
+}
+
+/* Collapsed table state */
+.table-wrapper.table-collapsed .table-container table tbody{ display:none; }
+.table-wrapper.table-collapsed .copy-buttons button{ opacity:0.65; }
+
+/* -----------------------------
+   Hide duplicate header-title when table has a real <caption>
+   Use both :has() (modern) and .has-caption (JS fallback)
+----------------------------- */
+.table-wrapper:has(.table-container table caption) .table-header-wrapper .table-title{ display:none !important; }
+.table-wrapper.has-caption .table-header-wrapper .table-title{ display:none !important; }
+
+/* -----------------------------
+   Responsive tweaks (mobile-first safety)
+----------------------------- */
+@media (max-width:900px){
+  .table-container{ overflow-x:auto; }
+
+  /* Allow header items to wrap rather than forcing column stacking.
+     Keeps title and buttons aligned and prevents caption from being hidden. */
+  .table-wrapper .table-header-wrapper{
+    flex-wrap:wrap;
+    align-items:flex-start;
+    gap:6px;
+  }
+
+  /* Title should take full available width on wrap */
+  .table-wrapper .table-header-wrapper .table-title{
+    width:100%;
+    order:0;
+  }
+
+  /* Keep buttons aligned at the end of the available row */
+  .table-wrapper .copy-buttons{
+    margin-left:auto;
+    order:1;
+    align-self:center;
+  }
+
+  /* Prevent copy buttons from stretching */
+  .table-wrapper .copy-buttons button{ flex:none; }
+}
+
+@media (max-width:600px){
+  .table-container table{ font-size:14px; }
+  .table-container td, .table-container th{ padding:8px 10px; }
+
+  .table-container caption{
+    font-size:0.95rem;
+    padding:6px 8px;
+  }
+
+  .table-wrapper .copy-buttons{ gap:6px; }
+}
+
+/* Ensure dark-mode list markers inherit correct color */
+[data-theme="dark"] .table-container td > ul > li::before,
+[data-theme="dark"] .table-container td ol > li::before{
+  color:var(--text);
+}
+
+/* -----------------------------
+   Utility: ensure pipes and inline tables don't break layout badly
+----------------------------- */
+.table-container td pre, .table-container td code, .table-container td kbd{
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+
+/* Overflow handling for long unbroken words */
+.table-container td{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+
+/* Prevent interactive elements from exceeding header wrapper height */
+.table-wrapper .table-header-wrapper > *{ max-width:100%; box-sizing:border-box; }
+
+/* Safety: visibly hide elements that are intentionally hidden, keep caption visible */
+.hidden{ display:none !important; visibility:hidden !important; }
+
+/* END overrides.css */
