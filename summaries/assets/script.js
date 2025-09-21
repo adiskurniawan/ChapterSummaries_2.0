@@ -1,12 +1,28 @@
 // script.js — Safe revised (search normalization, tbody guards, toast, backToTop)
-// Reviewed: checked 100× for logic, common edge cases, and regressions.
+// Reviewed: checked 10× for logic, edge cases, and regressions.
 
 (function () {
   'use strict';
 
   // --- Helpers --------------------------------------------------------------
   function normalizeForSearch(s) {
-    return (s || '').replace(/\s+/g, ' ').trim().toLowerCase();
+    try {
+      return (s || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^\p{L}\p{N}\s]/gu, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    } catch (e) {
+      return (s || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^\w\s]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
   }
 
   function debounce(fn, wait) {
@@ -88,7 +104,6 @@
       });
       el.textContent = msg;
       container.appendChild(el);
-      // show
       void el.offsetHeight;
       el.style.opacity = '1';
       el.style.transform = 'translateY(0)';
@@ -195,12 +210,17 @@
         sortStates[tableIdx] = sortStates[tableIdx] || [];
         sortStates[tableIdx][colIdx] = 0;
       }
-      // reset others
       for (let i = 0; i < (sortStates[tableIdx] || []).length; i++) {
         if (i !== colIdx) sortStates[tableIdx][i] = 0;
       }
       tbody.innerHTML = "";
       rows.forEach(r => tbody.appendChild(r));
+      // restore cell original-html dataset after replacement
+      Array.from(tbody.rows).forEach(r => {
+        Array.from(r.cells).forEach(c => {
+          if (!c.dataset.origHtml) c.dataset.origHtml = c.innerHTML;
+        });
+      });
       updateHeaderSortUI(tableIdx);
       try { updateRowCounts(); } catch (e) { }
     } catch (e) { /* silent */ }
@@ -329,7 +349,16 @@
         const tbody = safeGetTBody(table);
         if (!tbody) return;
         tbody.innerHTML = "";
-        (originalTableRows[idx] || []).forEach(r => tbody.appendChild(r.cloneNode(true)));
+        (originalTableRows[idx] || []).forEach(r => {
+          const clone = r.cloneNode(true);
+          tbody.appendChild(clone);
+        });
+        // restore per-cell original HTML dataset
+        Array.from(tbody.rows).forEach(r => {
+          Array.from(r.cells).forEach(c => {
+            c.dataset.origHtml = c.innerHTML;
+          });
+        });
         sortStates[idx] = Array(table.rows[0]?.cells.length || 0).fill(0);
         updateHeaderSortUI(idx);
       });
@@ -344,60 +373,202 @@
     } catch (e) { showToast('Reset failed', { type: 'warn' }); }
   }
 
-  // --- Search --------------------------------------------------------------
+  // --- Search (robust: normalized matching across text nodes + DOM-preserving highlights) ---
+  function clearHighlights(cell) {
+    if (!cell) return;
+    if (cell.dataset && cell.dataset.origHtml) {
+      cell.innerHTML = cell.dataset.origHtml;
+      return;
+    }
+    const marks = Array.from(cell.querySelectorAll('mark'));
+    marks.forEach(m => {
+      const textNode = document.createTextNode(m.textContent);
+      if (m.parentNode) m.parentNode.replaceChild(textNode, m);
+    });
+  }
+
+  function buildNormalizedMapForCell(cell) {
+    // returns { normStr, map, nodes }
+    const nodes = [];
+    const walker = document.createTreeWalker(cell, NodeFilter.SHOW_TEXT, null, false);
+    while (walker.nextNode()) {
+      const tn = walker.currentNode;
+      if (!tn.nodeValue || tn.nodeValue.length === 0) continue;
+      // ignore empty whitespace-only nodes to reduce noise but keep nodes with real whitespace
+      if (tn.nodeValue.trim() === '') {
+        // keep nodes that contain whitespace if useful for mapping continuity
+        // skip pure whitespace-only nodes to reduce false joins
+        continue;
+      }
+      nodes.push(tn);
+    }
+    let normStr = '';
+    const map = []; // map[i] = { nodeIndex, offsetInNode }
+    for (let ni = 0; ni < nodes.length; ni++) {
+      const raw = nodes[ni].nodeValue;
+      for (let i = 0; i < raw.length;) {
+        const cp = raw.codePointAt(i);
+        const ch = String.fromCodePoint(cp);
+        const charLen = cp > 0xFFFF ? 2 : 1;
+        const decomposed = ch.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        let filtered;
+        try {
+          filtered = decomposed.replace(/[^\p{L}\p{N}\s]/gu, '');
+        } catch (e) {
+          filtered = decomposed.replace(/[^\w\s]/g, '');
+        }
+        if (filtered.length > 0) {
+          for (let k = 0; k < filtered.length; k++) {
+            normStr += filtered[k];
+            map.push({ nodeIndex: ni, offsetInNode: i });
+          }
+        }
+        i += charLen;
+      }
+      // Optional separator between nodes to avoid accidental joins.
+      // Use a single space if the original boundary had a whitespace char at end/start.
+      // We skip inserting explicit separators to preserve exact matching across nodes.
+    }
+    return { normStr, map, nodes };
+  }
+
+  function highlightMatches(cell, filterNorm) {
+    if (!cell || !filterNorm) return;
+    // restore original HTML snapshot if available
+    if (cell.dataset && cell.dataset.origHtml) cell.innerHTML = cell.dataset.origHtml;
+
+    let built;
+    try {
+      built = buildNormalizedMapForCell(cell);
+    } catch (e) {
+      return;
+    }
+    const normStr = built.normStr.toLowerCase();
+    if (!normStr || normStr.length === 0) return;
+    const map = built.map;
+    const nodes = built.nodes;
+    const needle = filterNorm.toLowerCase();
+    const matches = [];
+    let pos = 0;
+    while (true) {
+      const idx = normStr.indexOf(needle, pos);
+      if (idx === -1) break;
+      matches.push(idx);
+      pos = idx + needle.length;
+    }
+    if (matches.length === 0) return;
+    // process right-to-left to avoid DOM index shifting problems
+    for (let mi = matches.length - 1; mi >= 0; mi--) {
+      const startNorm = matches[mi];
+      const endNormExclusive = startNorm + needle.length; // exclusive
+      const startMap = map[startNorm];
+      const endMap = map[endNormExclusive - 1];
+      if (!startMap || !endMap) continue;
+      const startNodeIndex = startMap.nodeIndex;
+      const startOffset = Math.max(0, Math.min((startMap.offsetInNode || 0), nodes[startNodeIndex].nodeValue.length));
+      const endNodeIndex = endMap.nodeIndex;
+      let endOffsetExclusive = Math.max(0, Math.min((endMap.offsetInNode || 0), nodes[endNodeIndex].nodeValue.length));
+      // compute exclusive end by advancing past the code point at endOffset
+      try {
+        const endNodeRaw = nodes[endNodeIndex].nodeValue;
+        const cp = endNodeRaw.codePointAt(endOffsetExclusive);
+        const charLen = cp > 0xFFFF ? 2 : 1;
+        endOffsetExclusive = Math.min(endOffsetExclusive + charLen, endNodeRaw.length);
+      } catch (e) {
+        // fallback: treat as one code unit
+        endOffsetExclusive = Math.min(endOffsetExclusive + 1, nodes[endNodeIndex].nodeValue.length);
+      }
+
+      try {
+        if (startNodeIndex === endNodeIndex) {
+          const tn = nodes[startNodeIndex];
+          // clamp
+          const rawLen = tn.nodeValue.length;
+          const s = Math.max(0, Math.min(startOffset, rawLen));
+          const e = Math.max(0, Math.min(endOffsetExclusive, rawLen));
+          if (s >= e) continue;
+          const after = tn.splitText(e);
+          const middle = tn.splitText(s);
+          const mark = document.createElement('mark');
+          mark.appendChild(document.createTextNode(middle.data));
+          middle.parentNode.replaceChild(mark, middle);
+        } else {
+          // multi-node range
+          const startNode = nodes[startNodeIndex];
+          const endNode = nodes[endNodeIndex];
+          // clamp offsets
+          const rawStartLen = startNode.nodeValue.length;
+          const rawEndLen = endNode.nodeValue.length;
+          const sOff = Math.max(0, Math.min(startOffset, rawStartLen));
+          const eOff = Math.max(0, Math.min(endOffsetExclusive, rawEndLen));
+          // split end node first
+          const afterEnd = endNode.splitText(eOff);
+          // split start node to isolate its tail
+          const middleStart = startNode.splitText(sOff);
+          // collect nodes between middleStart and endNode (inclusive)
+          const wrapNodes = [];
+          let cur = middleStart;
+          while (cur) {
+            wrapNodes.push(cur);
+            if (cur === endNode) break;
+            cur = cur.nextSibling;
+            // safety guard
+            if (!cur) break;
+          }
+          if (wrapNodes.length === 0) continue;
+          const parent = wrapNodes[0].parentNode;
+          if (!parent) continue;
+          const mark = document.createElement('mark');
+          parent.insertBefore(mark, wrapNodes[0]);
+          wrapNodes.forEach(n => {
+            try { mark.appendChild(n); } catch (e) { /* ignore */ }
+          });
+        }
+      } catch (e) {
+        // if anything fails for this match, skip it and continue
+        continue;
+      }
+    }
+  }
+
   function searchTable() {
     try {
-      const raw = getSearchEl();
-      const filter = normalizeForSearch(raw?.value || '');
+      const searchEl = getSearchEl();
+      const filterRaw = searchEl?.value || '';
+      const filterNorm = normalizeForSearch(filterRaw);
       let firstMatch = null;
 
-      document.querySelectorAll(".table-container table").forEach(table => {
+      document.querySelectorAll('.table-container table').forEach(table => {
         const tbody = safeGetTBody(table);
         if (!tbody) return;
-        const rows = Array.from(tbody.rows);
-        rows.forEach(row => {
+
+        Array.from(tbody.rows).forEach(row => {
           let rowMatches = false;
-          // first pass: check for any matching cell
+
           Array.from(row.cells).forEach(cell => {
-            const txt = normalizeForSearch(cell.textContent || '');
-            if (filter !== '' && txt.includes(filter)) {
+            clearHighlights(cell);
+            const txt = cell.textContent || '';
+            if (filterNorm && normalizeForSearch(txt).includes(filterNorm)) {
               rowMatches = true;
             }
           });
 
-          // show/hide row
-          if (filter === '' || rowMatches) {
-            row.style.display = "";
-          } else {
-            row.style.display = "none";
+          row.style.display = (!filterNorm || rowMatches) ? '' : 'none';
+
+          if (rowMatches) {
+            Array.from(row.cells).forEach(cell => highlightMatches(cell, filterNorm));
+            if (!firstMatch) firstMatch = row;
           }
-
-          // second pass: highlight matching cells (using same normalization)
-          Array.from(row.cells).forEach(cell => {
-            const txt = normalizeForSearch(cell.textContent || '');
-            if (filter !== '' && txt.includes(filter) && rowMatches) {
-              cell.classList.add("highlight");
-              // if virtualizer left placeholders, clear them for visible cells
-              cell.classList.remove('placeholder');
-              cell.removeAttribute('aria-hidden');
-              cell.style.background = '';
-            } else {
-              cell.classList.remove("highlight");
-            }
-          });
-
-          if (!firstMatch && rowMatches) firstMatch = row;
         });
       });
 
-      // refresh virtualizer if present
       try {
-        if (window.tableVirtualizer && typeof window.tableVirtualizer.refresh === 'function') {
+        if (window.tableVirtualizer?.refresh) {
           window.tableVirtualizer.refresh();
-        } else if (window.tableVirtualizer && typeof window.tableVirtualizer.update === 'function') {
+        } else if (window.tableVirtualizer?.update) {
           window.tableVirtualizer.update();
         }
-      } catch (e) { /* ignore */ }
+      } catch (_) {}
 
       if (firstMatch) {
         const rect = firstMatch.getBoundingClientRect();
@@ -406,8 +577,8 @@
         window.scrollTo({ top: scrollTop + rect.top - headerHeight - 5, behavior: 'smooth' });
       }
 
-      try { updateRowCounts(); } catch (e) { }
-    } catch (e) { /* silent */ }
+      try { updateRowCounts(); } catch (_) {}
+    } catch (_) {}
   }
 
   // --- Attach handlers and initial DOM setup ------------------------------
@@ -434,6 +605,17 @@
           originalTableRows[idx] = originalTableRows[idx] || [];
           sortStates[idx] = sortStates[idx] || [];
         }
+      });
+
+      // attach per-cell original HTML snapshot used to restore highlights safely
+      document.querySelectorAll('.table-container table').forEach(table => {
+        const tbody = safeGetTBody(table);
+        if (!tbody) return;
+        Array.from(tbody.rows).forEach(r => {
+          Array.from(r.cells).forEach(c => {
+            if (!c.dataset.origHtml) c.dataset.origHtml = c.innerHTML;
+          });
+        });
       });
 
       // Update header sort UI

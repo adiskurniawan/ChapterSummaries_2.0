@@ -1,5 +1,5 @@
 /* style.css — Tables Viewer v2.1
-   Revised: 2025-09-20 (compact header buttons, mobile hide rules)
+   Revised: 2025-09-21
    Purpose: consistent list markers inside table cells, plus general UI polish
 */
 
@@ -115,10 +115,19 @@ tr:hover td{background:var(--row-hover)}
 .highlight{background:var(--highlight)!important;transition:background .45s ease}
 .current-row td{background:var(--current-row)!important}
 
-/* Sticky first column */
-td:first-child, th:first-child{
+/* Sticky first column
+   NOTE: keep header cells bold (thead th rule). Do NOT force bold for data cells.
+*/
+thead th:first-child{
+  /* header-specific sticky behavior; header font-weight remains from thead th */
+  position:sticky;
+  left:0;
+  z-index:4;
   background:var(--panel);
-  font-weight:600;
+}
+td:first-child{
+  background:var(--panel);
+  font-weight:inherit; /* inherit normal td weight; explicit <strong> still appears bold */
   position:sticky;
   left:0;
   z-index:2;
@@ -408,22 +417,16 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
     font-size: 12px;
     min-height:36px;
   }
+}
 
-  /* Hide less-essential header buttons on very narrow screens while keeping key ones */
-  /* Keeps #modeBtn and #toggleAllBtn visible; hides other text buttons to save space */
-  @media (max-width:420px){
-    #tv-header > div:last-child{
-      overflow-x:auto;
-      -webkit-overflow-scrolling:touch;
-    }
-    #tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) {
-      display:none !important;
-    }
+/* Very-narrow screens - hide less-essential header buttons */
+@media (max-width:420px){
+  #tv-header > div:last-child{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
   }
-
-  /* Ensure toc has good touch area */
-  #tocBar{
-    padding:8px 6px;
+  #tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) {
+    display:none !important;
   }
 }
 
@@ -434,5 +437,3 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
 
 /* small visual polish for toc links */
 #tocBar a:hover{ background:var(--toc-link-hover-bg); color:var(--toc-link-hover-color) }
-
-/* End of file */
