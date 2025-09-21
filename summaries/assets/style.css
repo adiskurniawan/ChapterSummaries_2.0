@@ -1,8 +1,11 @@
 /* style.css — Tables Viewer v2.1
-   Revised: 2025-09-20 (compact header buttons, mobile hide rules)
+   Revised: 2025-09-21 (fix: sticky first-column <th> styling, dark-shadow, media-query cleanup)
    Purpose: consistent list markers inside table cells, plus general UI polish
 */
 
+/* --------------------------
+   Theme variables (light)
+   -------------------------- */
 :root{
   --bg:#ffffff;
   --text:#111827;
@@ -18,9 +21,13 @@
   --toc-link-hover-bg:#e0f2fe;
   --toc-link-hover-color:#1e40af;
   --tv-header-min-height:48px;
+  --firstcol-shadow-light: 2px 0 5px -2px rgba(0,0,0,0.08);
+  --firstcol-shadow-dark: 2px 0 5px -2px rgba(255,255,255,0.06);
 }
 
-/* dark theme overrides */
+/* --------------------------
+   Dark theme overrides
+   -------------------------- */
 [data-theme="dark"]{
   --bg:#1e1e2f;
   --text:#e0e0e0;
@@ -37,7 +44,9 @@
   --toc-link-hover-color:#ffffff;
 }
 
-/* Base layout + typography */
+/* --------------------------
+   Base layout + typography
+   -------------------------- */
 html,body{
   margin:0;
   background:var(--bg);
@@ -48,7 +57,7 @@ html,body{
 }
 a{color:inherit;text-decoration:none}
 
-/* Base button style (used broadly). Header buttons overridden below. */
+/* Buttons */
 button{
   background:var(--button-bg);
   color:var(--button-text);
@@ -62,7 +71,9 @@ button{
   justify-content:center;
 }
 
-/* Table container and responsive behavior */
+/* --------------------------
+   Table container and responsive behavior
+   -------------------------- */
 .table-container{
   width:100%;
   overflow-x:auto;
@@ -81,7 +92,9 @@ table{
   min-width:420px;
 }
 
-/* Headers and cells */
+/* Headers and cells
+   - use top value from header-min-height variable
+*/
 thead th, th{
   padding:12px 14px;
   text-align:left;
@@ -91,9 +104,10 @@ thead th, th{
   font-weight:700;
   font-size:1.03rem;
   position:sticky;
-  top:48px;
+  top:var(--tv-header-min-height);
   z-index:3;
   cursor:default;
+  transition: background-color 120ms ease, color 120ms ease;
 }
 tbody td, td{
   padding:12px 14px;
@@ -109,13 +123,22 @@ table strong, table b{
   letter-spacing:-0.01em;
 }
 
-/* Row striping & hover */
-tr:nth-child(even){background:var(--bg)}
-tr:hover td{background:var(--row-hover)}
+/* Row striping & hover (apply to both td and th in tbody) */
+tbody tr:nth-child(even) td,
+tbody tr:nth-child(even) th { background: var(--bg); }
+tbody tr:nth-child(odd) td,
+tbody tr:nth-child(odd) th { background: transparent; }
+
+tbody tr:hover td,
+tbody tr:hover th { background: var(--row-hover) !important; transition: background-color 120ms ease; }
+
 .highlight{background:var(--highlight)!important;transition:background .45s ease}
 .current-row td{background:var(--current-row)!important}
 
-/* Sticky first column */
+/* --------------------------
+   Sticky first column (covers td + th)
+   -------------------------- */
+/* Base sticky first-column (applies to both header and body first-child) */
 td:first-child, th:first-child{
   background:var(--panel);
   font-weight:600;
@@ -123,13 +146,45 @@ td:first-child, th:first-child{
   left:0;
   z-index:2;
   min-width:140px;
-  box-shadow:2px 0 5px -2px rgba(0,0,0,0.08);
+  box-shadow: var(--firstcol-shadow-light);
 }
 
-/* Subtle border color */
+/* Make sure body row-headers (<tbody> th:first-child) also get sticky and copy zebra/hover */
+.table-container table tbody th:first-child,
+.table-container table tbody td:first-child {
+  /* reinforce sticky behavior specifically for body first-column */
+  position: sticky;
+  left: 0;
+  z-index: 4;
+  box-shadow: var(--firstcol-shadow-light);
+  background-color: inherit !important;
+  color: inherit !important;
+}
+
+/* Explicit zebra colors for first-column <th> in tbody (to avoid stacking issues) */
+.table-container table tbody tr:nth-child(odd) th:first-child {
+  background-color: inherit !important;
+}
+.table-container table tbody tr:nth-child(even) th:first-child {
+  background-color: inherit !important;
+}
+/* Hover sync for first-column <th> in tbody */
+.table-container table tbody tr:hover th:first-child {
+  background-color: var(--row-hover) !important;
+}
+
+/* Dark-mode adaptive shadow for the sticky first column */
+[data-theme="dark"] .table-container table tbody th:first-child,
+[data-theme="dark"] .table-container table tbody td:first-child {
+  box-shadow: var(--firstcol-shadow-dark);
+}
+
+/* Subtle border color override (keeps borders light) */
 table td, table th{border-color:rgba(0,0,0,0.06)}
 
-/* Sort button and header interactions */
+/* --------------------------
+   Sort button and header interactions
+   -------------------------- */
 .sort-btn{
   display:flex;
   align-items:center;
@@ -145,7 +200,9 @@ table td, table th{border-color:rgba(0,0,0,0.06)}
 .th-with-sort, thead th[role="button"], .sort-btn{cursor:pointer}
 thead th[role="button"]:hover{background:#eef6ff}
 
-/* Sticky header area - header + TOC stack and remain sticky */
+/* --------------------------
+   Sticky header area - header + TOC
+   -------------------------- */
 #stickyMainHeader{
   position:sticky;
   top:0;
@@ -162,7 +219,7 @@ thead th[role="button"]:hover{background:#eef6ff}
   box-shadow: 0 1px 0 rgba(0,0,0,0.03);
 }
 
-/* tv-header: internal controls layout (title left, controls right) */
+/* tv-header layout */
 #tv-header{
   display:flex;
   gap:6px;
@@ -172,8 +229,6 @@ thead th[role="button"]:hover{background:#eef6ff}
   width:100%;
   min-height:var(--tv-header-min-height);
 }
-
-/* tv-header children: title and controls */
 #tv-header > div:first-child{
   flex: 0 0 auto;
   display:flex;
@@ -204,8 +259,6 @@ thead th[role="button"]:hover{background:#eef6ff}
   white-space:nowrap;
   gap:6px;
 }
-
-/* Provide slightly tighter visual for icon-only buttons if used */
 #tv-header button.icon-only,
 #tv-header .btn.icon-only {
   padding: 6px;
@@ -232,7 +285,7 @@ thead th[role="button"]:hover{background:#eef6ff}
   height: 34px;
 }
 
-/* TOC bar (keeps horizontal slicer behavior) */
+/* TOC bar */
 #tocBar{
   display:flex;
   align-items:center;
@@ -243,8 +296,6 @@ thead th[role="button"]:hover{background:#eef6ff}
   background:transparent;
   -webkit-overflow-scrolling:touch;
 }
-
-/* keep the TOC visible and separate visually */
 #tocBar ul{
   display:flex;
   gap:8px;
@@ -269,11 +320,69 @@ thead th[role="button"]:hover{background:#eef6ff}
 .sort-state-0{opacity:.45}
 .sort-state-1,.sort-state-2{color:var(--text);opacity:1}
 
-/* Responsive tweaks */
+/* --------------------------
+   Responsive tweaks
+   -------------------------- */
 @media (max-width:900px){
   #tv-header input[type="search"]{ width:180px !important; min-width:120px !important; }
   #tocBar{gap:8px;padding:4px}
   #mainContent{padding:12px}
+}
+
+/* Small-screen adjustments */
+@media (max-width:600px){
+  table{font-size:15px}
+  td,th{padding:10px 12px}
+  thead th{position:sticky;top:var(--tv-header-min-height);z-index:4}
+  .table-container{border-radius:6px}
+
+  /* Make the tv-header stack on very small screens */
+  #tv-header{
+    flex-direction:column;
+    align-items:stretch;
+  }
+  #tv-header > div:last-child{
+    justify-content:flex-start;
+  }
+
+  /* Force search full width on mobile and place above controls if wrapping */
+  #tv-header input[type="search"],
+  #tv-header input[type="text"],
+  #stickyMainHeader input[type="search"],
+  #stickyMainHeader input[type="text"] {
+    flex-basis: 100% !important;
+    width: 100% !important;
+    order: 1;
+    margin-bottom:6px;
+    height:32px;
+    font-size:12px;
+    padding:4px 7px;
+  }
+
+  /* Slightly tighter header buttons on very small screens */
+  #tv-header button,
+  #tv-header .btn,
+  #stickyMainHeader button {
+    padding: 3px 7px;
+    font-size: 12px;
+    min-height:36px;
+  }
+
+  /* Ensure toc has good touch area */
+  #tocBar{
+    padding:8px 6px;
+  }
+}
+
+/* Narrow-screen: hide less-essential header buttons to save space */
+@media (max-width:420px){
+  #tv-header > div:last-child{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  #tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) {
+    display:none !important;
+  }
 }
 
 /* Table header area, collapse controls */
@@ -349,7 +458,7 @@ td ol > li::before {
   margin-left: -2.2ch;
 }
 
-/* small improvement: keep code blocks and inline code readable */
+/* Keep inline code readable */
 td code{
   background:#f3f4f6;
   padding:2px 6px;
@@ -368,63 +477,6 @@ td code{
 a:focus, button:focus, input:focus, select:focus, textarea:focus {
   outline: 3px solid rgba(37,99,235,0.18);
   outline-offset: 2px;
-}
-
-/* Small-screen adjustments */
-@media (max-width:600px){
-  table{font-size:15px}
-  td,th{padding:10px 12px}
-  thead th{position:sticky;top:48px;z-index:4}
-  .table-container{border-radius:6px}
-
-  /* Make the tv-header stack on very small screens */
-  #tv-header{
-    flex-direction:column;
-    align-items:stretch;
-  }
-  #tv-header > div:last-child{
-    justify-content:flex-start;
-  }
-
-  /* Force search full width on mobile and place above controls if wrapping */
-  #tv-header input[type="search"],
-  #tv-header input[type="text"],
-  #stickyMainHeader input[type="search"],
-  #stickyMainHeader input[type="text"] {
-    flex-basis: 100% !important;
-    width: 100% !important;
-    order: 1;
-    margin-bottom:6px;
-    height:32px;
-    font-size:12px;
-    padding:4px 7px;
-  }
-
-  /* Slightly tighter header buttons on very small screens */
-  #tv-header button,
-  #tv-header .btn,
-  #stickyMainHeader button {
-    padding: 3px 7px;
-    font-size: 12px;
-    min-height:36px;
-  }
-
-  /* Hide less-essential header buttons on very narrow screens while keeping key ones */
-  /* Keeps #modeBtn and #toggleAllBtn visible; hides other text buttons to save space */
-  @media (max-width:420px){
-    #tv-header > div:last-child{
-      overflow-x:auto;
-      -webkit-overflow-scrolling:touch;
-    }
-    #tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) {
-      display:none !important;
-    }
-  }
-
-  /* Ensure toc has good touch area */
-  #tocBar{
-    padding:8px 6px;
-  }
 }
 
 /* Prevent ancestor overflow from disabling sticky positioning */
