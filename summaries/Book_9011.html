@@ -1,85 +1,67 @@
 <!DOCTYPE html>
 <html lang='en'>
 <head>
-<meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
 <title>Tables Viewer v2.1</title>
-<style>:root{--main-header-height:56px;}</style>
-<link rel="stylesheet" href="assets/style.css?v=1758389395">
-<link rel="stylesheet" href="assets/overrides.css?v=1758389395">
-</head><body>
+<meta name='description' content='Tables Viewer'>
+<meta name='author' content=''>
+<style>:root{--main-header-height:56px;--tv-header-min-height:56px;}</style>
+<link rel="stylesheet" href="assets/style.css?v=1758422927">
+<link rel="stylesheet" href="assets/overrides.css?v=1758422927">
+</head>
+<body>
 <div id="tables-viewer" role="region" aria-label="Tables viewer">
 <div id="stickyMainHeader">
-<div id="tv-header"><div><h1>Tables Viewer v2.1</h1></div><div style="display:flex;gap:8px;align-items:center;"><input id="searchBox" type="search" placeholder="Search" aria-label="Search tables" style="min-width:420px; width:44ch;"/><button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button><button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button><button id="copyAllPlainBtn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button><button id="copyAllMdBtn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy all tables as markdown">Copy All Tables (Markdown)</button><button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset all tables">Reset All Tables</button></div></div>
-<noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
-<div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1-title">Table 1</a></li></ul></div></div>
-<div class="table-wrapper" id="Table1"><h3 id="Table1-title">Table 1</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
-        <th style="width:28.57%;" onclick="sortTableByColumn(0,0)" role="button" aria-label="Sort by **Issue (observed)**">
-          <div class="th-with-sort">
-            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Issue (observed)</strong></div>
-            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,0, this)" title="Toggle sort" aria-label="Toggle sort">
-              <span class="sort-icon" aria-hidden="true"></span>
-            </button>
-          </div>
-        </th>
-        <th style="width:71.43%;" onclick="sortTableByColumn(0,1)" role="button" aria-label="Sort by **Repair for generator (what .py must do)**">
-          <div class="th-with-sort">
-            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Repair for generator (what .py must do)</strong></div>
-            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,1, this)" title="Toggle sort" aria-label="Toggle sort">
-              <span class="sort-icon" aria-hidden="true"></span>
-            </button>
-          </div>
-        </th></tr></thead><tbody><tr><td data-label="<strong>Issue (observed)</strong>"><p>Missing `<title>`</p></td><td data-label="<strong>Repair for generator (what .py must do)</strong>"><p>Insert `<title>` into `<head>` (use page title variable).</p></td></tr>
-<tr><td data-label="<strong>Issue (observed)</strong>"><p>`data-label` contains raw HTML (`"<strong>Summary</strong>"`)</p></td><td data-label="<strong>Repair for generator (what .py must do)</strong>"><p>Escape or serialize labels as plain text. Use `html.escape()` before writing into `data-label`.</p></td></tr>
-<tr><td data-label="<strong>Issue (observed)</strong>"><p>Buttons lack `type="button"`</p></td><td data-label="<strong>Repair for generator (what .py must do)</strong>"><p>Always emit `type="button"` for `<button>` to avoid accidental form submits.</p></td></tr>
-<tr><td data-label="<strong>Issue (observed)</strong>"><p>Inline `onclick` with hard-coded table indices</p></td><td data-label="<strong>Repair for generator (what .py must do)</strong>"><p>Emit `data-table-index` and `data-col-index` attributes instead of hard-coded JS calls. Attach listeners from `assets/script.js` (no inline handlers).</p></td></tr>
-<tr><td data-label="<strong>Issue (observed)</strong>"><p>Many inline `style="..."` attributes</p></td><td data-label="<strong>Repair for generator (what .py must do)</strong>"><p>Move styling to classes. Generator should emit classes (e.g. `class="search-input"`) and avoid inline `style`.</p></td></tr>
-<tr><td data-label="<strong>Issue (observed)</strong>"><p>Inline JS that assumes optional DOM elements (`exportBtn`) or external worker may be missing</p></td><td data-label="<strong>Repair for generator (what .py must do)</strong>"><p>Only emit code referencing elements that exist, or guard at generation time: <br>• include export button when you also write `worker.js` <br>• Otherwise remove export snippet or leave guard (already present) and ensure assets exist.</p></td></tr>
-<tr><td data-label="<strong>Issue (observed)</strong>"><p>Inline script executes immediately (possible ordering issues)</p></td><td data-label="<strong>Repair for generator (what .py must do)</strong>"><p>Defer inline behaviour by wrapping in `DOMContentLoaded` or move into external script file. Generator should output inline snippets inside `document.addEventListener('DOMContentLoaded', ...)`.</p></td></tr>
-<tr><td data-label="<strong>Issue (observed)</strong>"><p>`role="application"` on root element</p></td><td data-label="<strong>Repair for generator (what .py must do)</strong>"><p>Prefer `role="region"` with `aria-label` or no role. Generator should not set `role="application"` unless verified accessible behavior.</p></td></tr>
-<tr><td data-label="<strong>Issue (observed)</strong>"><p>`data-&#42;` values occasionally contain `{html}` template tokens</p></td><td data-label="<strong>Repair for generator (what .py must do)</strong>"><p>Sanitize/template-replace safely. Remove unintended placeholders like `replace('{user}', '')` unless used.</p></td></tr>
-<tr><td data-label="<strong>Issue (observed)</strong>"><p>Hard-coded table indices can go out of sync</p></td><td data-label="<strong>Repair for generator (what .py must do)</strong>"><p>When generating multiple tables compute and emit the index dynamically (incrementing counter) and/or use `data-table-id` that the script resolves by querySelector.</p></td></tr>
-<tr><td data-label="<strong>Issue (observed)</strong>"><p>Potential XSS from untrusted content (table cell HTML inserted raw)</p></td><td data-label="<strong>Repair for generator (what .py must do)</strong>"><p>If source text is untrusted, escape it. Offer an option `render&#95;html=True/False`. Default to escaping.</p></td></tr>
-<tr><td data-label="<strong>Issue (observed)</strong>"><p>Missing `<caption>` for tables</p></td><td data-label="<strong>Repair for generator (what .py must do)</strong>"><p>Emit `<caption>` from generator when a title exists for better accessibility.</p></td></tr>
-<tr><td data-label="<strong>Issue (observed)</strong>"><p>Missing ARIA labels on some control buttons</p></td><td data-label="<strong>Repair for generator (what .py must do)</strong>"><p>Emit `aria-label` for all controls: <br>• Copy Plain <br>• Copy Markdown <br>• Collapse <br>with descriptive text.</p></td></tr>
-<tr><td data-label="<strong>Issue (observed)</strong>"><p>Large single-file export check in page JS</p></td><td data-label="<strong>Repair for generator (what .py must do)</strong>"><p>Generator should provide an export-size guard on server side or split long content. <br>• If producing self-contained HTML, warn or chunk when document size > threshold.</p></td></tr>
-<tr><td data-label="<strong>Issue (observed)</strong>"><p>References to `assets/worker.js` or `assets/overrides.css` not present</p></td><td data-label="<strong>Repair for generator (what .py must do)</strong>"><p>Ensure generator copies/writes all referenced assets. Otherwise drop references or inline the assets.</p></td></tr>
-<tr><td data-label="<strong>Issue (observed)</strong>"><p>`thead th` sticky offset not computed</p></td><td data-label="<strong>Repair for generator (what .py must do)</strong>"><p>Emit a CSS var `--main-header-height` in head calculated from generator config or measured header height class. <br>• Example: `:root{--main-header-height:56px}` <br>• Or ensure script sets it at runtime.</p></td></tr>
-<tr><td data-label="<strong>Issue (observed)</strong>"><p>Mixed external linking vs inlined mode</p></td><td data-label="<strong>Repair for generator (what .py must do)</strong>"><p>If user requested self-contained output, generator must inline CSS/JS consistently rather than outputting `<link>` to missing assets. Provide a single `mode` flag.</p></td></tr>
-</tbody></table></div>
-  <div class='row-count'></div>
+  <div id="tv-header">
+    <div class="tv-title"><h1>Tables Viewer v2.1</h1></div>
+    <div class="tv-controls" style="display:flex;gap:8px;align-items:center;">
+      <input id="searchBox" type="search" placeholder="Search" aria-label="Search tables" style="min-width:360px; width:44ch;">
+      <button id="modeBtn" type="button" data-action="toggle-mode" aria-label="Toggle theme">Theme</button>
+      <button id="toggleAllBtn" type="button" data-action="toggle-all" aria-label="Toggle all">Collapse All Tables</button>
+      <button id="copyAllPlainBtn" type="button" data-action="copy-all-plain" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button>
+      <button id="copyAllMdBtn" type="button" data-action="copy-all-md" aria-label="Copy all tables as markdown">Copy All Tables (Markdown)</button>
+      <button id="resetAllBtn" type="button" data-action="reset-all" aria-label="Reset all tables">Reset All Tables</button>
+    </div>
+  </div>
+<div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#table1">Table 1</a></li></ul></div>
 </div>
-
-<script src="assets/script.js?v=1758389395" defer></script>
-
+<noscript><div style="margin:8px 0;padding:6px;border:1px solid #ddd;background:#fff9;">JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
+<div class="table-wrapper" id="table1"><div class="table-header-wrapper" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;"><div class="copy-buttons"><button type="button" class="copy-plain-btn" onclick="copyTablePlain(this)" aria-label="Copy table as plain text">Copy Plain Table</button><button type="button" class="copy-md-btn" onclick="copyTableMarkdown(this)" aria-label="Copy table as markdown">Copy Markdown Table</button></div><div style="display:flex;align-items:center;"><button type="button" class="toggle-table-btn" onclick="toggleTable(this)" aria-label="Toggle table">Collapse Table</button></div></div><div class="table-container"><table><thead><tr><th class="col-text" id="table1-th-0" role="button" data-col-index="0" data-table-index="0" aria-label="Sort by Issue (observed)"><div class="th-with-sort"><div style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Issue (observed)</div><button type="button" class="sort-btn" onclick="headerSortButtonClicked(0,0, this)" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th><th class="col-text" id="table1-th-1" role="button" data-col-index="1" data-table-index="0" aria-label="Sort by Repair for generator (what .py must do)"><div class="th-with-sort"><div style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Repair for generator (what .py must do)</div><button type="button" class="sort-btn" onclick="headerSortButtonClicked(0,1, this)" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th></tr></thead><tbody><tr><td data-label="Issue (observed)">Missing `<title>`                                                                            </td><td data-label="Repair for generator (what .py must do)">Insert `<title>` into `<head>` (use page title variable).                                                                                                                                                   </td></tr>
+<tr><td data-label="Issue (observed)">`data-label` contains raw HTML (`"<strong>Summary</strong>"`)                                </td><td data-label="Repair for generator (what .py must do)">Escape or serialize labels as plain text. Use `html.escape()` before writing into `data-label`.                                                                                                             </td></tr>
+<tr><td data-label="Issue (observed)">Buttons lack `type="button"`                                                                 </td><td data-label="Repair for generator (what .py must do)">Always emit `type="button"` for `<button>` to avoid accidental form submits.                                                                                                                                </td></tr>
+<tr><td data-label="Issue (observed)">Inline `onclick` with hard-coded table indices                                               </td><td data-label="Repair for generator (what .py must do)">Emit `data-table-index` and `data-col-index` attributes instead of hard-coded JS calls. Attach listeners from `assets/script.js` (no inline handlers).                                                      </td></tr>
+<tr><td data-label="Issue (observed)">Many inline `style="..."` attributes                                                         </td><td data-label="Repair for generator (what .py must do)">Move styling to classes. Generator should emit classes (e.g. `class="search-input"`) and avoid inline `style`.                                                                                              </td></tr>
+<tr><td data-label="Issue (observed)">Inline JS that assumes optional DOM elements (`exportBtn`) or external worker may be missing </td><td data-label="Repair for generator (what .py must do)">Only emit code referencing elements that exist, or guard at generation time: include export button when you also write `worker.js`. Otherwise remove export snippet or leave guard and ensure assets exist. </td></tr>
+<tr><td data-label="Issue (observed)">Inline script executes immediately (possible ordering issues)                                </td><td data-label="Repair for generator (what .py must do)">Defer inline behaviour by wrapping in `DOMContentLoaded` or move into external script file. Generator should output inline snippets inside `document.addEventListener('DOMContentLoaded', ...)`.            </td></tr>
+<tr><td data-label="Issue (observed)">`role="application"` on root element                                                         </td><td data-label="Repair for generator (what .py must do)">Prefer `role="region"` with `aria-label` or no role. Generator should not set `role="application"` unless verified accessible behavior.                                                                     </td></tr>
+<tr><td data-label="Issue (observed)">`data-*` values occasionally contain `{html}` template tokens                                </td><td data-label="Repair for generator (what .py must do)">Sanitize/template-replace safely. Remove unintended placeholders like `replace('{user}', '')` unless used.                                                                                                  </td></tr>
+<tr><td data-label="Issue (observed)">Hard-coded table indices can go out of sync                                                  </td><td data-label="Repair for generator (what .py must do)">When generating multiple tables compute and emit the index dynamically (incrementing counter) and/or use `data-table-id` that the script resolves by querySelector.                                         </td></tr>
+<tr><td data-label="Issue (observed)">Potential XSS from untrusted content (table cell HTML inserted raw)                          </td><td data-label="Repair for generator (what .py must do)">If source text is untrusted, escape it. Offer an option `render_html=True/False`. Default to escaping.                                                                                                      </td></tr>
+<tr><td data-label="Issue (observed)">Missing `<caption>` for tables                                                               </td><td data-label="Repair for generator (what .py must do)">Emit `<caption>` from generator when a title exists for better accessibility.                                                                                                                               </td></tr>
+<tr><td data-label="Issue (observed)">Missing ARIA labels on some control buttons                                                  </td><td data-label="Repair for generator (what .py must do)">Emit `aria-label` for all controls: Copy Plain, Copy Markdown, Collapse, with descriptive text.                                                                                                             </td></tr>
+<tr><td data-label="Issue (observed)">Large single-file export check in page JS                                                    </td><td data-label="Repair for generator (what .py must do)">Generator should provide an export-size guard on server side or split long content. If producing self-contained HTML, warn or chunk when document size exceeds threshold.                                   </td></tr>
+<tr><td data-label="Issue (observed)">References to `assets/worker.js` or `assets/overrides.css` not present                       </td><td data-label="Repair for generator (what .py must do)">Ensure generator copies/writes all referenced assets. Otherwise drop references or inline the assets.                                                                                                       </td></tr>
+<tr><td data-label="Issue (observed)">`thead th` sticky offset not computed                                                        </td><td data-label="Repair for generator (what .py must do)">Emit a CSS var `--main-header-height` in head calculated from generator config or measured header height class. Example: `:root{--main-header-height:56px}`. Or ensure script sets it at runtime.           </td></tr>
+<tr><td data-label="Issue (observed)">Mixed external linking vs inlined mode                                                       </td><td data-label="Repair for generator (what .py must do)">If user requested self-contained output, generator must inline CSS/JS consistently rather than outputting `<link>` to missing assets. Provide a single `mode` flag.                                         </td></tr>
+</tbody></table></div><div class="row-count"></div><div class="table-summary">Rows: 17 | Columns: 2</div></div>
+<script src="assets/worker.js" defer></script>
+<script src="assets/script.js" defer></script>
 <script>
 (function(){
-  const template = "{table}_{date}";
-  function formatName(tableName) {
-    const date = (new Date()).toISOString().slice(0,10);
-    return template.replace('{table}', tableName).replace('{date}', date).replace('{user}', '');
-  }
-  const btn = document.getElementById('exportBtn');
-  if(btn) {
-    btn.addEventListener('click', async function() {
-      try {
-        const html = document.documentElement.outerHTML;
-        if(html.length > 2000000) {
-          alert('Export refused: html too large');
-          return;
-        }
-        if(window.Worker) {
-          const worker = new Worker('assets/worker.js');
-          worker.postMessage({html:html, format:'pdf'});
-          worker.onmessage = function(e){ console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
-        } else {
-          alert('Export worker not supported in this environment.');
-        }
-      } catch(err) {
-        console.warn('Export failed', err);
-        alert('Export worker not available. See console for details.');
-      }
-    });
-  }
+document.addEventListener('DOMContentLoaded',function(){
+  window.__tv_export_template = "{table}_{date}";
+  window.__tv_user = "";
+  window.__tv_format_export = function(table,date){ return String(window.__tv_export_template).replace(/\{table\}/g,String(table)).replace(/\{date\}/g,String(date)); };
+  try{
+    var mb=document.getElementById('modeBtn'); if(mb) mb.addEventListener('click',function(){ if(window.toggleMode) return window.toggleMode(); });
+    var tb=document.getElementById('toggleAllBtn'); if(tb) tb.addEventListener('click',function(){ if(window.toggleAllTables) return window.toggleAllTables(); });
+    var cp=document.getElementById('copyAllPlainBtn'); if(cp) cp.addEventListener('click',function(){ if(window.copyAllTablesPlain) return window.copyAllTablesPlain(); });
+    var cm=document.getElementById('copyAllMdBtn'); if(cm) cm.addEventListener('click',function(){ if(window.copyAllTablesMarkdown) return window.copyAllTablesMarkdown(); });
+    var rs=document.getElementById('resetAllBtn'); if(rs) rs.addEventListener('click',function(){ if(window.resetAllTables) return window.resetAllTables(); else location.reload(); });
+    var sb=document.getElementById('searchBox'); if(sb) { sb.addEventListener('input',function(){ if(window.searchTable) { if(window.__tv_search_debounce) clearTimeout(window.__tv_search_debounce); window.__tv_search_debounce=setTimeout(window.searchTable,250); } }); }
+  }catch(e){}
+});
 })();
 </script>
 
