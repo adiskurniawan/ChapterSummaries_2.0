@@ -4,8 +4,8 @@
 <meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
 <title>Tables Viewer v2.1</title>
 <style>:root{--main-header-height:56px;}</style>
-<link rel="stylesheet" href="assets/style.css?v=1758464174">
-<link rel="stylesheet" href="assets/overrides.css?v=1758464174">
+<link rel="stylesheet" href="assets/style.css?v=1758464173">
+<link rel="stylesheet" href="assets/overrides.css?v=1758464173">
 </head><body>
 <div id="tables-viewer" role="region" aria-label="Tables viewer">
 <div id="stickyMainHeader">
@@ -13,39 +13,31 @@
 <noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
 <div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1-title">Table 1</a></li></ul></div></div>
 <div class="table-wrapper" id="Table1"><h3 id="Table1-title">Table 1</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
-        <th style="width:28.57%;" onclick="sortTableByColumn(0,0)" role="button" aria-label="Sort by **Module**">
+        <th style="width:28.57%;" onclick="sortTableByColumn(0,0)" role="button" aria-label="Sort by Key Point">
           <div class="th-with-sort">
-            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Module</strong></div>
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Key Point</div>
             <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,0, this)" title="Toggle sort" aria-label="Toggle sort">
               <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
         </th>
-        <th style="width:71.43%;" onclick="sortTableByColumn(0,1)" role="button" aria-label="Sort by **Notes**">
+        <th style="width:71.43%;" onclick="sortTableByColumn(0,1)" role="button" aria-label="Sort by Notes">
           <div class="th-with-sort">
-            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Notes</strong></div>
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Notes</div>
             <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,1, this)" title="Toggle sort" aria-label="Toggle sort">
               <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
-        </th></tr></thead><tbody><tr><td data-label="Module"><p>`render/<strong>init</strong>.py`</p></td><td data-label="Notes"><p>Depends on: `core` <br> Notes: Re-exports `render<em>page`, `render</em>table`, `render&#95;html`</p></td></tr>
-<tr><td data-label="Module"><p>`render/core.py`</p></td><td data-label="Notes"><p>Depends on: `io&#95;utils`, `sanitize`, `markdown`, `convert`, `assets`, `types` <br> Notes: Core rendering engine; full logic for table HTML generation</p></td></tr>
-<tr><td data-label="Module"><p>`render/io&#95;utils.py`</p></td><td data-label="Notes"><p>Depends on: `os` <br> Notes: Minimal I/O helpers; no external dependencies</p></td></tr>
-<tr><td data-label="Module"><p>`render/sanitize.py`</p></td><td data-label="Notes"><p>Depends on: `re`, `html`, `logging` <br> Notes: Provides `<em>unescape</em>brackets<em>outside</em>code`; safe HTML fallback</p></td></tr>
-<tr><td data-label="Module"><p>`render/markdown.py`</p></td><td data-label="Notes"><p>Depends on: `re`, `html`, `logging` <br> Notes: Converts markdown to HTML; prefers `markdown` package but falls back safely</p></td></tr>
-<tr><td data-label="Module"><p>`render/convert.py`</p></td><td data-label="Notes"><p>Depends on: `os`, `shutil` <br> Notes: Handles copying assets, writing `overrides.css`; fallback CSS/JS</p></td></tr>
-<tr><td data-label="Module"><p>`render/assets.py`</p></td><td data-label="Notes"><p>Depends on: `os`, `shutil` <br> Notes: Similar to `convert.py`; ensures assets are copied to the output folder</p></td></tr>
-<tr><td data-label="Module"><p>`render/cli.py`</p></td><td data-label="Notes"><p>Depends on: `argparse`, `core`, `types`, `markdown` <br> Notes: Provides command-line interface for table rendering</p></td></tr>
-<tr><td data-label="Module"><p>`render/types.py`</p></td><td data-label="Notes"><p>Depends on: `dataclasses`, `threading`, `typing`, `pathlib` <br> Notes: Defines `RenderConfig` and type hints</p></td></tr>
-<tr><td data-label="Module"><p>`html&#95;renderer.py`</p></td><td data-label="Notes"><p>Depends on: `render.core` <br> Notes: Wrapper for backward compatibility; dynamic import fallback</p></td></tr>
-<tr><td data-label="Module"><p>`utils.py`</p></td><td data-label="Notes"><p>Depends on: `re` <br> Notes: Helpers for sanitizing HTML, converting markdown lists</p></td></tr>
-<tr><td data-label="Module"><p>`helpers.py`</p></td><td data-label="Notes"><p>Depends on: `utils` <br> Notes: Thin re-export; fallback no-op if `utils` not available</p></td></tr>
-<tr><td data-label="Module"><p>`main.py`</p></td><td data-label="Notes"><p>Depends on: `pandas`, `glob`, `os`, `io.StringIO`, `re`, `sys`, `importlib`, `pathlib`, `shutil` <br> Notes: Loads markdown files, parses tables, calls `render&#95;html` if available, otherwise fallback HTML</p></td></tr>
+        </th></tr></thead><tbody><tr><td data-label="Key Point"><p><strong>Row 1 — Nested Lists</strong><br>- First bullet<br>- Second bullet<p></p>- Sub-bullet<br>- Third bullet</p></td><td data-label="Notes"><p>This cell contains:<br>1. Numbered item one<br>2. Numbered item two<br>   a. Nested sub-item<br>3. Numbered item three</p></td></tr>
+<tr><td data-label="Key Point"><p><strong>Row 2 — Checklists</strong><br>- [x] Completed task<br>- [ ] Pending task</p></td><td data-label="Notes"><p><ul> <li>[ ] Checkbox unchecked<br></li> <li>[x] Checkbox checked<br></li> <li>[ ] Another pending</li> </ul></p></td></tr>
+<tr><td data-label="Key Point"><p><strong>Row 3 — Bold, Italic, Links</strong><br>Here is some <strong>bold text</strong> and <em>italic text</em>.<br>Visit [Example](https://example.com).</p></td><td data-label="Notes"><p>Mixed content:<br>- <strong>Strong emphasis</strong> inside list<br>- Regular text continues<br>- Inline [link](https://openai.com) preserved</p></td></tr>
+<tr><td data-label="Key Point"><p><strong>Row 4 — Long Wrapping Text</strong><br>This is a deliberately long sentence that should wrap across multiple lines within the first column to confirm that sticky positioning and word wrapping are handled gracefully.</p></td><td data-label="Notes"><p>Same long wrapping text in the right column. It should also wrap correctly without breaking layout or overlapping the sticky column.</p></td></tr>
+<tr><td data-label="Key Point"><p><strong>Row 5 — Inline Code & Highlight</strong><br>Use `&#95;&#95;CODE&#95;0&#95;&#95;` or backticks like `inline code` inside table cells.</p></td><td data-label="Notes"><p>Example: `pip install tables-viewer`<br>Another one: `<div class="test">`<br>Highlight check: ==important==</p></td></tr>
 </tbody></table></div>
   <div class='row-count'></div>
 </div>
 
-<script src="assets/script.js?v=1758464174" defer></script>
+<script src="assets/script.js?v=1758464173" defer></script>
 
 <script>
 (function(){
