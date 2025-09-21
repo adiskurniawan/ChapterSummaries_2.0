@@ -4,8 +4,8 @@
 <meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
 <title>Tables Viewer v2.1</title>
 <style>:root{--main-header-height:56px;}</style>
-<link rel="stylesheet" href="assets/style.css?v=1758459913">
-<link rel="stylesheet" href="assets/overrides.css?v=1758459913">
+<link rel="stylesheet" href="assets/style.css?v=1758463040">
+<link rel="stylesheet" href="assets/overrides.css?v=1758463040">
 </head><body>
 <div id="tables-viewer" role="region" aria-label="Tables viewer">
 <div id="stickyMainHeader">
@@ -33,11 +33,11 @@
               <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
-        </th></tr></thead><tbody><tr><td data-label="<strong>Summary</strong>"><p><strong>Imports</strong></p></td><td data-label="<strong>Notes</strong>"><p>Brings in Python’s standard libraries: `os` for file and path management, `datetime` for timestamps.</p></td></tr>
-<tr><td data-label="<strong>Summary</strong>"><p><strong>Function entrypoint</strong></p></td><td data-label="<strong>Notes</strong>"><p>Defines `render<em>html(all</em>tables, output<em>html, markdown</em>to&#95;html)` as the main public function. It takes: <br>– a list of parsed tables, <br>– a target HTML file path, <br>– and a converter for markdown → HTML.</p></td></tr>
-<tr><td data-label="<strong>Summary</strong>"><p><strong>Docstring</strong></p></td><td data-label="<strong>Notes</strong>"><p>Explains the renderer’s purpose: generate a complete HTML file along with its supporting assets (`style.css`, `script.js`), automatically writing them into an `assets/` folder. Assets are overwritten each run to ensure consistency.</p></td></tr>
-<tr><td data-label="<strong>Summary</strong>"><p><strong>Column width calculation</strong></p></td><td data-label="<strong>Notes</strong>"><p>Sets up proportions for the output layout: left (summary) vs. right (notes). Encodes them as percentages, ensuring consistent column sizing.</p></td></tr>
-<tr><td data-label="<strong>Summary</strong>"><p><strong>Prepare output folders</strong></p></td><td data-label="<strong>Notes</strong>"><p>Figures out where the HTML will be saved, ensures an `assets/` subfolder exists, and prepares it to hold CSS + JS files.</p></td></tr>
+        </th></tr></thead><tbody><tr><td data-label="Summary"><p><strong>Imports</strong></p></td><td data-label="Notes"><p>Brings in Python’s standard libraries: `os` for file and path management, `datetime` for timestamps.</p></td></tr>
+<tr><td data-label="Summary"><p><strong>Function entrypoint</strong></p></td><td data-label="Notes"><p>Defines `render<em>html(all</em>tables, output<em>html, markdown</em>to&#95;html)` as the main public function. It takes: <br>– a list of parsed tables, <br>– a target HTML file path, <br>– and a converter for markdown → HTML.</p></td></tr>
+<tr><td data-label="Summary"><p><strong>Docstring</strong></p></td><td data-label="Notes"><p>Explains the renderer’s purpose: generate a complete HTML file along with its supporting assets (`style.css`, `script.js`), automatically writing them into an `assets/` folder. Assets are overwritten each run to ensure consistency.</p></td></tr>
+<tr><td data-label="Summary"><p><strong>Column width calculation</strong></p></td><td data-label="Notes"><p>Sets up proportions for the output layout: left (summary) vs. right (notes). Encodes them as percentages, ensuring consistent column sizing.</p></td></tr>
+<tr><td data-label="Summary"><p><strong>Prepare output folders</strong></p></td><td data-label="Notes"><p>Figures out where the HTML will be saved, ensures an `assets/` subfolder exists, and prepares it to hold CSS + JS files.</p></td></tr>
 </tbody></table></div>
   <div class='row-count'></div>
 </div>
@@ -58,16 +58,16 @@
               <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
-        </th></tr></thead><tbody><tr><td data-label="<strong>Summary</strong>"><p><strong>CSS variables – light theme</strong></p></td><td data-label="<strong>Notes</strong>"><p>Defines a set of reusable color and style variables (backgrounds, text, panels, borders, highlights, buttons, muted text). Provides consistent styling across all components.</p></td></tr>
-<tr><td data-label="<strong>Summary</strong>"><p><strong>CSS variables – dark theme</strong></p></td><td data-label="<strong>Notes</strong>"><p>Overrides the same variables for dark mode (darker panels, lighter text, different hover colors). Applied automatically when the document’s `data-theme="dark"`.</p></td></tr>
-<tr><td data-label="<strong>Summary</strong>"><p><strong>Global base styles</strong></p></td><td data-label="<strong>Notes</strong>"><p>Resets and standardizes the page: sets font, background, text color, link colors, and button defaults.</p></td></tr>
-<tr><td data-label="<strong>Summary</strong>"><p><strong>Table layout</strong></p></td><td data-label="<strong>Notes</strong>"><p>Tables are styled to be full-width, with fixed layout, shadows, rounded corners, and padding. Ensures readability and structure.</p></td></tr>
-<tr><td data-label="<strong>Summary</strong>"><p><strong>Sticky headers</strong></p></td><td data-label="<strong>Notes</strong>"><p>Table headers remain visible when scrolling. Styled with hover effects, clickable sort buttons, and different visuals for light/dark themes.</p></td></tr>
-<tr><td data-label="<strong>Summary</strong>"><p><strong>Sorting buttons</strong></p></td><td data-label="<strong>Notes</strong>"><p>Special `.sort-btn` style makes column headers interactive, aligning text + icons, with clear visual states for unsorted/ascending/descending.</p></td></tr>
-<tr><td data-label="<strong>Summary</strong>"><p><strong>Row & cell formatting</strong></p></td><td data-label="<strong>Notes</strong>"><p>Alternating row colors, hover highlighting, sticky first column (always visible while scrolling), and highlight classes for search matches. Improves navigation in large tables.</p></td></tr>
-<tr><td data-label="<strong>Summary</strong>"><p><strong>TOC sidebar</strong></p></td><td data-label="<strong>Notes</strong>"><p>Sidebar fixed on the left, styled with background, borders, padding, and rounded corners. TOC links are indented and highlighted on hover.</p></td></tr>
-<tr><td data-label="<strong>Summary</strong>"><p><strong>Sticky top header</strong></p></td><td data-label="<strong>Notes</strong>"><p>A fixed bar at the top for global controls (search, reset, theme toggle, export/copy). Styled for usability and visibility across themes.</p></td></tr>
-<tr><td data-label="<strong>Summary</strong>"><p><strong>Responsive design</strong></p></td><td data-label="<strong>Notes</strong>"><p>Media queries adjust layout on small screens (shrink TOC/sidebar, narrow search box), ensuring usability on mobile devices.</p></td></tr>
+        </th></tr></thead><tbody><tr><td data-label="Summary"><p><strong>CSS variables – light theme</strong></p></td><td data-label="Notes"><p>Defines a set of reusable color and style variables (backgrounds, text, panels, borders, highlights, buttons, muted text). Provides consistent styling across all components.</p></td></tr>
+<tr><td data-label="Summary"><p><strong>CSS variables – dark theme</strong></p></td><td data-label="Notes"><p>Overrides the same variables for dark mode (darker panels, lighter text, different hover colors). Applied automatically when the document’s `data-theme="dark"`.</p></td></tr>
+<tr><td data-label="Summary"><p><strong>Global base styles</strong></p></td><td data-label="Notes"><p>Resets and standardizes the page: sets font, background, text color, link colors, and button defaults.</p></td></tr>
+<tr><td data-label="Summary"><p><strong>Table layout</strong></p></td><td data-label="Notes"><p>Tables are styled to be full-width, with fixed layout, shadows, rounded corners, and padding. Ensures readability and structure.</p></td></tr>
+<tr><td data-label="Summary"><p><strong>Sticky headers</strong></p></td><td data-label="Notes"><p>Table headers remain visible when scrolling. Styled with hover effects, clickable sort buttons, and different visuals for light/dark themes.</p></td></tr>
+<tr><td data-label="Summary"><p><strong>Sorting buttons</strong></p></td><td data-label="Notes"><p>Special `.sort-btn` style makes column headers interactive, aligning text + icons, with clear visual states for unsorted/ascending/descending.</p></td></tr>
+<tr><td data-label="Summary"><p><strong>Row & cell formatting</strong></p></td><td data-label="Notes"><p>Alternating row colors, hover highlighting, sticky first column (always visible while scrolling), and highlight classes for search matches. Improves navigation in large tables.</p></td></tr>
+<tr><td data-label="Summary"><p><strong>TOC sidebar</strong></p></td><td data-label="Notes"><p>Sidebar fixed on the left, styled with background, borders, padding, and rounded corners. TOC links are indented and highlighted on hover.</p></td></tr>
+<tr><td data-label="Summary"><p><strong>Sticky top header</strong></p></td><td data-label="Notes"><p>A fixed bar at the top for global controls (search, reset, theme toggle, export/copy). Styled for usability and visibility across themes.</p></td></tr>
+<tr><td data-label="Summary"><p><strong>Responsive design</strong></p></td><td data-label="Notes"><p>Media queries adjust layout on small screens (shrink TOC/sidebar, narrow search box), ensuring usability on mobile devices.</p></td></tr>
 </tbody></table></div>
   <div class='row-count'></div>
 </div>
@@ -145,14 +145,14 @@
               <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
-        </th></tr></thead><tbody><tr><td data-label="<strong>Summary</strong>"><p><strong>Assets folder setup</strong></p></td><td data-label="<strong>Notes</strong>"><p>Before generating output, Python ensures the `assets/` subdirectory exists next to the target HTML file. Keeps supporting files organized.</p></td></tr>
-<tr><td data-label="<strong>Summary</strong>"><p><strong>CSS file writing</strong></p></td><td data-label="<strong>Notes</strong>"><p>The renderer writes `style.css` into the assets folder. This file contains all visual rules (light/dark themes, sticky headers, responsive layout). It is overwritten each run to stay in sync with the Python code.</p></td></tr>
-<tr><td data-label="<strong>Summary</strong>"><p><strong>JS file writing</strong></p></td><td data-label="<strong>Notes</strong>"><p>Similarly, the renderer writes `script.js` into the assets folder. This file holds all interactive behaviors (sorting, search, export, theme switching). Always freshly written to match the latest logic.</p></td></tr>
-<tr><td data-label="<strong>Summary</strong>"><p><strong>HTML file creation</strong></p></td><td data-label="<strong>Notes</strong>"><p>Opens the target HTML file path (`output&#95;html`) for writing. This becomes the main deliverable users open in a browser.</p></td></tr>
-<tr><td data-label="<strong>Summary</strong>"><p><strong>HTML head + header writing</strong></p></td><td data-label="<strong>Notes</strong>"><p>Writes document boilerplate: doctype, `<html>`, `<head>` metadata, links to CSS/JS, and starts the body with sticky top header and TOC container.</p></td></tr>
-<tr><td data-label="<strong>Summary</strong>"><p><strong>Injecting tables</strong></p></td><td data-label="<strong>Notes</strong>"><p>Iterates through all parsed tables (`all&#95;tables`), converts markdown cells to HTML, and embeds them into `<section>` blocks with headings. Each section becomes accessible via the TOC.</p></td></tr>
-<tr><td data-label="<strong>Summary</strong>"><p><strong>Footer writing</strong></p></td><td data-label="<strong>Notes</strong>"><p>After tables, closes the `<main>`, TOC, sticky header, and body. Ends with `</html>`.</p></td></tr>
-<tr><td data-label="<strong>Summary</strong>"><p><strong>File closing</strong></p></td><td data-label="<strong>Notes</strong>"><p>Ensures all open file handles (CSS, JS, HTML) are properly closed, finalizing the output package.</p></td></tr>
+        </th></tr></thead><tbody><tr><td data-label="Summary"><p><strong>Assets folder setup</strong></p></td><td data-label="Notes"><p>Before generating output, Python ensures the `assets/` subdirectory exists next to the target HTML file. Keeps supporting files organized.</p></td></tr>
+<tr><td data-label="Summary"><p><strong>CSS file writing</strong></p></td><td data-label="Notes"><p>The renderer writes `style.css` into the assets folder. This file contains all visual rules (light/dark themes, sticky headers, responsive layout). It is overwritten each run to stay in sync with the Python code.</p></td></tr>
+<tr><td data-label="Summary"><p><strong>JS file writing</strong></p></td><td data-label="Notes"><p>Similarly, the renderer writes `script.js` into the assets folder. This file holds all interactive behaviors (sorting, search, export, theme switching). Always freshly written to match the latest logic.</p></td></tr>
+<tr><td data-label="Summary"><p><strong>HTML file creation</strong></p></td><td data-label="Notes"><p>Opens the target HTML file path (`output&#95;html`) for writing. This becomes the main deliverable users open in a browser.</p></td></tr>
+<tr><td data-label="Summary"><p><strong>HTML head + header writing</strong></p></td><td data-label="Notes"><p>Writes document boilerplate: doctype, `<html>`, `<head>` metadata, links to CSS/JS, and starts the body with sticky top header and TOC container.</p></td></tr>
+<tr><td data-label="Summary"><p><strong>Injecting tables</strong></p></td><td data-label="Notes"><p>Iterates through all parsed tables (`all&#95;tables`), converts markdown cells to HTML, and embeds them into `<section>` blocks with headings. Each section becomes accessible via the TOC.</p></td></tr>
+<tr><td data-label="Summary"><p><strong>Footer writing</strong></p></td><td data-label="Notes"><p>After tables, closes the `<main>`, TOC, sticky header, and body. Ends with `</html>`.</p></td></tr>
+<tr><td data-label="Summary"><p><strong>File closing</strong></p></td><td data-label="Notes"><p>Ensures all open file handles (CSS, JS, HTML) are properly closed, finalizing the output package.</p></td></tr>
 </tbody></table></div>
   <div class='row-count'></div>
 </div>
@@ -182,7 +182,7 @@
   <div class='row-count'></div>
 </div>
 
-<script src="assets/script.js?v=1758459913" defer></script>
+<script src="assets/script.js?v=1758463040" defer></script>
 
 <script>
 (function(){
