@@ -4,8 +4,8 @@
 <meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
 <title>Tables Viewer v2.1</title>
 <style>:root{--main-header-height:56px;}</style>
-<link rel="stylesheet" href="assets/style.css?v=1758464174">
-<link rel="stylesheet" href="assets/overrides.css?v=1758464174">
+<link rel="stylesheet" href="assets/style.css?v=1758468299">
+<link rel="stylesheet" href="assets/overrides.css?v=1758468299">
 </head><body>
 <div id="tables-viewer" role="region" aria-label="Tables viewer">
 <div id="stickyMainHeader">
@@ -28,28 +28,28 @@
               <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
-        </th></tr></thead><tbody><tr><td data-label="Issue (observed)"><p>Missing `<title>`</p></td><td data-label="Repair for generator (what .py must do)"><p>Insert `<title>` into `<head>` (use page title variable).</p></td></tr>
-<tr><td data-label="Issue (observed)"><p>`data-label` contains raw HTML (`"<strong>Summary</strong>"`)</p></td><td data-label="Repair for generator (what .py must do)"><p>Escape or serialize labels as plain text. Use `html.escape()` before writing into `data-label`.</p></td></tr>
-<tr><td data-label="Issue (observed)"><p>Buttons lack `type="button"`</p></td><td data-label="Repair for generator (what .py must do)"><p>Always emit `type="button"` for `<button>` to avoid accidental form submits.</p></td></tr>
-<tr><td data-label="Issue (observed)"><p>Inline `onclick` with hard-coded table indices</p></td><td data-label="Repair for generator (what .py must do)"><p>Emit `data-table-index` and `data-col-index` attributes instead of hard-coded JS calls. Attach listeners from `assets/script.js` (no inline handlers).</p></td></tr>
-<tr><td data-label="Issue (observed)"><p>Many inline `style="..."` attributes</p></td><td data-label="Repair for generator (what .py must do)"><p>Move styling to classes. Generator should emit classes (e.g. `class="search-input"`) and avoid inline `style`.</p></td></tr>
-<tr><td data-label="Issue (observed)"><p>Inline JS that assumes optional DOM elements (`exportBtn`) or external worker may be missing</p></td><td data-label="Repair for generator (what .py must do)"><p>Only emit code referencing elements that exist, or guard at generation time: include export button when you also write `worker.js`. Otherwise remove export snippet or leave guard and ensure assets exist.</p></td></tr>
-<tr><td data-label="Issue (observed)"><p>Inline script executes immediately (possible ordering issues)</p></td><td data-label="Repair for generator (what .py must do)"><p>Defer inline behaviour by wrapping in `DOMContentLoaded` or move into external script file. Generator should output inline snippets inside `document.addEventListener('DOMContentLoaded', ...)`.</p></td></tr>
-<tr><td data-label="Issue (observed)"><p>`role="application"` on root element</p></td><td data-label="Repair for generator (what .py must do)"><p>Prefer `role="region"` with `aria-label` or no role. Generator should not set `role="application"` unless verified accessible behavior.</p></td></tr>
-<tr><td data-label="Issue (observed)"><p>`data-&#42;` values occasionally contain `{html}` template tokens</p></td><td data-label="Repair for generator (what .py must do)"><p>Sanitize/template-replace safely. Remove unintended placeholders like `replace('{user}', '')` unless used.</p></td></tr>
-<tr><td data-label="Issue (observed)"><p>Hard-coded table indices can go out of sync</p></td><td data-label="Repair for generator (what .py must do)"><p>When generating multiple tables compute and emit the index dynamically (incrementing counter) and/or use `data-table-id` that the script resolves by querySelector.</p></td></tr>
-<tr><td data-label="Issue (observed)"><p>Potential XSS from untrusted content (table cell HTML inserted raw)</p></td><td data-label="Repair for generator (what .py must do)"><p>If source text is untrusted, escape it. Offer an option `render&#95;html=True/False`. Default to escaping.</p></td></tr>
-<tr><td data-label="Issue (observed)"><p>Missing `<caption>` for tables</p></td><td data-label="Repair for generator (what .py must do)"><p>Emit `<caption>` from generator when a title exists for better accessibility.</p></td></tr>
-<tr><td data-label="Issue (observed)"><p>Missing ARIA labels on some control buttons</p></td><td data-label="Repair for generator (what .py must do)"><p>Emit `aria-label` for all controls: Copy Plain, Copy Markdown, Collapse, with descriptive text.</p></td></tr>
-<tr><td data-label="Issue (observed)"><p>Large single-file export check in page JS</p></td><td data-label="Repair for generator (what .py must do)"><p>Generator should provide an export-size guard on server side or split long content. If producing self-contained HTML, warn or chunk when document size exceeds threshold.</p></td></tr>
-<tr><td data-label="Issue (observed)"><p>References to `assets/worker.js` or `assets/overrides.css` not present</p></td><td data-label="Repair for generator (what .py must do)"><p>Ensure generator copies/writes all referenced assets. Otherwise drop references or inline the assets.</p></td></tr>
-<tr><td data-label="Issue (observed)"><p>`thead th` sticky offset not computed</p></td><td data-label="Repair for generator (what .py must do)"><p>Emit a CSS var `--main-header-height` in head calculated from generator config or measured header height class. Example: `:root{--main-header-height:56px}`. Or ensure script sets it at runtime.</p></td></tr>
-<tr><td data-label="Issue (observed)"><p>Mixed external linking vs inlined mode</p></td><td data-label="Repair for generator (what .py must do)"><p>If user requested self-contained output, generator must inline CSS/JS consistently rather than outputting `<link>` to missing assets. Provide a single `mode` flag.</p></td></tr>
+        </th></tr></thead><tbody><tr><td data-label="Issue (observed)"><p><strong>Missing `<title>`</strong></p></td><td data-label="Repair for generator (what .py must do)"><p>Insert `<title>` into `<head>` (use page title variable).</p></td></tr>
+<tr><td data-label="Issue (observed)"><p><strong>`data-label` contains raw HTML (`"Summary"`)</strong></p></td><td data-label="Repair for generator (what .py must do)"><p>Escape or serialize labels as plain text. Use `html.escape()` before writing into `data-label`.</p></td></tr>
+<tr><td data-label="Issue (observed)"><p><strong>Buttons lack `type="button"`</strong></p></td><td data-label="Repair for generator (what .py must do)"><p>Always emit `type="button"` for `<button>` to avoid accidental form submits.</p></td></tr>
+<tr><td data-label="Issue (observed)"><p><strong>Inline `onclick` with hard-coded table indices</strong></p></td><td data-label="Repair for generator (what .py must do)"><p>Emit `data-table-index` and `data-col-index` attributes instead of hard-coded JS calls. Attach listeners from `assets/script.js` (no inline handlers).</p></td></tr>
+<tr><td data-label="Issue (observed)"><p><strong>Many inline `style="..."` attributes</strong></p></td><td data-label="Repair for generator (what .py must do)"><p>Move styling to classes. Generator should emit classes (e.g. `class="search-input"`) and avoid inline `style`.</p></td></tr>
+<tr><td data-label="Issue (observed)"><p><strong>Inline JS that assumes optional DOM elements (`exportBtn`) or external worker may be missing</strong></p></td><td data-label="Repair for generator (what .py must do)"><p>Only emit code referencing elements that exist, or guard at generation time: include export button when you also write `worker.js`. Otherwise remove export snippet or leave guard and ensure assets exist.</p></td></tr>
+<tr><td data-label="Issue (observed)"><p><strong>Inline script executes immediately (possible ordering issues)</strong></p></td><td data-label="Repair for generator (what .py must do)"><p>Defer inline behaviour by wrapping in `DOMContentLoaded` or move into external script file. Generator should output inline snippets inside `document.addEventListener('DOMContentLoaded', ...)`.</p></td></tr>
+<tr><td data-label="Issue (observed)"><p><strong>`role="application"` on root element</strong></p></td><td data-label="Repair for generator (what .py must do)"><p>Prefer `role="region"` with `aria-label` or no role. Generator should not set `role="application"` unless verified accessible behavior.</p></td></tr>
+<tr><td data-label="Issue (observed)"><p><strong>`data-&#42;` values occasionally contain `{html}` template tokens</strong></p></td><td data-label="Repair for generator (what .py must do)"><p>Sanitize/template-replace safely. Remove unintended placeholders like `replace('{user}', '')` unless used.</p></td></tr>
+<tr><td data-label="Issue (observed)"><p><strong>Hard-coded table indices can go out of sync</strong></p></td><td data-label="Repair for generator (what .py must do)"><p>When generating multiple tables compute and emit the index dynamically (incrementing counter) and/or use `data-table-id` that the script resolves by querySelector.</p></td></tr>
+<tr><td data-label="Issue (observed)"><p><strong>Potential XSS from untrusted content (table cell HTML inserted raw)</strong></p></td><td data-label="Repair for generator (what .py must do)"><p>If source text is untrusted, escape it. Offer an option `render&#95;html=True/False`. Default to escaping.</p></td></tr>
+<tr><td data-label="Issue (observed)"><p><strong>Missing `<caption>` for tables</strong></p></td><td data-label="Repair for generator (what .py must do)"><p>Emit `<caption>` from generator when a title exists for better accessibility.</p></td></tr>
+<tr><td data-label="Issue (observed)"><p><strong>Missing ARIA labels on some control buttons</strong></p></td><td data-label="Repair for generator (what .py must do)"><p>Emit `aria-label` for all controls: Copy Plain, Copy Markdown, Collapse, with descriptive text.</p></td></tr>
+<tr><td data-label="Issue (observed)"><p><strong>Large single-file export check in page JS</strong></p></td><td data-label="Repair for generator (what .py must do)"><p>Generator should provide an export-size guard on server side or split long content. If producing self-contained HTML, warn or chunk when document size exceeds threshold.</p></td></tr>
+<tr><td data-label="Issue (observed)"><p><strong>References to `assets/worker.js` or `assets/overrides.css` not present</strong></p></td><td data-label="Repair for generator (what .py must do)"><p>Ensure generator copies/writes all referenced assets. Otherwise drop references or inline the assets.</p></td></tr>
+<tr><td data-label="Issue (observed)"><p><strong>`thead th` sticky offset not computed</strong></p></td><td data-label="Repair for generator (what .py must do)"><p>Emit a CSS var `--main-header-height` in head calculated from generator config or measured header height class. Example: `:root{--main-header-height:56px}`. Or ensure script sets it at runtime.</p></td></tr>
+<tr><td data-label="Issue (observed)"><p><strong>Mixed external linking vs inlined mode</strong></p></td><td data-label="Repair for generator (what .py must do)"><p>If user requested self-contained output, generator must inline CSS/JS consistently rather than outputting `<link>` to missing assets. Provide a single `mode` flag.</p></td></tr>
 </tbody></table></div>
   <div class='row-count'></div>
 </div>
 
-<script src="assets/script.js?v=1758464174" defer></script>
+<script src="assets/script.js?v=1758468299" defer></script>
 
 <script>
 (function(){

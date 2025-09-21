@@ -4,8 +4,8 @@
 <meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
 <title>Tables Viewer v2.1</title>
 <style>:root{--main-header-height:56px;}</style>
-<link rel="stylesheet" href="assets/style.css?v=1758464173">
-<link rel="stylesheet" href="assets/overrides.css?v=1758464173">
+<link rel="stylesheet" href="assets/style.css?v=1758468299">
+<link rel="stylesheet" href="assets/overrides.css?v=1758468299">
 </head><body>
 <div id="tables-viewer" role="region" aria-label="Tables viewer">
 <div id="stickyMainHeader">
@@ -13,31 +13,31 @@
 <noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
 <div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1-title">Table 1</a></li></ul></div></div>
 <div class="table-wrapper" id="Table1"><h3 id="Table1-title">Table 1</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
-        <th style="width:28.57%;" onclick="sortTableByColumn(0,0)" role="button" aria-label="Sort by Key Point">
+        <th style="width:28.57%;" onclick="sortTableByColumn(0,0)" role="button" aria-label="Sort by **Key Point**">
           <div class="th-with-sort">
-            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Key Point</div>
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Key Point</strong></div>
             <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,0, this)" title="Toggle sort" aria-label="Toggle sort">
               <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
         </th>
-        <th style="width:71.43%;" onclick="sortTableByColumn(0,1)" role="button" aria-label="Sort by Notes">
+        <th style="width:71.43%;" onclick="sortTableByColumn(0,1)" role="button" aria-label="Sort by **Notes**">
           <div class="th-with-sort">
-            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Notes</div>
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Notes</strong></div>
             <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,1, this)" title="Toggle sort" aria-label="Toggle sort">
               <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
-        </th></tr></thead><tbody><tr><td data-label="Key Point"><p><strong>Row 1 — Nested Lists</strong><br>- First bullet<br>- Second bullet<p></p>- Sub-bullet<br>- Third bullet</p></td><td data-label="Notes"><p>This cell contains:<br>1. Numbered item one<br>2. Numbered item two<br>   a. Nested sub-item<br>3. Numbered item three</p></td></tr>
-<tr><td data-label="Key Point"><p><strong>Row 2 — Checklists</strong><br>- [x] Completed task<br>- [ ] Pending task</p></td><td data-label="Notes"><p><ul> <li>[ ] Checkbox unchecked<br></li> <li>[x] Checkbox checked<br></li> <li>[ ] Another pending</li> </ul></p></td></tr>
-<tr><td data-label="Key Point"><p><strong>Row 3 — Bold, Italic, Links</strong><br>Here is some <strong>bold text</strong> and <em>italic text</em>.<br>Visit [Example](https://example.com).</p></td><td data-label="Notes"><p>Mixed content:<br>- <strong>Strong emphasis</strong> inside list<br>- Regular text continues<br>- Inline [link](https://openai.com) preserved</p></td></tr>
-<tr><td data-label="Key Point"><p><strong>Row 4 — Long Wrapping Text</strong><br>This is a deliberately long sentence that should wrap across multiple lines within the first column to confirm that sticky positioning and word wrapping are handled gracefully.</p></td><td data-label="Notes"><p>Same long wrapping text in the right column. It should also wrap correctly without breaking layout or overlapping the sticky column.</p></td></tr>
-<tr><td data-label="Key Point"><p><strong>Row 5 — Inline Code & Highlight</strong><br>Use `&#95;&#95;CODE&#95;0&#95;&#95;` or backticks like `inline code` inside table cells.</p></td><td data-label="Notes"><p>Example: `pip install tables-viewer`<br>Another one: `<div class="test">`<br>Highlight check: ==important==</p></td></tr>
+        </th></tr></thead><tbody><tr><td data-label="Key Point"><p><strong>Nested bullets</strong><br>- One<br>- Two<p></p>- Sub A<p></p>- Sub B<br>- Three</p></td><td data-label="Notes"><ol><li>First<br>2. Second<br>   a. Sub α<br>   b. Sub β<br>3. Third</li></ol></td></tr>
+<tr><td data-label="Key Point"><p><strong>Checklists</strong><br>- [ ] Task pending<br>- [x] Task done</p></td><td data-label="Notes"><p><ul> <li>[ ] Left unchecked<br></li> <li>[x] Marked done<br></li> <li>[ ] Another item</li> </ul></p></td></tr>
+<tr><td data-label="Key Point"><p><strong>Mixed emphasis</strong><br>This has <strong>bold</strong>, <em>italic</em>, and [link](https://example.com).</p></td><td data-label="Notes"><p><ul> <li>Text with <strong>strong</strong><br></li> <li>Inline [OpenAI](https://openai.com)<br></li> <li>More <em>italic</em></li> </ul></p></td></tr>
+<tr><td data-label="Key Point"><p><strong>Long wrap</strong><br>This is an intentionally long line of text to check wrapping inside the sticky first column and ensure no overlap occurs.</p></td><td data-label="Notes"><p>Same long sentence repeated to test column wrapping behavior across the right side.</p></td></tr>
+<tr><td data-label="Key Point"><p><strong>Code & highlight</strong><br>Use `inline code`, `<strong>CODE&#95;0</strong>`, and ==highlighted== text.</p></td><td data-label="Notes"><p>Example: `pip install tables-viewer`<br>Another: `<div class="test">`<br>Check ==important==</p></td></tr>
 </tbody></table></div>
   <div class='row-count'></div>
 </div>
 
-<script src="assets/script.js?v=1758464173" defer></script>
+<script src="assets/script.js?v=1758468299" defer></script>
 
 <script>
 (function(){

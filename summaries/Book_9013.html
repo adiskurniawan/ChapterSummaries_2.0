@@ -4,8 +4,8 @@
 <meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
 <title>Tables Viewer v2.1</title>
 <style>:root{--main-header-height:56px;}</style>
-<link rel="stylesheet" href="assets/style.css?v=1758464174">
-<link rel="stylesheet" href="assets/overrides.css?v=1758464174">
+<link rel="stylesheet" href="assets/style.css?v=1758468300">
+<link rel="stylesheet" href="assets/overrides.css?v=1758468300">
 </head><body>
 <div id="tables-viewer" role="region" aria-label="Tables viewer">
 <div id="stickyMainHeader">
@@ -28,24 +28,24 @@
               <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
-        </th></tr></thead><tbody><tr><td data-label="Module"><p>`render/<strong>init</strong>.py`</p></td><td data-label="Notes"><p>Depends on: `core` <br> Notes: Re-exports `render<em>page`, `render</em>table`, `render&#95;html`</p></td></tr>
-<tr><td data-label="Module"><p>`render/core.py`</p></td><td data-label="Notes"><p>Depends on: `io&#95;utils`, `sanitize`, `markdown`, `convert`, `assets`, `types` <br> Notes: Core rendering engine; full logic for table HTML generation</p></td></tr>
-<tr><td data-label="Module"><p>`render/io&#95;utils.py`</p></td><td data-label="Notes"><p>Depends on: `os` <br> Notes: Minimal I/O helpers; no external dependencies</p></td></tr>
-<tr><td data-label="Module"><p>`render/sanitize.py`</p></td><td data-label="Notes"><p>Depends on: `re`, `html`, `logging` <br> Notes: Provides `<em>unescape</em>brackets<em>outside</em>code`; safe HTML fallback</p></td></tr>
-<tr><td data-label="Module"><p>`render/markdown.py`</p></td><td data-label="Notes"><p>Depends on: `re`, `html`, `logging` <br> Notes: Converts markdown to HTML; prefers `markdown` package but falls back safely</p></td></tr>
-<tr><td data-label="Module"><p>`render/convert.py`</p></td><td data-label="Notes"><p>Depends on: `os`, `shutil` <br> Notes: Handles copying assets, writing `overrides.css`; fallback CSS/JS</p></td></tr>
-<tr><td data-label="Module"><p>`render/assets.py`</p></td><td data-label="Notes"><p>Depends on: `os`, `shutil` <br> Notes: Similar to `convert.py`; ensures assets are copied to the output folder</p></td></tr>
-<tr><td data-label="Module"><p>`render/cli.py`</p></td><td data-label="Notes"><p>Depends on: `argparse`, `core`, `types`, `markdown` <br> Notes: Provides command-line interface for table rendering</p></td></tr>
-<tr><td data-label="Module"><p>`render/types.py`</p></td><td data-label="Notes"><p>Depends on: `dataclasses`, `threading`, `typing`, `pathlib` <br> Notes: Defines `RenderConfig` and type hints</p></td></tr>
-<tr><td data-label="Module"><p>`html&#95;renderer.py`</p></td><td data-label="Notes"><p>Depends on: `render.core` <br> Notes: Wrapper for backward compatibility; dynamic import fallback</p></td></tr>
-<tr><td data-label="Module"><p>`utils.py`</p></td><td data-label="Notes"><p>Depends on: `re` <br> Notes: Helpers for sanitizing HTML, converting markdown lists</p></td></tr>
-<tr><td data-label="Module"><p>`helpers.py`</p></td><td data-label="Notes"><p>Depends on: `utils` <br> Notes: Thin re-export; fallback no-op if `utils` not available</p></td></tr>
-<tr><td data-label="Module"><p>`main.py`</p></td><td data-label="Notes"><p>Depends on: `pandas`, `glob`, `os`, `io.StringIO`, `re`, `sys`, `importlib`, `pathlib`, `shutil` <br> Notes: Loads markdown files, parses tables, calls `render&#95;html` if available, otherwise fallback HTML</p></td></tr>
+        </th></tr></thead><tbody><tr><td data-label="Module"><p><strong>`render/init.py`</strong></p></td><td data-label="Notes"><p>Depends on: `core` <br> Notes: Re-exports `render<em>page`, `render</em>table`, `render&#95;html`</p></td></tr>
+<tr><td data-label="Module"><p><strong>`render/core.py`</strong></p></td><td data-label="Notes"><p>Depends on: `io&#95;utils`, `sanitize`, `markdown`, `convert`, `assets`, `types` <br> Notes: Core rendering engine; full logic for table HTML generation</p></td></tr>
+<tr><td data-label="Module"><p><strong>`render/io&#95;utils.py`</strong></p></td><td data-label="Notes"><p>Depends on: `os` <br> Notes: Minimal I/O helpers; no external dependencies</p></td></tr>
+<tr><td data-label="Module"><p><strong>`render/sanitize.py`</strong></p></td><td data-label="Notes"><p>Depends on: `re`, `html`, `logging` <br> Notes: Provides `<em>unescape</em>brackets<em>outside</em>code`; safe HTML fallback</p></td></tr>
+<tr><td data-label="Module"><p><strong>`render/markdown.py`</strong></p></td><td data-label="Notes"><p>Depends on: `re`, `html`, `logging` <br> Notes: Converts markdown to HTML; prefers `markdown` package but falls back safely</p></td></tr>
+<tr><td data-label="Module"><p><strong>`render/convert.py`</strong></p></td><td data-label="Notes"><p>Depends on: `os`, `shutil` <br> Notes: Handles copying assets, writing `overrides.css`; fallback CSS/JS</p></td></tr>
+<tr><td data-label="Module"><p><strong>`render/assets.py`</strong></p></td><td data-label="Notes"><p>Depends on: `os`, `shutil` <br> Notes: Similar to `convert.py`; ensures assets are copied to the output folder</p></td></tr>
+<tr><td data-label="Module"><p><strong>`render/cli.py`</strong></p></td><td data-label="Notes"><p>Depends on: `argparse`, `core`, `types`, `markdown` <br> Notes: Provides command-line interface for table rendering</p></td></tr>
+<tr><td data-label="Module"><p><strong>`render/types.py`</strong></p></td><td data-label="Notes"><p>Depends on: `dataclasses`, `threading`, `typing`, `pathlib` <br> Notes: Defines `RenderConfig` and type hints</p></td></tr>
+<tr><td data-label="Module"><p><strong>`html&#95;renderer.py`</strong></p></td><td data-label="Notes"><p>Depends on: `render.core` <br> Notes: Wrapper for backward compatibility; dynamic import fallback</p></td></tr>
+<tr><td data-label="Module"><p><strong>`utils.py`</strong></p></td><td data-label="Notes"><p>Depends on: `re` <br> Notes: Helpers for sanitizing HTML, converting markdown lists</p></td></tr>
+<tr><td data-label="Module"><p><strong>`helpers.py`</strong></p></td><td data-label="Notes"><p>Depends on: `utils` <br> Notes: Thin re-export; fallback no-op if `utils` not available</p></td></tr>
+<tr><td data-label="Module"><p><strong>`main.py`</strong></p></td><td data-label="Notes"><p>Depends on: `pandas`, `glob`, `os`, `io.StringIO`, `re`, `sys`, `importlib`, `pathlib`, `shutil` <br> Notes: Loads markdown files, parses tables, calls `render&#95;html` if available, otherwise fallback HTML</p></td></tr>
 </tbody></table></div>
   <div class='row-count'></div>
 </div>
 
-<script src="assets/script.js?v=1758464174" defer></script>
+<script src="assets/script.js?v=1758468300" defer></script>
 
 <script>
 (function(){

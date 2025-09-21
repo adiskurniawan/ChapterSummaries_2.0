@@ -4,8 +4,8 @@
 <meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
 <title>Tables Viewer v2.1</title>
 <style>:root{--main-header-height:56px;}</style>
-<link rel="stylesheet" href="assets/style.css?v=1758464174">
-<link rel="stylesheet" href="assets/overrides.css?v=1758464174">
+<link rel="stylesheet" href="assets/style.css?v=1758468299">
+<link rel="stylesheet" href="assets/overrides.css?v=1758468299">
 </head><body>
 <div id="tables-viewer" role="region" aria-label="Tables viewer">
 <div id="stickyMainHeader">
@@ -28,17 +28,17 @@
               <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
-        </th></tr></thead><tbody><tr><td data-label="Cause"><p>JS runtime error during init</p></td><td data-label="Details"><p><strong>Symptom:</strong> Controls missing. Table wrappers not created. Interactive features broken.<br><strong>How to confirm:</strong> Console shows uncaught exception (TypeError, ReferenceError). Disabling JS shows static layout.<br><strong>Fix (minimal patch):</strong> Wrap init in DOMContentLoaded and try/catch. See code below.</p></td></tr>
-<tr><td data-label="Cause"><p>Sticky header hidden / wrong offset</p></td><td data-label="Details"><p><strong>Symptom:</strong> Thead appears behind top header when scrolling. Sticky not visible.<br><strong>How to confirm:</strong> Computed `top` smaller than main header height.<br><strong>Fix (minimal patch):</strong> Make `thead th { top: var(--main-header-height); }` and set `--main-header-height` to actual header height.</p></td></tr>
-<tr><td data-label="Cause"><p>Sticky fails due to overflow/transform ancestor</p></td><td data-label="Details"><p><strong>Symptom:</strong> Thead not sticking or sticking inside scroll area (not viewport).<br><strong>How to confirm:</strong> Ancestor has `overflow:auto/hidden` or `transform` in computed styles.<br><strong>Fix (minimal patch):</strong> Remove/relocate overflow or move sticky header out of that scroll container.<br>Alternative: use fixed header or clone header.</p></td></tr>
-<tr><td data-label="Cause"><p>Virtualization or DOM replace</p></td><td data-label="Details"><p><strong>Symptom:</strong> Rows missing or layout jumps.<br><strong>How to confirm:</strong> Script replaces table DOM; CSS selectors no longer apply.<br><strong>Fix (minimal patch):</strong> Ensure virtualizer keeps `thead` in DOM and preserves classes.</p></td></tr>
-<tr><td data-label="Cause"><p>Invalid HTML (unclosed tags)</p></td><td data-label="Details"><p><strong>Symptom:</strong> Layout breaks unpredictably.<br><strong>How to confirm:</strong> Validator complains.<br><strong>Fix (minimal patch):</strong> Fix markup. Close tags and keep table structure valid.</p></td></tr>
-<tr><td data-label="Cause"><p>Clipboard / large content exceptions</p></td><td data-label="Details"><p><strong>Symptom:</strong> "Copy All" crashes script mid-init.<br><strong>How to confirm:</strong> Console error during copy or memory-related exceptions.<br><strong>Fix (minimal patch):</strong> Add size guard. Use download stream instead of clipboard for very large exports.</p></td></tr>
+        </th></tr></thead><tbody><tr><td data-label="Cause"><p><strong>JS runtime error during init</strong></p></td><td data-label="Details"><p><strong>Symptom:</strong> Controls missing. Table wrappers not created. Interactive features broken.<br><strong>How to confirm:</strong> Console shows uncaught exception (TypeError, ReferenceError). Disabling JS shows static layout.<br><strong>Fix (minimal patch):</strong> Wrap init in DOMContentLoaded and try/catch. See code below.</p></td></tr>
+<tr><td data-label="Cause"><p><strong>Sticky header hidden / wrong offset</strong></p></td><td data-label="Details"><p><strong>Symptom:</strong> Thead appears behind top header when scrolling. Sticky not visible.<br><strong>How to confirm:</strong> Computed `top` smaller than main header height.<br><strong>Fix (minimal patch):</strong> Make `thead th { top: var(--main-header-height); }` and set `--main-header-height` to actual header height.</p></td></tr>
+<tr><td data-label="Cause"><p><strong>Sticky fails due to overflow/transform ancestor</strong></p></td><td data-label="Details"><p><strong>Symptom:</strong> Thead not sticking or sticking inside scroll area (not viewport).<br><strong>How to confirm:</strong> Ancestor has `overflow:auto/hidden` or `transform` in computed styles.<br><strong>Fix (minimal patch):</strong> Remove/relocate overflow or move sticky header out of that scroll container.<br>Alternative: use fixed header or clone header.</p></td></tr>
+<tr><td data-label="Cause"><p><strong>Virtualization or DOM replace</strong></p></td><td data-label="Details"><p><strong>Symptom:</strong> Rows missing or layout jumps.<br><strong>How to confirm:</strong> Script replaces table DOM; CSS selectors no longer apply.<br><strong>Fix (minimal patch):</strong> Ensure virtualizer keeps `thead` in DOM and preserves classes.</p></td></tr>
+<tr><td data-label="Cause"><p><strong>Invalid HTML (unclosed tags)</strong></p></td><td data-label="Details"><p><strong>Symptom:</strong> Layout breaks unpredictably.<br><strong>How to confirm:</strong> Validator complains.<br><strong>Fix (minimal patch):</strong> Fix markup. Close tags and keep table structure valid.</p></td></tr>
+<tr><td data-label="Cause"><p><strong>Clipboard / large content exceptions</strong></p></td><td data-label="Details"><p><strong>Symptom:</strong> "Copy All" crashes script mid-init.<br><strong>How to confirm:</strong> Console error during copy or memory-related exceptions.<br><strong>Fix (minimal patch):</strong> Add size guard. Use download stream instead of clipboard for very large exports.</p></td></tr>
 </tbody></table></div>
   <div class='row-count'></div>
 </div>
 
-<script src="assets/script.js?v=1758464174" defer></script>
+<script src="assets/script.js?v=1758468299" defer></script>
 
 <script>
 (function(){
