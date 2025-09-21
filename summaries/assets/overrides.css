@@ -1,9 +1,6 @@
-/* injected width overrides: left 28.57% right 71.43% */
-:root { --left-width: 28.57%; --right-width: 71.43%; }
-
 /* overrides.css — Fully revised for Tables Viewer v2.1
    Purpose: sticky headers, first column, zebra rows, hover highlights,
-   dark mode, consistent list markers, responsive tweaks, full fixes.
+   dark mode, consistent list markers, responsive tweaks, caption & button fixes.
 */
 
 /* -----------------------------
@@ -19,6 +16,9 @@
   --header-highlight-color: #111827;
   --text: #111827;
   --muted: #6b7280;
+  --caption-color: var(--muted);
+  --caption-font-weight: 600;
+  --caption-padding: 6px 10px;
 }
 
 [data-theme="dark"], body.dark-mode {
@@ -31,19 +31,44 @@
   --header-highlight-color: #ffffff;
   --text: #e6eef6;
   --muted: #9aa0b2;
+  --caption-color: var(--muted);
 }
 
 /* -----------------------------
    Base table layout
 ----------------------------- */
+.table-container {
+  box-sizing: border-box;
+}
+
 .table-container table {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
   box-sizing: border-box;
   word-wrap: break-word;
+  -webkit-font-smoothing: antialiased;
 }
 
+.table-container caption {
+  display: table-caption !important;
+  caption-side: top;
+  text-align: left;
+  color: var(--caption-color);
+  font-weight: var(--caption-font-weight);
+  padding: var(--caption-padding);
+  margin-bottom: 4px;
+  line-height: 1.2;
+  position: relative;
+  z-index: 8;
+  background: transparent;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* -----------------------------
+   Table header cells
+----------------------------- */
 .table-container table thead th {
   vertical-align: middle;
   padding: 10px;
@@ -56,6 +81,7 @@
   z-index: 5;
 }
 
+/* keep sort wrapper layout safe */
 .table-container table thead th .th-with-sort,
 .table-container table thead th .th-with-sort > div {
   display: flex;
@@ -70,6 +96,7 @@
 /* -----------------------------
    Sticky first column
 ----------------------------- */
+/* Keep first column visually separate and readable */
 .table-container table thead th:first-child,
 .table-container table tbody td:first-child {
   position: sticky;
@@ -80,6 +107,14 @@
   box-shadow: 2px 0 5px -2px rgba(0,0,0,0.08);
 }
 
+/* Ensure first-column cells inherit row backgrounds when needed */
+.table-container table tbody tr:nth-child(odd) td:first-child {
+  background-color: var(--row-odd-bg) !important;
+}
+.table-container table tbody tr:nth-child(even) td:first-child {
+  background-color: var(--row-even-bg) !important;
+}
+
 /* -----------------------------
    Zebra rows and hover
 ----------------------------- */
@@ -88,13 +123,6 @@
 }
 .table-container table tbody tr:nth-child(even) td {
   background-color: var(--row-even-bg);
-}
-
-.table-container table tbody tr:nth-child(odd) td:first-child {
-  background-color: var(--row-odd-bg) !important;
-}
-.table-container table tbody tr:nth-child(even) td:first-child {
-  background-color: var(--row-even-bg) !important;
 }
 
 .table-container table tbody tr:hover td,
@@ -199,7 +227,48 @@ textarea:focus {
    Misc table wrapper / copy buttons / collapsible tables
 ----------------------------- */
 .table-wrapper { margin-bottom: 18px; }
-.table-wrapper .table-header-wrapper { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
+.table-wrapper .table-header-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+/* Title area if present */
+.table-wrapper .table-header-wrapper .table-title {
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.2;
+  margin: 0;
+  padding: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  word-break: break-word;
+}
+
+/* Copy buttons container */
+.table-wrapper .copy-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-left: 8px;
+}
+
+/* Individual copy button styling (minimal theme-agnostic) */
+.table-wrapper .copy-buttons button {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(0,0,0,0.08);
+  background: transparent;
+  color: var(--text);
+  font-size: 0.92em;
+  cursor: pointer;
+  min-width: 36px;
+}
+
+/* Collapsed table state */
 .table-wrapper.table-collapsed .table-container table tbody { display: none; }
 .table-wrapper.table-collapsed .copy-buttons button { opacity: 0.65; }
 
@@ -208,18 +277,76 @@ textarea:focus {
 ----------------------------- */
 @media (max-width: 900px) {
   .table-container { overflow-x: auto; }
-  .table-wrapper .table-header-wrapper { flex-direction: column; align-items: stretch; gap: 4px; }
+
+  /* Stack header items but keep title left and buttons right */
+  .table-wrapper .table-header-wrapper {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  /* Ensure title occupies full width but allow buttons to float right */
+  .table-wrapper .table-header-wrapper .table-title {
+    width: 100%;
+    order: 0;
+  }
+
+  .table-wrapper .copy-buttons {
+    align-self: flex-end;
+    order: 1;
+  }
+
+  /* Prevent header from stretching buttons full width */
+  .table-wrapper .copy-buttons button {
+    flex: none;
+  }
 }
 
 @media (max-width: 600px) {
   .table-container table { font-size: 14px; }
   .table-container td, .table-container th { padding: 8px 10px; }
+
+  /* Slightly smaller caption on very small screens */
+  .table-container caption {
+    font-size: 0.95rem;
+    padding: 6px 8px;
+  }
+
+  /* Ensure copy buttons remain usable on very small screens */
+  .table-wrapper .copy-buttons {
+    gap: 6px;
+  }
 }
 
-/* -----------------------------
-   Dark mode adjustments for lists
------------------------------ */
+/* Ensure dark-mode list markers inherit correct color */
 [data-theme="dark"] .table-container td > ul > li::before,
 [data-theme="dark"] .table-container td ol > li::before {
   color: var(--text);
 }
+
+/* -----------------------------
+   Utility: ensure pipes and inline tables don't break layout badly
+----------------------------- */
+.table-container td pre,
+.table-container td code,
+.table-container td kbd {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Overflow handling for long unbroken words */
+.table-container td {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Prevent interactive elements from exceeding header wrapper height */
+.table-wrapper .table-header-wrapper > * {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Safety: visibly hide elements that are intentionally hidden, keep caption visible */
+.hidden { display: none !important; visibility: hidden !important; }
+
+/* END overrides.css */
