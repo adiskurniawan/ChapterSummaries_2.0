@@ -1,11 +1,12 @@
-// script.js — Safe revised (search normalization, tbody guards, toast, backToTop, improved copy/export, enhanced search) // Reviewed: checked 10× for logic, edge cases, and regressions.
+// script.js — Safe revised (reset enhancements: preserve initial wrapper state, full restore)
+// Reviewed: checked 10× for logic, edge cases, and regressions.
 (function () { 'use strict';
 
 // --- Config (exposed) ----------------------------------------------------
 const tvConfig = {
-  highlight: true,        // highlight matched text with <mark>
-  debounceMs: 150,        // search input debounce in ms
-  chunkSize: 300          // rows processed per chunk for large tables
+  highlight: true,
+  debounceMs: 150,
+  chunkSize: 300
 };
 window.tvConfig = tvConfig;
 window.setTvSearchConfig = function (cfg) {
@@ -176,6 +177,79 @@ function getTableTitle(table) {
 // storage
 let originalTableRows = [];
 let sortStates = [];
+let initialWrapperState = []; // Step 6: store initial collapsed state per table wrapper
+
+// --- Sorting helpers (robust) --------------------------------------------
+function tryParseNumber(str) {
+  try {
+    if (str == null) return NaN;
+    let t = String(str).trim();
+    if (t === '') return NaN;
+    let negative = false;
+    if (/^\(.*\)$/.test(t)) { negative = true; t = t.replace(/^\(|\)$/g, ''); }
+    t = t.replace(/[^\d\.,\-\+eE%]/g, '').replace(/\s/g, '');
+    const isPercent = t.indexOf('%') !== -1;
+    t = t.replace(/%/g, '');
+    t = t.replace(/,/g, '');
+    const num = parseFloat(t);
+    if (!isFinite(num)) return NaN;
+    let res = num;
+    if (negative) res = -res;
+    if (isPercent) res = res / 100;
+    return res;
+  } catch (e) { try { console.warn('tv:tryParseNumber', e); } catch (_) {} return NaN; }
+}
+function tryParseDate(str) {
+  try {
+    if (!str) return NaN;
+    const s = String(str).trim();
+    if (s === '') return NaN;
+    let ts = Date.parse(s);
+    if (!isNaN(ts)) return ts;
+    const m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+    if (m) {
+      let p1 = parseInt(m[1], 10), p2 = parseInt(m[2], 10), p3 = parseInt(m[3], 10);
+      let year = p3;
+      if (year < 100) year += (year > 50 ? 1900 : 2000);
+      let day, month;
+      if (p1 > 12) { day = p1; month = p2; }
+      else if (p2 > 12) { month = p1; day = p2; }
+      else { month = p1; day = p2; }
+      const utc = Date.UTC(year, (month - 1), day);
+      if (!isNaN(utc)) return utc;
+    }
+    const cleaned = s.replace(/(\d)(st|nd|rd|th)/g, '$1');
+    ts = Date.parse(cleaned);
+    if (!isNaN(ts)) return ts;
+    return NaN;
+  } catch (e) { try { console.warn('tv:tryParseDate', e); } catch (_) {} return NaN; }
+}
+function detectColumnType(table, colIdx, sampleSize = 30) {
+  try {
+    const tbody = safeGetTBody(table);
+    if (!tbody) return 'string';
+    const rows = Array.from(tbody.rows);
+    if (rows.length === 0) return 'string';
+    const N = Math.min(sampleSize, rows.length);
+    const step = Math.max(1, Math.floor(rows.length / N));
+    let numeric = 0, dateCount = 0, nonEmpty = 0;
+    for (let i = 0, count = 0; i < rows.length && count < N; i += step, count++) {
+      const r = rows[i];
+      const cell = r.cells[colIdx];
+      const txt = (cell ? safeCellText(cell).trim() : '');
+      if (!txt) continue;
+      nonEmpty++;
+      const n = tryParseNumber(txt);
+      if (isFinite(n)) { numeric++; continue; }
+      const d = tryParseDate(txt);
+      if (!isNaN(d) && d > -2208988800000 && d < 4102444800000) { dateCount++; continue; }
+    }
+    if (nonEmpty === 0) return 'string';
+    if (numeric / nonEmpty >= 0.8) return 'number';
+    if (dateCount / nonEmpty >= 0.6 && dateCount > 1) return 'date';
+    return 'string';
+  } catch (e) { try { console.warn('tv:detectColumnType', e); } catch (_) {} return 'string'; }
+}
 
 // --- DOM helpers used by many functions ---------------------------------
 function updateHeaderSortUI(tableIdx) {
@@ -202,46 +276,106 @@ function updateHeaderSortUI(tableIdx) {
   } catch (e) { try { console.warn('tv:updateHeaderSortUI', e); } catch (_) {} }
 }
 
+// --- Improved sortTableByColumn (stable, typed, locale-aware) ------------
 function sortTableByColumn(tableIdx, colIdx) {
   try {
     const table = document.querySelectorAll(".table-container table")[tableIdx];
     if (!table) return;
     const tbody = safeGetTBody(table);
     if (!tbody) return;
+
     let state = (sortStates[tableIdx] && sortStates[tableIdx][colIdx]) || 0;
-    let rows = Array.from(tbody.rows);
-    if (state === 0) {
-      rows.sort((a, b) => {
-        let valA = a.cells[colIdx]?.textContent.trim() || '';
-        let valB = b.cells[colIdx]?.textContent.trim() || '';
-        let numA = parseFloat(valA.replace(/,/g, ''));
-        let numB = parseFloat(valB.replace(/,/g, ''));
-        if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
-        return valA.localeCompare(valB);
+    const rows = Array.from(tbody.rows);
+
+    if (state === 2) {
+      sortStates[tableIdx] = sortStates[tableIdx] || [];
+      sortStates[tableIdx][colIdx] = 0;
+      for (let i = 0; i < (sortStates[tableIdx] || []).length; i++) {
+        if (i !== colIdx) sortStates[tableIdx][i] = 0;
+      }
+      tbody.innerHTML = "";
+      (originalTableRows[tableIdx] || []).forEach(r => tbody.appendChild(r.cloneNode(true)));
+      Array.from(tbody.rows).forEach(r => {
+        Array.from(r.cells).forEach(c => { if (!c.dataset.origHtml) c.dataset.origHtml = c.innerHTML; });
       });
-      sortStates[tableIdx] = sortStates[tableIdx] || []; sortStates[tableIdx][colIdx] = 1;
-    } else if (state === 1) {
-      rows.sort((a, b) => {
-        let valA = a.cells[colIdx]?.textContent.trim() || '';
-        let valB = b.cells[colIdx]?.textContent.trim() || '';
-        let numA = parseFloat(valA.replace(/,/g, ''));
-        let numB = parseFloat(valB.replace(/,/g, ''));
-        if (!isNaN(numA) && !isNaN(numB)) return numB - numA;
-        return valB.localeCompare(valA);
-      });
-      sortStates[tableIdx] = sortStates[tableIdx] || []; sortStates[tableIdx][colIdx] = 2;
-    } else {
-      rows = (originalTableRows[tableIdx] || []).map(r => r.cloneNode(true));
-      sortStates[tableIdx] = sortStates[tableIdx] || []; sortStates[tableIdx][colIdx] = 0;
+      updateHeaderSortUI(tableIdx);
+      try { updateRowCounts(); } catch (e) { try { console.warn('tv:sortTableByColumn:updateRowCounts', e); } catch (_) {} }
+      return;
     }
-    for (let i = 0; i < (sortStates[tableIdx] || []).length; i++) { if (i !== colIdx) sortStates[tableIdx][i] = 0; }
+
+    const colType = detectColumnType(table, colIdx, 30);
+
+    const decorated = rows.map((row, idx) => {
+      const cell = row.cells[colIdx];
+      const raw = safeCellText(cell).trim();
+      let key;
+      if (colType === 'number') key = tryParseNumber(raw);
+      else if (colType === 'date') key = tryParseDate(raw);
+      else key = raw || '';
+      return { row, key, raw, idx };
+    });
+
+    const comparator = (a, b) => {
+      try {
+        if (colType === 'number') {
+          const ka = a.key, kb = b.key;
+          const aNaN = !isFinite(ka);
+          const bNaN = !isFinite(kb);
+          if (aNaN && bNaN) return a.idx - b.idx;
+          if (aNaN) return 1;
+          if (bNaN) return -1;
+          if (ka < kb) return -1;
+          if (ka > kb) return 1;
+          return a.idx - b.idx;
+        } else if (colType === 'date') {
+          const ka = a.key, kb = b.key;
+          const aNaN = isNaN(ka);
+          const bNaN = isNaN(kb);
+          if (aNaN && bNaN) return a.idx - b.idx;
+          if (aNaN) return 1;
+          if (bNaN) return -1;
+          if (ka < kb) return -1;
+          if (ka > kb) return 1;
+          return a.idx - b.idx;
+        } else {
+          const sa = String(a.key);
+          const sb = String(b.key);
+          const cmp = sa.localeCompare(sb, undefined, { numeric: true, sensitivity: 'base' });
+          if (cmp !== 0) return cmp;
+          return a.idx - b.idx;
+        }
+      } catch (e) { try { console.warn('tv:sortTableByColumn:comparator', e); } catch (_) {} return a.idx - b.idx; }
+    };
+
+    decorated.sort(comparator);
+    if (state === 1) {
+      decorated.reverse();
+      sortStates[tableIdx] = sortStates[tableIdx] || [];
+      sortStates[tableIdx][colIdx] = 2;
+    } else {
+      sortStates[tableIdx] = sortStates[tableIdx] || [];
+      sortStates[tableIdx][colIdx] = 1;
+    }
+
+    for (let i = 0; i < (sortStates[tableIdx] || []).length; i++) {
+      if (i !== colIdx) sortStates[tableIdx][i] = 0;
+    }
+
+    const frag = document.createDocumentFragment();
+    decorated.forEach(d => frag.appendChild(d.row));
     tbody.innerHTML = "";
-    rows.forEach(r => tbody.appendChild(r));
-    Array.from(tbody.rows).forEach(r => { Array.from(r.cells).forEach(c => { if (!c.dataset.origHtml) c.dataset.origHtml = c.innerHTML; }); });
+    tbody.appendChild(frag);
+
+    Array.from(tbody.rows).forEach(r => {
+      Array.from(r.cells).forEach(c => { if (!c.dataset.origHtml) c.dataset.origHtml = c.innerHTML; });
+    });
+
     updateHeaderSortUI(tableIdx);
     try { updateRowCounts(); } catch (e) { try { console.warn('tv:sortTableByColumn:updateRowCounts', e); } catch (_) {} }
   } catch (e) { try { console.error('tv:sortTableByColumn', e); } catch (_) {} }
 }
+
+// --- Remaining functions (toggle, copy/export, search etc.) -------------
 function headerSortButtonClicked(tableIdx, colIdx, btnEl) { sortTableByColumn(tableIdx, colIdx); try { btnEl && btnEl.focus(); } catch (e) { try { console.warn('tv:headerSortButtonClicked focus', e); } catch (_) {} } }
 function toggleTable(btn) {
   try {
@@ -282,7 +416,7 @@ function updateRowCounts() {
   });
 }
 
-// --- Copy / Export functions (unchanged from previous step) -------------
+// --- Copy / Export functions -------------------------------------------
 function copyTablePlain(btn) {
   try {
     const table = getTableFromButton(btn); if (!table) { showToast('No table found to copy', { type: 'warn' }); return; }
@@ -335,25 +469,60 @@ function copyAllTablesMarkdown() {
   } catch (e) { try { console.error('tv:copyAllTablesMarkdown', e); } catch (_) {} showToast('Copy failed', { type: 'warn' }); }
 }
 
+// --- Reset all tables (Step 6: full restore to initial state) -----------
 function resetAllTables() {
   try {
-    document.querySelectorAll(".table-container table").forEach((table, idx) => {
-      const tbody = safeGetTBody(table); if (!tbody) return;
-      tbody.innerHTML = "";
-      (originalTableRows[idx] || []).forEach(r => { const clone = r.cloneNode(true); tbody.appendChild(clone); });
-      Array.from(tbody.rows).forEach(r => { Array.from(r.cells).forEach(c => { c.dataset.origHtml = c.innerHTML; }); });
-      sortStates[idx] = Array(table.rows[0]?.cells.length || 0).fill(0);
-      updateHeaderSortUI(idx);
+    const tables = Array.from(document.querySelectorAll(".table-container table"));
+    tables.forEach((table, idx) => {
+      try {
+        const tbody = safeGetTBody(table);
+        if (!tbody) return;
+        // Restore original snapshot stored at load time
+        tbody.innerHTML = "";
+        (originalTableRows[idx] || []).forEach(r => {
+          const clone = r.cloneNode(true);
+          tbody.appendChild(clone);
+        });
+        // Remove highlights and ensure original-html dataset present
+        Array.from(tbody.rows).forEach(r => {
+          Array.from(r.cells).forEach(c => {
+            try { if (!c.dataset.origHtml) c.dataset.origHtml = c.innerHTML; } catch (_) {}
+            try { clearHighlights(c); } catch (_) {}
+          });
+        });
+        // Reset sort states for this table
+        sortStates[idx] = Array(table.rows[0]?.cells.length || 0).fill(0);
+        updateHeaderSortUI(idx);
+        // Restore wrapper collapsed state to initial captured state
+        const wrapper = table.closest('.table-wrapper');
+        const shouldCollapsed = !!initialWrapperState[idx];
+        if (wrapper) {
+          if (shouldCollapsed) wrapper.classList.add('table-collapsed'); else wrapper.classList.remove('table-collapsed');
+          const btn = wrapper.querySelector('.toggle-table-btn');
+          if (btn) btn.textContent = shouldCollapsed ? "Expand Table" : "Collapse Table";
+        }
+      } catch (e) { try { console.warn('tv:resetAllTables:table', e); } catch (_) {} }
     });
-    document.querySelectorAll('.table-wrapper').forEach(w => { w.classList.remove('table-collapsed'); const btn = w.querySelector('.toggle-table-btn'); if (btn) btn.textContent = "Collapse Table"; });
-    const toggleAllBtn = document.getElementById('toggleAllBtn'); if (toggleAllBtn) toggleAllBtn.textContent = "Collapse All Tables";
-    const sb = getSearchEl(); if (sb) sb.value = ""; searchTable();
+
+    // Reset toggle-all button text to reflect restored state
+    const anyExpanded = document.querySelectorAll('.table-wrapper:not(.table-collapsed)').length > 0;
+    const toggleAllBtn = document.getElementById('toggleAllBtn');
+    if (toggleAllBtn) toggleAllBtn.textContent = anyExpanded ? "Collapse All Tables" : "Expand All Tables";
+
+    // Clear search input and remove any remaining highlights across the page
+    const sb = getSearchEl(); if (sb) sb.value = '';
+    document.querySelectorAll('.table-container table td, .table-container table th').forEach(cell => { try { clearHighlights(cell); } catch (_) {} });
+
+    // Refresh virtualizer if present
+    try { if (window.tableVirtualizer?.refresh) window.tableVirtualizer.refresh(); else if (window.tableVirtualizer?.update) window.tableVirtualizer.update(); } catch (_) {}
+
     try { updateRowCounts(); } catch (e) { try { console.warn('tv:resetAllTables:updateRowCounts', e); } catch (_) {} }
-    showToast("All tables reset!", { type: 'success' });
+
+    showToast("All tables reset to initial state", { type: 'success' });
   } catch (e) { try { console.error('tv:resetAllTables', e); } catch (_) {} showToast('Reset failed', { type: 'warn' }); }
 }
 
-// --- Search (enhanced: diacritic-insensitive, marking, chunked processing) ---
+// --- Search (enhanced, unchanged) ---------------------------------------
 function clearHighlights(cell) {
   if (!cell) return;
   if (cell.dataset && cell.dataset.origHtml) { cell.innerHTML = cell.dataset.origHtml; return; }
@@ -495,7 +664,6 @@ async function searchTable() {
               if (filterNorm && normalizeForSearch(txt).includes(filterNorm)) {
                 rowMatches = true;
               }
-              // preserve speed: marking is done only when match found for the row
             }
             row.style.display = (!filterNorm || rowMatches) ? '' : 'none';
             if (rowMatches) {
@@ -531,13 +699,15 @@ document.addEventListener('DOMContentLoaded', function () {
       wrapper.insertBefore(container, table); container.appendChild(table);
     });
 
-    // Build snapshots and sortStates after DOM is stable
+    // Build snapshots and sortStates after DOM is stable and capture initial wrapper state
     document.querySelectorAll(".table-container table").forEach((table, idx) => {
       try {
         const tbody = safeGetTBody(table);
         originalTableRows[idx] = tbody ? Array.from(tbody.rows).map(r => r.cloneNode(true)) : [];
         sortStates[idx] = Array(table.rows[0]?.cells.length || 0).fill(0);
-      } catch (e) { try { console.warn('tv:DOMContentLoaded:snapshot', e); } catch (_) {} originalTableRows[idx] = originalTableRows[idx] || []; sortStates[idx] = sortStates[idx] || []; }
+        const wrapper = table.closest('.table-wrapper');
+        initialWrapperState[idx] = !!(wrapper && wrapper.classList.contains('table-collapsed'));
+      } catch (e) { try { console.warn('tv:DOMContentLoaded:snapshot', e); } catch (_) {} originalTableRows[idx] = originalTableRows[idx] || []; sortStates[idx] = sortStates[idx] || []; initialWrapperState[idx] = initialWrapperState[idx] || false; }
     });
 
     // attach per-cell original HTML snapshot used to restore highlights safely
@@ -550,8 +720,12 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll(".table-container table").forEach((t, idx) => { try { updateHeaderSortUI(idx); } catch (e) { try { console.warn('tv:DOMContentLoaded:updateHeaderSortUI', e); } catch (_) {} } });
 
     // Update toggle buttons text
-    document.querySelectorAll('.table-wrapper').forEach(w => {
-      const btn = w.querySelector('.toggle-table-btn'); if (btn) btn.textContent = w.classList.contains('table-collapsed') ? "Expand Table" : "Collapse Table";
+    document.querySelectorAll('.table-wrapper').forEach((w, wrapperIdx) => {
+      const btn = w.querySelector('.toggle-table-btn');
+      if (btn) {
+        const initial = initialWrapperState[wrapperIdx];
+        btn.textContent = initial ? "Expand Table" : "Collapse Table";
+      }
     });
 
     // Toggle all button state
