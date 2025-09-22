@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Tables Viewer v2.1</title>
+<style>:root{--main-header-height:56px;}</style>
+<link rel="stylesheet" href="assets/style.css?v=1758537385">
+<link rel="stylesheet" href="assets/overrides.css?v=1758537385">
+</head><body>
+<div id="tables-viewer" role="region" aria-label="Tables viewer">
+<div id="stickyMainHeader">
+<div id="tv-header"><div><h1>Tables Viewer v2.1</h1></div><div style="display:flex;gap:8px;align-items:center;">
+<input id="searchBox" type="search" placeholder="Search" aria-label="Search tables" style="min-width:420px; width:44ch;"/>
+<button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button>
+<button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button>
+<button id="copyAllPlainBtn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button>
+<button id="copyAllMdBtn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy all tables as markdown">Copy All Tables (Markdown)</button>
+<button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset all tables">Reset All Tables</button>
+</div></div>
+<noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
+<div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1-title">Table 1</a></li></ul></div></div>
+<div class="table-wrapper" id="Table1"><h3 id="Table1-title">Table 1</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
+        <th style="width:28.57%;" onclick="sortTableByColumn(0,0)" role="button" aria-label="Sort by Your Responsibility">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Your Responsibility</div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true"></span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(0,1)" role="button" aria-label="Sort by My Responsibility">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">My Responsibility</div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true"></span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="Your Responsibility"><p><strong>1. Define project goals clearly</strong><br>- State the high-level purpose of the project (example: “render complex tables into styled HTML”).<br>- Break goals into smaller phases (example: “Phase 1: modularize rendering”, “Phase 2: optimize performance”).<br>- Keep the long-term vision consistent even if small tasks change.</p></td><td data-label="My Responsibility"><p><strong>1. Interpret and formalize goals</strong><br>- Translate high-level goals into technical specifications.<br>- Map goals into actionable changes per file.<br>- Ensure all proposals preserve compatibility and future extendibility.</p></td></tr>
+<tr><td data-label="Your Responsibility"><p><strong>2. Provide current assets</strong><br>- Share the latest versions of files before requesting an enhancement.<br>- Ensure files are complete (no truncated code).<br>- Organize shared snippets by filename so I can reassemble context.</p></td><td data-label="My Responsibility"><p><strong>2. Preserve and update assets</strong><br>- Return the full updated file each time, not partial edits.<br>- Guarantee signatures, structure, and orchestration remain consistent with your existing project.<br>- Strip comments unless you request explanations.</p></td></tr>
+<tr><td data-label="Your Responsibility"><p><strong>3. Specify scope of each task</strong><br>- Keep requests limited to one focused change (example: “optimize asset copy in core<em>assets.py”).<br>- Clarify boundaries (example: “do not modify core</em>renderer.py in this step”).</p></td><td data-label="My Responsibility"><p><strong>3. Deliver precise scope changes</strong><br>- Modify only the targeted file(s).<br>- Apply exactly the requested change.<br>- Ensure no ripple changes spill into untouched modules unless explicitly asked.</p></td></tr>
+<tr><td data-label="Your Responsibility"><p><strong>4. Testing on your side</strong><br>- Run the project after each change.<br>- Report console errors, traceback logs, or rendering issues.<br>- Provide failing input/output samples if something breaks.</p></td><td data-label="My Responsibility"><p><strong>4. Verification on my side</strong><br>- Perform “check 10 times” before returning code: syntax, imports, edge cases, variables, test runs.<br>- Provide usage snippets for smoke testing.<br>- Point out any uncertainties that require your confirmation.</p></td></tr>
+<tr><td data-label="Your Responsibility"><p><strong>5. Provide style and policy rules</strong><br>- Confirm rules (e.g., no comments, preserved function signatures).<br>- State coding preferences (e.g., PEP8 strict, short variable names).<br>- Clarify if third-party libraries are allowed.</p></td><td data-label="My Responsibility"><p><strong>5. Enforce style and policies</strong><br>- Follow your constraints exactly.<br>- Default to minimal Python standard library unless you approve an external dependency.<br>- Maintain project conventions (folder layout, imports, naming).</p></td></tr>
+<tr><td data-label="Your Responsibility"><p><strong>6. Memory control</strong><br>- Tell me explicitly when to remember a workflow, directory, or preference long-term.<br>- Request forget operations when rules or context change.<br>- Keep memory synced with project evolution.</p></td><td data-label="My Responsibility"><p><strong>6. Memory maintenance</strong><br>- Store or delete memory items as instructed.<br>- Keep Prompt&#95;03 as the baseline reference.<br>- Update memory when you finalize structural changes to the project tree.</p></td></tr>
+<tr><td data-label="Your Responsibility"><p><strong>7. Task approval</strong><br>- Approve or reject each file I deliver.<br>- Provide feedback if changes are incomplete or incorrect.<br>- Request tweaks before final approval if needed.</p></td><td data-label="My Responsibility"><p><strong>7. Apply feedback</strong><br>- Revise files quickly based on your corrections.<br>- Keep iterations short, precise, and cumulative.<br>- Avoid overwriting your assets during revision.</p></td></tr>
+<tr><td data-label="Your Responsibility"><p><strong>8. Repository management</strong><br>- Decide when to merge changes into your Git repo or Dropbox folder.<br>- Create commits with clear messages (example: “core&#95;assets.py: add atomic copy fallback”).<br>- Handle branching and release tags.</p></td><td data-label="My Responsibility"><p><strong>8. Provide commit-ready output</strong><br>- Deliver changes in copy-pasteable format.<br>- Summarize diffs where helpful.<br>- Warn if a change introduces backward incompatibility.</p></td></tr>
+<tr><td data-label="Your Responsibility"><p><strong>9. Decide enhancements</strong><br>- Choose priority (performance, readability, modularity, UX).<br>- Break big features into steps.<br>- Provide roadmap checkpoints.</p></td><td data-label="My Responsibility"><p><strong>9. Propose safe enhancements</strong><br>- Suggest minimal, non-breaking changes for each step.<br>- Highlight trade-offs (speed vs. memory, clarity vs. brevity).<br>- Keep options modular for later rollback.</p></td></tr>
+<tr><td data-label="Your Responsibility"><p><strong>10. Communication</strong><br>- Use clear and concise requests.<br>- Mark multi-file tasks with explicit filenames.<br>- Confirm when we move from one step to the next.</p></td><td data-label="My Responsibility"><p><strong>10. Communication</strong><br>- Answer only in your chosen language.<br>- Keep replies short, factual, no fluff.<br>- Present everything in tables, lists, or code blocks for clarity.</p></td></tr>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+<script src="assets/script.js?v=1758537385" defer></script>
+<script src="assets/worker.js?v=1758537385" defer></script>
+
+<script>
+(function(){
+  const template = "{table}_{date}";
+  function formatName(tableName) {
+    const date = (new Date()).toISOString().slice(0,10);
+    return template.replace('{table}', tableName).replace('{date}', date).replace('{user}', '');
+  }
+  const btn = document.getElementById('exportBtn');
+  if(btn) {
+    btn.addEventListener('click', async function() {
+      try {
+        const html = document.documentElement.outerHTML;
+        if(html.length > 2000000) {
+          alert('Export refused: html too large');
+          return;
+        }
+        if(window.Worker) {
+          const worker = new Worker((function(){
+            try{ return 'assets/worker.js'; }catch(e){ return null; }
+          })());
+          if(worker){
+            worker.postMessage({html:html, format:'pdf'});
+            worker.onmessage = function(e){ console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+          } else {
+            alert('Worker not available');
+          }
+        } else {
+          alert('Export worker not supported in this environment.');
+        }
+      } catch(err) {
+        console.warn('Export failed', err);
+        alert('Export worker not available. See console for details.');
+      }
+    });
+  }
+})();
+</script>
+
+</div>
+</body>
+</html>
