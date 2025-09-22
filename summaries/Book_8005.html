@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Tables Viewer v2.1</title>
+<style>:root{--main-header-height:56px;}</style>
+<link rel="stylesheet" href="assets/style.css?v=1758526544">
+<link rel="stylesheet" href="assets/overrides.css?v=1758526544">
+</head><body>
+<div id="tables-viewer" role="region" aria-label="Tables viewer">
+<div id="stickyMainHeader">
+<div id="tv-header"><div><h1>Tables Viewer v2.1</h1></div><div style="display:flex;gap:8px;align-items:center;">
+<input id="searchBox" type="search" placeholder="Search" aria-label="Search tables" style="min-width:420px; width:44ch;"/>
+<button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button>
+<button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button>
+<button id="copyAllPlainBtn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button>
+<button id="copyAllMdBtn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy all tables as markdown">Copy All Tables (Markdown)</button>
+<button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset all tables">Reset All Tables</button>
+</div></div>
+<noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
+<div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1-title">Table 1</a></li>
+<li class="toc-item"><a class="toc-link" href="#Table2-title">Table 2</a></li></ul></div></div>
+<div class="table-wrapper" id="Table1"><h3 id="Table1-title">Table 1</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
+        <th style="width:28.57%;" onclick="sortTableByColumn(0,0)" role="button" aria-label="Sort by **What You Do**">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>What You Do</strong></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true"></span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(0,1)" role="button" aria-label="Sort by **What I Do**">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>What I Do</strong></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true"></span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(0,2)" role="button" aria-label="Sort by Unnamed: 3">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Unnamed: 3</div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,2, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true"></span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="What You Do"><p><strong>Set up the project folder with `render/`, `assets/`, `output<em>combined/`, `main.py`, `html</em>renderer.py`, `helpers.py`, `utils.py`.</strong></p></td><td data-label="What I Do"><p>Record folder structure, verify modular split, identify each module’s responsibility (`core<em>renderer.py`, `core</em>table.py`, `core<em>utils.py`, `core</em>assets.py`, `core<em>fragments.py`, `convert.py`, `markdown.py`, `io</em>utils.py`, `sanitize.py`, `types.py`, `<strong>init</strong>.py`).</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Ask to recall Prompt\&#95;03 folder tree.</strong></p></td><td data-label="What I Do"><p>Provide exact folder tree with submodules, assets, output folder, HTML wrapper, and main script.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Prepare Markdown files in `D:\Dropbox\Adi\ChatGPT<em>Book</em>Summaries\tables`.</strong></p></td><td data-label="What I Do"><p>Validate folder exists, gather all `.md` files with `glob`, sort, and identify book prefixes.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Highlight numeric and extra prefixes in Markdown filenames.</strong></p></td><td data-label="What I Do"><p>Build `numeric<em>map` for 4-digit suffixes, `extras` for non-numeric prefixes. Combine into `selection</em>map` ensuring unique keys.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Loop through selected book prefixes for processing.</strong></p></td><td data-label="What I Do"><p>For each prefix, collect matching Markdown files, sort, and prepare output HTML path in `output&#95;combined`.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Provide `parse<em>markdown</em>tables` function to extract tables.</strong></p></td><td data-label="What I Do"><p>Analyze splitting logic: split content by double newlines, remove empty rows/columns, skip delimiter-only rows. Wrap valid sections into pandas DataFrames.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Highlight multi-line Markdown cells as potential issue.</strong></p></td><td data-label="What I Do"><p>Suggest `pandas.read&#95;html` or `markdown2` parsing in future for robustness.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Provide `markdown<em>to</em>html` function to handle bold, italics, bullets, numbered lists, and line breaks.</strong></p></td><td data-label="What I Do"><p>Check regex coverage for all Markdown patterns, note edge cases (nested formatting, links, escaped characters). Suggest using standard Markdown library for future reliability.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Execute fallback HTML when `render&#95;html` is unavailable.</strong></p></td><td data-label="What I Do"><p>Assemble minimal HTML: `<html><head><meta charset='utf-8'><title></title></head><body>`, add `<h1>` per book prefix, convert DataFrames to HTML tables, write to output folder.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Highlight fallback HTML writing logic.</strong></p></td><td data-label="What I Do"><p>Check safe writing using `open(..., encoding="utf-8")`, ensure exceptions are caught and logged.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Provide `<em>cleanup</em>fragments<em>safe` function for removing `.frags</em>&#42;` and `.fragments`.</strong></p></td><td data-label="What I Do"><p>Validate safe deletion of directories in multiple target folders, handle exceptions silently to avoid breaking main processing.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Attempt to dynamically load `html&#95;renderer.py`.</strong></p></td><td data-label="What I Do"><p>Use `importlib.util.spec<em>from</em>file<em>location` to load module from project folder, fall back to `import html</em>renderer` from `sys.path`, verify `render&#95;html` attribute exists. Log warnings if loading fails.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Ask why top-part of `Book<em>0002</em>new.html` looks different.</strong></p></td><td data-label="What I Do"><p>Analyze orchestration: missing `<head>` section, incomplete CSS/JS injection, fragment assembly not called, top-level Markdown headers not processed before table assembly.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Ask to preserve split modules but restore visual fidelity.</strong></p></td><td data-label="What I Do"><p>Recommend restoring full orchestration in `core&#95;renderer.py`: asset injection, fragment assembly, top-level Markdown processing, table rendering, fallback handling.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Ask for advantages of splitting `core.py`.</strong></p></td><td data-label="What I Do"><p>List benefits: modularity, readability, testability, easier collaboration, optional plugin support, future extensibility, backward compatibility.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Ask for orchestration diagram.</strong></p></td><td data-label="What I Do"><p>Provide ASCII diagram showing flow: `main.py` → `html<em>renderer.py` → `core</em>renderer.py` → `core<em>table/core</em>utils/core<em>assets/core</em>fragments` → `convert.py`, including how tables, assets, and fragments interact.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Ask to save notes to long-term memory for tomorrow.</strong></p></td><td data-label="What I Do"><p>Compile all observations and plans, deduplicate, clean formatting, ensure action points are ready for continuation.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Ask to include asset copying issue in notes.</strong></p></td><td data-label="What I Do"><p>Update long-term memory with incomplete asset copy from `assets/` to `output&#95;combined/`.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Confirm continuation tomorrow.</strong></p></td><td data-label="What I Do"><p>Keep notes, orchestration plan, workflow, and script analysis in memory.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Provide full `main.py` script for review.</strong></p></td><td data-label="What I Do"><p>Review for dynamic `html&#95;renderer` loading, Markdown parsing, table processing, fallback HTML writing, fragment cleanup, error handling. Suggest minor improvements (use `pathlib`, modern exception handling, modularization).</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Highlight numeric and extra book prefixes again.</strong></p></td><td data-label="What I Do"><p>Verify mapping in `selection&#95;map`, ensure proper ordering, assign unique numeric keys for extras starting after max numeric prefix.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Point out Markdown tables may have inconsistent columns.</strong></p></td><td data-label="What I Do"><p>Ensure `parse<em>markdown</em>tables` drops empty columns, removes fully-empty rows, strips whitespace from column names.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Provide Markdown-to-HTML regex for formatting.</strong></p></td><td data-label="What I Do"><p>Check bold (`&#42;&#42;` or `&#95;&#95;`), italics (`<em>` or `&#95;`), bullets (`-</em>`), numbered lists (`\d+\.`), nested formatting, line breaks. Suggest improvement with standard Markdown parser.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Parse Markdown tables for each file in a prefix group.</strong></p></td><td data-label="What I Do"><p>For each file: read content safely, parse tables via `parse<em>markdown</em>tables`. If none found, try inline parsing for \`</p></td><td data-label="Unnamed: 3"><p>`lines. Collect all DataFrames into`all\&#95;tables\`.</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Generate fallback HTML if `render&#95;html` unavailable.</strong></p></td><td data-label="What I Do"><p>Build HTML page: add `<h1>` for book prefix, loop over `all&#95;tables` with `<h3>` headers, write HTML, log success or exception.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Use `render&#95;html` if available.</strong></p></td><td data-label="What I Do"><p>Call `render<em>html(all</em>tables, output<em>html, markdown</em>to&#95;html)`, handle exceptions, log failures with traceback.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Plan to fix `Book<em>0002</em>new.html` top section.</strong></p></td><td data-label="What I Do"><p>Determine steps: ensure `<head>` section includes CSS/JS from `core&#95;assets.py`, inject top-level headings, run fragment assembly, render tables, maintain modular API.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Prepare 2-column summary table (your actions vs my responses).</strong></p></td><td data-label="What I Do"><p>Map every step taken by you to the analysis, review, internal checks, and guidance I provided.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Ask to expand 2-column table to 20,000 characters.</strong></p></td><td data-label="What I Do"><p>Expand each action-response pair into detailed explanations, include internal reasoning, checks for Markdown parsing, table assembly, asset injection, fragment cleanup, fallback handling, renderer orchestration, long-term memory management.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Ask why top part differs, emphasize easy fix.</strong></p></td><td data-label="What I Do"><p>Pinpoint missing `<head>` injection, asset copying, fragment handling, and top Markdown processing. Highlight correct sequence for restoring old visual fidelity.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Ask to continue fixing tomorrow.</strong></p></td><td data-label="What I Do"><p>Keep all expanded workflow notes, orchestration plan, table mapping, and analysis in memory for seamless continuation.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Ask for complete advantages of splitting core.py.</strong></p></td><td data-label="What I Do"><p>Provide full list of modularity, testability, maintainability, collaboration, plugin support, backward compatibility, extensibility, easier future feature integration.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Ask for orchestration diagram showing module interaction.</strong></p></td><td data-label="What I Do"><p>Draw ASCII diagram with flow from `main.py → html<em>renderer.py → core</em>renderer.py → helpers` and supporting modules for tables, assets, fragments, Markdown conversion.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Ask for workflow table (actions vs responses).</strong></p></td><td data-label="What I Do"><p>Produce compact 2-column table with full mapping of every step from initial folder setup to final top-part analysis and long-term memory planning.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Ask to expand table to 20,000 characters.</strong></p></td><td data-label="What I Do"><p>Extend table to include: parsing logic, Markdown-to-HTML conversion, DataFrame cleanup, numeric/extra prefix handling, fallback HTML generation, fragment cleanup, dynamic renderer loading, error logging, orchestration plan, asset copying, top-part differences, long-term memory deduplication, and future improvements.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+<div class="table-wrapper" id="Table2"><h3 id="Table2-title">Table 2</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
+        <th style="width:28.57%;" onclick="sortTableByColumn(1,0)" role="button" aria-label="Sort by **What You Do**">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>What You Do</strong></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(1,0, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true"></span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(1,1)" role="button" aria-label="Sort by **What I Do**">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>What I Do</strong></div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(1,1, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true"></span>
+            </button>
+          </div>
+        </th>
+        <th style="width:71.43%;" onclick="sortTableByColumn(1,2)" role="button" aria-label="Sort by Unnamed: 3">
+          <div class="th-with-sort">
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Unnamed: 3</div>
+            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(1,2, this)" title="Toggle sort" aria-label="Toggle sort">
+              <span class="sort-icon" aria-hidden="true"></span>
+            </button>
+          </div>
+        </th></tr></thead><tbody><tr><td data-label="What You Do"><p><strong>Set up `render/core&#95;table.py` with table-specific helpers.</strong></p></td><td data-label="What I Do"><p>Identify functions like `format<em>table</em>cells()`, `drop<em>empty</em>columns()`, `normalize&#95;headers()`. Explain that for each DataFrame: remove fully-empty columns/rows, strip whitespace from column names, handle numeric formatting.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Provide table parsing logic.</strong></p></td><td data-label="What I Do"><p>Check `parse<em>markdown</em>tables()`: split by double newlines, skip delimiter-only lines, convert valid sections into DataFrames, append to `all&#95;tables`. Validate edge cases (multi-line cells, inconsistent columns).</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Set up `render/core&#95;utils.py` for sanitization and helpers.</strong></p></td><td data-label="What I Do"><p>Review `sanitize<em>text()`, `escape</em>html()`, `streaming<em>utils()`, `sri</em>attr()`. Ensure text is cleaned before HTML output, special characters escaped, optional streaming of large tables supported.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Implement `render/core&#95;assets.py` to handle CSS/JS.</strong></p></td><td data-label="What I Do"><p>Ensure functions like `copy<em>assets()`, `embed</em>assets()` exist. Copy all files from `assets/` to `output&#95;combined/assets/`. Embed `<link>` and `<script>` tags in `<head>` of HTML. Handle missing files gracefully.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Implement `render/core&#95;fragments.py`.</strong></p></td><td data-label="What I Do"><p>Provide functions like `assemble<em>fragments()`, `remove</em>old<em>fragments()`. Assemble pre-rendered table fragments, manage `.frags</em>&#42;` directories, clean up old fragments before writing new HTML.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Implement `render/convert.py` for Markdown → 2-column tables.</strong></p></td><td data-label="What I Do"><p>Process parsed Markdown DataFrames into 2-column table format, handle Markdown-to-HTML conversion via `markdown<em>to</em>html()`. Apply regex for bold, italics, bullets, numbered lists, and line breaks.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Call `core&#95;renderer.py` for full page rendering.</strong></p></td><td data-label="What I Do"><p>Orchestrate workflow: inject `<head>` and assets, process top-level Markdown headings, assemble table fragments, render tables with `convert.py`, write final HTML to `output&#95;combined`.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Load `html&#95;renderer.py` dynamically in `main.py`.</strong></p></td><td data-label="What I Do"><p>Use `importlib.util.spec<em>from</em>file<em>location`, load module, verify `render</em>html` exists, fall back to minimal HTML if loading fails. Log warnings/errors with traceback.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Handle fallback HTML for unavailable renderer.</strong></p></td><td data-label="What I Do"><p>Create minimal `<html><head>`, include charset and title, loop through `all&#95;tables`, convert to HTML, write to file. Ensure exceptions caught and logged.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Manage fragment directories safely.</strong></p></td><td data-label="What I Do"><p>`<em>cleanup</em>fragments<em>safe()` removes `.frags</em>&#42;` and `.fragments` in both output folder and current working directory. Validate directories exist, remove safely, append removed paths to log.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Map numeric and extra prefixes for book files.</strong></p></td><td data-label="What I Do"><p>Build `numeric<em>map` and `extras`, merge into `selection</em>map` with unique keys. Ensure sorted order and consistent mapping.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Process Markdown tables for each prefix.</strong></p></td><td data-label="What I Do"><p>Loop through files: read content safely, call `parse<em>markdown</em>tables()`. If no tables found, parse inline \`</p></td><td data-label="Unnamed: 3"><p>`lines. Append all valid DataFrames to`all\&#95;tables\`.</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Convert Markdown cells to HTML.</strong></p></td><td data-label="What I Do"><p>Call `markdown<em>to</em>html()` for each cell: apply regex substitutions for bold/italic, remove unwanted link references, handle bullets/numbers, add `<br>` for line breaks.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Inject CSS/JS assets at top of page.</strong></p></td><td data-label="What I Do"><p>Use `core<em>assets.embed</em>assets()` to write `<link rel="stylesheet">` and `<script>` tags in `<head>`. Ensure all files from `assets/` exist in `output&#95;combined`.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Assemble fragments for navigation/buttons.</strong></p></td><td data-label="What I Do"><p>`core<em>fragments.assemble</em>fragments()` inserts top-level navigation buttons, Back-to-Top links, and pre-rendered fragment HTML before table sections.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Render tables.</strong></p></td><td data-label="What I Do"><p>Loop through `all<em>tables`, apply formatting via `core</em>table.format<em>table</em>cells()`, write each DataFrame as HTML `<table>` with headers and indexes handled correctly.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Write final HTML output.</strong></p></td><td data-label="What I Do"><p>Combine `<head>`, top-level headings, fragments, tables, and closing `</body></html>` into a single file. Write to `output&#95;html` with UTF-8 encoding, handle exceptions.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Handle renderer exceptions.</strong></p></td><td data-label="What I Do"><p>If `render&#95;html()` fails, catch exception, print traceback, fall back to minimal HTML generation.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Remove fragment directories after rendering.</strong></p></td><td data-label="What I Do"><p>`<em>cleanup</em>fragments<em>safe()` cleans temporary `.frags</em>&#42;` directories in output folder and working directory. Log removed paths.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Save and maintain long-term memory notes.</strong></p></td><td data-label="What I Do"><p>Deduplicate issues: top-part differences, missing assets, renderer orchestration, fallback handling. Record plan for restoring full orchestration and modular compatibility.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Analyze top-part page differences.</strong></p></td><td data-label="What I Do"><p>Identify missing `<head>` content, CSS/JS, fragment assembly, and top-level Markdown headers. Suggest calling `embed<em>assets()`, `assemble</em>fragments()`, and `convert.py` before table loop in `core&#95;renderer.py`.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Plan corrected `render&#95;html` orchestration.</strong></p></td><td data-label="What I Do"><p>Step 1: Inject assets first. Step 2: Process top-level Markdown headings. Step 3: Assemble fragments. Step 4: Loop through `all&#95;tables` and render tables. Step 5: Write final HTML. Step 6: Cleanup fragments. Step 7: Log success. Maintain backward-compatible API.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Verify asset copying.</strong></p></td><td data-label="What I Do"><p>Ensure all files from `assets/` are copied to `output<em>combined/assets/` using `core</em>assets.copy&#95;assets()`. Warn if missing.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Maintain modular split structure.</strong></p></td><td data-label="What I Do"><p>Keep `core<em>renderer.py` orchestration while using `core</em>table.py`, `core<em>utils.py`, `core</em>assets.py`, `core&#95;fragments.py`, `convert.py` independently.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Validate fallback for missing `html&#95;renderer.py`.</strong></p></td><td data-label="What I Do"><p>If dynamic import fails, still generate minimal HTML for each book prefix.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+<tr><td data-label="What You Do"><p><strong>Record and deduplicate long-term memory.</strong></p></td><td data-label="What I Do"><p>Include all identified issues, plan, asset handling, fragment cleanup, top-part fixes, and renderer orchestration steps.</p></td><td data-label="Unnamed: 3"><p>nan</p></td></tr>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+<script src="assets/script.js?v=1758526544" defer></script>
+<script src="assets/worker.js?v=1758526544" defer></script>
+
+<script>
+(function(){
+  const template = "{table}_{date}";
+  function formatName(tableName) {
+    const date = (new Date()).toISOString().slice(0,10);
+    return template.replace('{table}', tableName).replace('{date}', date).replace('{user}', '');
+  }
+  const btn = document.getElementById('exportBtn');
+  if(btn) {
+    btn.addEventListener('click', async function() {
+      try {
+        const html = document.documentElement.outerHTML;
+        if(html.length > 2000000) {
+          alert('Export refused: html too large');
+          return;
+        }
+        if(window.Worker) {
+          const worker = new Worker((function(){
+            try{ return 'assets/worker.js'; }catch(e){ return null; }
+          })());
+          if(worker){
+            worker.postMessage({html:html, format:'pdf'});
+            worker.onmessage = function(e){ console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+          } else {
+            alert('Worker not available');
+          }
+        } else {
+          alert('Export worker not supported in this environment.');
+        }
+      } catch(err) {
+        console.warn('Export failed', err);
+        alert('Export worker not available. See console for details.');
+      }
+    });
+  }
+})();
+</script>
+
+</div>
+</body>
+</html>

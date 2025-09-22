@@ -4,40 +4,61 @@
 <meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
 <title>Tables Viewer v2.1</title>
 <style>:root{--main-header-height:56px;}</style>
-<link rel="stylesheet" href="assets/style.css?v=1758468299">
-<link rel="stylesheet" href="assets/overrides.css?v=1758468299">
+<link rel="stylesheet" href="assets/style.css?v=1758526544">
+<link rel="stylesheet" href="assets/overrides.css?v=1758526544">
 </head><body>
 <div id="tables-viewer" role="region" aria-label="Tables viewer">
 <div id="stickyMainHeader">
-<div id="tv-header"><div><h1>Tables Viewer v2.1</h1></div><div style="display:flex;gap:8px;align-items:center;"><input id="searchBox" type="search" placeholder="Search" aria-label="Search tables" style="min-width:420px; width:44ch;"/><button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button><button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button><button id="copyAllPlainBtn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button><button id="copyAllMdBtn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy all tables as markdown">Copy All Tables (Markdown)</button><button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset all tables">Reset All Tables</button></div></div>
+<div id="tv-header"><div><h1>Tables Viewer v2.1</h1></div><div style="display:flex;gap:8px;align-items:center;">
+<input id="searchBox" type="search" placeholder="Search" aria-label="Search tables" style="min-width:420px; width:44ch;"/>
+<button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button>
+<button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button>
+<button id="copyAllPlainBtn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button>
+<button id="copyAllMdBtn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy all tables as markdown">Copy All Tables (Markdown)</button>
+<button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset all tables">Reset All Tables</button>
+</div></div>
 <noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
 <div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1-title">Table 1</a></li></ul></div></div>
 <div class="table-wrapper" id="Table1"><h3 id="Table1-title">Table 1</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
-        <th style="width:28.57%;" onclick="sortTableByColumn(0,0)" role="button" aria-label="Sort by **Col A**">
+        <th style="width:28.57%;" onclick="sortTableByColumn(0,0)" role="button" aria-label="Sort by **File / Folder**">
           <div class="th-with-sort">
-            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Col A</strong></div>
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>File / Folder</strong></div>
             <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,0, this)" title="Toggle sort" aria-label="Toggle sort">
               <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
         </th>
-        <th style="width:71.43%;" onclick="sortTableByColumn(0,1)" role="button" aria-label="Sort by **Col B**">
+        <th style="width:71.43%;" onclick="sortTableByColumn(0,1)" role="button" aria-label="Sort by **Purpose / Explanation**">
           <div class="th-with-sort">
-            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Col B</strong></div>
+            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Purpose / Explanation</strong></div>
             <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,1, this)" title="Toggle sort" aria-label="Toggle sort">
               <span class="sort-icon" aria-hidden="true"></span>
             </button>
           </div>
-        </th></tr></thead><tbody><tr><td data-label="Col A"><p><strong>Nested emphasis bold <em>italic ~~strike~~</em></strong></p></td><td data-label="Col B"><p>Mixed highlight ==marked <strong>bold</strong>==</p></td></tr>
-<tr><td data-label="Col A"><p><strong>Inline + display math \$f(x)=\frac{1}{x^2+1}\$ and $\int&#95;0^1 x^2 dx$</strong></p></td><td data-label="Col B"><p>Subscript H\~2\~O and superscript x^2^</p></td></tr>
-<tr><td data-label="Col A"><p><strong>Collapsible block <details><summary>Open</summary>Hidden bold</details></strong></p></td><td data-label="Col B"><p>Inline HTML <mark>highlighted text</mark></p></td></tr>
-<tr><td data-label="Col A"><p><strong>Multilingual sample العربية مع русский язык</strong></p></td><td data-label="Col B"><p>Emoji family 👨‍👩‍👧‍👦 and variation selector ☺️</p></td></tr>
-<tr><td data-label="Col A"><p><strong>Escaped script \<script>alert(1)\</script></strong></p></td><td data-label="Col B"><p>Attribute injection test <img src=x onerror=alert(1)></p></td></tr>
+        </th></tr></thead><tbody><tr><td data-label="File / Folder"><p><strong>`D:\Dropbox\Projects\tables<em>viewer</em>v2&#95;1\`</strong></p></td><td data-label="Purpose / Explanation"><p>Root project folder. Contains all source code, assets, and outputs for the `tables<em>viewer</em>v2&#95;1` system. This project handles table rendering, Markdown-to-HTML conversion, sanitization, and front-end integration. Everything the program needs is organized here.</p></td></tr>
+<tr><td data-label="File / Folder"><p><strong>render\</strong></p></td><td data-label="Purpose / Explanation"><p>Subfolder where the <strong>core rendering logic</strong> lives. It holds the Python modules that handle input text parsing, Markdown interpretation, HTML generation, and data sanitization. This is the "engine" of the project.</p></td></tr>
+<tr><td data-label="File / Folder"><p><strong>`render\core.py`</strong></p></td><td data-label="Purpose / Explanation"><p>Central controller for rendering. Likely manages the pipeline: loading input, passing it through conversion, parsing Markdown, sanitizing, and producing HTML. If the HTML file is blank, this file is a prime suspect—it might not be writing the parsed output correctly.</p></td></tr>
+<tr><td data-label="File / Folder"><p><strong>`render\convert.py`</strong></p></td><td data-label="Purpose / Explanation"><p>Handles transformation of intermediate formats into renderable structures. Converts parsed Markdown tokens, table structures, or plain text into HTML blocks. Think of it as the "translator" from internal Python objects to HTML strings.</p></td></tr>
+<tr><td data-label="File / Folder"><p><strong>`render\markdown.py`</strong></p></td><td data-label="Purpose / Explanation"><p>Specialized parser for Markdown. It interprets raw text (like headings, bold, italics, links, tables) and converts them into HTML tags. This is what makes your 2-column tables render correctly. If tables or formatting disappear, this file needs inspection.</p></td></tr>
+<tr><td data-label="File / Folder"><p><strong>`render\io&#95;utils.py`</strong></p></td><td data-label="Purpose / Explanation"><p>Input/output utilities. Could handle reading raw Markdown files, writing HTML files, or managing input/output streams. It acts as a helper for `core.py` to abstract file system operations.</p></td></tr>
+<tr><td data-label="File / Folder"><p><strong>`render\sanitize.py`</strong></p></td><td data-label="Purpose / Explanation"><p>Cleans up HTML or Markdown to remove unsafe tags, attributes, or JavaScript. Prevents injection attacks (like `<script>alert(1)</script>`) and ensures the final HTML is safe. If your output looks empty, over-aggressive sanitization here could be stripping too much.</p></td></tr>
+<tr><td data-label="File / Folder"><p><strong>`render\types.py`</strong></p></td><td data-label="Purpose / Explanation"><p>Defines dataclasses, enums, or type structures used across rendering modules. Example: a `TableCell` object, a `MarkdownBlock`, or a `RenderResult`. Keeps type consistency across modules.</p></td></tr>
+<tr><td data-label="File / Folder"><p><strong>assets\</strong></p></td><td data-label="Purpose / Explanation"><p>Front-end static assets. Contains CSS and JavaScript that style and power the output HTML. These files are copied to the output folder when rendering so the browser can use them.</p></td></tr>
+<tr><td data-label="File / Folder"><p><strong>`assets\style.css`</strong></p></td><td data-label="Purpose / Explanation"><p>Primary stylesheet. Controls colors, spacing, font, and table formatting. Determines how the 2-column tables appear in the browser. If output is written but looks plain or broken, this file might be missing or not linked.</p></td></tr>
+<tr><td data-label="File / Folder"><p><strong>`assets\script.js`</strong></p></td><td data-label="Purpose / Explanation"><p>Front-end JavaScript logic. Could handle interactive features like collapsible sections, copy-to-clipboard buttons, or dynamic table formatting. Not critical for plain HTML display, but important for advanced UX.</p></td></tr>
+<tr><td data-label="File / Folder"><p><strong>`assets\worker.js`</strong></p></td><td data-label="Purpose / Explanation"><p>Web Worker script for handling heavy tasks in the browser (e.g., rendering math, syntax highlighting, or sanitization off-thread). Keeps the UI responsive. Optional but improves performance.</p></td></tr>
+<tr><td data-label="File / Folder"><p><strong>`assets\overrides.css`</strong></p></td><td data-label="Purpose / Explanation"><p>Extra CSS overrides for styling. Lets you patch or adjust default styles without editing `style.css` directly. Useful for quick fixes or theme tweaks.</p></td></tr>
+<tr><td data-label="File / Folder"><p><strong>output\&#95;combined\</strong></p></td><td data-label="Purpose / Explanation"><p>Destination folder where rendered HTML files and copied assets are stored. This is what the user opens in a browser. If nothing shows up, check whether `core.py` actually wrote into this folder.</p></td></tr>
+<tr><td data-label="File / Folder"><p><strong>`output&#95;combined\assets\`</strong></p></td><td data-label="Purpose / Explanation"><p>Local copy of the `assets\` folder. Automatically copied during render so that the output HTML can link to its CSS/JS locally. Browser will load files from here instead of the source `assets\` directory.</p></td></tr>
+<tr><td data-label="File / Folder"><p><strong>`html&#95;renderer.py`</strong></p></td><td data-label="Purpose / Explanation"><p>Wrapper module to keep `main.py` compatible. Provides a higher-level API for rendering Markdown into HTML. Likely imports functions from `render\core.py` and handles integration with other code.</p></td></tr>
+<tr><td data-label="File / Folder"><p><strong>`utils.py`</strong></p></td><td data-label="Purpose / Explanation"><p>General-purpose helper functions. Could include text cleanup, logging, path handling, or small string utilities. Supports other modules without being tied to rendering logic.</p></td></tr>
+<tr><td data-label="File / Folder"><p><strong>`helpers.py`</strong></p></td><td data-label="Purpose / Explanation"><p>Another utility script, possibly older or domain-specific. May contain functions for debugging, testing table formatting, or preparing data for rendering.</p></td></tr>
+<tr><td data-label="File / Folder"><p><strong>`main.py`</strong></p></td><td data-label="Purpose / Explanation"><p>Entry point of the project. Orchestrates the workflow: reads user input, calls `html&#95;renderer.py` or `render\core.py`, and triggers output generation. Running `python main.py` is how you produce the final HTML file.</p></td></tr>
 </tbody></table></div>
   <div class='row-count'></div>
 </div>
-
-<script src="assets/script.js?v=1758468299" defer></script>
+<script src="assets/script.js?v=1758526544" defer></script>
+<script src="assets/worker.js?v=1758526544" defer></script>
 
 <script>
 (function(){
@@ -56,9 +77,15 @@
           return;
         }
         if(window.Worker) {
-          const worker = new Worker('assets/worker.js');
-          worker.postMessage({html:html, format:'pdf'});
-          worker.onmessage = function(e){ console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+          const worker = new Worker((function(){
+            try{ return 'assets/worker.js'; }catch(e){ return null; }
+          })());
+          if(worker){
+            worker.postMessage({html:html, format:'pdf'});
+            worker.onmessage = function(e){ console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+          } else {
+            alert('Worker not available');
+          }
         } else {
           alert('Export worker not supported in this environment.');
         }
@@ -71,4 +98,6 @@
 })();
 </script>
 
-</div></body></html>
+</div>
+</body>
+</html>

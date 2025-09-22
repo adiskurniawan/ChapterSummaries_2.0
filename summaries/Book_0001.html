@@ -4,12 +4,19 @@
 <meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
 <title>Tables Viewer v2.1</title>
 <style>:root{--main-header-height:56px;}</style>
-<link rel="stylesheet" href="assets/style.css?v=1758468299">
-<link rel="stylesheet" href="assets/overrides.css?v=1758468299">
+<link rel="stylesheet" href="assets/style.css?v=1758526541">
+<link rel="stylesheet" href="assets/overrides.css?v=1758526541">
 </head><body>
 <div id="tables-viewer" role="region" aria-label="Tables viewer">
 <div id="stickyMainHeader">
-<div id="tv-header"><div><h1>Tables Viewer v2.1</h1></div><div style="display:flex;gap:8px;align-items:center;"><input id="searchBox" type="search" placeholder="Search" aria-label="Search tables" style="min-width:420px; width:44ch;"/><button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button><button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button><button id="copyAllPlainBtn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button><button id="copyAllMdBtn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy all tables as markdown">Copy All Tables (Markdown)</button><button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset all tables">Reset All Tables</button></div></div>
+<div id="tv-header"><div><h1>Tables Viewer v2.1</h1></div><div style="display:flex;gap:8px;align-items:center;">
+<input id="searchBox" type="search" placeholder="Search" aria-label="Search tables" style="min-width:420px; width:44ch;"/>
+<button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button>
+<button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button>
+<button id="copyAllPlainBtn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button>
+<button id="copyAllMdBtn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy all tables as markdown">Copy All Tables (Markdown)</button>
+<button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset all tables">Reset All Tables</button>
+</div></div>
 <noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
 <div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1-title">Table 1</a></li>
 <li class="toc-item"><a class="toc-link" href="#Table2-title">Table 2</a></li>
@@ -54,7 +61,6 @@
 </tbody></table></div>
   <div class='row-count'></div>
 </div>
-
 <div class="table-wrapper" id="Table2"><h3 id="Table2-title">Table 2</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
         <th style="width:28.57%;" onclick="sortTableByColumn(1,0)" role="button" aria-label="Sort by **Summary**">
           <div class="th-with-sort">
@@ -89,7 +95,6 @@
 </tbody></table></div>
   <div class='row-count'></div>
 </div>
-
 <div class="table-wrapper" id="Table3"><h3 id="Table3-title">Table 3</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
         <th style="width:28.57%;" onclick="sortTableByColumn(2,0)" role="button" aria-label="Sort by **Summary**">
           <div class="th-with-sort">
@@ -122,7 +127,6 @@
 </tbody></table></div>
   <div class='row-count'></div>
 </div>
-
 <div class="table-wrapper" id="Table4"><h3 id="Table4-title">Table 4</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
         <th style="width:28.57%;" onclick="sortTableByColumn(3,0)" role="button" aria-label="Sort by **Summary**">
           <div class="th-with-sort">
@@ -154,7 +158,6 @@
 </tbody></table></div>
   <div class='row-count'></div>
 </div>
-
 <div class="table-wrapper" id="Table5"><h3 id="Table5-title">Table 5</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
         <th style="width:28.57%;" onclick="sortTableByColumn(4,0)" role="button" aria-label="Sort by **Summary**">
           <div class="th-with-sort">
@@ -186,7 +189,6 @@
 </tbody></table></div>
   <div class='row-count'></div>
 </div>
-
 <div class="table-wrapper" id="Table6"><h3 id="Table6-title">Table 6</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
         <th style="width:28.57%;" onclick="sortTableByColumn(5,0)" role="button" aria-label="Sort by **Summary**">
           <div class="th-with-sort">
@@ -217,7 +219,6 @@
 </tbody></table></div>
   <div class='row-count'></div>
 </div>
-
 <div class="table-wrapper" id="Table7"><h3 id="Table7-title">Table 7</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
         <th style="width:28.57%;" onclick="sortTableByColumn(6,0)" role="button" aria-label="Sort by **Summary**">
           <div class="th-with-sort">
@@ -248,7 +249,6 @@
 </tbody></table></div>
   <div class='row-count'></div>
 </div>
-
 <div class="table-wrapper" id="Table8"><h3 id="Table8-title">Table 8</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
         <th style="width:28.57%;" onclick="sortTableByColumn(7,0)" role="button" aria-label="Sort by **Summary**">
           <div class="th-with-sort">
@@ -278,7 +278,6 @@
 </tbody></table></div>
   <div class='row-count'></div>
 </div>
-
 <div class="table-wrapper" id="Table9"><h3 id="Table9-title">Table 9</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
         <th style="width:28.57%;" onclick="sortTableByColumn(8,0)" role="button" aria-label="Sort by **Summary**">
           <div class="th-with-sort">
@@ -308,8 +307,8 @@
 </tbody></table></div>
   <div class='row-count'></div>
 </div>
-
-<script src="assets/script.js?v=1758468299" defer></script>
+<script src="assets/script.js?v=1758526541" defer></script>
+<script src="assets/worker.js?v=1758526541" defer></script>
 
 <script>
 (function(){
@@ -328,9 +327,15 @@
           return;
         }
         if(window.Worker) {
-          const worker = new Worker('assets/worker.js');
-          worker.postMessage({html:html, format:'pdf'});
-          worker.onmessage = function(e){ console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+          const worker = new Worker((function(){
+            try{ return 'assets/worker.js'; }catch(e){ return null; }
+          })());
+          if(worker){
+            worker.postMessage({html:html, format:'pdf'});
+            worker.onmessage = function(e){ console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+          } else {
+            alert('Worker not available');
+          }
         } else {
           alert('Export worker not supported in this environment.');
         }
@@ -343,4 +348,6 @@
 })();
 </script>
 
-</div></body></html>
+</div>
+</body>
+</html>

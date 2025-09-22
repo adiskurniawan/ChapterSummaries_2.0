@@ -4,16 +4,24 @@
 <meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
 <title>Tables Viewer v2.1</title>
 <style>:root{--main-header-height:56px;}</style>
-<link rel="stylesheet" href="assets/style.css?v=1758468299">
-<link rel="stylesheet" href="assets/overrides.css?v=1758468299">
+<link rel="stylesheet" href="assets/style.css?v=1758526544">
+<link rel="stylesheet" href="assets/overrides.css?v=1758526544">
 </head><body>
 <div id="tables-viewer" role="region" aria-label="Tables viewer">
 <div id="stickyMainHeader">
-<div id="tv-header"><div><h1>Tables Viewer v2.1</h1></div><div style="display:flex;gap:8px;align-items:center;"><input id="searchBox" type="search" placeholder="Search" aria-label="Search tables" style="min-width:420px; width:44ch;"/><button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button><button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button><button id="copyAllPlainBtn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button><button id="copyAllMdBtn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy all tables as markdown">Copy All Tables (Markdown)</button><button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset all tables">Reset All Tables</button></div></div>
+<div id="tv-header"><div><h1>Tables Viewer v2.1</h1></div><div style="display:flex;gap:8px;align-items:center;">
+<input id="searchBox" type="search" placeholder="Search" aria-label="Search tables" style="min-width:420px; width:44ch;"/>
+<button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button>
+<button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button>
+<button id="copyAllPlainBtn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button>
+<button id="copyAllMdBtn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy all tables as markdown">Copy All Tables (Markdown)</button>
+<button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset all tables">Reset All Tables</button>
+</div></div>
 <noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
 <div id="tocBar" role="navigation" aria-label="Table of contents"><ul></ul></div></div>
-<div class="tv-empty" style="padding:12px;background:#fff4e5;border:1px solid #ffd59e;margin:8px 16px;">No tables were rendered. no tables received by render_html | no fragments produced; falling back to inline rendering | no inline table HTML produced</div>
-<script src="assets/script.js?v=1758468299" defer></script>
+<div class="tv-empty" style="padding:12px;background:#fff4e5;border:1px solid #ffd59e;margin:8px 16px;">No tables were rendered. no tables provided to render_fragments_concurrently | no fragments produced; falling back to inline rendering | no inline table HTML produced</div>
+<script src="assets/script.js?v=1758526544" defer></script>
+<script src="assets/worker.js?v=1758526544" defer></script>
 
 <script>
 (function(){
@@ -32,9 +40,15 @@
           return;
         }
         if(window.Worker) {
-          const worker = new Worker('assets/worker.js');
-          worker.postMessage({html:html, format:'pdf'});
-          worker.onmessage = function(e){ console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+          const worker = new Worker((function(){
+            try{ return 'assets/worker.js'; }catch(e){ return null; }
+          })());
+          if(worker){
+            worker.postMessage({html:html, format:'pdf'});
+            worker.onmessage = function(e){ console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+          } else {
+            alert('Worker not available');
+          }
         } else {
           alert('Export worker not supported in this environment.');
         }
@@ -47,4 +61,6 @@
 })();
 </script>
 
-</div></body></html>
+</div>
+</body>
+</html>
