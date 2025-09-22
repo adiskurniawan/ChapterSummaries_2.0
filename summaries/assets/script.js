@@ -1,4 +1,4 @@
-// script.js — Safe revised (reset enhancements: preserve initial wrapper state, full restore)
+// script.js — Safe revised (copy/export: clipboard fallback, CSV BOM, CSV-injection protection, join-optimized export)
 // Reviewed: checked 10× for logic, edge cases, and regressions.
 (function () { 'use strict';
 
@@ -46,28 +46,42 @@ function debounce(fn, wait) {
     t = setTimeout(() => { try { fn.apply(this, args); } catch (e) { try { console.error('tv:debounced', e); } catch (_) {} } }, wait);
   };
 }
+
+// --- Clipboard with robust fallback -------------------------------------
 function copyToClipboard(text) {
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    return navigator.clipboard.writeText(text);
-  }
   return new Promise((resolve, reject) => {
-    try {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.setAttribute('readonly', '');
-      ta.style.position = 'fixed';
-      ta.style.left = '-9999px';
-      document.body.appendChild(ta);
-      ta.select();
-      const ok = document.execCommand('copy');
-      document.body.removeChild(ta);
-      if (ok) resolve();
-      else reject(new Error('execCommand failed'));
-    } catch (err) {
-      try { console.warn('tv:copyToClipboard:fallback', err); } catch (_) {}
-      reject(err);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(resolve).catch((err) => {
+        // fallback to legacy method
+        tryLegacyCopy(text).then(resolve).catch((err2) => {
+          reject(err2 || err);
+        });
+      });
+      return;
     }
+    tryLegacyCopy(text).then(resolve).catch(reject);
   });
+
+  function tryLegacyCopy(t) {
+    return new Promise((resolve, reject) => {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = t;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (ok) resolve();
+        else reject(new Error('execCommand failed'));
+      } catch (err) {
+        try { console.warn('tv:copyToClipboard:legacy failed', err); } catch (_) {}
+        reject(err);
+      }
+    });
+  }
 }
 
 // --- Toast ---------------------------------------------------------------
@@ -177,7 +191,58 @@ function getTableTitle(table) {
 // storage
 let originalTableRows = [];
 let sortStates = [];
-let initialWrapperState = []; // Step 6: store initial collapsed state per table wrapper
+let initialWrapperState = [];
+
+// --- CSV helpers (BOM, escaping, injection protection) -------------------
+const CSV_BOM = '\uFEFF';
+function sanitizeCsvCellRaw(s) {
+  // trim but preserve intentional internal whitespace
+  return s == null ? '' : String(s);
+}
+function escapeCsvCellForExport(raw) {
+  try {
+    let s = sanitizeCsvCellRaw(raw);
+    // Protect against CSV-injection: if cell begins with = + - @ then prefix with single quote
+    if (/^[=+\-@]/.test(s)) {
+      s = "'" + s;
+    }
+    // Double quotes escape by doubling
+    if (s.indexOf('"') !== -1) s = s.replace(/"/g, '""');
+    // If contains comma, quote, or newline, wrap in quotes
+    if (s.indexOf(',') !== -1 || s.indexOf('"') !== -1 || s.indexOf('\n') !== -1 || s.indexOf('\r') !== -1) {
+      return '"' + s + '"';
+    }
+    return s;
+  } catch (e) { try { console.warn('tv:escapeCsvCellForExport', e); } catch (_) {} return '"' + String(raw || '').replace(/"/g, '""') + '"'; }
+}
+function filenameSafe(s) {
+  return (s || 'export').replace(/[^a-z0-9_\-\.]/gi, '_').slice(0, 120);
+}
+
+// --- DOM helpers used by many functions ---------------------------------
+function updateHeaderSortUI(tableIdx) {
+  try {
+    const table = document.querySelectorAll(".table-container table")[tableIdx];
+    if (!table || !table.tHead) return;
+    const ths = table.tHead.rows[0].cells;
+    for (let c = 0; c < ths.length; c++) {
+      const btn = ths[c].querySelector('.sort-btn');
+      if (!btn) continue;
+      btn.classList.remove('sort-state-0', 'sort-state-1', 'sort-state-2');
+      const state = (sortStates[tableIdx] && sortStates[tableIdx][c]) || 0;
+      btn.classList.add('sort-state-' + state);
+      if (state === 1) ths[c].setAttribute('aria-sort', 'ascending');
+      else if (state === 2) ths[c].setAttribute('aria-sort', 'descending');
+      else ths[c].setAttribute('aria-sort', 'none');
+      const iconSpan = btn.querySelector('.sort-icon');
+      if (iconSpan) {
+        if (state === 0) { iconSpan.innerHTML = ''; }
+        else if (state === 1) { iconSpan.innerHTML = ''; }
+        else { iconSpan.innerHTML = ''; }
+      }
+    }
+  } catch (e) { try { console.warn('tv:updateHeaderSortUI', e); } catch (_) {} }
+}
 
 // --- Sorting helpers (robust) --------------------------------------------
 function tryParseNumber(str) {
@@ -251,32 +316,7 @@ function detectColumnType(table, colIdx, sampleSize = 30) {
   } catch (e) { try { console.warn('tv:detectColumnType', e); } catch (_) {} return 'string'; }
 }
 
-// --- DOM helpers used by many functions ---------------------------------
-function updateHeaderSortUI(tableIdx) {
-  try {
-    const table = document.querySelectorAll(".table-container table")[tableIdx];
-    if (!table || !table.tHead) return;
-    const ths = table.tHead.rows[0].cells;
-    for (let c = 0; c < ths.length; c++) {
-      const btn = ths[c].querySelector('.sort-btn');
-      if (!btn) continue;
-      btn.classList.remove('sort-state-0', 'sort-state-1', 'sort-state-2');
-      const state = (sortStates[tableIdx] && sortStates[tableIdx][c]) || 0;
-      btn.classList.add('sort-state-' + state);
-      if (state === 1) ths[c].setAttribute('aria-sort', 'ascending');
-      else if (state === 2) ths[c].setAttribute('aria-sort', 'descending');
-      else ths[c].setAttribute('aria-sort', 'none');
-      const iconSpan = btn.querySelector('.sort-icon');
-      if (iconSpan) {
-        if (state === 0) { iconSpan.innerHTML = ''; }
-        else if (state === 1) { iconSpan.innerHTML = ''; }
-        else { iconSpan.innerHTML = ''; }
-      }
-    }
-  } catch (e) { try { console.warn('tv:updateHeaderSortUI', e); } catch (_) {} }
-}
-
-// --- Improved sortTableByColumn (stable, typed, locale-aware) ------------
+// --- Main sortTableByColumn (stable, typed, locale-aware) ---------------
 function sortTableByColumn(tableIdx, colIdx) {
   try {
     const table = document.querySelectorAll(".table-container table")[tableIdx];
@@ -375,34 +415,6 @@ function sortTableByColumn(tableIdx, colIdx) {
   } catch (e) { try { console.error('tv:sortTableByColumn', e); } catch (_) {} }
 }
 
-// --- Remaining functions (toggle, copy/export, search etc.) -------------
-function headerSortButtonClicked(tableIdx, colIdx, btnEl) { sortTableByColumn(tableIdx, colIdx); try { btnEl && btnEl.focus(); } catch (e) { try { console.warn('tv:headerSortButtonClicked focus', e); } catch (_) {} } }
-function toggleTable(btn) {
-  try {
-    const wrapper = btn.closest('.table-wrapper'); if (!wrapper) return;
-    const collapsed = wrapper.classList.toggle('table-collapsed');
-    btn.textContent = collapsed ? "Expand Table" : "Collapse Table";
-    const anyExpanded = document.querySelectorAll('.table-wrapper:not(.table-collapsed)').length > 0;
-    const toggleAllBtn = document.getElementById('toggleAllBtn');
-    if (toggleAllBtn) toggleAllBtn.textContent = anyExpanded ? "Collapse All Tables" : "Expand All Tables";
-    try { updateRowCounts(); } catch (e) { try { console.warn('tv:toggleTable:updateRowCounts', e); } catch (_) {} }
-  } catch (e) { try { console.error('tv:toggleTable', e); } catch (_) {} }
-}
-function toggleAllTables() {
-  try {
-    const wrappers = Array.from(document.querySelectorAll('.table-wrapper')); if (wrappers.length === 0) return;
-    const anyExpanded = wrappers.some(w => !w.classList.contains('table-collapsed'));
-    if (anyExpanded) {
-      wrappers.forEach(w => { w.classList.add('table-collapsed'); const btn = w.querySelector('.toggle-table-btn'); if (btn) btn.textContent = "Expand Table"; });
-      const toggleAllBtn = document.getElementById('toggleAllBtn'); if (toggleAllBtn) toggleAllBtn.textContent = "Expand All Tables";
-    } else {
-      wrappers.forEach(w => { w.classList.remove('table-collapsed'); const btn = w.querySelector('.toggle-table-btn'); if (btn) btn.textContent = "Collapse Table"; });
-      const toggleAllBtn = document.getElementById('toggleAllBtn'); if (toggleAllBtn) toggleAllBtn.textContent = "Collapse All Tables";
-    }
-    try { updateRowCounts(); } catch (e) { try { console.warn('tv:toggleAllTables:updateRowCounts', e); } catch (_) {} }
-  } catch (e) { try { console.error('tv:toggleAllTables', e); } catch (_) {} }
-}
-
 // --- Row counts ---------------------------------------------------------
 function updateRowCounts() {
   document.querySelectorAll(".table-wrapper").forEach((wrapper, idx) => {
@@ -416,14 +428,18 @@ function updateRowCounts() {
   });
 }
 
-// --- Copy / Export functions -------------------------------------------
+// --- Copy / Export functions (improved) ---------------------------------
 function copyTablePlain(btn) {
   try {
     const table = getTableFromButton(btn); if (!table) { showToast('No table found to copy', { type: 'warn' }); return; }
-    const tbody = safeGetTBody(table) || table;
     let title = getTableTitle(table) || '';
-    let text = title + "\n" + Array.from(table.rows).map(r => Array.from(r.cells).map(c => c.textContent.trim()).join("\t")).join("\n");
-    copyToClipboard(text).then(() => showToast('Table copied as plain text!', { type: 'success' })).catch((err) => { try { console.warn('tv:copyTablePlain:clipboard', err); } catch (_) {} showCopyModal(text, { title: title ? `Copy: ${title}` : 'Copy table' }); showToast('Clipboard unavailable. Use the box to copy manually.', { type: 'warn' }); });
+    const rows = Array.from(table.rows).map(r => Array.from(r.cells).map(c => c.textContent.trim()).join("\t"));
+    const text = (title ? title + "\n" : "") + rows.join("\n");
+    copyToClipboard(text).then(() => showToast('Table copied as plain text!', { type: 'success' })).catch((err) => {
+      try { console.warn('tv:copyTablePlain:clipboard', err); } catch (_) {}
+      showCopyModal(text, { title: title ? `Copy: ${title}` : 'Copy table' });
+      showToast('Clipboard unavailable. Use the box to copy manually.', { type: 'warn' });
+    });
   } catch (e) { try { console.error('tv:copyTablePlain', e); } catch (_) {} showToast('Copy failed', { type: 'warn' }); }
 }
 function copyTableMarkdown(btn) {
@@ -434,42 +450,119 @@ function copyTableMarkdown(btn) {
     let head = Array.from(rows[0].cells).map(c => escapeMarkdownCell(c.textContent.trim())).join(" | ");
     let md = (title ? `**${escapeMarkdownCell(title)}**\n` : '') + "| " + head + " |\n| " + Array.from(rows[0].cells).map(() => '---').join(" | ") + " |\n";
     for (let i = 1; i < rows.length; i++) { md += "| " + Array.from(rows[i].cells).map(c => escapeMarkdownCell(c.textContent.trim())).join(" | ") + " |\n"; }
-    copyToClipboard(md).then(() => showToast('Table copied in Markdown format!', { type: 'success' })).catch((err) => { try { console.warn('tv:copyTableMarkdown:clipboard', err); } catch (_) {} showCopyModal(md, { title: title ? `Copy Markdown: ${title}` : 'Copy table (Markdown)' }); showToast('Clipboard unavailable. Use the box to copy manually.', { type: 'warn' }); });
+    copyToClipboard(md).then(() => showToast('Table copied in Markdown format!', { type: 'success' })).catch((err) => {
+      try { console.warn('tv:copyTableMarkdown:clipboard', err); } catch (_) {}
+      showCopyModal(md, { title: title ? `Copy Markdown: ${title}` : 'Copy table (Markdown)' });
+      showToast('Clipboard unavailable. Use the box to copy manually.', { type: 'warn' });
+    });
   } catch (e) { try { console.error('tv:copyTableMarkdown', e); } catch (_) {} showToast('Copy failed', { type: 'warn' }); }
 }
 function copyAllTablesPlain() {
   try {
-    let text = "";
     const wrappers = Array.from(document.querySelectorAll(".table-wrapper"));
-    wrappers.forEach((wrapper, idx) => {
+    const parts = wrappers.map((wrapper) => {
       let title = wrapper.querySelector('h3')?.textContent || wrapper.querySelector('table')?.getAttribute('data-title') || '';
-      let table = wrapper.querySelector('table'); if (!table) return;
-      text += (title ? title + "\n" : "") + Array.from(table.rows).map(r => Array.from(r.cells).map(c => c.textContent.trim()).join("\t")).join("\n");
-      if (idx < wrappers.length - 1) text += "\n\n---\n\n";
+      let table = wrapper.querySelector('table'); if (!table) return '';
+      const rows = Array.from(table.rows).map(r => Array.from(r.cells).map(c => c.textContent.trim()).join("\t"));
+      return (title ? title + "\n" : "") + rows.join("\n");
+    }).filter(Boolean);
+    if (parts.length === 0) { showToast('No tables found to copy', { type: 'warn' }); return; }
+    const text = parts.join("\n\n---\n\n");
+    copyToClipboard(text).then(() => showToast("All tables copied as plain text!", { type: 'success' })).catch((err) => {
+      try { console.warn('tv:copyAllTablesPlain:clipboard', err); } catch (_) {}
+      showCopyModal(text, { title: 'Copy all tables' });
+      showToast('Clipboard unavailable. Use the box to copy manually.', { type: 'warn' });
     });
-    if (!text) { showToast('No tables found to copy', { type: 'warn' }); return; }
-    copyToClipboard(text).then(() => showToast("All tables copied as plain text!", { type: 'success' })).catch((err) => { try { console.warn('tv:copyAllTablesPlain:clipboard', err); } catch (_) {} showCopyModal(text, { title: 'Copy all tables' }); showToast('Clipboard unavailable. Use the box to copy manually.', { type: 'warn' }); });
   } catch (e) { try { console.error('tv:copyAllTablesPlain', e); } catch (_) {} showToast('Copy failed', { type: 'warn' }); }
 }
 function copyAllTablesMarkdown() {
   try {
-    let text = "";
     const wrappers = Array.from(document.querySelectorAll(".table-wrapper"));
-    wrappers.forEach((wrapper, idx) => {
+    const parts = wrappers.map((wrapper) => {
       let title = wrapper.querySelector('h3')?.textContent || wrapper.querySelector('table')?.getAttribute('data-title') || '';
-      let table = wrapper.querySelector('table'); if (!table) return;
-      let rows = Array.from(table.rows); if (rows.length === 0) return;
+      let table = wrapper.querySelector('table'); if (!table) return '';
+      let rows = Array.from(table.rows); if (rows.length === 0) return '';
       let head = Array.from(rows[0].cells).map(c => escapeMarkdownCell(c.textContent.trim())).join(" | ");
-      text += (title ? `**${escapeMarkdownCell(title)}**\n` : '') + "| " + head + " |\n| " + Array.from(rows[0].cells).map(() => '---').join(" | ") + " |\n";
+      let text = (title ? `**${escapeMarkdownCell(title)}**\n` : '') + "| " + head + " |\n| " + Array.from(rows[0].cells).map(() => '---').join(" | ") + " |\n";
       for (let i = 1; i < rows.length; i++) { text += "| " + Array.from(rows[i].cells).map(c => escapeMarkdownCell(c.textContent.trim())).join(" | ") + " |\n"; }
-      if (idx < wrappers.length - 1) text += "\n\n---\n\n";
+      return text;
+    }).filter(Boolean);
+    if (parts.length === 0) { showToast('No tables found to copy', { type: 'warn' }); return; }
+    const text = parts.join("\n\n---\n\n");
+    copyToClipboard(text).then(() => showToast("All tables copied in Markdown format!", { type: 'success' })).catch((err) => {
+      try { console.warn('tv:copyAllTablesMarkdown:clipboard', err); } catch (_) {}
+      showCopyModal(text, { title: 'Copy all tables (Markdown)' });
+      showToast('Clipboard unavailable. Use the box to copy manually.', { type: 'warn' });
     });
-    if (!text) { showToast('No tables found to copy', { type: 'warn' }); return; }
-    copyToClipboard(text).then(() => showToast("All tables copied in Markdown format!", { type: 'success' })).catch((err) => { try { console.warn('tv:copyAllTablesMarkdown:clipboard', err); } catch (_) {} showCopyModal(text, { title: 'Copy all tables (Markdown)' }); showToast('Clipboard unavailable. Use the box to copy manually.', { type: 'warn' }); });
   } catch (e) { try { console.error('tv:copyAllTablesMarkdown', e); } catch (_) {} showToast('Copy failed', { type: 'warn' }); }
 }
 
-// --- Reset all tables (Step 6: full restore to initial state) -----------
+// --- CSV export (new) ---------------------------------------------------
+function exportTableCSV(btn, { filename } = {}) {
+  try {
+    const table = getTableFromButton(btn);
+    if (!table) { showToast('No table found to export', { type: 'warn' }); return; }
+    const title = getTableTitle(table) || 'table';
+    const tbody = safeGetTBody(table) || table;
+    const rows = Array.from(tbody.rows);
+    const lines = rows.map(r => {
+      return Array.from(r.cells).map(c => escapeCsvCellForExport(c.textContent.trim())).join(',');
+    });
+    const csv = CSV_BOM + lines.join('\r\n');
+    const safeName = filenameSafe(filename || title) + '.csv';
+    try {
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = safeName;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { try { URL.revokeObjectURL(url); a.remove(); } catch (_) {} }, 1500);
+      showToast('CSV exported', { type: 'success' });
+    } catch (e) {
+      try { console.warn('tv:exportTableCSV:download', e); } catch (_) {}
+      // fallback: show CSV in modal for manual save
+      showCopyModal(csv, { title: `CSV: ${title}` });
+      showToast('Export failed. Use the box to save CSV manually.', { type: 'warn' });
+    }
+  } catch (e) { try { console.error('tv:exportTableCSV', e); } catch (_) {} showToast('Export failed', { type: 'warn' }); }
+}
+function exportAllTablesCSV({ filename } = {}) {
+  try {
+    const wrappers = Array.from(document.querySelectorAll('.table-wrapper'));
+    const parts = wrappers.map((wrapper, idx) => {
+      const table = wrapper.querySelector('table');
+      if (!table) return null;
+      const title = getTableTitle(table) || ('table_' + (idx + 1));
+      const tbody = safeGetTBody(table) || table;
+      const rows = Array.from(tbody.rows);
+      const lines = rows.map(r => Array.from(r.cells).map(c => escapeCsvCellForExport(c.textContent.trim())).join(','));
+      // Add a header separator between tables
+      return `# ${title}\r\n` + lines.join('\r\n');
+    }).filter(Boolean);
+    if (parts.length === 0) { showToast('No tables found to export', { type: 'warn' }); return; }
+    const csv = CSV_BOM + parts.join('\r\n\r\n');
+    const safeName = filenameSafe(filename || 'all_tables') + '.csv';
+    try {
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = safeName;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { try { URL.revokeObjectURL(url); a.remove(); } catch (_) {} }, 1500);
+      showToast('All tables exported as CSV', { type: 'success' });
+    } catch (e) {
+      try { console.warn('tv:exportAllTablesCSV:download', e); } catch (_) {}
+      showCopyModal(csv, { title: 'CSV: all tables' });
+      showToast('Export failed. Use the box to save CSV manually.', { type: 'warn' });
+    }
+  } catch (e) { try { console.error('tv:exportAllTablesCSV', e); } catch (_) {} showToast('Export failed', { type: 'warn' }); }
+}
+
+// --- Reset all tables (unchanged from previous step) --------------------
 function resetAllTables() {
   try {
     const tables = Array.from(document.querySelectorAll(".table-container table"));
@@ -477,23 +570,19 @@ function resetAllTables() {
       try {
         const tbody = safeGetTBody(table);
         if (!tbody) return;
-        // Restore original snapshot stored at load time
         tbody.innerHTML = "";
         (originalTableRows[idx] || []).forEach(r => {
           const clone = r.cloneNode(true);
           tbody.appendChild(clone);
         });
-        // Remove highlights and ensure original-html dataset present
         Array.from(tbody.rows).forEach(r => {
           Array.from(r.cells).forEach(c => {
             try { if (!c.dataset.origHtml) c.dataset.origHtml = c.innerHTML; } catch (_) {}
             try { clearHighlights(c); } catch (_) {}
           });
         });
-        // Reset sort states for this table
         sortStates[idx] = Array(table.rows[0]?.cells.length || 0).fill(0);
         updateHeaderSortUI(idx);
-        // Restore wrapper collapsed state to initial captured state
         const wrapper = table.closest('.table-wrapper');
         const shouldCollapsed = !!initialWrapperState[idx];
         if (wrapper) {
@@ -504,16 +593,13 @@ function resetAllTables() {
       } catch (e) { try { console.warn('tv:resetAllTables:table', e); } catch (_) {} }
     });
 
-    // Reset toggle-all button text to reflect restored state
     const anyExpanded = document.querySelectorAll('.table-wrapper:not(.table-collapsed)').length > 0;
     const toggleAllBtn = document.getElementById('toggleAllBtn');
     if (toggleAllBtn) toggleAllBtn.textContent = anyExpanded ? "Collapse All Tables" : "Expand All Tables";
 
-    // Clear search input and remove any remaining highlights across the page
     const sb = getSearchEl(); if (sb) sb.value = '';
     document.querySelectorAll('.table-container table td, .table-container table th').forEach(cell => { try { clearHighlights(cell); } catch (_) {} });
 
-    // Refresh virtualizer if present
     try { if (window.tableVirtualizer?.refresh) window.tableVirtualizer.refresh(); else if (window.tableVirtualizer?.update) window.tableVirtualizer.update(); } catch (_) {}
 
     try { updateRowCounts(); } catch (e) { try { console.warn('tv:resetAllTables:updateRowCounts', e); } catch (_) {} }
@@ -812,6 +898,8 @@ window.copyTablePlain = copyTablePlain;
 window.copyTableMarkdown = copyTableMarkdown;
 window.copyAllTablesPlain = copyAllTablesPlain;
 window.copyAllTablesMarkdown = copyAllTablesMarkdown;
+window.exportTableCSV = exportTableCSV;
+window.exportAllTablesCSV = exportAllTablesCSV;
 window.resetAllTables = resetAllTables;
 window.searchTable = searchTable;
 window.toggleMode = function () {
