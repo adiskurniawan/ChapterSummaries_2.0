@@ -557,6 +557,115 @@
     } catch (e) { showToast('CSV export failed', { type: 'warn' }); }
   }
 
+  // --- New export functions (JSON, XLS, PDF) ------------------------------
+  function exportTableJSON(btn, { filename } = {}) {
+    try {
+      const table = getTableFromButton(btn);
+      if (!table) { showToast('No table found to export', { type: 'warn' }); return; }
+      const thead = table.tHead;
+      let headers = [];
+      if (thead && thead.rows.length > 0) {
+        headers = Array.from(thead.rows[0].cells).map(c => c.textContent.trim());
+      } else {
+        // fallback: use first row cell count to generate generic keys
+        const firstRow = table.rows[0];
+        if (firstRow) headers = Array.from(firstRow.cells).map((c, i) => `Col${i+1}`);
+      }
+      const tbody = safeGetTBody(table) || table;
+      const dataRows = Array.from(tbody.rows);
+      const rows = dataRows.map(r => {
+        const cells = Array.from(r.cells);
+        const obj = {};
+        cells.forEach((td, i) => {
+          const key = headers[i] || `Col${i+1}`;
+          obj[key] = td.textContent.trim();
+        });
+        return obj;
+      });
+      const jsonStr = JSON.stringify(rows, null, 2);
+      const safeName = (filename || table.closest('.table-wrapper')?.querySelector('h3')?.textContent || 'table').replace(/[\/\\:*?"<>|]/g, '_') + '.json';
+      const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = safeName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast('JSON exported', { type: 'success' });
+    } catch (e) { console.error(e); showToast('Export JSON failed', { type: 'warn' }); }
+  }
+
+  function exportTableXLSX(btn, { filename } = {}) {
+    try {
+      const table = getTableFromButton(btn);
+      if (!table) { showToast('No table found to export', { type: 'warn' }); return; }
+      const rows = [];
+      Array.from(table.querySelectorAll('tr')).forEach(tr => {
+        const cols = Array.from(tr.querySelectorAll('th,td')).map(td => {
+          const txt = (td.textContent || '').trim();
+          // escape double quotes for safety in some viewers
+          return '"' + txt.replace(/"/g, '""') + '"';
+        });
+        rows.push(cols.join('\t'));
+      });
+      const tsv = rows.join('\n');
+      const safeName = (filename || table.closest('.table-wrapper')?.querySelector('h3')?.textContent || 'table').replace(/[\/\\:*?"<>|]/g, '_') + '.xls';
+      const blob = new Blob(["\uFEFF", tsv], { type: 'application/vnd.ms-excel;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = safeName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast('Table exported as XLS', { type: 'success' });
+    } catch (e) { console.error(e); showToast('Export XLS failed', { type: 'warn' }); }
+  }
+
+  function exportTablePDF(btn, { filename } = {}) {
+    try {
+      const table = getTableFromButton(btn);
+      if (!table) { showToast('No table found to export', { type: 'warn' }); return; }
+      const title = table.closest('.table-wrapper')?.querySelector('h3')?.textContent || 'Table';
+      const htmlDoc = `
+        <!doctype html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <title>${title}</title>
+            <style>
+              body { font-family: Arial, Helvetica, sans-serif; padding: 12px; color: #111; }
+              table { border-collapse: collapse; width: 100%; }
+              th, td { border: 1px solid #333; padding: 6px; text-align: left; }
+              h1 { font-size: 18px; margin-bottom: 8px; }
+            </style>
+          </head>
+          <body>
+            <h1>${title}</h1>
+            ${table.outerHTML}
+          </body>
+        </html>`;
+      // open printable window and trigger print. This is zero-dependency and works reliably in browsers.
+      const w = window.open('', '_blank');
+      if (!w) { showToast('Unable to open print window', { type: 'warn' }); return; }
+      w.document.open();
+      w.document.write(htmlDoc);
+      w.document.close();
+      setTimeout(() => {
+        try {
+          w.focus();
+          w.print();
+          showToast('Print dialog opened for PDF export', { type: 'success' });
+        } catch (e) {
+          showToast('Print failed', { type: 'warn' });
+        }
+      }, 300);
+    } catch (e) { console.error(e); showToast('Export PDF failed', { type: 'warn' }); }
+  }
+
   function resetAllTables() {
     try {
       document.querySelectorAll(".table-container table").forEach((table, idx) => {
@@ -827,6 +936,9 @@
             { sel: '.copy-plain-btn', fn: copyTablePlain },
             { sel: '.copy-markdown-btn', fn: copyTableMarkdown },
             { sel: '.export-csv-btn', fn: exportTableCSV },
+            { sel: '.export-json-btn', fn: exportTableJSON },
+            { sel: '.export-xls-btn', fn: exportTableXLSX },
+            { sel: '.export-pdf-btn', fn: exportTablePDF },
             { sel: '.export-markdown-btn', fn: copyTableMarkdown }
           ];
           handlers.forEach(h => {
@@ -925,6 +1037,9 @@
   window.resetAllTables = resetAllTables;
   window.searchTable = searchTable;
   window.exportTableCSV = exportTableCSV;
+  window.exportTableJSON = exportTableJSON;
+  window.exportTableXLSX = exportTableXLSX;
+  window.exportTablePDF = exportTablePDF;
   window.toggleMode = function () {
     try {
       const modeBtn = document.getElementById('modeBtn');
