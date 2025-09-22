@@ -1,5 +1,5 @@
 // assets/script.js — Merged, carefully checked (queued toasts, robust clipboard, copy modal, CSV export, stable sorting, normalized search)
-// Revised: inject per-table toolbar when missing; safe handlers; checked 5×.
+// Revised: do NOT inject per-table toolbar; attach safe handlers to server-rendered buttons when missing.
 
 (function () {
   'use strict';
@@ -819,35 +819,27 @@
         } catch (e) { /* silent */ }
       }
 
-      // Inject per-table toolbar when missing
+      // Attach handlers to server-rendered toolbar buttons when missing
       try {
         document.querySelectorAll('.table-wrapper').forEach(wrapper => {
-          if (wrapper.querySelector('.table-toolbar')) return; // already present
-          const toolbar = document.createElement('div');
-          toolbar.className = 'table-toolbar';
-          toolbar.setAttribute('role', 'group');
-
-          function makeBtn(text, cls, aria, handler) {
-            const b = document.createElement('button');
-            b.type = 'button';
-            b.className = cls;
-            b.textContent = text;
-            if (aria) b.setAttribute('aria-label', aria);
-            b.addEventListener('click', function (ev) { try { handler(this); } catch (e) { /* silent */ } });
-            return b;
-          }
-
-          // collapse, copy, export buttons
-          toolbar.appendChild(makeBtn('Collapse Table', 'toggle-table-btn', 'Collapse or expand table', (btn) => toggleTable(btn)));
-          toolbar.appendChild(makeBtn('Copy (Plain)', 'copy-plain-btn', 'Copy table as plain text', (btn) => copyTablePlain(btn)));
-          toolbar.appendChild(makeBtn('Copy (Markdown)', 'copy-markdown-btn', 'Copy table as markdown', (btn) => copyTableMarkdown(btn)));
-          toolbar.appendChild(makeBtn('Export CSV', 'export-csv-btn', 'Export table as CSV', (btn) => exportTableCSV(btn)));
-          toolbar.appendChild(makeBtn('Export MD', 'export-markdown-btn', 'Export table as Markdown', (btn) => copyTableMarkdown(btn)));
-
-          // last: insert toolbar before the .table-container or table
-          const container = wrapper.querySelector('.table-container') || wrapper.querySelector('table');
-          if (container) wrapper.insertBefore(toolbar, container);
-          else wrapper.appendChild(toolbar);
+          const handlers = [
+            { sel: '.toggle-table-btn', fn: toggleTable },
+            { sel: '.copy-plain-btn', fn: copyTablePlain },
+            { sel: '.copy-markdown-btn', fn: copyTableMarkdown },
+            { sel: '.export-csv-btn', fn: exportTableCSV },
+            { sel: '.export-markdown-btn', fn: copyTableMarkdown }
+          ];
+          handlers.forEach(h => {
+            try {
+              const btn = wrapper.querySelector(h.sel);
+              if (!btn) return;
+              // if server provided inline onclick, assume it's wired and skip
+              if (btn.getAttribute && btn.getAttribute('onclick')) return;
+              if (btn.dataset && btn.dataset.tvHandlerAttached) return;
+              btn.addEventListener('click', function (ev) { try { h.fn(this); } catch (e) { /* silent */ } });
+              if (btn.dataset) btn.dataset.tvHandlerAttached = '1';
+            } catch (e) { /* silent */ }
+          });
         });
       } catch (e) { /* silent */ }
 
