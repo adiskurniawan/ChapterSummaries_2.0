@@ -1,8 +1,20 @@
-// script.js — Safe revised (search normalization, tbody guards, toast, backToTop)
-// Reviewed: checked 10× for logic, edge cases, and regressions.
+// assets/script.js — Merged, carefully checked (queued toasts, robust clipboard, copy modal, CSV export, stable sorting, normalized search)
+// Revised: inject per-table toolbar when missing; safe handlers; checked 5×.
 
 (function () {
   'use strict';
+
+  // --- Public config -------------------------------------------------------
+  const tvConfig = { highlight: true, debounceMs: 150, chunkSize: 300 };
+  window.tvConfig = tvConfig;
+  window.setTvSearchConfig = function (cfg) {
+    try {
+      if (typeof cfg !== 'object' || cfg === null) return;
+      if (typeof cfg.highlight === 'boolean') tvConfig.highlight = cfg.highlight;
+      if (typeof cfg.debounceMs === 'number') tvConfig.debounceMs = Math.max(0, cfg.debounceMs);
+      if (typeof cfg.chunkSize === 'number') tvConfig.chunkSize = Math.max(50, cfg.chunkSize);
+    } catch (e) { /* silent */ }
+  };
 
   // --- Helpers --------------------------------------------------------------
   function normalizeForSearch(s) {
@@ -29,18 +41,29 @@
     let t;
     return function (...args) {
       clearTimeout(t);
-      t = setTimeout(() => fn.apply(this, args), wait);
+      t = setTimeout(() => {
+        try { fn.apply(this, args); } catch (e) { /* silent */ }
+      }, wait);
     };
   }
 
+  // --- Clipboard with robust fallback -------------------------------------
   function copyToClipboard(text) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      return navigator.clipboard.writeText(text);
-    }
+    return new Promise((resolve, reject) => {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(resolve).catch(() => {
+          tryLegacyCopy(text).then(resolve).catch(reject);
+        });
+        return;
+      }
+      tryLegacyCopy(text).then(resolve).catch(reject);
+    });
+  }
+  function tryLegacyCopy(t) {
     return new Promise((resolve, reject) => {
       try {
         const ta = document.createElement('textarea');
-        ta.value = text;
+        ta.value = t;
         ta.setAttribute('readonly', '');
         ta.style.position = 'fixed';
         ta.style.left = '-9999px';
@@ -51,46 +74,83 @@
         if (ok) resolve();
         else reject(new Error('execCommand failed'));
       } catch (err) {
+        try { console.warn('tv:copyToClipboard:legacy failed', err); } catch (_) {}
         reject(err);
       }
     });
   }
 
-  // --- Toast ---------------------------------------------------------------
+  // --- Toast / Notification system (queued, accessible, adaptive) ----------
+  let _toastQueue = [];
+  let _activeToast = null;
+  let _toastIdCounter = 0;
+
   function _ensureToastContainer() {
-    let c = document.getElementById('tv-toast-container');
-    if (c) return c;
-    c = document.createElement('div');
-    c.id = 'tv-toast-container';
-    Object.assign(c.style, {
-      position: 'fixed',
-      bottom: '24px',
-      right: '24px',
-      zIndex: 1300,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '8px',
-      alignItems: 'flex-end',
-      pointerEvents: 'none',
-      maxWidth: 'calc(100% - 48px)'
-    });
-    document.body.appendChild(c);
-    return c;
+    try {
+      let c = document.getElementById('tv-toast-container');
+      if (c) return c;
+      c = document.createElement('div');
+      c.id = 'tv-toast-container';
+      c.setAttribute('role', 'status');
+      c.setAttribute('aria-live', 'polite');
+      c.setAttribute('aria-atomic', 'true');
+      Object.assign(c.style, {
+        position: 'fixed',
+        bottom: '24px',
+        right: '24px',
+        zIndex: 1300,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+        alignItems: 'flex-end',
+        pointerEvents: 'none',
+        maxWidth: 'calc(100% - 48px)'
+      });
+      document.body.appendChild(c);
+      return c;
+    } catch (e) { return null; }
   }
 
-  function showToast(msg, { duration = 3000, type = 'info' } = {}) {
+  function _computeToastDuration(msg, type, optDuration) {
     try {
+      if (typeof optDuration === 'number' && isFinite(optDuration) && optDuration >= 200) return Math.max(200, Math.floor(optDuration));
+      const len = (msg || '').length || 0;
+      let base = 1600;
+      if (type === 'success') base = 1400;
+      else if (type === 'warn') base = 2000;
+      else if (type === 'error') base = 3600;
+      const perChar = 40;
+      let dur = base + Math.min(6000, len * perChar);
+      dur = Math.max(900, Math.min(8000, dur));
+      return dur;
+    } catch (e) { return 2500; }
+  }
+
+  function showToast(msg, { duration = null, type = 'info' } = {}) {
+    try {
+      const id = ++_toastIdCounter;
+      _toastQueue.push({ id, msg: String(msg || ''), duration, type });
+      setTimeout(_processToastQueue, 0);
+      return { id, dismiss: () => _dismissToastById(id) };
+    } catch (e) { try { alert(String(msg || '')); } catch (_) {} return null; }
+  }
+
+  function _processToastQueue() {
+    try {
+      if (_activeToast) return;
+      if (_toastQueue.length === 0) return;
+      const item = _toastQueue.shift();
       const container = _ensureToastContainer();
+      if (!container) { try { alert(item.msg); } catch (_) {} setTimeout(_processToastQueue, 0); return; }
       const el = document.createElement('div');
       el.className = 'tv-toast';
-      const rootStyles = getComputedStyle(document.documentElement);
-      const panel = rootStyles.getPropertyValue('--panel') || '#fff';
-      const textColor = rootStyles.getPropertyValue('--text') || '#111';
-      const bg = (type === 'success') ? '#16a34a' : (type === 'warn' ? '#f59e0b' : panel.trim());
-      const color = (type === 'success' || type === 'warn') ? '#fff' : textColor.trim();
+      el.setAttribute('data-toast-id', item.id);
+      el.setAttribute('role', 'status');
+      el.setAttribute('aria-live', 'polite');
+      el.tabIndex = -1;
       Object.assign(el.style, {
-        background: bg,
-        color: color,
+        background: (getComputedStyle(document.documentElement).getPropertyValue('--panel') || '#fff').trim(),
+        color: (getComputedStyle(document.documentElement).getPropertyValue('--text') || '#111').trim(),
         padding: '8px 12px',
         borderRadius: '8px',
         boxShadow: '0 6px 18px rgba(0,0,0,0.12)',
@@ -100,43 +160,171 @@
         pointerEvents: 'auto',
         maxWidth: '360px',
         wordBreak: 'normal',
-        whiteSpace: 'pre-wrap'
+        whiteSpace: 'pre-wrap',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px'
       });
-      el.textContent = msg;
+      if (item.type === 'success') { el.style.background = '#16a34a'; el.style.color = '#fff'; }
+      else if (item.type === 'warn') { el.style.background = '#f59e0b'; el.style.color = '#fff'; }
+      else if (item.type === 'error') { el.style.background = '#dc2626'; el.style.color = '#fff'; }
+      const textWrap = document.createElement('div');
+      textWrap.style.flex = '1 1 auto';
+      textWrap.style.minWidth = '0';
+      textWrap.textContent = item.msg;
+      const closeBtn = document.createElement('button');
+      closeBtn.type = 'button';
+      closeBtn.ariaLabel = 'Dismiss notification';
+      closeBtn.title = 'Dismiss';
+      closeBtn.innerHTML = '✕';
+      Object.assign(closeBtn.style, { border: 'none', background: 'transparent', color: 'inherit', cursor: 'pointer', fontSize: '14px', lineHeight: '1', padding: '4px', margin: '0' });
+      closeBtn.addEventListener('click', function (ev) { try { ev.stopPropagation(); } catch (_) {} _hideActiveToast(el, true); }, { passive: true });
+      el.addEventListener('click', function () { _hideActiveToast(el, true); }, { passive: true });
+      el.appendChild(textWrap);
+      el.appendChild(closeBtn);
       container.appendChild(el);
       void el.offsetHeight;
       el.style.opacity = '1';
       el.style.transform = 'translateY(0)';
-      const to = setTimeout(() => {
-        try { hide(); } catch (e) {}
-      }, duration);
-      function hide() {
-        clearTimeout(to);
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(6px)';
-        setTimeout(() => { try { el.remove(); } catch (e) {} }, 220);
+      const timeoutMs = _computeToastDuration(item.msg, item.type, item.duration);
+      const to = setTimeout(() => { _hideActiveToast(el, false); }, timeoutMs);
+      _activeToast = { id: item.id, el, timeoutId: to };
+      try {
+        const prevActive = document.activeElement;
+        if (container && typeof container.focus === 'function') {
+          container.tabIndex = -1;
+          container.focus({ preventScroll: true });
+          setTimeout(() => { try { if (prevActive && typeof prevActive.focus === 'function') prevActive.focus({ preventScroll: true }); } catch (_) {} }, 60);
+        }
+      } catch (_) {}
+    } catch (e) { /* silent */ }
+  }
+
+  function _hideActiveToast(el, manual) {
+    try {
+      if (!_activeToast || !_activeToast.el) {
+        if (el && el.parentNode) el.remove();
+        setTimeout(_processToastQueue, 100);
+        return;
       }
-      el.addEventListener('click', hide, { once: true, passive: true });
-      return el;
-    } catch (e) {
-      try { alert(msg); } catch (err) {}
-    }
+      try { clearTimeout(_activeToast.timeoutId); } catch (_) {}
+      try { el.style.opacity = '0'; el.style.transform = 'translateY(6px)'; } catch (_) {}
+      setTimeout(() => {
+        try { if (el && el.parentNode) el.parentNode.removeChild(el); } catch (_) {}
+        _activeToast = null;
+        setTimeout(_processToastQueue, 80);
+      }, 220);
+    } catch (e) { _activeToast = null; setTimeout(_processToastQueue, 80); }
+  }
+
+  function _dismissToastById(id) {
+    try {
+      if (_activeToast && _activeToast.id === id && _activeToast.el) { _hideActiveToast(_activeToast.el, true); return; }
+      for (let i = 0; i < _toastQueue.length; i++) {
+        if (_toastQueue[i].id === id) { _toastQueue.splice(i, 1); return; }
+      }
+    } catch (e) { /* silent */ }
+  }
+
+  // --- Copy modal (fallback UI) ------------------------------------------
+  function showCopyModal(text, { title = 'Copy text' } = {}) {
+    try {
+      const existing = document.getElementById('tv-copy-modal');
+      if (existing) existing.remove();
+      const overlay = document.createElement('div');
+      overlay.id = 'tv-copy-modal';
+      Object.assign(overlay.style, { position: 'fixed', inset: '0', background: 'rgba(0,0,0,0.45)', zIndex: 1400, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' });
+      const panel = document.createElement('div');
+      panel.setAttribute('role', 'dialog');
+      panel.setAttribute('aria-modal', 'true');
+      panel.tabIndex = -1;
+      const rootStyles = getComputedStyle(document.documentElement);
+      const panelBg = rootStyles.getPropertyValue('--panel') || '#fff';
+      const textColor = rootStyles.getPropertyValue('--text') || '#111';
+      Object.assign(panel.style, { background: panelBg.trim(), color: textColor.trim(), borderRadius: '8px', boxShadow: '0 12px 40px rgba(0,0,0,0.35)', maxWidth: 'min(90%,1000px)', width: '100%', maxHeight: '80vh', overflow: 'auto', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' });
+      const hdr = document.createElement('div');
+      hdr.style.display = 'flex';
+      hdr.style.justifyContent = 'space-between';
+      hdr.style.alignItems = 'center';
+      const h = document.createElement('strong');
+      h.textContent = title || 'Copy';
+      const closeBtn = document.createElement('button');
+      closeBtn.type = 'button';
+      closeBtn.textContent = 'Close';
+      Object.assign(closeBtn.style, { marginLeft: '8px' });
+      closeBtn.addEventListener('click', () => overlay.remove());
+      hdr.appendChild(h);
+      hdr.appendChild(closeBtn);
+      const ta = document.createElement('textarea');
+      ta.value = text || '';
+      ta.readOnly = false;
+      ta.style.width = '100%';
+      ta.style.height = '320px';
+      ta.style.resize = 'vertical';
+      ta.style.whiteSpace = 'pre-wrap';
+      ta.style.fontFamily = 'monospace, monospace';
+      ta.style.fontSize = '13px';
+      ta.setAttribute('aria-label', 'Copy text area');
+      const controls = document.createElement('div');
+      controls.style.display = 'flex';
+      controls.style.gap = '8px';
+      controls.style.justifyContent = 'flex-end';
+      const selectBtn = document.createElement('button');
+      selectBtn.type = 'button';
+      selectBtn.textContent = 'Select All';
+      selectBtn.addEventListener('click', () => { try { ta.focus(); ta.select(); } catch (_) {} });
+      const copyBtn = document.createElement('button');
+      copyBtn.type = 'button';
+      copyBtn.textContent = 'Copy';
+      copyBtn.addEventListener('click', () => {
+        copyToClipboard(ta.value).then(() => {
+          showToast('Copied to clipboard', { type: 'success' });
+          overlay.remove();
+        }).catch(() => {
+          showToast('Copy failed', { type: 'warn' });
+        });
+      });
+      const downloadBtn = document.createElement('button');
+      downloadBtn.type = 'button';
+      downloadBtn.textContent = 'Download';
+      downloadBtn.addEventListener('click', () => {
+        try {
+          const blob = new Blob([ta.value], { type: 'text/plain;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = (title || 'export').replace(/[\/\\:*?"<>|]/g, '_') + '.txt';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+          showToast('Downloaded', { type: 'success' });
+          overlay.remove();
+        } catch (e) { showToast('Download failed', { type: 'warn' }); }
+      });
+      controls.appendChild(selectBtn);
+      controls.appendChild(copyBtn);
+      controls.appendChild(downloadBtn);
+      panel.appendChild(hdr);
+      panel.appendChild(ta);
+      panel.appendChild(controls);
+      overlay.appendChild(panel);
+      document.body.appendChild(overlay);
+      try { ta.focus(); ta.select(); } catch (_) {}
+      return overlay;
+    } catch (e) { try { alert(String(text || '')); } catch (_) {} return null; }
   }
 
   // --- Safe utilities -----------------------------------------------------
   function getSearchEl() {
-    return document.getElementById('searchBox')
-      || document.getElementById('searchInput')
-      || document.getElementById('search');
+    return document.getElementById('searchBox') || document.getElementById('searchInput') || document.getElementById('search');
   }
 
   function getTableFromButton(btn) {
     try {
       const wrapper = btn && (btn.closest('.table-wrapper') || btn.closest('.table-container') || btn.closest('[data-table-id]'));
       return wrapper ? wrapper.querySelector('table') : null;
-    } catch (e) {
-      return null;
-    }
+    } catch (e) { return null; }
   }
 
   // storage
@@ -215,20 +403,19 @@
       }
       tbody.innerHTML = "";
       rows.forEach(r => tbody.appendChild(r));
-      // restore cell original-html dataset after replacement
       Array.from(tbody.rows).forEach(r => {
         Array.from(r.cells).forEach(c => {
           if (!c.dataset.origHtml) c.dataset.origHtml = c.innerHTML;
         });
       });
       updateHeaderSortUI(tableIdx);
-      try { updateRowCounts(); } catch (e) { }
+      try { updateRowCounts(); } catch (e) {}
     } catch (e) { /* silent */ }
   }
 
   function headerSortButtonClicked(tableIdx, colIdx, btnEl) {
     sortTableByColumn(tableIdx, colIdx);
-    try { btnEl && btnEl.focus(); } catch (e) { }
+    try { btnEl && btnEl.focus(); } catch (e) {}
   }
 
   function toggleTable(btn) {
@@ -240,7 +427,7 @@
       const anyExpanded = document.querySelectorAll('.table-wrapper:not(.table-collapsed)').length > 0;
       const toggleAllBtn = document.getElementById('toggleAllBtn');
       if (toggleAllBtn) toggleAllBtn.textContent = anyExpanded ? "Collapse All Tables" : "Expand All Tables";
-      try { updateRowCounts(); } catch (e) { }
+      try { updateRowCounts(); } catch (e) {}
     } catch (e) { /* silent */ }
   }
 
@@ -258,7 +445,7 @@
         const toggleAllBtn = document.getElementById('toggleAllBtn');
         if (toggleAllBtn) toggleAllBtn.textContent = "Collapse All Tables";
       }
-      try { updateRowCounts(); } catch (e) { }
+      try { updateRowCounts(); } catch (e) {}
     } catch (e) { /* silent */ }
   }
 
@@ -288,7 +475,7 @@
       let title = table.closest('.table-wrapper')?.querySelector('h3')?.textContent || '';
       let text = title + "\n" + Array.from(table.rows).map(r => Array.from(r.cells).map(c => c.textContent.trim()).join("\t")).join("\n");
       copyToClipboard(text).then(() => showToast('Table copied as plain text!', { type: 'success' })).catch(() => {
-        try { prompt('Copy table text', text); } catch (e) { showToast('Copy failed', { type: 'warn' }); }
+        try { showCopyModal(text, { title: 'Copy table text' }); } catch (e) { showToast('Copy failed', { type: 'warn' }); }
       });
     } catch (e) { showToast('Copy failed', { type: 'warn' }); }
   }
@@ -304,7 +491,7 @@
       let md = "**" + title + "**\n| " + head + " |\n| " + Array.from(rows[0].cells).map(() => '---').join(" | ") + " |\n";
       for (let i = 1; i < rows.length; i++) { md += "| " + Array.from(rows[i].cells).map(c => c.textContent.trim()).join(" | ") + " |\n"; }
       copyToClipboard(md).then(() => showToast('Table copied in Markdown format!', { type: 'success' })).catch(() => {
-        try { prompt('Copy table markdown', md); } catch (e) { showToast('Copy failed', { type: 'warn' }); }
+        try { showCopyModal(md, { title: 'Copy table markdown' }); } catch (e) { showToast('Copy failed', { type: 'warn' }); }
       });
     } catch (e) { showToast('Copy failed', { type: 'warn' }); }
   }
@@ -319,7 +506,7 @@
         text += title + "\n" + Array.from(table.rows).map(r => Array.from(r.cells).map(c => c.textContent.trim()).join("\t")).join("\n") + "\n";
       });
       copyToClipboard(text).then(() => showToast("All tables copied as plain text!", { type: 'success' })).catch(() => {
-        try { prompt('Copy all tables', text); } catch (e) { showToast('Copy failed', { type: 'warn' }); }
+        try { showCopyModal(text, { title: 'Copy all tables' }); } catch (e) { showToast('Copy failed', { type: 'warn' }); }
       });
     } catch (e) { showToast('Copy failed', { type: 'warn' }); }
   }
@@ -338,9 +525,36 @@
         for (let i = 1; i < rows.length; i++) { text += "| " + Array.from(rows[i].cells).map(c => c.textContent.trim()).join(" | ") + " |\n"; }
       });
       copyToClipboard(text).then(() => showToast("All tables copied in Markdown format!", { type: 'success' })).catch(() => {
-        try { prompt('Copy all tables markdown', text); } catch (e) { showToast('Copy failed', { type: 'warn' }); }
+        try { showCopyModal(text, { title: 'Copy all tables markdown' }); } catch (e) { showToast('Copy failed', { type: 'warn' }); }
       });
     } catch (e) { showToast('Copy failed', { type: 'warn' }); }
+  }
+
+  function exportTableCSV(btn, { filename } = {}) {
+    try {
+      const table = getTableFromButton(btn);
+      if (!table) { showToast('No table found to export', { type: 'warn' }); return; }
+      const rows = Array.from(table.rows);
+      if (rows.length === 0) { showToast('Table empty', { type: 'warn' }); return; }
+      const csv = rows.map(r => Array.from(r.cells).map(c => {
+        const v = c.textContent || '';
+        if (v.indexOf('"') !== -1 || v.indexOf(',') !== -1 || v.indexOf('\n') !== -1) {
+          return '"' + v.replace(/"/g, '""') + '"';
+        }
+        return v;
+      }).join(',')).join('\r\n');
+      const safeName = (filename || table.closest('.table-wrapper')?.querySelector('h3')?.textContent || 'table').replace(/[\/\\:*?"<>|]/g, '_') + '.csv';
+      const blob = new Blob(["\uFEFF", csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = safeName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast('CSV exported', { type: 'success' });
+    } catch (e) { showToast('CSV export failed', { type: 'warn' }); }
   }
 
   function resetAllTables() {
@@ -353,11 +567,8 @@
           const clone = r.cloneNode(true);
           tbody.appendChild(clone);
         });
-        // restore per-cell original HTML dataset
         Array.from(tbody.rows).forEach(r => {
-          Array.from(r.cells).forEach(c => {
-            c.dataset.origHtml = c.innerHTML;
-          });
+          Array.from(r.cells).forEach(c => { c.dataset.origHtml = c.innerHTML; });
         });
         sortStates[idx] = Array(table.rows[0]?.cells.length || 0).fill(0);
         updateHeaderSortUI(idx);
@@ -365,15 +576,14 @@
       document.querySelectorAll('.table-wrapper').forEach(w => { w.classList.remove('table-collapsed'); const btn = w.querySelector('.toggle-table-btn'); if (btn) btn.textContent = "Collapse Table"; });
       const toggleAllBtn = document.getElementById('toggleAllBtn');
       if (toggleAllBtn) toggleAllBtn.textContent = "Collapse All Tables";
-      const sb = getSearchEl();
-      if (sb) sb.value = "";
+      const sb = getSearchEl(); if (sb) sb.value = "";
       searchTable();
-      try { updateRowCounts(); } catch (e) { }
+      try { updateRowCounts(); } catch (e) {}
       showToast("All tables reset!", { type: 'success' });
     } catch (e) { showToast('Reset failed', { type: 'warn' }); }
   }
 
-  // --- Search (robust: normalized matching across text nodes + DOM-preserving highlights) ---
+  // --- Search & highlight (robust) ---------------------------------------
   function clearHighlights(cell) {
     if (!cell) return;
     if (cell.dataset && cell.dataset.origHtml) {
@@ -388,22 +598,16 @@
   }
 
   function buildNormalizedMapForCell(cell) {
-    // returns { normStr, map, nodes }
     const nodes = [];
     const walker = document.createTreeWalker(cell, NodeFilter.SHOW_TEXT, null, false);
     while (walker.nextNode()) {
       const tn = walker.currentNode;
       if (!tn.nodeValue || tn.nodeValue.length === 0) continue;
-      // ignore empty whitespace-only nodes to reduce noise but keep nodes with real whitespace
-      if (tn.nodeValue.trim() === '') {
-        // keep nodes that contain whitespace if useful for mapping continuity
-        // skip pure whitespace-only nodes to reduce false joins
-        continue;
-      }
+      if (tn.nodeValue.trim() === '') continue;
       nodes.push(tn);
     }
     let normStr = '';
-    const map = []; // map[i] = { nodeIndex, offsetInNode }
+    const map = [];
     for (let ni = 0; ni < nodes.length; ni++) {
       const raw = nodes[ni].nodeValue;
       for (let i = 0; i < raw.length;) {
@@ -412,11 +616,8 @@
         const charLen = cp > 0xFFFF ? 2 : 1;
         const decomposed = ch.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         let filtered;
-        try {
-          filtered = decomposed.replace(/[^\p{L}\p{N}\s]/gu, '');
-        } catch (e) {
-          filtered = decomposed.replace(/[^\w\s]/g, '');
-        }
+        try { filtered = decomposed.replace(/[^\p{L}\p{N}\s]/gu, ''); }
+        catch (e) { filtered = decomposed.replace(/[^\w\s]/g, ''); }
         if (filtered.length > 0) {
           for (let k = 0; k < filtered.length; k++) {
             normStr += filtered[k];
@@ -425,24 +626,15 @@
         }
         i += charLen;
       }
-      // Optional separator between nodes to avoid accidental joins.
-      // Use a single space if the original boundary had a whitespace char at end/start.
-      // We skip inserting explicit separators to preserve exact matching across nodes.
     }
     return { normStr, map, nodes };
   }
 
   function highlightMatches(cell, filterNorm) {
     if (!cell || !filterNorm) return;
-    // restore original HTML snapshot if available
     if (cell.dataset && cell.dataset.origHtml) cell.innerHTML = cell.dataset.origHtml;
-
     let built;
-    try {
-      built = buildNormalizedMapForCell(cell);
-    } catch (e) {
-      return;
-    }
+    try { built = buildNormalizedMapForCell(cell); } catch (e) { return; }
     const normStr = built.normStr.toLowerCase();
     if (!normStr || normStr.length === 0) return;
     const map = built.map;
@@ -457,10 +649,9 @@
       pos = idx + needle.length;
     }
     if (matches.length === 0) return;
-    // process right-to-left to avoid DOM index shifting problems
     for (let mi = matches.length - 1; mi >= 0; mi--) {
       const startNorm = matches[mi];
-      const endNormExclusive = startNorm + needle.length; // exclusive
+      const endNormExclusive = startNorm + needle.length;
       const startMap = map[startNorm];
       const endMap = map[endNormExclusive - 1];
       if (!startMap || !endMap) continue;
@@ -468,21 +659,15 @@
       const startOffset = Math.max(0, Math.min((startMap.offsetInNode || 0), nodes[startNodeIndex].nodeValue.length));
       const endNodeIndex = endMap.nodeIndex;
       let endOffsetExclusive = Math.max(0, Math.min((endMap.offsetInNode || 0), nodes[endNodeIndex].nodeValue.length));
-      // compute exclusive end by advancing past the code point at endOffset
       try {
         const endNodeRaw = nodes[endNodeIndex].nodeValue;
         const cp = endNodeRaw.codePointAt(endOffsetExclusive);
         const charLen = cp > 0xFFFF ? 2 : 1;
         endOffsetExclusive = Math.min(endOffsetExclusive + charLen, endNodeRaw.length);
-      } catch (e) {
-        // fallback: treat as one code unit
-        endOffsetExclusive = Math.min(endOffsetExclusive + 1, nodes[endNodeIndex].nodeValue.length);
-      }
-
+      } catch (e) { endOffsetExclusive = Math.min(endOffsetExclusive + 1, nodes[endNodeIndex].nodeValue.length); }
       try {
         if (startNodeIndex === endNodeIndex) {
           const tn = nodes[startNodeIndex];
-          // clamp
           const rawLen = tn.nodeValue.length;
           const s = Math.max(0, Math.min(startOffset, rawLen));
           const e = Math.max(0, Math.min(endOffsetExclusive, rawLen));
@@ -493,26 +678,20 @@
           mark.appendChild(document.createTextNode(middle.data));
           middle.parentNode.replaceChild(mark, middle);
         } else {
-          // multi-node range
           const startNode = nodes[startNodeIndex];
           const endNode = nodes[endNodeIndex];
-          // clamp offsets
           const rawStartLen = startNode.nodeValue.length;
           const rawEndLen = endNode.nodeValue.length;
           const sOff = Math.max(0, Math.min(startOffset, rawStartLen));
           const eOff = Math.max(0, Math.min(endOffsetExclusive, rawEndLen));
-          // split end node first
           const afterEnd = endNode.splitText(eOff);
-          // split start node to isolate its tail
           const middleStart = startNode.splitText(sOff);
-          // collect nodes between middleStart and endNode (inclusive)
           const wrapNodes = [];
           let cur = middleStart;
           while (cur) {
             wrapNodes.push(cur);
             if (cur === endNode) break;
             cur = cur.nextSibling;
-            // safety guard
             if (!cur) break;
           }
           if (wrapNodes.length === 0) continue;
@@ -520,14 +699,9 @@
           if (!parent) continue;
           const mark = document.createElement('mark');
           parent.insertBefore(mark, wrapNodes[0]);
-          wrapNodes.forEach(n => {
-            try { mark.appendChild(n); } catch (e) { /* ignore */ }
-          });
+          wrapNodes.forEach(n => { try { mark.appendChild(n); } catch (e) {} });
         }
-      } catch (e) {
-        // if anything fails for this match, skip it and continue
-        continue;
-      }
+      } catch (e) { continue; }
     }
   }
 
@@ -537,14 +711,11 @@
       const filterRaw = searchEl?.value || '';
       const filterNorm = normalizeForSearch(filterRaw);
       let firstMatch = null;
-
       document.querySelectorAll('.table-container table').forEach(table => {
         const tbody = safeGetTBody(table);
         if (!tbody) return;
-
         Array.from(tbody.rows).forEach(row => {
           let rowMatches = false;
-
           Array.from(row.cells).forEach(cell => {
             clearHighlights(cell);
             const txt = cell.textContent || '';
@@ -552,31 +723,23 @@
               rowMatches = true;
             }
           });
-
           row.style.display = (!filterNorm || rowMatches) ? '' : 'none';
-
           if (rowMatches) {
-            Array.from(row.cells).forEach(cell => highlightMatches(cell, filterNorm));
+            if (tvConfig.highlight) Array.from(row.cells).forEach(cell => highlightMatches(cell, filterNorm));
             if (!firstMatch) firstMatch = row;
           }
         });
       });
-
       try {
-        if (window.tableVirtualizer?.refresh) {
-          window.tableVirtualizer.refresh();
-        } else if (window.tableVirtualizer?.update) {
-          window.tableVirtualizer.update();
-        }
+        if (window.tableVirtualizer?.refresh) window.tableVirtualizer.refresh();
+        else if (window.tableVirtualizer?.update) window.tableVirtualizer.update();
       } catch (_) {}
-
       if (firstMatch) {
         const rect = firstMatch.getBoundingClientRect();
         const headerHeight = document.getElementById('stickyMainHeader')?.offsetHeight || 0;
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0;
         window.scrollTo({ top: scrollTop + rect.top - headerHeight - 5, behavior: 'smooth' });
       }
-
       try { updateRowCounts(); } catch (_) {}
     } catch (_) {}
   }
@@ -649,12 +812,44 @@
       // Attach search handlers (debounced)
       const sb = getSearchEl();
       if (sb) {
-        const deb = debounce(searchTable, 120);
+        const deb = debounce(searchTable, tvConfig.debounceMs || 120);
         try {
           sb.addEventListener('input', deb);
           sb.addEventListener('keyup', function (e) { if (e.key === 'Enter') searchTable(); });
         } catch (e) { /* silent */ }
       }
+
+      // Inject per-table toolbar when missing
+      try {
+        document.querySelectorAll('.table-wrapper').forEach(wrapper => {
+          if (wrapper.querySelector('.table-toolbar')) return; // already present
+          const toolbar = document.createElement('div');
+          toolbar.className = 'table-toolbar';
+          toolbar.setAttribute('role', 'group');
+
+          function makeBtn(text, cls, aria, handler) {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = cls;
+            b.textContent = text;
+            if (aria) b.setAttribute('aria-label', aria);
+            b.addEventListener('click', function (ev) { try { handler(this); } catch (e) { /* silent */ } });
+            return b;
+          }
+
+          // collapse, copy, export buttons
+          toolbar.appendChild(makeBtn('Collapse Table', 'toggle-table-btn', 'Collapse or expand table', (btn) => toggleTable(btn)));
+          toolbar.appendChild(makeBtn('Copy (Plain)', 'copy-plain-btn', 'Copy table as plain text', (btn) => copyTablePlain(btn)));
+          toolbar.appendChild(makeBtn('Copy (Markdown)', 'copy-markdown-btn', 'Copy table as markdown', (btn) => copyTableMarkdown(btn)));
+          toolbar.appendChild(makeBtn('Export CSV', 'export-csv-btn', 'Export table as CSV', (btn) => exportTableCSV(btn)));
+          toolbar.appendChild(makeBtn('Export MD', 'export-markdown-btn', 'Export table as Markdown', (btn) => copyTableMarkdown(btn)));
+
+          // last: insert toolbar before the .table-container or table
+          const container = wrapper.querySelector('.table-container') || wrapper.querySelector('table');
+          if (container) wrapper.insertBefore(toolbar, container);
+          else wrapper.appendChild(toolbar);
+        });
+      } catch (e) { /* silent */ }
 
       // Single consolidated keydown handler for "/" and "Escape"
       document.addEventListener("keydown", function (e) {
@@ -676,7 +871,7 @@
       });
 
       // Initial row counts
-      try { updateRowCounts(); } catch (e) { }
+      try { updateRowCounts(); } catch (e) {}
     } catch (e) { /* silent */ }
   });
 
@@ -725,9 +920,9 @@
     } catch (e) { /* silent */ }
   });
 
-  function backToTop() { try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) { } }
+  function backToTop() { try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) {} }
 
-  // Expose a few functions for HTML inline handlers (minimal global exposure)
+  // Expose functions used by HTML inline handlers
   window.headerSortButtonClicked = headerSortButtonClicked;
   window.toggleTable = toggleTable;
   window.toggleAllTables = toggleAllTables;
@@ -737,6 +932,7 @@
   window.copyAllTablesMarkdown = copyAllTablesMarkdown;
   window.resetAllTables = resetAllTables;
   window.searchTable = searchTable;
+  window.exportTableCSV = exportTableCSV;
   window.toggleMode = function () {
     try {
       const modeBtn = document.getElementById('modeBtn');
