@@ -4,8 +4,8 @@
 <meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
 <title>Tables Viewer v2.1</title>
 <style>:root{--main-header-height:56px;}</style>
-<link rel="stylesheet" href="assets/style.css?v=1758552144">
-<link rel="stylesheet" href="assets/overrides.css?v=1758552144">
+<link rel="stylesheet" href="assets/style.css?v=1758553255">
+<link rel="stylesheet" href="assets/overrides.css?v=1758553255">
 </head><body>
 <div id="tables-viewer" role="region" aria-label="Tables viewer">
 <div id="stickyMainHeader">
@@ -351,33 +351,42 @@
 </tbody></table></div>
   <div class='row-count'></div>
 </div>
-<script src="assets/script.js?v=1758552144" defer></script>
-<script src="assets/worker.js?v=1758552144" defer></script>
+<script src="assets/script.js?v=1758553255" defer></script>
+<script src="assets/worker.js?v=1758553255" defer></script>
 
 <script>
 (function(){
   const template = "{table}_{date}";
-  function formatName(tableName){
+  function formatName(tableName) {
     const date = (new Date()).toISOString().slice(0,10);
-    return template.replace('{table}', tableName).replace('{date}', date).replace('{user}', "");
+    return template.replace('{table}', tableName).replace('{date}', date).replace('{user}', '');
   }
   const btn = document.getElementById('exportBtn');
-  if(btn){
-    btn.addEventListener('click', async function(){
-      try{
+  if(btn) {
+    btn.addEventListener('click', async function() {
+      try {
         const html = document.documentElement.outerHTML;
-        if(html.length > 2000000){ alert('Export refused: html too large'); return; }
-        if(window.Worker){
-          const workerPath = "assets" + '/worker.js';
-          try{
-            const worker = new Worker(workerPath);
-            if(worker){
-              worker.postMessage({html: html, format: 'pdf'});
-              worker.onmessage = function(e){ console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
-            } else { alert('Worker not available'); }
-          }catch(e){ alert('Worker not available'); }
-        } else { alert('Export worker not supported in this environment.'); }
-      } catch(err){ console.warn('Export failed', err); alert('Export worker not available. See console for details.'); }
+        if(html.length > 2000000) {
+          alert('Export refused: html too large');
+          return;
+        }
+        if(window.Worker) {
+          const worker = new Worker((function(){
+            try{ return 'assets/worker.js'; }catch(e){ return null; }
+          })());
+          if(worker){
+            worker.postMessage({html:html, format:'pdf'});
+            worker.onmessage = function(e){ console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+          } else {
+            alert('Worker not available');
+          }
+        } else {
+          alert('Export worker not supported in this environment.');
+        }
+      } catch(err) {
+        console.warn('Export failed', err);
+        alert('Export worker not available. See console for details.');
+      }
     });
   }
 })();

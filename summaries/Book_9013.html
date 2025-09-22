@@ -4,14 +4,21 @@
 <meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
 <title>Tables Viewer v2.1</title>
 <style>:root{--main-header-height:56px;}</style>
-<link rel="stylesheet" href="assets/style.css?v=1758538518">
-<link rel="stylesheet" href="assets/overrides.css?v=1758538518">
-</head>
-<body>
+<link rel="stylesheet" href="assets/style.css?v=1758553258">
+<link rel="stylesheet" href="assets/overrides.css?v=1758553258">
+</head><body>
 <div id="tables-viewer" role="region" aria-label="Tables viewer">
-<div id="stickyMainHeader"><div id="tv-header"><div><h1>Tables Viewer v2.1</h1></div><div style="display:flex;gap:8px;align-items:center;"><input id="searchBox" type="search" placeholder="Search" aria-label="Search tables" style="min-width:420px; width:44ch;"/><button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button><button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button><button id="copyAllPlainBtn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button><button id="copyAllMdBtn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy all tables as markdown">Copy All Tables (Markdown)</button><button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset all tables">Reset All Tables</button></div></div></div>
-<div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1-title">Table 1</a></li></ul></div>
-
+<div id="stickyMainHeader">
+<div id="tv-header"><div><h1>Tables Viewer v2.1</h1></div><div style="display:flex;gap:8px;align-items:center;">
+<input id="searchBox" type="search" placeholder="Search" aria-label="Search tables" style="min-width:420px; width:44ch;"/>
+<button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button>
+<button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button>
+<button id="copyAllPlainBtn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button>
+<button id="copyAllMdBtn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy all tables as markdown">Copy All Tables (Markdown)</button>
+<button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset all tables">Reset All Tables</button>
+</div></div>
+<noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
+<div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1-title">Table 1</a></li></ul></div></div>
 <div class="table-wrapper" id="Table1"><h3 id="Table1-title">Table 1</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button onclick="copyTablePlain(this)">Copy Plain Table</button><button onclick="copyTableMarkdown(this)">Copy Markdown Table</button></div><div style="display:flex; align-items:center;"><button class="toggle-table-btn" onclick="toggleTable(this)">Collapse Table</button></div></div><table><thead><tr>
         <th style="width:28.57%;" onclick="sortTableByColumn(0,0)" role="button" aria-label="Sort by **Module**">
           <div class="th-with-sort">
@@ -44,34 +51,47 @@
 </tbody></table></div>
   <div class='row-count'></div>
 </div>
+<script src="assets/script.js?v=1758553258" defer></script>
+<script src="assets/worker.js?v=1758553258" defer></script>
 
-</div>
-<script src="assets/script.js?v=1758538518" defer></script>
-<script src="assets/worker.js?v=1758538518" defer></script>
 <script>
 (function(){
   const template = "{table}_{date}";
-  function formatName(tableName){
+  function formatName(tableName) {
     const date = (new Date()).toISOString().slice(0,10);
-    return template.replace('{table}', tableName).replace('{date}', date).replace('{user}', "");
+    return template.replace('{table}', tableName).replace('{date}', date).replace('{user}', '');
   }
   const btn = document.getElementById('exportBtn');
-  if(btn){
-    btn.addEventListener('click', async function(){
-      try{
+  if(btn) {
+    btn.addEventListener('click', async function() {
+      try {
         const html = document.documentElement.outerHTML;
-        if(html.length > 2000000){ alert('Export refused: html too large'); return; }
-        if(window.Worker){
-          const worker = new Worker((function(){ try{ return 'assets/worker.js'; }catch(e){ return null; } })());
+        if(html.length > 2000000) {
+          alert('Export refused: html too large');
+          return;
+        }
+        if(window.Worker) {
+          const worker = new Worker((function(){
+            try{ return 'assets/worker.js'; }catch(e){ return null; }
+          })());
           if(worker){
             worker.postMessage({html:html, format:'pdf'});
             worker.onmessage = function(e){ console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
-          } else { alert('Worker not available'); }
-        } else { alert('Export worker not supported in this environment.'); }
-      } catch(err){ console.warn('Export failed', err); alert('Export worker not available. See console for details.'); }
+          } else {
+            alert('Worker not available');
+          }
+        } else {
+          alert('Export worker not supported in this environment.');
+        }
+      } catch(err) {
+        console.warn('Export failed', err);
+        alert('Export worker not available. See console for details.');
+      }
     });
   }
 })();
 </script>
+
+</div>
 </body>
 </html>
