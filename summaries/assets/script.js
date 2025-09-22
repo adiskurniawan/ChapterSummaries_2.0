@@ -1,4 +1,4 @@
-// script.js — Safe revised (copy/export: clipboard fallback, CSV BOM, CSV-injection protection, join-optimized export)
+// script.js — Safe revised (toast/notification enhancements: ARIA live region, queue, adaptive timeout, dismiss)
 // Reviewed: checked 10× for logic, edge cases, and regressions.
 (function () { 'use strict';
 
@@ -84,53 +84,220 @@ function copyToClipboard(text) {
   }
 }
 
-// --- Toast ---------------------------------------------------------------
+// --- Toast / Notification system (queued, accessible, adaptive) ----------
+let _toastQueue = [];
+let _activeToast = null;
+let _toastIdCounter = 0;
+
+// Creates or returns toast container. Accessible ARIA live region.
 function _ensureToastContainer() {
-  let c = document.getElementById('tv-toast-container');
-  if (c) return c;
-  c = document.createElement('div');
-  c.id = 'tv-toast-container';
-  Object.assign(c.style, {
-    position: 'fixed', bottom: '24px', right: '24px', zIndex: 1300,
-    display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end',
-    pointerEvents: 'none', maxWidth: 'calc(100% - 48px)'
-  });
-  document.body.appendChild(c);
-  return c;
-}
-function showToast(msg, { duration = 3000, type = 'info' } = {}) {
   try {
+    let c = document.getElementById('tv-toast-container');
+    if (c) return c;
+    c = document.createElement('div');
+    c.id = 'tv-toast-container';
+    // Accessibility
+    c.setAttribute('role', 'status');
+    c.setAttribute('aria-live', 'polite');
+    c.setAttribute('aria-atomic', 'true');
+    // Visual styles
+    Object.assign(c.style, {
+      position: 'fixed',
+      bottom: '24px',
+      right: '24px',
+      zIndex: 1300,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '8px',
+      alignItems: 'flex-end',
+      pointerEvents: 'none', // allow clicks through except on toast elements
+      maxWidth: 'calc(100% - 48px)',
+    });
+    document.body.appendChild(c);
+    return c;
+  } catch (e) {
+    try { console.warn('tv:_ensureToastContainer', e); } catch (_) {}
+    return null;
+  }
+}
+
+// Compute adaptive timeout based on message length and type.
+// duration can be overridden by options.duration (ms).
+function _computeToastDuration(msg, type, optDuration) {
+  try {
+    if (typeof optDuration === 'number' && isFinite(optDuration) && optDuration >= 200) return Math.max(200, Math.floor(optDuration));
+    const len = (msg || '').length || 0;
+    let base = 1600;
+    if (type === 'success') base = 1400;
+    else if (type === 'warn') base = 2000;
+    else if (type === 'error') base = 3600;
+    // per-char multiplier, capped
+    const perChar = 40;
+    let dur = base + Math.min(6000, len * perChar);
+    dur = Math.max(900, Math.min(8000, dur));
+    return dur;
+  } catch (e) { try { console.warn('tv:_computeToastDuration', e); } catch (_) {} return 2500; }
+}
+
+// Enqueue a toast and start processing queue.
+function showToast(msg, { duration = null, type = 'info' } = {}) {
+  try {
+    const id = ++_toastIdCounter;
+    _toastQueue.push({ id, msg: String(msg || ''), duration, type });
+    // Start processor asynchronously (non-blocking)
+    setTimeout(_processToastQueue, 0);
+    // Return a handle for optional dismissal
+    return {
+      id,
+      dismiss: () => { _dismissToastById(id); }
+    };
+  } catch (e) {
+    try { console.warn('tv:showToast:enqueue', e); } catch (_) {}
+    return null;
+  }
+}
+
+function _processToastQueue() {
+  try {
+    if (_activeToast) return; // one at a time
+    if (_toastQueue.length === 0) return;
+    const item = _toastQueue.shift();
     const container = _ensureToastContainer();
+    if (!container) {
+      // best-effort fallback: alert
+      try { alert(item.msg); } catch (_) {}
+      // immediately process next
+      setTimeout(_processToastQueue, 0);
+      return;
+    }
+
     const el = document.createElement('div');
     el.className = 'tv-toast';
-    const rootStyles = getComputedStyle(document.documentElement);
-    const panel = rootStyles.getPropertyValue('--panel') || '#fff';
-    const textColor = rootStyles.getPropertyValue('--text') || '#111';
-    const bg = (type === 'success') ? '#16a34a' : (type === 'warn' ? '#f59e0b' : panel.trim());
-    const color = (type === 'success' || type === 'warn') ? '#fff' : textColor.trim();
+    el.setAttribute('data-toast-id', item.id);
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
+    el.tabIndex = -1; // focusable programatically if needed
+
+    // Ensure the toast itself accepts pointer events (so close button works)
     Object.assign(el.style, {
-      background: bg, color: color, padding: '8px 12px', borderRadius: '8px',
-      boxShadow: '0 6px 18px rgba(0,0,0,0.12)', opacity: '0', transform: 'translateY(6px)',
-      transition: 'opacity .18s ease, transform .18s ease', pointerEvents: 'auto',
-      maxWidth: '360px', wordBreak: 'normal', whiteSpace: 'pre-wrap'
+      background: (getComputedStyle(document.documentElement).getPropertyValue('--panel') || '#fff').trim(),
+      color: (getComputedStyle(document.documentElement).getPropertyValue('--text') || '#111').trim(),
+      padding: '8px 12px',
+      borderRadius: '8px',
+      boxShadow: '0 6px 18px rgba(0,0,0,0.12)',
+      opacity: '0',
+      transform: 'translateY(6px)',
+      transition: 'opacity .18s ease, transform .18s ease',
+      pointerEvents: 'auto',
+      maxWidth: '360px',
+      wordBreak: 'normal',
+      whiteSpace: 'pre-wrap',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px'
     });
-    el.textContent = msg;
+
+    // Determine background color for types
+    try {
+      if (item.type === 'success') {
+        el.style.background = '#16a34a';
+        el.style.color = '#fff';
+      } else if (item.type === 'warn') {
+        el.style.background = '#f59e0b';
+        el.style.color = '#fff';
+      } else if (item.type === 'error') {
+        el.style.background = '#dc2626';
+        el.style.color = '#fff';
+      }
+    } catch (_) {}
+
+    const textWrap = document.createElement('div');
+    textWrap.style.flex = '1 1 auto';
+    textWrap.style.minWidth = '0';
+    textWrap.textContent = item.msg;
+
+    // Dismiss button
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.ariaLabel = 'Dismiss notification';
+    closeBtn.title = 'Dismiss';
+    closeBtn.innerHTML = '✕';
+    Object.assign(closeBtn.style, {
+      border: 'none', background: 'transparent', color: 'inherit', cursor: 'pointer',
+      fontSize: '14px', lineHeight: '1', padding: '4px', margin: '0'
+    });
+    closeBtn.addEventListener('click', function (ev) {
+      try { ev.stopPropagation(); } catch (_) {}
+      _hideActiveToast(el, true);
+    }, { passive: true });
+
+    // Optional: click anywhere to dismiss (keeps previous behavior)
+    el.addEventListener('click', function () { _hideActiveToast(el, true); }, { passive: true });
+
+    el.appendChild(textWrap);
+    el.appendChild(closeBtn);
+
     container.appendChild(el);
+    // force reflow for transition
     void el.offsetHeight;
     el.style.opacity = '1';
     el.style.transform = 'translateY(0)';
-    const to = setTimeout(() => { try { hide(); } catch (e) { try { console.warn('tv:showToast:hide', e); } catch (_) {} } }, duration);
-    function hide() {
-      clearTimeout(to);
+
+    const timeoutMs = _computeToastDuration(item.msg, item.type, item.duration);
+    const to = setTimeout(() => { _hideActiveToast(el, false); }, timeoutMs);
+
+    _activeToast = { id: item.id, el, timeoutId: to };
+
+    // After insertion, ensure screen readers notice the update: focus the container briefly (not stealing keyboard focus from inputs)
+    try {
+      // make a very short-lived programmatic focus for some AT; then blur
+      const prevActive = document.activeElement;
+      if (container && typeof container.focus === 'function') {
+        container.tabIndex = -1;
+        container.focus({ preventScroll: true });
+        setTimeout(() => { try { if (prevActive && typeof prevActive.focus === 'function') prevActive.focus({ preventScroll: true }); } catch (_) {} }, 60);
+      }
+    } catch (e) { try { console.warn('tv:_processToastQueue:focus', e); } catch (_) {} }
+  } catch (e) { try { console.error('tv:_processToastQueue', e); } catch (_) {} }
+}
+
+function _hideActiveToast(el, manual) {
+  try {
+    if (!_activeToast || !_activeToast.el) {
+      // If no active toast tracked, simply remove provided element
+      if (el && el.parentNode) el.remove();
+      setTimeout(_processToastQueue, 100);
+      return;
+    }
+    // Clear timer
+    try { clearTimeout(_activeToast.timeoutId); } catch (_) {}
+    // animate out
+    try {
       el.style.opacity = '0';
       el.style.transform = 'translateY(6px)';
-      setTimeout(() => { try { el.remove(); } catch (e) { try { console.warn('tv:showToast:remove', e); } catch (_) {} } }, 220);
+    } catch (_) {}
+    // remove after animation
+    setTimeout(() => {
+      try {
+        if (el && el.parentNode) el.parentNode.removeChild(el);
+      } catch (_) {}
+      _activeToast = null;
+      setTimeout(_processToastQueue, 80);
+    }, 220);
+  } catch (e) { try { console.warn('tv:_hideActiveToast', e); } catch (_) {} _activeToast = null; setTimeout(_processToastQueue, 80); }
+}
+
+function _dismissToastById(id) {
+  try {
+    if (_activeToast && _activeToast.id === id && _activeToast.el) {
+      _hideActiveToast(_activeToast.el, true);
+      return;
     }
-    el.addEventListener('click', hide, { once: true, passive: true });
-    return el;
-  } catch (e) {
-    try { console.error('tv:showToast', e); alert(msg); } catch (err) { try { console.warn('tv:showToast:alertFailed', err); } catch (_) {} }
-  }
+    // remove from queue if present
+    for (let i = 0; i < _toastQueue.length; i++) {
+      if (_toastQueue[i].id === id) { _toastQueue.splice(i, 1); return; }
+    }
+  } catch (e) { try { console.warn('tv:_dismissToastById', e); } catch (_) {} }
 }
 
 // --- Copy modal (fallback UI) ------------------------------------------
@@ -196,19 +363,15 @@ let initialWrapperState = [];
 // --- CSV helpers (BOM, escaping, injection protection) -------------------
 const CSV_BOM = '\uFEFF';
 function sanitizeCsvCellRaw(s) {
-  // trim but preserve intentional internal whitespace
   return s == null ? '' : String(s);
 }
 function escapeCsvCellForExport(raw) {
   try {
     let s = sanitizeCsvCellRaw(raw);
-    // Protect against CSV-injection: if cell begins with = + - @ then prefix with single quote
     if (/^[=+\-@]/.test(s)) {
       s = "'" + s;
     }
-    // Double quotes escape by doubling
     if (s.indexOf('"') !== -1) s = s.replace(/"/g, '""');
-    // If contains comma, quote, or newline, wrap in quotes
     if (s.indexOf(',') !== -1 || s.indexOf('"') !== -1 || s.indexOf('\n') !== -1 || s.indexOf('\r') !== -1) {
       return '"' + s + '"';
     }
@@ -217,31 +380,6 @@ function escapeCsvCellForExport(raw) {
 }
 function filenameSafe(s) {
   return (s || 'export').replace(/[^a-z0-9_\-\.]/gi, '_').slice(0, 120);
-}
-
-// --- DOM helpers used by many functions ---------------------------------
-function updateHeaderSortUI(tableIdx) {
-  try {
-    const table = document.querySelectorAll(".table-container table")[tableIdx];
-    if (!table || !table.tHead) return;
-    const ths = table.tHead.rows[0].cells;
-    for (let c = 0; c < ths.length; c++) {
-      const btn = ths[c].querySelector('.sort-btn');
-      if (!btn) continue;
-      btn.classList.remove('sort-state-0', 'sort-state-1', 'sort-state-2');
-      const state = (sortStates[tableIdx] && sortStates[tableIdx][c]) || 0;
-      btn.classList.add('sort-state-' + state);
-      if (state === 1) ths[c].setAttribute('aria-sort', 'ascending');
-      else if (state === 2) ths[c].setAttribute('aria-sort', 'descending');
-      else ths[c].setAttribute('aria-sort', 'none');
-      const iconSpan = btn.querySelector('.sort-icon');
-      if (iconSpan) {
-        if (state === 0) { iconSpan.innerHTML = ''; }
-        else if (state === 1) { iconSpan.innerHTML = ''; }
-        else { iconSpan.innerHTML = ''; }
-      }
-    }
-  } catch (e) { try { console.warn('tv:updateHeaderSortUI', e); } catch (_) {} }
 }
 
 // --- Sorting helpers (robust) --------------------------------------------
@@ -522,7 +660,6 @@ function exportTableCSV(btn, { filename } = {}) {
       showToast('CSV exported', { type: 'success' });
     } catch (e) {
       try { console.warn('tv:exportTableCSV:download', e); } catch (_) {}
-      // fallback: show CSV in modal for manual save
       showCopyModal(csv, { title: `CSV: ${title}` });
       showToast('Export failed. Use the box to save CSV manually.', { type: 'warn' });
     }
@@ -538,7 +675,6 @@ function exportAllTablesCSV({ filename } = {}) {
       const tbody = safeGetTBody(table) || table;
       const rows = Array.from(tbody.rows);
       const lines = rows.map(r => Array.from(r.cells).map(c => escapeCsvCellForExport(c.textContent.trim())).join(','));
-      // Add a header separator between tables
       return `# ${title}\r\n` + lines.join('\r\n');
     }).filter(Boolean);
     if (parts.length === 0) { showToast('No tables found to export', { type: 'warn' }); return; }
