@@ -1,5 +1,6 @@
 // assets/script.js — Merged, carefully checked (queued toasts, robust clipboard, copy modal, CSV export, stable sorting, normalized search)
 // Revised: do NOT inject per-table toolbar; attach safe handlers to server-rendered buttons when missing.
+// XLSX export integrated with SheetJS when available; graceful fallback included.
 
 (function () {
   'use strict';
@@ -608,29 +609,49 @@
         aoa.push(row);
       });
 
+      if (aoa.length === 0) {
+        showToast('Table empty', { type: 'warn' });
+        return;
+      }
+
       const baseName = (filename || table.closest('.table-wrapper')?.querySelector('h3')?.textContent || 'table').replace(/[\/\\:*?"<>|]/g, '_');
       const safeName = baseName + '.xlsx';
 
       // If SheetJS is available, create a real .xlsx
-      if (window.XLSX && window.XLSX.utils && typeof window.XLSX.write === 'function') {
+      if (window.XLSX && window.XLSX.utils) {
         try {
-          const wb = window.XLSX.utils.book_new();
+          const wb = (typeof window.XLSX.utils.book_new === 'function') ? window.XLSX.utils.book_new() : { SheetNames: [], Sheets: {} };
           const ws = window.XLSX.utils.aoa_to_sheet(aoa);
-          window.XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-          const wbout = window.XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-          const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = safeName;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          URL.revokeObjectURL(url);
-          showToast('XLSX exported', { type: 'success' });
-          return;
+          if (typeof window.XLSX.utils.book_append_sheet === 'function') {
+            window.XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+          } else {
+            wb.SheetNames.push('Sheet1');
+            wb.Sheets['Sheet1'] = ws;
+          }
+
+          if (typeof window.XLSX.writeFile === 'function') {
+            window.XLSX.writeFile(wb, safeName);
+            showToast('XLSX exported', { type: 'success' });
+            return;
+          }
+
+          // fallback write to ArrayBuffer then download
+          if (typeof window.XLSX.write === 'function') {
+            const wbout = window.XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+            const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = safeName;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            showToast('XLSX exported', { type: 'success' });
+            return;
+          }
         } catch (err) {
-          console.error('xlsx write failed', err);
+          console.error('SheetJS export failed', err);
           // fall through to fallback
         }
       }
