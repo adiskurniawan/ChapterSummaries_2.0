@@ -557,7 +557,7 @@
     } catch (e) { showToast('CSV export failed', { type: 'warn' }); }
   }
 
-  // --- New export functions (JSON, XLS, PDF) ------------------------------
+  // --- New export functions (JSON, XLSX, PDF) -----------------------------
   function exportTableJSON(btn, { filename } = {}) {
     try {
       const table = getTableFromButton(btn);
@@ -567,7 +567,6 @@
       if (thead && thead.rows.length > 0) {
         headers = Array.from(thead.rows[0].cells).map(c => c.textContent.trim());
       } else {
-        // fallback: use first row cell count to generate generic keys
         const firstRow = table.rows[0];
         if (firstRow) headers = Array.from(firstRow.cells).map((c, i) => `Col${i+1}`);
       }
@@ -601,28 +600,64 @@
     try {
       const table = getTableFromButton(btn);
       if (!table) { showToast('No table found to export', { type: 'warn' }); return; }
-      const rows = [];
+
+      // Build array-of-arrays from table rows
+      const aoa = [];
       Array.from(table.querySelectorAll('tr')).forEach(tr => {
-        const cols = Array.from(tr.querySelectorAll('th,td')).map(td => {
-          const txt = (td.textContent || '').trim();
-          // escape double quotes for safety in some viewers
-          return '"' + txt.replace(/"/g, '""') + '"';
-        });
-        rows.push(cols.join('\t'));
+        const row = Array.from(tr.querySelectorAll('th,td')).map(td => (td.textContent || '').trim());
+        aoa.push(row);
       });
-      const tsv = rows.join('\n');
-      const safeName = (filename || table.closest('.table-wrapper')?.querySelector('h3')?.textContent || 'table').replace(/[\/\\:*?"<>|]/g, '_') + '.xls';
-      const blob = new Blob(["\uFEFF", tsv], { type: 'application/vnd.ms-excel;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = safeName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-      showToast('Table exported as XLS', { type: 'success' });
-    } catch (e) { console.error(e); showToast('Export XLS failed', { type: 'warn' }); }
+
+      const baseName = (filename || table.closest('.table-wrapper')?.querySelector('h3')?.textContent || 'table').replace(/[\/\\:*?"<>|]/g, '_');
+      const safeName = baseName + '.xlsx';
+
+      // If SheetJS is available, create a real .xlsx
+      if (window.XLSX && window.XLSX.utils && typeof window.XLSX.write === 'function') {
+        try {
+          const wb = window.XLSX.utils.book_new();
+          const ws = window.XLSX.utils.aoa_to_sheet(aoa);
+          window.XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+          const wbout = window.XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+          const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = safeName;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+          showToast('XLSX exported', { type: 'success' });
+          return;
+        } catch (err) {
+          console.error('xlsx write failed', err);
+          // fall through to fallback
+        }
+      }
+
+      // Fallback: TSV content but saved with .xlsx extension; warn user
+      try {
+        const rows = aoa.map(r => r.map(v => '"' + (String(v || '').replace(/"/g, '""')) + '"').join('\t'));
+        const tsv = rows.join('\n');
+        const blob = new Blob(["\uFEFF", tsv], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = safeName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        showToast('XLSX exported (fallback TSV). Install assets/xlsx.full.min.js for true .xlsx support.', { type: 'warn' });
+        return;
+      } catch (err2) {
+        console.error('xlsx fallback failed', err2);
+        showToast('Export XLSX failed', { type: 'warn' });
+      }
+    } catch (e) {
+      console.error(e);
+      showToast('Export XLSX failed', { type: 'warn' });
+    }
   }
 
   function exportTablePDF(btn, { filename } = {}) {
@@ -648,7 +683,6 @@
             ${table.outerHTML}
           </body>
         </html>`;
-      // open printable window and trigger print. This is zero-dependency and works reliably in browsers.
       const w = window.open('', '_blank');
       if (!w) { showToast('Unable to open print window', { type: 'warn' }); return; }
       w.document.open();
@@ -937,7 +971,7 @@
             { sel: '.copy-markdown-btn', fn: copyTableMarkdown },
             { sel: '.export-csv-btn', fn: exportTableCSV },
             { sel: '.export-json-btn', fn: exportTableJSON },
-            { sel: '.export-xls-btn', fn: exportTableXLSX },
+            { sel: '.export-xlsx-btn', fn: exportTableXLSX },
             { sel: '.export-pdf-btn', fn: exportTablePDF },
             { sel: '.export-markdown-btn', fn: copyTableMarkdown }
           ];
