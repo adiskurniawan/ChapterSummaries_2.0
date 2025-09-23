@@ -4,8 +4,8 @@
 <meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
 <title>Tables Viewer v2.1</title>
 <style>:root{--main-header-height:56px;}</style>
-<link rel="stylesheet" href="assets/style.css?v=1758615669">
-<link rel="stylesheet" href="assets/overrides.css?v=1758615669">
+<link rel="stylesheet" href="assets/style.css?v=1758623096">
+<link rel="stylesheet" href="assets/overrides.css?v=1758623096">
 </head><body>
 <div id="tables-viewer" role="region" aria-label="Tables viewer">
 <div id="stickyMainHeader">
@@ -19,23 +19,7 @@
 </div></div>
 <noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
 <div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#table-1">Table 1</a></li></ul></div></div>
-<div class="table-wrapper" data-table-id="table-1"><h3 id="table-1">Table 1</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button type="button" class="copy-plain-btn" data-action="copy-plain" onclick="copyTablePlain(this)">Copy Plain Table</button><button type="button" class="copy-markdown-btn" data-action="copy-markdown" onclick="copyTableMarkdown(this)">Copy Markdown Table</button><button type="button" class="export-csv-btn" data-action="export-csv" onclick="exportTableCSV(this)">Export CSV</button><button type="button" class="export-json-btn" data-action="export-json" onclick="exportTableJSON(this)">Export JSON</button><button type="button" class="export-xlsx-btn" data-action="export-xlsx" onclick="exportTableXLSX(this)">Export XLSX</button><button type="button" class="export-pdf-btn" data-action="export-pdf" onclick="exportTablePDF(this)">Export PDF</button></div><div style="display:flex; align-items:center;"><button type="button" class="toggle-table-btn" data-action="toggle-collapse" onclick="toggleTable(this)">Collapse Table</button></div></div><table class="tv-table" role="table"><thead><tr>
-        <th style="width:28.57%;" onclick="sortTableByColumn(0,0)" role="button" aria-label="Sort by Issue (observed)">
-          <div class="th-with-sort">
-            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Issue (observed)</div>
-            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,0, this)" title="Toggle sort" aria-label="Toggle sort">
-              <span class="sort-icon" aria-hidden="true"></span>
-            </button>
-          </div>
-        </th>
-        <th style="width:71.43%;" onclick="sortTableByColumn(0,1)" role="button" aria-label="Sort by Repair for generator (what .py must do)">
-          <div class="th-with-sort">
-            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Repair for generator (what .py must do)</div>
-            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,1, this)" title="Toggle sort" aria-label="Toggle sort">
-              <span class="sort-icon" aria-hidden="true"></span>
-            </button>
-          </div>
-        </th></tr></thead><tbody><tr><td data-label="Issue (observed)"><p><strong>Missing `<title>`</strong></p></td><td data-label="Repair for generator (what .py must do)"><p>Insert `<title>` into `<head>` (use page title variable).</p></td></tr>
+<div class="table-wrapper" data-table-id="table-1"><h3 id="table-1">Table 1</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button type="button" class="copy-plain-btn" data-action="copy-plain" onclick="copyTablePlain(this)">Copy Plain Table</button><button type="button" class="copy-markdown-btn" data-action="copy-markdown" onclick="copyTableMarkdown(this)">Copy Markdown Table</button><button type="button" class="export-csv-btn" data-action="export-csv" onclick="exportTableCSV(this)">Export CSV</button><button type="button" class="export-json-btn" data-action="export-json" onclick="exportTableJSON(this)">Export JSON</button><button type="button" class="export-xlsx-btn" data-action="export-xlsx" onclick="exportTableXLSX(this)">Export XLSX</button><button type="button" class="export-pdf-btn" data-action="export-pdf" onclick="exportTablePDF(this)">Export PDF</button><button type="button" class="export-markdown-btn" data-action="export-markdown" onclick="exportTableMarkdown(this)">Export Markdown</button></div><div style="display:flex; align-items:center;"><button type="button" class="toggle-table-btn" data-action="toggle-collapse" onclick="toggleTable(this)">Collapse Table</button></div></div><table class="tv-table" role="table"><thead><tr><th style="width:28.57%;" role="button" aria-label="Sort by Issue (observed)"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Issue (observed)</div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th><th style="width:71.43%;" role="button" aria-label="Sort by Repair for generator (what .py must do)"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Repair for generator (what .py must do)</div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th></tr></thead><tbody><tr><td data-label="Issue (observed)"><p><strong>Missing `<title>`</strong></p></td><td data-label="Repair for generator (what .py must do)"><p>Insert `<title>` into `<head>` (use page title variable).</p></td></tr>
 <tr><td data-label="Issue (observed)"><p><strong>`data-label` contains raw HTML (`"Summary"`)</strong></p></td><td data-label="Repair for generator (what .py must do)"><p>Escape or serialize labels as plain text. Use `html.escape()` before writing into `data-label`.</p></td></tr>
 <tr><td data-label="Issue (observed)"><p><strong>Buttons lack `type="button"`</strong></p></td><td data-label="Repair for generator (what .py must do)"><p>Always emit `type="button"` for `<button>` to avoid accidental form submits.</p></td></tr>
 <tr><td data-label="Issue (observed)"><p><strong>Inline `onclick` with hard-coded table indices</strong></p></td><td data-label="Repair for generator (what .py must do)"><p>Emit `data-table-index` and `data-col-index` attributes instead of hard-coded JS calls. Attach listeners from `assets/script.js` (no inline handlers).</p></td></tr>
@@ -55,9 +39,9 @@
 </tbody></table></div>
   <div class='row-count'></div>
 </div>
-<script src="assets/xlsx.full.min.js?v=1758615669" defer></script>
-<script src="assets/script.js?v=1758615669" defer></script>
-<script src="assets/worker.js?v=1758615669" defer></script>
+<script src="assets/xlsx.full.min.js?v=1758623096" defer></script>
+<script src="assets/script.js?v=1758623096" defer></script>
+<script src="assets/worker.js?v=1758623096" defer></script>
 
 <script>
 (function(){

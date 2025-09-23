@@ -4,8 +4,8 @@
 <meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
 <title>Tables Viewer v2.1</title>
 <style>:root{--main-header-height:56px;}</style>
-<link rel="stylesheet" href="assets/style.css?v=1758615669">
-<link rel="stylesheet" href="assets/overrides.css?v=1758615669">
+<link rel="stylesheet" href="assets/style.css?v=1758623096">
+<link rel="stylesheet" href="assets/overrides.css?v=1758623096">
 </head><body>
 <div id="tables-viewer" role="region" aria-label="Tables viewer">
 <div id="stickyMainHeader">
@@ -19,23 +19,7 @@
 </div></div>
 <noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
 <div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#table-1">Table 1</a></li></ul></div></div>
-<div class="table-wrapper" data-table-id="table-1"><h3 id="table-1">Table 1</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button type="button" class="copy-plain-btn" data-action="copy-plain" onclick="copyTablePlain(this)">Copy Plain Table</button><button type="button" class="copy-markdown-btn" data-action="copy-markdown" onclick="copyTableMarkdown(this)">Copy Markdown Table</button><button type="button" class="export-csv-btn" data-action="export-csv" onclick="exportTableCSV(this)">Export CSV</button><button type="button" class="export-json-btn" data-action="export-json" onclick="exportTableJSON(this)">Export JSON</button><button type="button" class="export-xlsx-btn" data-action="export-xlsx" onclick="exportTableXLSX(this)">Export XLSX</button><button type="button" class="export-pdf-btn" data-action="export-pdf" onclick="exportTablePDF(this)">Export PDF</button></div><div style="display:flex; align-items:center;"><button type="button" class="toggle-table-btn" data-action="toggle-collapse" onclick="toggleTable(this)">Collapse Table</button></div></div><table class="tv-table" role="table"><thead><tr>
-        <th style="width:28.57%;" onclick="sortTableByColumn(0,0)" role="button" aria-label="Sort by **Feature / Component**">
-          <div class="th-with-sort">
-            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Feature / Component</strong></div>
-            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,0, this)" title="Toggle sort" aria-label="Toggle sort">
-              <span class="sort-icon" aria-hidden="true"></span>
-            </button>
-          </div>
-        </th>
-        <th style="width:71.43%;" onclick="sortTableByColumn(0,1)" role="button" aria-label="Sort by **Explanation / Notes**">
-          <div class="th-with-sort">
-            <div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Explanation / Notes</strong></div>
-            <button class="sort-btn sort-state-0" onclick="event.stopPropagation(); headerSortButtonClicked(0,1, this)" title="Toggle sort" aria-label="Toggle sort">
-              <span class="sort-icon" aria-hidden="true"></span>
-            </button>
-          </div>
-        </th></tr></thead><tbody><tr><td data-label="Feature / Component"><p><strong>HTML Structure</strong></p></td><td data-label="Explanation / Notes"><p>`<!doctype html>` with `<html lang="en">` and `<head>` containing meta tags for UTF-8 charset, viewport, and title `PasteToTable <br>- Self-contained`.</p></td></tr>
+<div class="table-wrapper" data-table-id="table-1"><h3 id="table-1">Table 1</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button type="button" class="copy-plain-btn" data-action="copy-plain" onclick="copyTablePlain(this)">Copy Plain Table</button><button type="button" class="copy-markdown-btn" data-action="copy-markdown" onclick="copyTableMarkdown(this)">Copy Markdown Table</button><button type="button" class="export-csv-btn" data-action="export-csv" onclick="exportTableCSV(this)">Export CSV</button><button type="button" class="export-json-btn" data-action="export-json" onclick="exportTableJSON(this)">Export JSON</button><button type="button" class="export-xlsx-btn" data-action="export-xlsx" onclick="exportTableXLSX(this)">Export XLSX</button><button type="button" class="export-pdf-btn" data-action="export-pdf" onclick="exportTablePDF(this)">Export PDF</button><button type="button" class="export-markdown-btn" data-action="export-markdown" onclick="exportTableMarkdown(this)">Export Markdown</button></div><div style="display:flex; align-items:center;"><button type="button" class="toggle-table-btn" data-action="toggle-collapse" onclick="toggleTable(this)">Collapse Table</button></div></div><table class="tv-table" role="table"><thead><tr><th style="width:28.57%;" role="button" aria-label="Sort by **Feature / Component**"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Feature / Component</strong></div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th><th style="width:71.43%;" role="button" aria-label="Sort by **Explanation / Notes**"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Explanation / Notes</strong></div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th></tr></thead><tbody><tr><td data-label="Feature / Component"><p><strong>HTML Structure</strong></p></td><td data-label="Explanation / Notes"><p>`<!doctype html>` with `<html lang="en">` and `<head>` containing meta tags for UTF-8 charset, viewport, and title `PasteToTable <br>- Self-contained`.</p></td></tr>
 <tr><td data-label="Feature / Component"><p><strong>Inlined CSS</strong></p></td><td data-label="Explanation / Notes"><p>Entire `assets/style.css` is embedded in `<style>` for self-contained functionality. Includes CSS variables for light/dark theme, table styling, headers, buttons, TOC, sticky headers, responsive behavior, row highlighting, nested lists, code blocks, and accessibility outlines.</p></td></tr>
 <tr><td data-label="Feature / Component"><p><strong>CSS Variables</strong></p></td><td data-label="Explanation / Notes"><p>`:root` defines main colors: background, text, panel, borders, hover, highlight, current row, buttons, muted, TOC links. `data-theme="dark"` overrides colors for dark mode.</p></td></tr>
 <tr><td data-label="Feature / Component"><p><strong>Base Layout</strong></p></td><td data-label="Explanation / Notes"><p>`html, body` zero margin, font `Inter`, size `15px`, line-height `1.45`. Links inherit color, no underline. Buttons have uniform styling: padding, border-radius, cursor pointer, inline-flex alignment.</p></td></tr>
@@ -60,9 +44,9 @@
 </tbody></table></div>
   <div class='row-count'></div>
 </div>
-<script src="assets/xlsx.full.min.js?v=1758615669" defer></script>
-<script src="assets/script.js?v=1758615669" defer></script>
-<script src="assets/worker.js?v=1758615669" defer></script>
+<script src="assets/xlsx.full.min.js?v=1758623096" defer></script>
+<script src="assets/script.js?v=1758623096" defer></script>
+<script src="assets/worker.js?v=1758623096" defer></script>
 
 <script>
 (function(){
