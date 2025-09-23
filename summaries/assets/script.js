@@ -366,6 +366,7 @@
     } catch (e) { /* silent */ }
   }
 
+  // --- Sorting and toggles ------------------------------------------------
   function sortTableByColumn(tableIdx, colIdx) {
     try {
       const table = document.querySelectorAll(".table-container table")[tableIdx];
@@ -558,7 +559,90 @@
     } catch (e) { showToast('CSV export failed', { type: 'warn' }); }
   }
 
-  // --- New export functions (JSON, XLSX, PDF) -----------------------------
+  // --- New export functions (Markdown, JSON, XLSX, PDF) ------------------
+  function exportTableMarkdown(btn, { filename } = {}) {
+    try {
+      const table = getTableFromButton(btn);
+      if (!table) { showToast('No table found to export', { type: 'warn' }); return; }
+      const title = table.closest('.table-wrapper')?.querySelector('h3')?.textContent || '';
+      const rows = Array.from(table.rows);
+      if (rows.length === 0) { showToast('Table empty', { type: 'warn' }); return; }
+
+      const headCells = Array.from(rows[0].cells).map(c => (c.textContent || '').trim());
+      const headerLine = '| ' + headCells.join(' | ') + ' |';
+      const sepLine = '| ' + headCells.map(() => '---').join(' | ') + ' |';
+
+      let md = '';
+      if (title) md += '**' + title + '**\n\n';
+      md += headerLine + '\n' + sepLine + '\n';
+      for (let i = 1; i < rows.length; i++) {
+        const rowCells = Array.from(rows[i].cells).map(c => {
+          const txt = (c.textContent || '').trim().replace(/\|/g, '\\|').replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\n/g, '<br>');
+          return txt;
+        });
+        md += '| ' + rowCells.join(' | ') + ' |\n';
+      }
+
+      const baseName = (filename || title || 'table').replace(/[\/\\:*?"<>|]/g, '_');
+      const safeName = baseName + '.md';
+      const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = safeName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast('Markdown exported', { type: 'success' });
+    } catch (e) {
+      console.error('exportTableMarkdown failed', e);
+      showToast('Export Markdown failed', { type: 'warn' });
+    }
+  }
+
+  function exportAllTablesMarkdown({ filename } = {}) {
+    try {
+      let md = '';
+      document.querySelectorAll(".table-wrapper").forEach((wrapper) => {
+        try {
+          const table = wrapper.querySelector('table');
+          if (!table) return;
+          const title = wrapper.querySelector('h3')?.textContent || '';
+          const rows = Array.from(table.rows);
+          if (!rows || rows.length === 0) return;
+          if (md) md += '\n\n';
+          if (title) md += '**' + title + '**\n\n';
+          const headCells = Array.from(rows[0].cells).map(c => (c.textContent || '').trim());
+          md += '| ' + headCells.join(' | ') + ' |\n';
+          md += '| ' + headCells.map(() => '---').join(' | ') + ' |\n';
+          for (let i = 1; i < rows.length; i++) {
+            const rowCells = Array.from(rows[i].cells).map(c => {
+              const txt = (c.textContent || '').trim().replace(/\|/g, '\\|').replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\n/g, '<br>');
+              return txt;
+            });
+            md += '| ' + rowCells.join(' | ') + ' |\n';
+          }
+        } catch (e) { /* ignore single table error */ }
+      });
+      if (!md) { showToast('No tables to export', { type: 'warn' }); return; }
+      const safeName = (filename || 'all_tables').replace(/[\/\\:*?"<>|]/g, '_') + '.md';
+      const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = safeName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast('All tables exported', { type: 'success' });
+    } catch (e) {
+      console.error('exportAllTablesMarkdown failed', e);
+      showToast('Export failed', { type: 'warn' });
+    }
+  }
+
   function exportTableJSON(btn, { filename } = {}) {
     try {
       const table = getTableFromButton(btn);
@@ -987,14 +1071,14 @@
       try {
         document.querySelectorAll('.table-wrapper').forEach(wrapper => {
           const handlers = [
-            { sel: '.toggle-table-btn', fn: toggleTable },
-            { sel: '.copy-plain-btn', fn: copyTablePlain },
-            { sel: '.copy-markdown-btn', fn: copyTableMarkdown },
-            { sel: '.export-csv-btn', fn: exportTableCSV },
-            { sel: '.export-json-btn', fn: exportTableJSON },
-            { sel: '.export-xlsx-btn', fn: exportTableXLSX },
-            { sel: '.export-pdf-btn', fn: exportTablePDF },
-            { sel: '.export-markdown-btn', fn: copyTableMarkdown }
+            { sel: '.toggle-table-btn, .toggle-table', fn: toggleTable },
+            { sel: '.copy-plain-btn, .copy-plain, .copy-plain-table', fn: copyTablePlain },
+            { sel: '.copy-markdown-btn, .copy-markdown, .copy-markdown-table', fn: copyTableMarkdown },
+            { sel: '.export-csv-btn, .export-csv, .export-csv-table', fn: exportTableCSV },
+            { sel: '.export-json-btn, .export-json, .export-json-table', fn: exportTableJSON },
+            { sel: '.export-xlsx-btn, .export-xlsx, .export-xlsx-table', fn: exportTableXLSX },
+            { sel: '.export-pdf-btn, .export-pdf, .export-pdf-table', fn: exportTablePDF },
+            { sel: '.export-markdown-btn, .export-markdown, .export-markdown-table', fn: exportTableMarkdown }
           ];
           handlers.forEach(h => {
             try {
@@ -1095,6 +1179,8 @@
   window.exportTableJSON = exportTableJSON;
   window.exportTableXLSX = exportTableXLSX;
   window.exportTablePDF = exportTablePDF;
+  window.exportTableMarkdown = exportTableMarkdown;
+  window.exportAllTablesMarkdown = exportAllTablesMarkdown;
   window.toggleMode = function () {
     try {
       const modeBtn = document.getElementById('modeBtn');
