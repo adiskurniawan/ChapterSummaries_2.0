@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Tables Viewer v2.1</title>
+<style>:root{--main-header-height:56px;}</style>
+<link rel="stylesheet" href="assets/style.css?v=1758701111">
+<link rel="stylesheet" href="assets/overrides.css?v=1758701111">
+</head><body>
+<div id="tables-viewer" role="region" aria-label="Tables viewer">
+<div id="stickyMainHeader">
+<div id="tv-header"><div><h1>Tables Viewer v2.1</h1></div><div style="display:flex;gap:8px;align-items:center;">
+<input id="searchBox" type="search" placeholder="Search" aria-label="Search tables" style="min-width:420px; width:44ch;"/>
+<button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button>
+<button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button>
+<button id="copyAllPlainBtn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button>
+<button id="copyAllMdBtn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy all tables as markdown">Copy All Tables (Markdown)</button>
+<button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset all tables">Reset All Tables</button>
+</div></div>
+<noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
+<div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#table-1">Table 1</a></li></ul></div></div>
+<div class="table-wrapper" data-table-id="table-1"><h3 id="table-1">Table 1</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button type="button" class="copy-plain-btn" data-action="copy-plain" onclick="copyTablePlain(this)">Copy Plain Table</button><button type="button" class="copy-markdown-btn" data-action="copy-markdown" onclick="copyTableMarkdown(this)">Copy Markdown Table</button><button type="button" class="export-csv-btn" data-action="export-csv" onclick="exportTableCSV(this)">Export CSV</button><button type="button" class="export-json-btn" data-action="export-json" onclick="exportTableJSON(this)">Export JSON</button><button type="button" class="export-xlsx-btn" data-action="export-xlsx" onclick="exportTableXLSX(this)">Export XLSX</button><button type="button" class="export-pdf-btn" data-action="export-pdf" onclick="exportTablePDF(this)">Export PDF</button><button type="button" class="export-markdown-btn" data-action="export-markdown" onclick="exportTableMarkdown(this)">Export Markdown</button></div><div style="display:flex; align-items:center;"><button type="button" class="toggle-table-btn" data-action="toggle-collapse" onclick="toggleTable(this)">Collapse Table</button></div></div><table class="tv-table" role="table"><thead><tr><th style="width:28.57%;" role="button" aria-label="Sort by **Feature / Component**"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Feature / Component</strong></div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th><th style="width:71.43%;" role="button" aria-label="Sort by **Explanation / Notes**"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Explanation / Notes</strong></div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th></tr></thead><tbody><tr><td data-label="Feature / Component"><p><strong>HTML Structure</strong></p></td><td data-label="Explanation / Notes"><p>`<!doctype html>` with `<html lang="en">` and `<head>` containing meta tags for UTF-8 charset, viewport, and title `PasteToTable <br>- Self-contained`.</p></td></tr>
+<tr><td data-label="Feature / Component"><p><strong>Inlined CSS</strong></p></td><td data-label="Explanation / Notes"><p>Entire `assets/style.css` is embedded in `<style>` for self-contained functionality. Includes CSS variables for light/dark theme, table styling, headers, buttons, TOC, sticky headers, responsive behavior, row highlighting, nested lists, code blocks, and accessibility outlines.</p></td></tr>
+<tr><td data-label="Feature / Component"><p><strong>CSS Variables</strong></p></td><td data-label="Explanation / Notes"><p>`:root` defines main colors: background, text, panel, borders, hover, highlight, current row, buttons, muted, TOC links. `data-theme="dark"` overrides colors for dark mode.</p></td></tr>
+<tr><td data-label="Feature / Component"><p><strong>Base Layout</strong></p></td><td data-label="Explanation / Notes"><p>`html, body` zero margin, font `Inter`, size `15px`, line-height `1.45`. Links inherit color, no underline. Buttons have uniform styling: padding, border-radius, cursor pointer, inline-flex alignment.</p></td></tr>
+<tr><td data-label="Feature / Component"><p><strong>Table Styling</strong></p></td><td data-label="Explanation / Notes"><p>`.table-container` makes tables horizontally scrollable. Tables are fixed layout, word-wrap, min-width `420px`. `thead th` sticky at top `48px`, sticky first column with shadow. Row striping and hover effects included. Nested lists styled for consistent bullets.</p></td></tr>
+<tr><td data-label="Feature / Component"><p><strong>Sticky Header</strong></p></td><td data-label="Explanation / Notes"><p>`#stickyMainHeader` contains `#tv-header` with left-aligned title, right-aligned controls. TOC bar `#tocBar` is scrollable and visually separate.</p></td></tr>
+<tr><td data-label="Feature / Component"><p><strong>Controls</strong></p></td><td data-label="Explanation / Notes"><p>Search input, Dark Mode toggle (`#modeBtn`), Collapse All (`#toggleAllBtn`), Reset (`#resetBtn`). Compact button sizing for small screens.</p></td></tr>
+<tr><td data-label="Feature / Component"><p><strong>Tables Section</strong></p></td><td data-label="Explanation / Notes"><p>`#tablesContainer` contains `.table-wrapper` with `.table-header-wrapper` (title + toggle), `.table-container` (actual table), row-count display, copy buttons (`Copy Plain`, `Copy Markdown`). Example table included.</p></td></tr>
+<tr><td data-label="Feature / Component"><p><strong>Back-to-Top Button</strong></p></td><td data-label="Explanation / Notes"><p>`#backToTop` fixed, hidden by default, shows up after scrolling. Smooth fade-in/out on hover.</p></td></tr>
+<tr><td data-label="Feature / Component"><p><strong>JavaScript (Self-contained)</strong></p></td><td data-label="Explanation / Notes"><p>Inlined `assets/script.js` manages: copy to clipboard, toast notifications, debounce, search/filtering, row highlighting, sorting, table collapse/expand, reset, back-to-top scroll.</p></td></tr>
+<tr><td data-label="Feature / Component"><p><strong>Toast Notifications</strong></p></td><td data-label="Explanation / Notes"><p>`&#95;ensureToastContainer()` creates container, `showToast(msg, options)` shows success/warn/info messages with auto-hide and click-to-dismiss.</p></td></tr>
+<tr><td data-label="Feature / Component"><p><strong>Clipboard Handling</strong></p></td><td data-label="Explanation / Notes"><p>`copyToClipboard()` handles modern async API and fallback with textarea + `execCommand`. `copyTablePlain`, `copyTableMarkdown`, `copyAllTablesPlain`, `copyAllTablesMarkdown` for table export.</p></td></tr>
+<tr><td data-label="Feature / Component"><p><strong>Table Sorting</strong></p></td><td data-label="Explanation / Notes"><p>`sortTableByColumn(tableIdx, colIdx)` sorts numeric or string values, toggles between ascending/descending/reset. `headerSortButtonClicked` triggers sort, updates icons (`sort-state-0/1/2`).</p></td></tr>
+<tr><td data-label="Feature / Component"><p><strong>Table Collapse / Expand</strong></p></td><td data-label="Explanation / Notes"><p>`toggleTable(btn)` collapses/expands a single table. `toggleAllTables()` collapses/expands all tables and updates button labels accordingly.</p></td></tr>
+<tr><td data-label="Feature / Component"><p><strong>Row Count Updates</strong></p></td><td data-label="Explanation / Notes"><p>`updateRowCounts()` updates `.row-count` for each table, shows `Showing X of Y rows` based on filtered/search results.</p></td></tr>
+<tr><td data-label="Feature / Component"><p><strong>Search Functionality</strong></p></td><td data-label="Explanation / Notes"><p>`searchTable()` filters tables by input, highlights matching cells, scrolls first match into view, works with virtualized tables if present.</p></td></tr>
+<tr><td data-label="Feature / Component"><p><strong>Initialization</strong></p></td><td data-label="Explanation / Notes"><p>`initTablesOnce()` wraps tables in `.table-container` if missing, saves original rows for reset, sets up sort states, updates toggle button texts, and prepares header UI.</p></td></tr>
+<tr><td data-label="Feature / Component"><p><strong>Responsive Behavior</strong></p></td><td data-label="Explanation / Notes"><p>Media queries adjust input width, padding, stacking of header elements, compact buttons, hiding less important buttons on very narrow screens, and TOC padding.</p></td></tr>
+<tr><td data-label="Feature / Component"><p><strong>Accessibility</strong></p></td><td data-label="Explanation / Notes"><p>Focus outlines on `a, button, input, select, textarea`, color adjustments in dark mode, semantic roles on headers/buttons.</p></td></tr>
+<tr><td data-label="Feature / Component"><p><strong>Nested Lists in Cells</strong></p></td><td data-label="Explanation / Notes"><p>`td ul/li` and `td ol/li` have consistent markers (`–` for ul, counter for ol), handle nested lists with proper indentation and color adjustments in dark mode.</p></td></tr>
+<tr><td data-label="Feature / Component"><p><strong>Inline Code</strong></p></td><td data-label="Explanation / Notes"><p>`td code` styled with monospace, background, padding, border-radius for readability inside tables.</p></td></tr>
+<tr><td data-label="Feature / Component"><p><strong>Prevent Overflow Issues</strong></p></td><td data-label="Explanation / Notes"><p>`#tables-viewer`, `#mainContent` `overflow: visible` to allow sticky positioning to function correctly.</p></td></tr>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+<script src="assets/xlsx.full.min.js?v=1758701111" defer></script>
+<script src="assets/script.js?v=1758701111" defer></script>
+<script src="assets/worker.js?v=1758701111" defer></script>
+
+<script>
+(function(){
+  const template = "{table}_{date}";
+  function formatName(tableName) {
+    const date = (new Date()).toISOString().slice(0,10);
+    return template.replace('{table}', tableName).replace('{date}', date).replace('{user}', '');
+  }
+  const btn = document.getElementById('exportBtn');
+  if(btn) {
+    btn.addEventListener('click', async function() {
+      try {
+        const html = document.documentElement.outerHTML;
+        if(html.length > 2000000) {
+          alert('Export refused: html too large');
+          return;
+        }
+        if(window.Worker) {
+          const worker = new Worker((function(){
+            try{ return 'assets/worker.js'; }catch(e){ return null; }
+          })());
+          if(worker){
+            worker.postMessage({html:html, format:'pdf'});
+            worker.onmessage = function(e){ console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+          } else {
+            alert('Worker not available');
+          }
+        } else {
+          alert('Export worker not supported in this environment.');
+        }
+      } catch(err) {
+        console.warn('Export failed', err);
+        alert('Export worker not available. See console for details.');
+      }
+    });
+  }
+})();
+</script>
+
+</div>
+</body>
+</html>

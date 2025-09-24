@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Tables Viewer v2.1</title>
+<style>:root{--main-header-height:56px;}</style>
+<link rel="stylesheet" href="assets/style.css?v=1758701112">
+<link rel="stylesheet" href="assets/overrides.css?v=1758701112">
+</head><body>
+<div id="tables-viewer" role="region" aria-label="Tables viewer">
+<div id="stickyMainHeader">
+<div id="tv-header"><div><h1>Tables Viewer v2.1</h1></div><div style="display:flex;gap:8px;align-items:center;">
+<input id="searchBox" type="search" placeholder="Search" aria-label="Search tables" style="min-width:420px; width:44ch;"/>
+<button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button>
+<button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button>
+<button id="copyAllPlainBtn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button>
+<button id="copyAllMdBtn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy all tables as markdown">Copy All Tables (Markdown)</button>
+<button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset all tables">Reset All Tables</button>
+</div></div>
+<noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
+<div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#table-1">Table 1</a></li></ul></div></div>
+<div class="table-wrapper" data-table-id="table-1"><h3 id="table-1">Table 1</h3><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button type="button" class="copy-plain-btn" data-action="copy-plain" onclick="copyTablePlain(this)">Copy Plain Table</button><button type="button" class="copy-markdown-btn" data-action="copy-markdown" onclick="copyTableMarkdown(this)">Copy Markdown Table</button><button type="button" class="export-csv-btn" data-action="export-csv" onclick="exportTableCSV(this)">Export CSV</button><button type="button" class="export-json-btn" data-action="export-json" onclick="exportTableJSON(this)">Export JSON</button><button type="button" class="export-xlsx-btn" data-action="export-xlsx" onclick="exportTableXLSX(this)">Export XLSX</button><button type="button" class="export-pdf-btn" data-action="export-pdf" onclick="exportTablePDF(this)">Export PDF</button><button type="button" class="export-markdown-btn" data-action="export-markdown" onclick="exportTableMarkdown(this)">Export Markdown</button></div><div style="display:flex; align-items:center;"><button type="button" class="toggle-table-btn" data-action="toggle-collapse" onclick="toggleTable(this)">Collapse Table</button></div></div><table class="tv-table" role="table"><thead><tr><th style="width:28.57%;" role="button" aria-label="Sort by **Interface element**"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Interface element</strong></div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th><th style="width:71.43%;" role="button" aria-label="Sort by **Cleaned analysis / findings**"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Cleaned analysis / findings</strong></div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th></tr></thead><tbody><tr><td data-label="Interface element"><p><strong>Page title / header</strong></p></td><td data-label="Cleaned analysis / findings"><p>`"Tables Viewer v2.1"` — clear product name and version at top. Indicates a dedicated viewer UI.</p></td></tr>
+<tr><td data-label="Interface element"><p><strong>Top control bar</strong></p></td><td data-label="Cleaned analysis / findings"><p>Buttons: <strong>Theme</strong>, <strong>Collapse All Tables</strong>, <strong>Copy All Tables (Plain Text)</strong>, <strong>Copy All Tables (Markdown)</strong>, <strong>Reset All Tables</strong>. <br>These are global controls intended for site-wide actions. Visible as inline controls on the header.</p></td></tr>
+<tr><td data-label="Interface element"><p><strong>JavaScript fallback notice</strong></p></td><td data-label="Cleaned analysis / findings"><p>Text: <em>"JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization."</em> <br>Page includes a static fallback message. UI supports an enhanced JS mode but serves content when JS is off.</p></td></tr>
+<tr><td data-label="Interface element"><p><strong>Table index / TOC</strong></p></td><td data-label="Cleaned analysis / findings"><p>A simple unordered list of links labeled `Table 1` .. `Table 10` (prefixed 0..9). <br>Serves as a quick navigator. Likely generated server-side or by build step as static anchors.</p></td></tr>
+<tr><td data-label="Interface element"><p><strong>Per-table heading format</strong></p></td><td data-label="Cleaned analysis / findings"><p>Each table is introduced with a heading like `### Table N`. <br>That suggests consistent H3 sectioning for table blocks in the HTML source.</p></td></tr>
+<tr><td data-label="Interface element"><p><strong>Per-table controls</strong></p></td><td data-label="Cleaned analysis / findings"><p>Each table block shows <strong>Copy Plain Table</strong>, <strong>Copy Markdown Table</strong>, and <strong>Collapse Table</strong> buttons. <br>These are localized actions per table. UI exposes both global and per-table copy/collapse.</p></td></tr>
+<tr><td data-label="Interface element"><p><strong>Content structure inside a table</strong></p></td><td data-label="Cleaned analysis / findings"><p>Two labeled sub-sections appear: <strong>Summary</strong> and <strong>Notes</strong>, followed by paragraph content. <br>Structure is uniform across tables (heading → controls → Summary → Notes → body).</p></td></tr>
+<tr><td data-label="Interface element"><p><strong>Virtualization hint</strong></p></td><td data-label="Cleaned analysis / findings"><p>The JS-disabled message explicitly references <em>virtualization</em> for large tables. <br>Implementation likely includes a virtualization/virtual-scroll module when JS is enabled. Check script for conditional rendering.</p></td></tr>
+<tr><td data-label="Interface element"><p><strong>Copy/export surface area</strong></p></td><td data-label="Cleaned analysis / findings"><p>UI provides copy-to-clipboard for single tables and for all tables in two formats (plain / markdown). <br>Large-volume copy operations should be implemented with chunking or downloads to avoid clipboard limits.</p></td></tr>
+<tr><td data-label="Interface element"><p><strong>Collapse behavior (observed)</strong></p></td><td data-label="Cleaned analysis / findings"><p>Collapse controls are present per table and globally. <br>Verify collapse only hides content and does not remove it from DOM to preserve accessibility and focus behavior.</p></td></tr>
+<tr><td data-label="Interface element"><p><strong>Accessibility (a11y) quick note</strong></p></td><td data-label="Cleaned analysis / findings"><p>Rendered text shows no visible keyboard hint strings. <br>Raw HTML attributes (aria-&#42;, roles, tabindex) were not visible in the rendered text snapshot. <br>Recommend audit of the HTML for ARIA roles, keyboard focus order, and skip-links. (Raw source inspection of HTML/JS recommended.)</p></td></tr>
+<tr><td data-label="Interface element"><p><strong>Responsive / mobile behavior</strong></p></td><td data-label="Cleaned analysis / findings"><p>No explicit mobile hints in rendered text. <br>Confirm CSS includes responsive breakpoints, and that per-table controls remain reachable on small screens (wrap or overflow handling).</p></td></tr>
+<tr><td data-label="Interface element"><p><strong>Performance risks</strong></p></td><td data-label="Cleaned analysis / findings"><p>Full-page "Copy All" may exceed browser clipboard memory for very large content. <br>Virtualization is noted but must be enabled in JS. <br>Long static pages can be slow to render on low-memory devices.</p></td></tr>
+<tr><td data-label="Interface element"><p><strong>Potential edge cases</strong></p></td><td data-label="Cleaned analysis / findings"><p><ul> <li>Deeply nested content or very long paragraphs could break layout. <br></li> <li>Collapse + copy combos may capture hidden text. <br></li> <li>Print mode not described; confirm print CSS.</li> </ul></p></td></tr>
+<tr><td data-label="Interface element"><p><strong>Suggested quick fixes</strong></p></td><td data-label="Cleaned analysis / findings"><p><ul> <li>Add ARIA labels and keyboard shortcuts for copy/collapse. <br></li> <li>Implement streaming/download for "Copy All" when content > X KB. <br></li> <li>Ensure virtualization loads on page ready and toggles based on viewport/size. <br></li> <li>Persist theme in localStorage and expose an accessible toggle.</li> </ul></p></td></tr>
+<tr><td data-label="Interface element"><p><strong>Developer checklist (where to inspect)</strong></p></td><td data-label="Cleaned analysis / findings"><p><ul> <li>Header control handlers (copyAll, collapseAll, resetAll). <br></li> <li>Per-table handlers (copyPlain, copyMd, collapse). <br></li> <li>Virtualization module and fallback. <br></li> <li>Theme code (localStorage usage). <br></li> <li>Accessibility attributes and keyboard events.</li> </ul></p></td></tr>
+<tr><td data-label="Interface element"><p><strong>Notes on evidence</strong></p></td><td data-label="Cleaned analysis / findings"><p>Visible strings in the rendered page confirm all items above: header controls, JS-disabled notice, TOC, per-table controls, and uniform Summary/Notes structure. <br>Use the page source for precise selectors and function names.</p></td></tr>
+<tr><td data-label="Interface element"><p><strong>Quick improvement priorities</strong></p></td><td data-label="Cleaned analysis / findings"><p>1) Add ARIA + keyboard navigation. <br>2) Make "Copy All" robust (stream or file). <br>3) Test virtualization for large datasets. <br>4) Save theme state. <br>5) Add unit tests for copy/collapse handlers.</p></td></tr>
+<tr><td data-label="Interface element"><p><strong>Source (page checked)</strong></p></td><td data-label="Cleaned analysis / findings"><p>`Book&#95;0002.html` on the site. <br>Full rendered content inspected.</p></td></tr>
+</tbody></table></div>
+  <div class='row-count'></div>
+</div>
+<script src="assets/xlsx.full.min.js?v=1758701112" defer></script>
+<script src="assets/script.js?v=1758701112" defer></script>
+<script src="assets/worker.js?v=1758701112" defer></script>
+
+<script>
+(function(){
+  const template = "{table}_{date}";
+  function formatName(tableName) {
+    const date = (new Date()).toISOString().slice(0,10);
+    return template.replace('{table}', tableName).replace('{date}', date).replace('{user}', '');
+  }
+  const btn = document.getElementById('exportBtn');
+  if(btn) {
+    btn.addEventListener('click', async function() {
+      try {
+        const html = document.documentElement.outerHTML;
+        if(html.length > 2000000) {
+          alert('Export refused: html too large');
+          return;
+        }
+        if(window.Worker) {
+          const worker = new Worker((function(){
+            try{ return 'assets/worker.js'; }catch(e){ return null; }
+          })());
+          if(worker){
+            worker.postMessage({html:html, format:'pdf'});
+            worker.onmessage = function(e){ console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+          } else {
+            alert('Worker not available');
+          }
+        } else {
+          alert('Export worker not supported in this environment.');
+        }
+      } catch(err) {
+        console.warn('Export failed', err);
+        alert('Export worker not available. See console for details.');
+      }
+    });
+  }
+})();
+</script>
+
+</div>
+</body>
+</html>
