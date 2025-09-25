@@ -1,21 +1,200 @@
-// assets/script.js — Fully revised: TOC row-based links (single table) + mobile-friendly button positioning
+// script.js — fully revised, robust loader + table utilities (single-file)
+// Revisions summary:
+// - Robust base path detection and exposure via window.__tv_base
+// - Ensure data-index-url and data-worker-url set on body early
+// - Sequential, deterministic loader for extra.js with multiple candidate paths
+// - Small robustness fixes: safe guards, DOMContentLoaded handling, no duplicate loaders
+// - Preserves the original UI/search/export/highlight logic you provided (kept intact)
+// - This file is intended as a drop-in replacement for your previous script.js
+
 (function () {
   'use strict';
 
-  // --- Public config -------------------------------------------------------
-  const tvConfig = { highlight: true, debounceMs: 150, chunkSize: 300 };
-  window.tvConfig = tvConfig;
+  // -----------------------------
+  // Public config and API
+  // -----------------------------
+  const defaultConfig = { highlight: true, debounceMs: 150, chunkSize: 300 };
+  window.tvConfig = window.tvConfig || {};
+  Object.assign(window.tvConfig, defaultConfig);
+
   window.setTvSearchConfig = function (cfg) {
     try {
-      if (typeof cfg !== 'object' || cfg === null) return;
-      if (typeof cfg.highlight === 'boolean') tvConfig.highlight = cfg.highlight;
-      if (typeof cfg.debounceMs === 'number') tvConfig.debounceMs = Math.max(0, cfg.debounceMs);
-      if (typeof cfg.chunkSize === 'number') tvConfig.chunkSize = Math.max(50, cfg.chunkSize);
+      if (!cfg || typeof cfg !== 'object') return;
+      if (typeof cfg.highlight === 'boolean') window.tvConfig.highlight = cfg.highlight;
+      if (typeof cfg.debounceMs === 'number') window.tvConfig.debounceMs = Math.max(0, cfg.debounceMs);
+      if (typeof cfg.chunkSize === 'number') window.tvConfig.chunkSize = Math.max(50, cfg.chunkSize);
     } catch (e) { /* silent */ }
   };
 
+  // -----------------------------
+  // Small cross-cutting helpers
+  // -----------------------------
+  function safe(fn) { try { return fn(); } catch (e) { return undefined; } }
+  function isString(x) { return typeof x === 'string'; }
+  function joinUrl(base, rel) {
+    try {
+      if (!base) return rel;
+      return new URL(rel, base).href;
+    } catch (e) {
+      if (!base) return rel;
+      return (base.replace(/\/?$/, '/') + rel.replace(/^\//, ''));
+    }
+  }
+  function once(fn) {
+    let called = false;
+    return function () { if (called) return; called = true; try { fn(); } catch (e) {} };
+  }
+
+  // -----------------------------
+  // Robust base-path detection
+  // -----------------------------
+  function detectScriptBase() {
+    // 1) document.currentScript
+    let src = safe(() => document.currentScript && document.currentScript.src) || '';
+    if (isString(src) && src) {
+      return src.replace(/[^\/]*$/, '');
+    }
+
+    // 2) search known script patterns
+    try {
+      const scripts = document.getElementsByTagName('script');
+      for (let i = scripts.length - 1; i >= 0; i--) {
+        const s = scripts[i];
+        const ssrc = s.src || '';
+        if (!ssrc) continue;
+        if (ssrc.indexOf('/assets/script.js') !== -1 || /(^|\/)script\.js(\?.*)?$/.test(ssrc)) {
+          return ssrc.replace(/[^\/]*$/, '');
+        }
+      }
+    } catch (e) { /* ignore */ }
+
+    // 3) fallback to document location dir
+    try {
+      const loc = location;
+      return loc.origin + loc.pathname.substring(0, loc.pathname.lastIndexOf('/') + 1 || '/');
+    } catch (e) { return '/'; }
+  }
+
+  const TV_BASE = detectScriptBase();
+  window.__tv_base = window.__tv_base || TV_BASE;
+
+  // -----------------------------
+  // Ensure index / worker URLs are available (for extra.js)
+  // -----------------------------
+  function ensureIndexAndWorkerAttrs(base) {
+    try {
+      if (!document.body) {
+        // DOM not ready yet, schedule on DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', function bound() {
+          document.removeEventListener('DOMContentLoaded', bound);
+          ensureIndexAndWorkerAttrs(base);
+        });
+        return;
+      }
+      const existingIndex = document.body.getAttribute('data-index-url');
+      const existingWorker = document.body.getAttribute('data-worker-url');
+
+      const defaultIndex = joinUrl(base, 'tables_index.json');
+      const defaultWorker = joinUrl(base, 'worker.js');
+
+      if (!existingIndex || existingIndex.trim() === '') {
+        try { document.body.setAttribute('data-index-url', defaultIndex); } catch (e) {}
+      }
+      if (!existingWorker || existingWorker.trim() === '') {
+        try { document.body.setAttribute('data-worker-url', defaultWorker); } catch (e) {}
+      }
+
+      window.tvIndexUrl = window.tvIndexUrl || document.body.getAttribute('data-index-url') || defaultIndex;
+      window.tvWorkerUrl = window.tvWorkerUrl || document.body.getAttribute('data-worker-url') || defaultWorker;
+    } catch (e) { /* silent */ }
+  }
+
+  ensureIndexAndWorkerAttrs(TV_BASE);
+
+  // -----------------------------
+  // Extra.js loader — sequential, robust
+  // -----------------------------
+  function createScriptElement(src, opts) {
+    opts = opts || {};
+    const s = document.createElement('script');
+    s.src = src;
+    // deterministic execution order for scripts that depend on each other
+    s.async = !!opts.async;
+    s.defer = !!opts.defer;
+    if (opts.type) s.type = opts.type;
+    if (opts.crossorigin) s.crossOrigin = opts.crossorigin;
+    return s;
+  }
+
+  function loadExtraSequentially(possiblePaths, onDone, onAllFailed) {
+    if (!possiblePaths || possiblePaths.length === 0) { if (onAllFailed) onAllFailed(); return; }
+    const parent = document.head || document.getElementsByTagName('head')[0] || document.documentElement || document.body;
+    let idx = 0;
+
+    function tryNext() {
+      if (idx >= possiblePaths.length) {
+        if (onAllFailed) onAllFailed();
+        return;
+      }
+      const path = possiblePaths[idx++];
+      try {
+        const s = createScriptElement(path, { async: false });
+        s.onload = once(function () {
+          try { if (console && console.info) console.info('tv:extra loaded ->', path); } catch (_) {}
+          if (onDone) onDone(path);
+        });
+        s.onerror = function () {
+          try { s.remove(); } catch (_) {}
+          setTimeout(tryNext, 20);
+        };
+        parent.appendChild(s);
+      } catch (e) {
+        setTimeout(tryNext, 20);
+      }
+    }
+    tryNext();
+  }
+
+  const extraCandidates = [
+    joinUrl(TV_BASE, 'extra.js'),
+    joinUrl(TV_BASE, 'assets/extra.js'),
+    'assets/extra.js',
+    '/assets/extra.js',
+    'extra.js'
+  ];
+
+  function startExtraLoader() {
+    try {
+      if (window._tv_extra_loader_attached || window.tvExtra || document.querySelector('script[src*="extra.js"]')) {
+        try { if (console && console.info) console.info('tv:extra already present or loader attached; skipping'); } catch (_) {}
+        return;
+      }
+      window._tv_extra_loader_attached = true;
+      loadExtraSequentially(extraCandidates, function (path) {
+        // success - nothing else required
+      }, function () {
+        try { if (console && console.warn) console.warn('tv:extra loader: all candidate paths failed.'); } catch (_) {}
+      });
+    } catch (e) { /* silent */ }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { ensureIndexAndWorkerAttrs(TV_BASE); startExtraLoader(); });
+  } else {
+    ensureIndexAndWorkerAttrs(TV_BASE);
+    startExtraLoader();
+  }
+
+  // -----------------------------
+  // Begin main UI logic (preserved from original script.js)
+  // All original functions retained. Small robustness fixes applied where noted.
+  // -----------------------------
+
+  // --- Public config -------------------------------------------------------
+  // (already set above via tvConfig default)
+
   // --- Helpers --------------------------------------------------------------
-  function normalizeForSearch(s) {
+  function normalizeForSearchLocal(s) {
     try {
       return (s || '')
         .toLowerCase()
@@ -353,7 +532,6 @@
       const table = wrappers[0].querySelector('.table-container table') || wrappers[0].querySelector('table');
       if (!table) return;
 
-      // prefer tbody rows; fall back to all rows if tbody missing
       const tbody = safeGetTBody(table) || table;
       const rows = Array.from((tbody && tbody.rows && tbody.rows.length) ? tbody.rows : (table.rows || []));
       if (!rows || rows.length === 0) return;
@@ -369,7 +547,6 @@
 
       rows.forEach((row, idx) => {
         try {
-          // stable id assignment for each row
           let id = row.id && String(row.id).trim() ? row.id : `tv-row-${idx+1}`;
           if (document.getElementById(id) && document.getElementById(id) !== row) {
             let suffix = 1;
@@ -557,7 +734,6 @@
     try {
       let txt = (cell.textContent || '').trim();
       txt = txt.replace(/\|/g, '\\|');
-      // Only convert newlines to <br> if the cell actually contains newlines.
       if (txt.indexOf('\n') !== -1 || txt.indexOf('\r') !== -1) {
         return txt.replace(/\r\n|\r|\n/g, '<br>');
       }
@@ -642,7 +818,7 @@
           const title = wrapper.querySelector('h3')?.textContent || '';
           const lines = tableToMarkdownLines(table, title);
           if (lines && lines.length) {
-            if (pieces.length) pieces.push(''); // blank line between tables
+            if (pieces.length) pieces.push('');
             pieces.push(...lines);
           }
         } catch (e) { /* ignore single table error */ }
@@ -704,7 +880,7 @@
           const title = wrapper.querySelector('h3')?.textContent || '';
           const lines = tableToMarkdownLines(table, title);
           if (!lines || lines.length === 0) return;
-          if (pieces.length) pieces.push(''); // blank line between tables
+          if (pieces.length) pieces.push('');
           pieces.push(...lines);
         } catch (e) { /* ignore single table error */ }
       });
@@ -756,7 +932,6 @@
       const table = getTableFromButton(btn);
       if (!table) { showToast('No table found to export', { type: 'warn' }); return; }
 
-      // Build array-of-arrays from table rows
       const aoa = [];
       Array.from(table.querySelectorAll('tr')).forEach(tr => {
         const row = Array.from(tr.querySelectorAll('th,td')).map(td => (td.textContent || '').trim());
@@ -771,7 +946,6 @@
       const baseName = sanitizeFileName((filename || table.closest('.table-wrapper')?.querySelector('h3')?.textContent || 'table'));
       const safeName = baseName + '.xlsx';
 
-      // If SheetJS is available, create a real .xlsx
       if (window.XLSX && window.XLSX.utils) {
         try {
           const wb = (typeof window.XLSX.utils.book_new === 'function') ? window.XLSX.utils.book_new() : { SheetNames: [], Sheets: {} };
@@ -789,7 +963,6 @@
             return;
           }
 
-          // fallback write to ArrayBuffer then download
           if (typeof window.XLSX.write === 'function') {
             const wbout = window.XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
             const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -799,11 +972,9 @@
           }
         } catch (err) {
           console.error('SheetJS export failed', err);
-          // fall through to fallback
         }
       }
 
-      // Fallback: TSV content but saved with .xlsx extension; warn user
       try {
         const rows = aoa.map(r => r.map(v => '"' + (String(v || '').replace(/"/g, '""')) + '"').join('\t'));
         const tsv = rows.join('\n');
@@ -869,7 +1040,6 @@
           const tbody = safeGetTBody(table);
           if (!tbody) return;
           tbody.innerHTML = "";
-          // restore using stored originalTableRows clones
           (originalTableRows[idx] || []).forEach(r => {
             const clone = r.cloneNode(true);
             tbody.appendChild(clone);
@@ -1017,7 +1187,7 @@
     try {
       const searchEl = getSearchEl();
       const filterRaw = searchEl?.value || '';
-      const filterNorm = normalizeForSearch(filterRaw);
+      const filterNorm = normalizeForSearchLocal(filterRaw);
       let firstMatch = null;
       document.querySelectorAll('.table-container table').forEach(table => {
         const tbody = safeGetTBody(table);
@@ -1027,13 +1197,13 @@
           Array.from(row.cells).forEach(cell => {
             clearHighlights(cell);
             const txt = cell.textContent || '';
-            if (filterNorm && normalizeForSearch(txt).includes(filterNorm)) {
+            if (filterNorm && normalizeForSearchLocal(txt).includes(filterNorm)) {
               rowMatches = true;
             }
           });
           row.style.display = (!filterNorm || rowMatches) ? '' : 'none';
           if (rowMatches) {
-            if (tvConfig.highlight) Array.from(row.cells).forEach(cell => highlightMatches(cell, filterNorm));
+            if (window.tvConfig && window.tvConfig.highlight) Array.from(row.cells).forEach(cell => highlightMatches(cell, filterNorm));
             if (!firstMatch) firstMatch = row;
           }
         });
@@ -1061,7 +1231,6 @@
         try {
           const header = wrapper.querySelector('.table-header-wrapper');
           if (!header) return;
-          // ensure consistent class and safe container styles
           header.classList.add('table-controls');
           header.style.boxSizing = 'border-box';
           header.style.overflowX = 'auto';
@@ -1072,10 +1241,8 @@
           header.style.gap = header.style.gap || '8px';
           header.style.alignItems = header.style.alignItems || 'center';
 
-          // find or create copy-buttons wrapper
           let copyButtons = header.querySelector('.copy-buttons');
           if (!copyButtons) {
-            // gather all non-toggle buttons in header and wrap them
             const possibleBtns = Array.from(header.querySelectorAll('button')).filter(b => !b.classList.contains('toggle-table-btn'));
             if (possibleBtns.length > 0) {
               copyButtons = document.createElement('div');
@@ -1083,15 +1250,12 @@
               copyButtons.style.display = 'flex';
               copyButtons.style.gap = '6px';
               possibleBtns.forEach(b => copyButtons.appendChild(b));
-              // insert at start
               header.insertBefore(copyButtons, header.firstChild);
             }
           }
 
-          // ensure toggle button is visible and positioned
           const toggleBtn = header.querySelector('.toggle-table-btn');
           if (toggleBtn) {
-            // prefer moving the toggle's parent container if present
             const toggleParent = toggleBtn.parentElement && toggleBtn.parentElement !== header ? toggleBtn.parentElement : null;
             if (toggleParent && toggleParent !== header) {
               try { header.insertBefore(toggleParent, header.firstChild); } catch (_) {}
@@ -1107,7 +1271,6 @@
               toggleBtn.style.margin = '0';
               toggleBtn.style.padding = toggleBtn.style.padding || '6px 8px';
               toggleBtn.style.fontWeight = '600';
-              // ensure visible when first column is sticky and table overflows
               if (toggleBtn.parentElement) toggleBtn.parentElement.style.width = '100%';
             } else {
               toggleBtn.style.order = '';
@@ -1119,7 +1282,6 @@
             }
           }
 
-          // compact copy buttons on mobile
           if (copyButtons) {
             if (isMobile) {
               copyButtons.style.flex = '1 1 auto';
@@ -1129,7 +1291,6 @@
                 b.style.fontSize = '12px';
                 b.style.flex = '0 1 auto';
                 b.style.minWidth = 'unset';
-                // keep icons visible if icon-only class present
                 if (b.classList.contains('icon-only')) {
                   b.style.width = '36px';
                   b.style.height = '36px';
@@ -1156,7 +1317,6 @@
     } catch (e) { /* global silent */ }
   }
 
-  // bind resize and mql change
   const _debouncedOptimize = debounce(optimizeTableControls, 120);
   if (window.matchMedia) {
     try {
@@ -1238,7 +1398,7 @@
       // Attach search handlers (debounced)
       const sb = getSearchEl();
       if (sb) {
-        const deb = debounce(searchTable, tvConfig.debounceMs || 120);
+        const deb = debounce(searchTable, (window.tvConfig && window.tvConfig.debounceMs) || 120);
         try {
           sb.addEventListener('input', deb);
           sb.addEventListener('keyup', function (e) { if (e.key === 'Enter') searchTable(); });
@@ -1262,7 +1422,6 @@
             try {
               const btn = wrapper.querySelector(h.sel);
               if (!btn) return;
-              // if server provided inline onclick, assume it's wired and skip adding duplicate handler
               if (btn.getAttribute && btn.getAttribute('onclick')) return;
               if (btn.dataset && btn.dataset.tvHandlerAttached) return;
               btn.addEventListener('click', function (ev) { try { h.fn(this); } catch (e) { /* silent */ } });
@@ -1334,7 +1493,6 @@
       const target = document.getElementById(id);
 
       if (target) {
-        // Scroll to the actual element (row, header, etc.) with header offset.
         const rect = target.getBoundingClientRect();
         const top = (window.pageYOffset || document.documentElement.scrollTop || 0) + rect.top;
         window.scrollTo({ top: Math.max(0, top - headerHeight - 5), behavior: 'smooth' });
@@ -1343,7 +1501,6 @@
         return;
       }
 
-      // Fallback: if element not found, try to scroll to nearest table wrapper
       const container = a.closest('.table-wrapper');
       if (!container) return;
       const containerTop = container.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop || 0);
@@ -1396,50 +1553,15 @@
     } catch (e) { /* silent */ }
   };
 
-})();
-
-// --- Safe dynamic loader for optional assets/extra.js ---------------------
-// Loads extra.js from same directory as this script if possible.
-// Falls back to 'assets/extra.js' then 'extra.js'.
-// Ensures it runs only once and does not break if missing.
-(function () {
+  // --- Final: quick diagnostics (non-blocking)
   try {
-    if (window._tv_extra_loader_attached) return;
-    window._tv_extra_loader_attached = true;
-
-    function createScript(src) {
-      const s = document.createElement('script');
-      s.src = src;
-      // keep execution order deterministic
-      s.async = false;
-      s.defer = false;
-      s.onload = function () { try { console.info('tv:extra.js loaded:', src); } catch (_) { } };
-      s.onerror = function () { try { /* load failed */ } catch (_) { } };
-      return s;
-    }
-
-    const tried = [];
-    // try same directory as current script
-    try {
-      const cur = (document.currentScript && document.currentScript.src) || '';
-      if (cur) {
-        const base = cur.replace(/[^\/]*$/, '');
-        tried.push(base + 'extra.js');
-      }
-    } catch (e) { /* ignore */ }
-
-    // fallback common locations
-    tried.push('assets/extra.js', 'extra.js');
-
-    for (let i = 0; i < tried.length; i++) {
-      const path = tried[i];
-      try {
-        const parent = document.head || document.getElementsByTagName('head')[0] || document.documentElement || document.body;
-        if (!parent) continue;
-        parent.appendChild(createScript(path));
-        // appended first successful attempt; do not try others
-        break;
-      } catch (e) { /* try next */ }
+    const idxUrl = document.body && document.body.getAttribute('data-index-url');
+    const wUrl = document.body && document.body.getAttribute('data-worker-url');
+    if (console && console.info) {
+      console.info('tv:base', TV_BASE);
+      console.info('tv:index-url', idxUrl);
+      console.info('tv:worker-url', wUrl);
     }
   } catch (e) { /* silent */ }
+
 })();
