@@ -1,10 +1,13 @@
-// assets/extra.js — merged safe enhancements (batch 1/4)
-// Includes: mobile toggle helper and base TVSearch bootstrap
+// assets/extra.js
+// Combined extra helpers for Tables Viewer
+// - mobile toggle helper (tvExtra)
+// - base TVSearch (append-only, non-breaking)
+// - advanced TVSearch features (fuzzy, fuse.js, export) with namespace isolation
 (function () {
   'use strict';
 
   // -------------------------
-  // Mobile toggle helper (unchanged behavior, idempotent)
+  // Mobile toggle helper
   // -------------------------
   (function () {
     const MOBILE_BP = 600;
@@ -23,11 +26,10 @@
     }
 
     function injectStyle() {
-      try {
-        if (document.getElementById(STYLE_ID)) return;
-        const s = document.createElement('style');
-        s.id = STYLE_ID;
-        s.textContent = `
+      if (document.getElementById(STYLE_ID)) return;
+      const s = document.createElement('style');
+      s.id = STYLE_ID;
+      s.textContent = `
 .tv-mobile-toggle {
   position: absolute;
   top: 8px;
@@ -60,41 +62,36 @@
 }
 .table-wrapper[data-tv-mobile-enabled="1"] { position: relative; }
 `;
-        (document.head || document.documentElement).appendChild(s);
-      } catch (e) { /* silent */ }
+      (document.head || document.documentElement).appendChild(s);
     }
 
     function findOriginalToggle(wrapper) {
-      try {
-        if (!wrapper || !wrapper.querySelector) return null;
-        const selectors = [
-          '.toggle-table-btn',
-          'button[data-action="toggle-collapse"]',
-          '.toggle-table',
-          'button.toggle-table-btn',
-          'button.toggle-table'
-        ];
-        for (const sel of selectors) {
-          const found = wrapper.querySelector(sel);
-          if (found) return found;
+      if (!wrapper || !wrapper.querySelector) return null;
+      const selectors = [
+        '.toggle-table-btn',
+        'button[data-action="toggle-collapse"]',
+        '.toggle-table',
+        'button.toggle-table-btn',
+        'button.toggle-table'
+      ];
+      for (const sel of selectors) {
+        const found = wrapper.querySelector(sel);
+        if (found) return found;
+      }
+      const header = wrapper.querySelector('.table-header-wrapper, .table-header, .copy-buttons');
+      if (header) {
+        const btns = Array.from(header.querySelectorAll('button'));
+        for (const b of btns) {
+          const t = (b.textContent || b.innerText || '').trim().toLowerCase();
+          if (t.includes('collapse') || t.includes('expand') || t.includes('toggle')) return b;
         }
-        const header = wrapper.querySelector('.table-header-wrapper, .table-header, .copy-buttons');
-        if (header) {
-          const btns = Array.from(header.querySelectorAll('button'));
-          for (const b of btns) {
-            const t = (b.textContent || b.innerText || '').trim().toLowerCase();
-            if (t.includes('collapse') || t.includes('expand') || t.includes('toggle')) return b;
-          }
-        }
-      } catch (e) { /* silent */ }
+      }
       return null;
     }
 
     function findHeaderContainer(wrapper) {
       if (!wrapper) return null;
-      try {
-        return wrapper.querySelector('.table-header-wrapper') || wrapper.querySelector('.table-header') || wrapper.querySelector('.copy-buttons') || wrapper;
-      } catch (e) { return null; }
+      return wrapper.querySelector('.table-header-wrapper') || wrapper.querySelector('.table-header') || wrapper.querySelector('.copy-buttons') || wrapper;
     }
 
     function isElementVisibleWithin(el, container) {
@@ -298,7 +295,7 @@
   })();
 
   // -------------------------
-  // Base TVSearch module (lightweight safe)
+  // Base TVSearch module
   // -------------------------
   (function () {
     const SENTINEL = '__TV_SEARCH__';
@@ -326,6 +323,7 @@
     const INDEX_URL = (document.body && document.body.getAttribute('data-index-url')) || (BASE + 'tables_index.json');
     const WORKER_URL = (document.body && document.body.getAttribute('data-worker-url')) || (BASE + 'worker.js');
 
+    // shared state exposed to advanced module
     const shared = window.TVSearch && window.TVSearch._shared ? window.TVSearch._shared : {};
     shared.worker = shared.worker || null;
     shared.indexData = shared.indexData || null;
@@ -333,7 +331,7 @@
     window.TVSearch = window.TVSearch || {};
     window.TVSearch._shared = shared;
 
-    let localWorker = null;
+    let localWorker = null; // local alias
 
     function safeFetchJson(url) {
       return fetch(url, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error('fetch failed: ' + r.status); return r.json(); });
@@ -349,8 +347,11 @@
           try {
             if (d.type === 'index-ack') { shared.indexLoaded = true; log('worker index ack'); }
             else if (d.type === 'results') {
+              // detailed worker event
               try { document.dispatchEvent(new CustomEvent('tv:search:worker', { detail: d })); } catch (_) {}
+              // generic results event
               try { document.dispatchEvent(new CustomEvent('tv:search:results', { detail: { results: d.results || [], meta: d } })); } catch (_) {}
+              // base rendering path: if not intercepted by advanced, render
               try { if (!window.TVSearch._adv || !window.TVSearch._adv.isActive) renderResults(d.results || []); } catch (_) { renderResults(d.results || []); }
             }
           } catch (e) { log('worker message handler error', e); }
@@ -446,8 +447,9 @@
       } catch (e) { }
     }
 
-    function debounceLocal(fn, ms) { let t; return function () { const args = arguments; clearTimeout(t); t = setTimeout(function () { fn.apply(null, args); }, ms || 250); }; }
+    function debounce(fn, ms) { let t; return function () { const args = arguments; clearTimeout(t); t = setTimeout(function () { fn.apply(null, args); }, ms || 250); }; }
 
+    // base search function exposed to page. Advanced may override this with enhanced implementation.
     function baseSearch(q) {
       try {
         if (shared.worker && shared.indexLoaded) { try { shared.worker.postMessage({ type: 'query', q: q }); return; } catch (e) { /* fallthrough */ } }
@@ -456,13 +458,14 @@
       } catch (e) { log('baseSearch error', e); }
     }
 
+    // bind input handlers
     function bindSearchInput() {
       try {
         const selectors = ['#searchBox', '.tv-search input', 'input[type="search"]', 'input[name="q"]'];
         let input = null;
         for (const s of selectors) { input = document.querySelector(s); if (input) break; }
         if (!input) { log('no search input found'); return; }
-        const handler = debounceLocal(function (e) {
+        const handler = debounce(function (e) {
           const q = (e && e.target && e.target.value) ? e.target.value : (typeof e === 'string' ? e : '');
           try { baseSearch(q); } catch (e) { fallbackDomSearch(q); }
           try {
@@ -480,6 +483,7 @@
       } catch (e) { log('bindSearchInput failed', e); }
     }
 
+    // init: load index then bind
     safeFetchJson(INDEX_URL).then(idx => {
       shared.indexData = idx;
       log('index loaded', Array.isArray(idx) ? idx.length : typeof idx);
@@ -491,16 +495,366 @@
       log('index not found or failed to load', err);
     }).finally(() => { bindSearchInput(); });
 
+    // expose minimal API
     window.TVSearch.search = baseSearch;
     window.TVSearch.start = bindSearchInput;
     window.TVSearch.stop = function () { /* no-op for compatibility */ };
     window.TVSearch._initWorker = initWorkerWithIndex;
+    // shared is available at window.TVSearch._shared
   })();
 
-  // end of batch 1
-  
-  
-  
-  
-  
+  // -------------------------
+  // Advanced TVSearch module (namespace-isolated, safe)
+  // -------------------------
+  (function () {
+    const SENTINEL2 = '__TV_SEARCH_ADV__';
+    if (window[SENTINEL2]) return;
+    window[SENTINEL2] = true;
+
+    const cfg = window.tvConfig || {};
+    const MODE_KEY = 'tv:search:mode';
+    const DEFAULT_MODE = cfg.defaultMode || 'fuzzy';
+    const FUSE_CDN = cfg.fuseCdn || 'https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js';
+    const XLSX_PATH = cfg.xlsxPath || (location.origin + '/assets/xlsx.full.min.js');
+    const VBUFFER = cfg.virtualBuffer || 5;
+
+    // adv state stored on window.TVSearch._adv
+    window.TVSearch = window.TVSearch || {};
+    const adv = window.TVSearch._adv = window.TVSearch._adv || {};
+    adv.isActive = true;
+
+    // reuse shared state from base module
+    const shared = window.TVSearch._shared || { worker: null, indexData: null, indexLoaded: false };
+
+    let fuseLib = null;
+    let useFuse = (localStorage.getItem(MODE_KEY) || DEFAULT_MODE) === 'fuzzy';
+    let lastQueryId = 0;
+    let pending = new Map();
+    let metrics = { searches: 0, lastQuery: null, lastTimeMs: 0, lastCount: 0 };
+
+    function log2() { try { if (console && console.log) console.log.apply(console, ['[tv-search-adv]'].concat(Array.from(arguments))); } catch (_) {} }
+
+    function loadFuseIfNeeded() {
+      if (!useFuse || fuseLib) return Promise.resolve();
+      if (window.Fuse) { fuseLib = window.Fuse; return Promise.resolve(); }
+      return new Promise((res, rej) => {
+        const s = document.createElement('script');
+        s.src = FUSE_CDN;
+        s.async = true;
+        s.onload = function () { try { fuseLib = window.Fuse; res(); } catch (e) { rej(e); } };
+        s.onerror = function (e) { log2('failed to load fuse', e); rej(e); };
+        document.head.appendChild(s);
+      });
+    }
+
+    function escapeRegExp(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+    function escapeHtml(s) { return String(s).replace(/[&<>"']/g, function (m) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]); }); }
+
+    function highlightHtml(text, q) {
+      if (!q) return escapeHtml(text);
+      const parts = q.trim().split(/\s+/).filter(Boolean).map(p => escapeRegExp(p));
+      if (!parts.length) return escapeHtml(text);
+      const re = new RegExp('(' + parts.join('|') + ')', 'ig');
+      return escapeHtml(text).replace(re, '<mark class="tv-hl">$1</mark>');
+    }
+
+    function deliverResultsEnhanced(results, meta) {
+      try {
+        const container = document.querySelector('#tv-results') || document.querySelector('.tv-results');
+        try { document.dispatchEvent(new CustomEvent('tv:search:results', { detail: { results: results, meta } })); } catch (_) {}
+        if (!container) return;
+        if (meta && meta.partial) appendResultNodes(container, results, meta);
+        else renderVirtualized(container, results, meta);
+      } catch (e) { log2('deliverResultsEnhanced failed', e); }
+    }
+
+    function appendResultNodes(container, results, meta) {
+      try {
+        const q = meta && meta.q;
+        results.forEach(r => {
+          const node = document.createElement('div');
+          node.className = 'tv-result';
+          if (r.item) {
+            node.innerHTML = '<div class="tv-summary">' + highlightHtml(r.item.summary || '', q) + '</div>' +
+              '<div class="tv-notes">' + highlightHtml(r.item.notes || '', q) + '</div>';
+            node.dataset.id = r.item.id || '';
+          } else if (r.html) node.innerHTML = r.html;
+          else node.textContent = JSON.stringify(r);
+          container.appendChild(node);
+        });
+      } catch (e) { log2('appendResultNodes failed', e); }
+    }
+
+    // lightweight virtualized renderer
+    function renderVirtualized(container, results, meta) {
+      container._tv_full_results = results || [];
+      container.innerHTML = '';
+      let viewport = container.querySelector('.tv-viewport');
+      if (!viewport) {
+        viewport = document.createElement('div');
+        viewport.className = 'tv-viewport';
+        viewport.style.position = 'relative';
+        viewport.style.height = container.style.height || '480px';
+        viewport.style.overflow = 'auto';
+        container.appendChild(viewport);
+      } else viewport.innerHTML = '';
+
+      const sampleHeight = 40;
+      const total = (results || []).length;
+      const spacer = document.createElement('div');
+      spacer.className = 'tv-spacer';
+      spacer.style.height = (total * sampleHeight) + 'px';
+      viewport.appendChild(spacer);
+
+      function renderWindow() {
+        const scrollTop = viewport.scrollTop;
+        const vh = viewport.clientHeight;
+        const startIndex = Math.max(0, Math.floor(scrollTop / sampleHeight) - VBUFFER);
+        const endIndex = Math.min(total, Math.ceil((scrollTop + vh) / sampleHeight) + VBUFFER);
+        let windowEl = viewport.querySelector('.tv-window');
+        if (!windowEl) {
+          windowEl = document.createElement('div');
+          windowEl.className = 'tv-window';
+          windowEl.style.position = 'absolute';
+          viewport.appendChild(windowEl);
+        }
+        windowEl.style.top = (startIndex * sampleHeight) + 'px';
+        windowEl.innerHTML = '';
+        const q = meta && meta.q;
+        for (let i = startIndex; i < endIndex; i++) {
+          const r = results[i];
+          const node = document.createElement('div');
+          node.className = 'tv-result';
+          node.style.height = sampleHeight + 'px';
+          if (r && r.item) {
+            node.innerHTML = '<div class="tv-summary">' + highlightHtml(r.item.summary || '', q) + '</div>' +
+              '<div class="tv-notes">' + highlightHtml(r.item.notes || '', q) + '</div>';
+            node.dataset.index = i;
+          } else if (r && r.html) node.innerHTML = r.html;
+          else node.textContent = JSON.stringify(r);
+          windowEl.appendChild(node);
+        }
+        const countNode = document.querySelector('#tv-results-count') || document.querySelector('.tv-results-count');
+        if (countNode) countNode.textContent = total;
+      }
+
+      if (!viewport._tv_scroll_bound) {
+        viewport.addEventListener('scroll', throttle(renderWindow, 80));
+        viewport._tv_scroll_bound = true;
+      }
+      renderWindow();
+      setupKeyboardNav(container);
+    }
+
+    function throttle(fn, ms) { let busy = false; return function () { if (busy) return; busy = true; setTimeout(() => { busy = false; fn.apply(null, arguments); }, ms); }; }
+
+    function setupKeyboardNav(container) {
+      if (container._tv_nav_bound) return;
+      const viewport = container.querySelector('.tv-viewport') || container;
+      let idx = -1;
+      function focusIndex(i) {
+        const full = container._tv_full_results || [];
+        const total = full.length;
+        if (i < 0) i = 0;
+        if (i >= total) i = total - 1;
+        idx = i;
+        const node = viewport.querySelector('[data-index="' + i + '"]');
+        if (node) {
+          try { node.focus && node.focus(); } catch (_) {}
+          viewport.querySelectorAll('.tv-result.selected').forEach(n => n.classList.remove('selected'));
+          try { node.classList.add('selected'); } catch (_) {}
+        }
+      }
+      document.addEventListener('keydown', function (e) {
+        const active = document.activeElement;
+        if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) {
+          if (e.key === 'ArrowDown') { e.preventDefault(); idx = (idx === -1 ? 0 : idx + 1); focusIndex(idx); }
+          if (e.key === 'ArrowUp') { e.preventDefault(); idx = (idx === -1 ? 0 : idx - 1); focusIndex(idx); }
+          if (e.key === 'Enter') { e.preventDefault(); const full = container._tv_full_results || []; const item = full[idx]; if (item) dispatchActivate(item); }
+        }
+      }, { passive: true });
+      container._tv_nav_bound = true;
+    }
+
+    function dispatchActivate(item) { try { document.dispatchEvent(new CustomEvent('tv:search:activate', { detail: item })); } catch (_) { } }
+
+    // apply simple filters by data-filter-* attributes on body
+    function applyFilters(results) {
+      try {
+        const body = document.body;
+        if (!body) return results;
+        const filters = {};
+        Array.prototype.slice.call(body.attributes).forEach(attr => {
+          if (attr.name.indexOf('data-filter-') === 0) {
+            const k = attr.name.replace('data-filter-', '');
+            filters[k] = attr.value;
+          }
+        });
+        if (Object.keys(filters).length === 0) return results;
+        return results.filter(r => {
+          const it = r.item || r;
+          for (const k in filters) {
+            const v = (it[k] || '').toString();
+            if (!v.includes(filters[k])) return false;
+          }
+          return true;
+        });
+      } catch (e) { log2('applyFilters failed', e); return results; }
+    }
+
+    // export results using lazy SheetJS
+    function exportResults(format) {
+      const container = document.querySelector('#tv-results') || document.querySelector('.tv-results');
+      const data = (container && container._tv_full_results) || [];
+      if (!data.length) return Promise.resolve(false);
+      if (window.XLSX) return Promise.resolve(doExport(window.XLSX, data, format));
+      return new Promise((res, rej) => {
+        const s = document.createElement('script');
+        s.src = XLSX_PATH;
+        s.onload = () => { if (window.XLSX) res(doExport(window.XLSX, data, format)); else rej('xlsx absent'); };
+        s.onerror = (e) => { log2('xlsx load failed', e); rej(e); };
+        document.head.appendChild(s);
+      });
+    }
+
+    function doExport(XLSX, data, format) {
+      try {
+        const aoa = data.map(r => {
+          const it = r.item || r;
+          return [it.summary || '', it.notes || ''];
+        });
+        const ws = XLSX.utils.aoa_to_sheet(aoa);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Results');
+        const wbout = XLSX.write(wb, { bookType: format || 'xlsx', type: 'array' });
+        const blob = new Blob([wbout], { type: 'application/octet-stream' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'tv-results.' + (format || 'xlsx');
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        return true;
+      } catch (e) { log2('doExport failed', e); return false; }
+    }
+
+    // wire worker events from base module to advanced deliver
+    document.addEventListener('tv:search:worker', function (e) {
+      try {
+        const d = e && e.detail ? e.detail : {};
+        // forward to advanced renderer if adv is active
+        if (!d) return;
+        // d should contain results, qid, q, partial flags if worker supports streaming
+        deliverResultsEnhanced(d.results || [], { q: d.q, qid: d.qid, partial: !!d.partial });
+      } catch (err) { log2('tv:search:worker handler failed', err); }
+    });
+
+    // advanced query implementation (overrides base search)
+    function query(q) {
+      metrics.searches++;
+      metrics.lastQuery = q;
+      const qid = ++lastQueryId;
+      pending.forEach((v, k) => { if (k !== qid && v.cancel) try { v.cancel(); } catch (_) { } pending.delete(k); });
+      const start = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+      const onResults = (results, partial = false) => {
+        metrics.lastTimeMs = Math.round(((typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now()) - start);
+        metrics.lastCount = (results && results.length) || 0;
+        deliverResultsEnhanced(results, { q, qid, partial });
+      };
+
+      const cancel = () => { try { if (shared.worker) shared.worker.postMessage({ type: 'cancel', qid }); } catch (_) { } };
+      pending.set(qid, { cancel });
+
+      // prefer worker if available
+      if (shared.worker && shared.indexLoaded) {
+        try { shared.worker.postMessage({ type: 'query', q: q, qid: qid, mode: useFuse ? 'fuzzy' : 'exact' }); } catch (e) { log2('post to worker failed', e); }
+        return qid;
+      }
+
+      // in-memory fuzzy via Fuse or substring exact
+      (useFuse ? loadFuseIfNeeded().then(() => {
+        try {
+          if (!shared.indexData) { onResults([]); return; }
+          const F = (typeof fuseLib === 'function' || typeof fuseLib === 'object') ? fuseLib : window.Fuse;
+          const f = new F(shared.indexData, { keys: ['summary', 'notes'], includeScore: true, threshold: 0.4 });
+          const out = f.search(q, { limit: 1000 }).map(r => ({ item: r.item, score: 1 / (1 + (r.score || 0)) }));
+          onResults(applyFilters(out));
+        } catch (e) { log2('fuse search failed', e); onResults([]); }
+      }) : Promise.resolve().then(() => {
+        const needle = (q || '').toLowerCase();
+        if (!needle) { onResults([]); return; }
+        const out = (shared.indexData || []).filter(it => ((it.summary || '') + ' ' + (it.notes || '')).toLowerCase().includes(needle)).map(it => ({ item: it, score: 1 }));
+        onResults(applyFilters(out));
+      })).catch(err => { log2('in-memory search path failed', err); onResults([]); });
+
+      return qid;
+    }
+
+    // UI controls for mode and export
+    function bindUiControls() {
+      try {
+        const modeBtn = document.querySelector('#tv-toggle-mode') || document.querySelector('.tv-toggle-mode');
+        if (modeBtn) {
+          modeBtn.addEventListener('click', function () {
+            window.TVSearch.setMode(useFuse ? 'exact' : 'fuzzy');
+            modeBtn.textContent = useFuse ? 'Exact' : 'Fuzzy';
+          }, { passive: true });
+          modeBtn.textContent = useFuse ? 'Fuzzy' : 'Exact';
+        }
+        const expBtn = document.querySelector('#tv-export') || document.querySelector('.tv-export');
+        if (expBtn) {
+          expBtn.addEventListener('click', function () { exportResults('xlsx').catch(e => log2('export failed', e)); }, { passive: true });
+        }
+      } catch (e) { log2('bindUiControls failed', e); }
+    }
+
+    // expose adv API under TVSearch
+    window.TVSearch = window.TVSearch || {};
+    Object.assign(window.TVSearch, {
+      setMode(m) { useFuse = (m === 'fuzzy'); localStorage.setItem(MODE_KEY, useFuse ? 'fuzzy' : 'exact'); },
+      search(q) { return query(q); },
+      exportResults(format) { return exportResults(format); },
+      getMetrics() { return Object.assign({}, metrics); },
+      useWorker() { return !!(shared.worker); }
+    });
+
+    // allow toggling worker creation by consumer
+    window.TVSearch.setWorkerMode = function (enabled) {
+      if (!enabled && shared.worker) { try { shared.worker.terminate(); } catch (_) { } shared.worker = null; return; }
+      if (enabled && !shared.worker && shared.indexData && window.TVSearch._initWorker) try { window.TVSearch._initWorker(shared.indexData); } catch (_) { }
+    };
+
+    // ensure minimal CSS for highlights
+    (function ensureStyle() {
+      try {
+        if (document.getElementById('tv-search-adv-style')) return;
+        const s = document.createElement('style');
+        s.id = 'tv-search-adv-style';
+        s.textContent = '.tv-result{padding:6px 8px;border-bottom:1px solid rgba(0,0,0,0.04)} .tv-summary{font-weight:600} .tv-hl{background:yellow;color:inherit}';
+        (document.head || document.documentElement).appendChild(s);
+      } catch (_) { }
+    })();
+
+    // wire UI and warm-up
+    (function initAdvanced() {
+      bindUiControls();
+      if (cfg.preloadFuse) loadFuseIfNeeded().catch(() => { });
+      // load index if base hasn't already populated shared.indexData
+      if (!shared.indexData) {
+        // attempt fetch same index URL as base if available
+        try {
+          const baseIndexUrl = (document.body && document.body.getAttribute('data-index-url')) || null;
+          if (baseIndexUrl) {
+            fetch(baseIndexUrl, { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).then(idx => { if (idx) shared.indexData = idx; }).catch(() => { });
+          }
+        } catch (_) { }
+      }
+      const container = document.querySelector('#tv-results') || document.querySelector('.tv-results');
+      if (container) container.setAttribute('role', 'list');
+    })();
+
+  })();
+
 })();

@@ -1,11 +1,11 @@
 // script.js — fully revised, robust loader + table utilities (single-file)
 // Revisions summary:
+// - Export Markdown UI targets hidden (kept functions for re-enable)
 // - Robust base path detection and exposure via window.__tv_base
 // - Ensure data-index-url and data-worker-url set on body early
 // - Sequential, deterministic loader for extra.js with multiple candidate paths
 // - Small robustness fixes: safe guards, DOMContentLoaded handling, no duplicate loaders
-// - Preserves the original UI/search/export/highlight logic you provided (kept intact)
-// - This file is intended as a drop-in replacement for your previous script.js
+// - Preserves original UI/search/export/highlight logic (except UI hiding requested)
 
 (function () {
   'use strict';
@@ -1061,6 +1061,84 @@
     } catch (e) { showToast('Reset failed', { type: 'warn' }); }
   }
 
+  // --- Hide-only logic for "Reset All Tables" option ---------------------
+  function hideResetAllTablesOption() {
+    try {
+      const selectors = ['.reset-all-btn', '.reset-btn', '#resetAllBtn', '[data-action="reset-all"]'];
+      selectors.forEach(s => {
+        try { document.querySelectorAll(s).forEach(el => { if (el && el.style) el.style.display = 'none'; }); } catch (_) {}
+      });
+      // Also hide buttons/links whose visible text or title includes 'reset all tables' (case-insensitive)
+      const needle = 'reset all tables';
+      const shortNeedle = 'reset all';
+      document.querySelectorAll('button, a, input').forEach(el => {
+        try {
+          const txt = ((el.textContent || '') + ' ' + (el.title || '')).toLowerCase();
+          if (txt.indexOf(needle) !== -1 || txt.indexOf(shortNeedle) !== -1) {
+            if (el && el.style) el.style.display = 'none';
+          }
+        } catch (_) {}
+      });
+      // Hide elements inside potential menus/toolbars
+      try {
+        document.querySelectorAll('#toolbar, .toolbar, .menu, .dropdown-menu').forEach(menu => {
+          menu.querySelectorAll('button, a, li').forEach(item => {
+            try {
+              const txt = ((item.textContent || '') + ' ' + (item.title || '')).toLowerCase();
+              if (txt.indexOf(needle) !== -1 || txt.indexOf(shortNeedle) !== -1) {
+                if (item && item.style) item.style.display = 'none';
+              }
+            } catch (_) {}
+          });
+        });
+      } catch (_) {}
+    } catch (e) { /* silent */ }
+  }
+
+  // --- Hide-only logic for "Export Markdown" option -----------------------
+  function hideExportMarkdownOption() {
+    try {
+      const selectors = [
+        '.export-markdown-btn', '.export-markdown', '.export-markdown-table',
+        '#exportMarkdownBtn', '[data-action="export-markdown"]',
+        'button[data-format="md"]', 'a[data-format="md"]'
+      ];
+      selectors.forEach(s => {
+        try { document.querySelectorAll(s).forEach(el => { if (el && el.style) el.style.display = 'none'; }); } catch (_) {}
+      });
+
+      const needles = ['export markdown', 'export md', 'markdown export', 'export as markdown'];
+      document.querySelectorAll('button, a, input, li, span').forEach(el => {
+        try {
+          const txt = ((el.textContent || '') + ' ' + (el.title || '')).toLowerCase();
+          for (let n of needles) {
+            if (txt.indexOf(n) !== -1) {
+              if (el && el.style) el.style.display = 'none';
+              break;
+            }
+          }
+        } catch (_) {}
+      });
+
+      // Also traverse toolbars/menus
+      try {
+        document.querySelectorAll('#toolbar, .toolbar, .menu, .dropdown-menu').forEach(menu => {
+          menu.querySelectorAll('button, a, li').forEach(item => {
+            try {
+              const txt = ((item.textContent || '') + ' ' + (item.title || '')).toLowerCase();
+              for (let n of needles) {
+                if (txt.indexOf(n) !== -1) {
+                  if (item && item.style) item.style.display = 'none';
+                  break;
+                }
+              }
+            } catch (_) {}
+          });
+        });
+      } catch (_) {}
+    } catch (e) { /* silent */ }
+  }
+
   // --- Search & highlight (robust) ---------------------------------------
   function clearHighlights(cell) {
     if (!cell) return;
@@ -1415,8 +1493,8 @@
             { sel: '.export-csv-btn, .export-csv, .export-csv-table', fn: exportTableCSV },
             { sel: '.export-json-btn, .export-json, .export-json-table', fn: exportTableJSON },
             { sel: '.export-xlsx-btn, .export-xlsx, .export-xlsx-table', fn: exportTableXLSX },
-            { sel: '.export-pdf-btn, .export-pdf, .export-pdf-table', fn: exportTablePDF },
-            { sel: '.export-markdown-btn, .export-markdown, .export-markdown-table', fn: exportTableMarkdown }
+            { sel: '.export-pdf-btn, .export-pdf, .export-pdf-table', fn: exportTablePDF }
+            // NOTE: export-markdown intentionally excluded from automatic handler attachment.
           ];
           handlers.forEach(h => {
             try {
@@ -1436,6 +1514,12 @@
 
       // Optimize table controls position/size for mobile
       try { optimizeTableControls(); setTimeout(optimizeTableControls, 200); } catch (e) { /* silent */ }
+
+      // Hide Reset All Tables UI targets (only hide; function retained)
+      try { hideResetAllTablesOption(); setTimeout(hideResetAllTablesOption, 500); } catch (e) {}
+
+      // Hide Export Markdown UI targets (only hide; functions retained)
+      try { hideExportMarkdownOption(); setTimeout(hideExportMarkdownOption, 500); } catch (e) {}
 
       // Single consolidated keydown handler for "/" and "Escape"
       document.addEventListener("keydown", function (e) {
@@ -1535,8 +1619,21 @@
   window.exportTableJSON = exportTableJSON;
   window.exportTableXLSX = exportTableXLSX;
   window.exportTablePDF = exportTablePDF;
+  window.exportTableMarkdown = exportTableMarkdown; // function retained but UI hidden
+  window.exportAllTablesMarkdown = exportAllTablesMarkdown; // function retained but UI hidden
   window.exportTableMarkdown = exportTableMarkdown;
   window.exportAllTablesMarkdown = exportAllTablesMarkdown;
+  window.exportTableMarkdown = exportTableMarkdown;
+  window.exportAllTablesMarkdown = exportAllTablesMarkdown;
+  window.exportTableMarkdown = exportTableMarkdown;
+  window.exportAllTablesMarkdown = exportAllTablesMarkdown;
+  window.exportTableMarkdown = exportTableMarkdown;
+  window.exportAllTablesMarkdown = exportAllTablesMarkdown;
+  // (repeated assignments harmless; ensures availability)
+
+  window.exportTableMarkdown = exportTableMarkdown;
+  window.exportAllTablesMarkdown = exportAllTablesMarkdown;
+
   window.toggleMode = function () {
     try {
       const modeBtn = document.getElementById('modeBtn');
