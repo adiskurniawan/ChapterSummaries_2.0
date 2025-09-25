@@ -328,6 +328,75 @@
     } catch (e) { return null; }
   }
 
+  // --- Single-table TOC logic (only applied when exactly one table exists) -
+  function buildSingleTableToc() {
+    try {
+      const wrappers = document.querySelectorAll('.table-wrapper');
+      if (!wrappers || wrappers.length !== 1) return; // only when exactly one table
+      const tocBar = document.getElementById('tocBar');
+      if (!tocBar) return;
+      const table = wrappers[0].querySelector('.table-container table') || wrappers[0].querySelector('table');
+      if (!table) return;
+
+      let headerCells = [];
+      if (table.tHead && table.tHead.rows.length) {
+        headerCells = Array.from(table.tHead.rows[0].cells);
+      } else if (table.rows && table.rows.length) {
+        headerCells = Array.from(table.rows[0].cells);
+      }
+      if (!headerCells || headerCells.length === 0) return;
+
+      const ul = document.createElement('ul');
+      ul.className = 'single-toc-list';
+      ul.style.listStyle = 'none';
+      ul.style.display = 'flex';
+      ul.style.gap = '8px';
+      ul.style.margin = '0';
+      ul.style.padding = '0';
+
+      headerCells.forEach((cell, idx) => {
+        // ensure stable id on header cell
+        let id = cell.id && String(cell.id).trim() ? cell.id : `tv-topic-${idx+1}`;
+        if (document.getElementById(id) && document.getElementById(id) !== cell) {
+          let suffix = 1;
+          while (document.getElementById(id + '-' + suffix)) suffix++;
+          id = id + '-' + suffix;
+        }
+        cell.id = id;
+
+        const li = document.createElement('li');
+        li.className = 'toc-item';
+        const a = document.createElement('a');
+        a.className = 'toc-link';
+        a.href = `#${id}`;
+        a.textContent = `Topic ${idx+1}`;
+        const headerText = (cell.textContent || '').trim();
+        if (headerText) {
+          a.setAttribute('aria-label', headerText);
+          a.title = headerText;
+        }
+        a.addEventListener('click', function (ev) {
+          ev.preventDefault();
+          const target = document.getElementById(id);
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            try { history.replaceState(null, '', `#${id}`); } catch (e) { }
+            try { target.focus && target.focus({ preventScroll: true }); } catch (e) { }
+          }
+        });
+        li.appendChild(a);
+        ul.appendChild(li);
+      });
+
+      const existingUl = tocBar.querySelector('ul');
+      if (existingUl) existingUl.remove();
+      tocBar.appendChild(ul);
+    } catch (err) {
+      try { console.warn('buildSingleTableToc error', err); } catch (_) {}
+    }
+  }
+  window.buildSingleTableToc = buildSingleTableToc;
+
   // storage
   let originalTableRows = [];
   let sortStates = [];
@@ -1093,6 +1162,9 @@
           });
         });
       } catch (e) { /* silent */ }
+
+      // Build single-table TOC if condition applies
+      try { buildSingleTableToc(); setTimeout(buildSingleTableToc, 500); } catch (e) {}
 
       // Single consolidated keydown handler for "/" and "Escape"
       document.addEventListener("keydown", function (e) {

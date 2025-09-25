@@ -1,8 +1,10 @@
 /* style.css — Tables Viewer v2.1
-   Revised: 2025-09-21
-   Purpose: consistent list markers inside table cells, plus general UI polish
+   Revised: 2025-09-25
+   Purpose: consistent list markers inside table cells, UI polish, and complete code styling (inline + block)
+   Notes: merged user file + code styling + dark-mode code overrides + copy-button helpers
 */
 
+/* === color vars (preserve existing + add code-specific vars) === */
 :root{
   --bg:#ffffff;
   --text:#111827;
@@ -18,6 +20,12 @@
   --toc-link-hover-bg:#e0f2fe;
   --toc-link-hover-color:#1e40af;
   --tv-header-min-height:48px;
+
+  /* code styling vars */
+  --code-bg: #f6f8fa;
+  --code-bg-alt: #f3f4f6;
+  --code-text-dark: #e6e6e6;
+  --code-radius: 6px;
 }
 
 /* dark theme overrides */
@@ -35,6 +43,9 @@
   --toc-link:#93c5fd;
   --toc-link-hover-bg:#1e3a8a;
   --toc-link-hover-color:#ffffff;
+
+  /* code dark override */
+  --code-bg: #2d2d2d;
 }
 
 /* Base layout + typography */
@@ -115,11 +126,8 @@ tr:hover td{background:var(--row-hover)}
 .highlight{background:var(--highlight)!important;transition:background .45s ease}
 .current-row td{background:var(--current-row)!important}
 
-/* Sticky first column
-   NOTE: keep header cells bold (thead th rule). Do NOT force bold for data cells.
-*/
+/* Sticky first column */
 thead th:first-child{
-  /* header-specific sticky behavior; header font-weight remains from thead th */
   position:sticky;
   left:0;
   z-index:4;
@@ -127,7 +135,7 @@ thead th:first-child{
 }
 td:first-child{
   background:var(--panel);
-  font-weight:inherit; /* inherit normal td weight; explicit <strong> still appears bold */
+  font-weight:inherit;
   position:sticky;
   left:0;
   z-index:2;
@@ -154,7 +162,7 @@ table td, table th{border-color:rgba(0,0,0,0.06)}
 .th-with-sort, thead th[role="button"], .sort-btn{cursor:pointer}
 thead th[role="button"]:hover{background:#eef6ff}
 
-/* Sticky header area - header + TOC stack and remain sticky */
+/* Sticky header area */
 #stickyMainHeader{
   position:sticky;
   top:0;
@@ -171,7 +179,7 @@ thead th[role="button"]:hover{background:#eef6ff}
   box-shadow: 0 1px 0 rgba(0,0,0,0.03);
 }
 
-/* tv-header: internal controls layout (title left, controls right) */
+/* tv-header layout */
 #tv-header{
   display:flex;
   gap:6px;
@@ -181,8 +189,6 @@ thead th[role="button"]:hover{background:#eef6ff}
   width:100%;
   min-height:var(--tv-header-min-height);
 }
-
-/* tv-header children: title and controls */
 #tv-header > div:first-child{
   flex: 0 0 auto;
   display:flex;
@@ -208,13 +214,11 @@ thead th[role="button"]:hover{background:#eef6ff}
   font-size: 13px;
   border-radius: 5px;
   line-height: 1.1;
-  min-height: 40px;     /* preserves touch target */
+  min-height: 40px;
   min-width: 36px;
   white-space:nowrap;
   gap:6px;
 }
-
-/* Provide slightly tighter visual for icon-only buttons if used */
 #tv-header button.icon-only,
 #tv-header .btn.icon-only {
   padding: 6px;
@@ -222,7 +226,7 @@ thead th[role="button"]:hover{background:#eef6ff}
   height: 36px;
   min-width: 36px;
   min-height: 36px;
-  font-size: 0; /* icon fonts or SVG only */
+  font-size: 0;
 }
 
 /* Compact header search inputs */
@@ -241,7 +245,7 @@ thead th[role="button"]:hover{background:#eef6ff}
   height: 34px;
 }
 
-/* TOC bar (keeps horizontal slicer behavior) */
+/* TOC bar */
 #tocBar{
   display:flex;
   align-items:center;
@@ -252,8 +256,6 @@ thead th[role="button"]:hover{background:#eef6ff}
   background:transparent;
   -webkit-overflow-scrolling:touch;
 }
-
-/* keep the TOC visible and separate visually */
 #tocBar ul{
   display:flex;
   gap:8px;
@@ -358,13 +360,61 @@ td ol > li::before {
   margin-left: -2.2ch;
 }
 
-/* small improvement: keep code blocks and inline code readable */
+/* === Code styling (global + table-specific) === */
+
+/* Inline code (global) */
+code {
+  background: var(--code-bg);
+  padding: 2px 6px;
+  border-radius: var(--code-radius);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 0.92em;
+  line-height: 1;
+  color: inherit;
+}
+
+/* Fenced code blocks */
+pre code {
+  background: var(--code-bg);
+  display: block;
+  padding: 10px 14px;
+  border-radius: calc(var(--code-radius));
+  overflow-x: auto;
+  line-height: 1.45;
+  font-size: 0.92em;
+  white-space: pre;
+  tab-size: 4;
+}
+
+/* Keep table cell inline code slightly tighter to match cell padding */
 td code{
-  background:#f3f4f6;
-  padding:2px 6px;
-  border-radius:6px;
-  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-  font-size:.92em;
+  background: var(--code-bg-alt);
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:.9em;
+  line-height:1;
+}
+
+/* Remove extra padding inside <pre> itself (consistent with existing file) */
+pre {
+  margin: 1em 0;
+  padding: 0;
+  background: transparent;
+}
+
+/* Dark theme overrides for code */
+[data-theme="dark"] code {
+  background: var(--code-bg);
+  color: var(--code-text-dark);
+}
+[data-theme="dark"] pre code {
+  background: var(--code-bg);
+  color: var(--code-text-dark);
+}
+[data-theme="dark"] td code {
+  background: rgba(255,255,255,0.02);
+  color: var(--code-text-dark);
 }
 
 /* Ensure nested lists inside <td> inherit color in dark mode too */
@@ -437,3 +487,59 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
 
 /* small visual polish for toc links */
 #tocBar a:hover{ background:var(--toc-link-hover-bg); color:var(--toc-link-hover-color) }
+
+/* --------------------------
+   Copy-button / copy-ready output helpers
+   -------------------------- */
+
+/* container for copy buttons (existing site uses .copy-buttons) */
+.copy-buttons{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+/* individual copy button styling (non-invasive) */
+.copy-buttons button.copy-btn,
+.copy-btn {
+  background: var(--button-bg);
+  color: var(--button-text);
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size:13px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+
+/* Visual styling for copy-ready code-blocks that appear as "copy-button table" output */
+.copy-button-output pre,
+.copy-button-table pre {
+  margin: 0;
+  border: 1px solid rgba(0,0,0,0.06);
+  background: var(--panel);
+  padding: 8px 10px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.92em;
+  line-height: 1.45;
+}
+
+/* Slight visual separation when a copy-ready markdown table is present in the UI */
+.copy-button-output {
+  padding: 8px;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.01);
+  border: 1px dashed rgba(0,0,0,0.03);
+}
+
+/* Light visual accent for focus on copy outputs */
+.copy-button-output:focus-within,
+.copy-button-output:hover {
+  box-shadow: 0 4px 14px rgba(37,99,235,0.06);
+  border-color: rgba(37,99,235,0.12);
+}
+
+/* End of file */
