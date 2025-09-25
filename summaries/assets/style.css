@@ -1,7 +1,6 @@
 /* style.css — Tables Viewer v2.1
-   Revised: 2025-09-25
+   Revised: 2025-09-25 (mobile toggle fixed)
    Purpose: consistent list markers inside table cells, UI polish, and complete code styling (inline + block)
-   Notes: merged user file + code styling + dark-mode code overrides + copy-button helpers
 */
 
 /* === color vars (preserve existing + add code-specific vars) === */
@@ -543,7 +542,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
 }
 
 /* --------------------------
-   Table-controls styling and mobile optimization
+   Table-controls styling and mobile optimization (updated)
    -------------------------- */
 
 /* default table controls layout (non-invasive) */
@@ -564,30 +563,45 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
   .table-controls {
     display:flex;
     flex-wrap:wrap;
-    gap:4px;
+    gap:6px;
     justify-content:flex-start;
+    align-items:flex-start;
   }
-  .table-controls button {
-    font-size:12px;
-    padding:4px 6px;
-    flex:1 1 auto;
-    min-width:unset;
-    white-space:nowrap;
-  }
-  /* Ensure collapse/expand toggle is always visible and spans full width */
+
+  /* Collapse toggle: make prominent and always visible on its own row */
   .table-controls .toggle-table-btn,
   .table-controls button.toggle-table-btn {
-    flex:100%;
-    order:-1;
-    text-align:center;
-    padding:6px 8px;
+    flex: 1 0 100%;
+    order: -1; /* ensure it appears before other controls */
+    text-align: center;
+    padding: 8px 10px;
     font-weight:600;
+    font-size:13px;
+    border-radius:6px;
+    box-sizing: border-box;
+    white-space:nowrap;
   }
+
+  /* Other controls compact and wrap below the toggle */
+  .table-controls button:not(.toggle-table-btn) {
+    flex: 1 1 auto;
+    font-size: 12px;
+    padding: 5px 8px;
+    min-width: 0;
+    white-space:nowrap;
+  }
+
   /* Make copy buttons compact on mobile */
   .table-controls .copy-buttons button,
   .table-controls .copy-btn {
     padding:4px 6px;
     font-size:12px;
+  }
+
+  /* ensure toggle doesn't push horizontally; keep container scroll-free */
+  .table-wrapper .table-header-wrapper,
+  .table-controls {
+    overflow: visible;
   }
 }
 
