@@ -1397,3 +1397,49 @@
   };
 
 })();
+
+// --- Safe dynamic loader for optional assets/extra.js ---------------------
+// Loads extra.js from same directory as this script if possible.
+// Falls back to 'assets/extra.js' then 'extra.js'.
+// Ensures it runs only once and does not break if missing.
+(function () {
+  try {
+    if (window._tv_extra_loader_attached) return;
+    window._tv_extra_loader_attached = true;
+
+    function createScript(src) {
+      const s = document.createElement('script');
+      s.src = src;
+      // keep execution order deterministic
+      s.async = false;
+      s.defer = false;
+      s.onload = function () { try { console.info('tv:extra.js loaded:', src); } catch (_) { } };
+      s.onerror = function () { try { /* load failed */ } catch (_) { } };
+      return s;
+    }
+
+    const tried = [];
+    // try same directory as current script
+    try {
+      const cur = (document.currentScript && document.currentScript.src) || '';
+      if (cur) {
+        const base = cur.replace(/[^\/]*$/, '');
+        tried.push(base + 'extra.js');
+      }
+    } catch (e) { /* ignore */ }
+
+    // fallback common locations
+    tried.push('assets/extra.js', 'extra.js');
+
+    for (let i = 0; i < tried.length; i++) {
+      const path = tried[i];
+      try {
+        const parent = document.head || document.getElementsByTagName('head')[0] || document.documentElement || document.body;
+        if (!parent) continue;
+        parent.appendChild(createScript(path));
+        // appended first successful attempt; do not try others
+        break;
+      } catch (e) { /* try next */ }
+    }
+  } catch (e) { /* silent */ }
+})();
