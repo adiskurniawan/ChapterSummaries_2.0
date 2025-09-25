@@ -81,6 +81,31 @@
     });
   }
 
+  // --- Download helper & filename sanitize --------------------------------
+  function sanitizeFileName(name) {
+    try {
+      if (!name) return 'download';
+      return String(name).trim().replace(/[\/\\:*?"<>|]/g, '_').replace(/\s+/g, '_').slice(0, 200) || 'download';
+    } catch (e) { return 'download'; }
+  }
+
+  function downloadBlob(blob, filename) {
+    try {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = sanitizeFileName(filename);
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      return true;
+    } catch (e) {
+      try { console.error('downloadBlob failed', e); } catch (_) {}
+      return false;
+    }
+  }
+
   // --- Toast / Notification system (queued, accessible, adaptive) ----------
   let _toastQueue = [];
   let _activeToast = null;
@@ -291,14 +316,7 @@
       downloadBtn.addEventListener('click', () => {
         try {
           const blob = new Blob([ta.value], { type: 'text/plain;charset=utf-8' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = (title || 'export').replace(/[\/\\:*?"<>|]/g, '_') + '.txt';
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          URL.revokeObjectURL(url);
+          downloadBlob(blob, (title || 'export') + '.txt');
           showToast('Downloaded', { type: 'success' });
           overlay.remove();
         } catch (e) { showToast('Download failed', { type: 'warn' }); }
@@ -338,13 +356,10 @@
       const table = wrappers[0].querySelector('.table-container table') || wrappers[0].querySelector('table');
       if (!table) return;
 
-      let headerCells = [];
-      if (table.tHead && table.tHead.rows.length) {
-        headerCells = Array.from(table.tHead.rows[0].cells);
-      } else if (table.rows && table.rows.length) {
-        headerCells = Array.from(table.rows[0].cells);
-      }
-      if (!headerCells || headerCells.length === 0) return;
+      // prefer tbody rows; fall back to all rows if tbody missing
+      const tbody = safeGetTBody(table) || table;
+      const rows = Array.from((tbody && tbody.rows && tbody.rows.length) ? tbody.rows : (table.rows || []));
+      if (!rows || rows.length === 0) return;
 
       const ul = document.createElement('ul');
       ul.className = 'single-toc-list';
@@ -353,39 +368,42 @@
       ul.style.gap = '8px';
       ul.style.margin = '0';
       ul.style.padding = '0';
+      ul.style.flexWrap = 'wrap';
 
-      headerCells.forEach((cell, idx) => {
-        // ensure stable id on header cell
-        let id = cell.id && String(cell.id).trim() ? cell.id : `tv-topic-${idx+1}`;
-        if (document.getElementById(id) && document.getElementById(id) !== cell) {
-          let suffix = 1;
-          while (document.getElementById(id + '-' + suffix)) suffix++;
-          id = id + '-' + suffix;
-        }
-        cell.id = id;
-
-        const li = document.createElement('li');
-        li.className = 'toc-item';
-        const a = document.createElement('a');
-        a.className = 'toc-link';
-        a.href = `#${id}`;
-        a.textContent = `Topic ${idx+1}`;
-        const headerText = (cell.textContent || '').trim();
-        if (headerText) {
-          a.setAttribute('aria-label', headerText);
-          a.title = headerText;
-        }
-        a.addEventListener('click', function (ev) {
-          ev.preventDefault();
-          const target = document.getElementById(id);
-          if (target) {
-            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            try { history.replaceState(null, '', `#${id}`); } catch (e) { }
-            try { target.focus && target.focus({ preventScroll: true }); } catch (e) { }
+      rows.forEach((row, idx) => {
+        try {
+          // stable id assignment for each row
+          let id = row.id && String(row.id).trim() ? row.id : `tv-row-${idx+1}`;
+          if (document.getElementById(id) && document.getElementById(id) !== row) {
+            let suffix = 1;
+            while (document.getElementById(id + '-' + suffix)) suffix++;
+            id = id + '-' + suffix;
           }
-        });
-        li.appendChild(a);
-        ul.appendChild(li);
+          row.id = id;
+
+          const li = document.createElement('li');
+          li.className = 'toc-item';
+          const a = document.createElement('a');
+          a.className = 'toc-link';
+          a.href = `#${id}`;
+          a.textContent = `Topic ${idx+1}`;
+          const rowText = (row.textContent || '').trim();
+          if (rowText) {
+            a.setAttribute('aria-label', rowText);
+            a.title = rowText;
+          }
+          a.addEventListener('click', function (ev) {
+            ev.preventDefault();
+            const target = document.getElementById(id);
+            if (target) {
+              target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              try { history.replaceState(null, '', `#${id}`); } catch (e) { }
+              try { target.focus && target.focus({ preventScroll: true }); } catch (e) { }
+            }
+          });
+          li.appendChild(a);
+          ul.appendChild(li);
+        } catch (e) { /* ignore single row error */ }
       });
 
       const existingUl = tocBar.querySelector('ul');
@@ -537,7 +555,39 @@
     });
   }
 
-  // --- Copy / Export functions -------------------------------------------
+  // --- Copy / Export helper: centralize table extraction ------------------
+  function formatCellForMarkdown(cell) {
+    try {
+      let txt = (cell.textContent || '').trim();
+      txt = txt.replace(/\|/g, '\\|');
+      // Only convert newlines to <br> if the cell actually contains newlines.
+      if (txt.indexOf('\n') !== -1 || txt.indexOf('\r') !== -1) {
+        return txt.replace(/\r\n|\r|\n/g, '<br>');
+      }
+      return txt;
+    } catch (e) { return (cell.textContent || '').trim().replace(/\|/g, '\\|'); }
+  }
+
+  function tableToMarkdownLines(table, title) {
+    const lines = [];
+    try {
+      const rows = Array.from(table.rows);
+      if (!rows || rows.length === 0) return lines;
+      if (title) {
+        lines.push('**' + (title || '') + '**');
+        lines.push('');
+      }
+      const headCells = Array.from(rows[0].cells).map(c => (c.textContent || '').trim().replace(/\|/g, '\\|'));
+      lines.push('| ' + headCells.join(' | ') + ' |');
+      lines.push('| ' + headCells.map(() => '---').join(' | ') + ' |');
+      for (let i = 1; i < rows.length; i++) {
+        const rowCells = Array.from(rows[i].cells).map(c => formatCellForMarkdown(c));
+        lines.push('| ' + rowCells.join(' | ') + ' |');
+      }
+    } catch (e) { /* ignore per-table errors */ }
+    return lines;
+  }
+
   function copyTablePlain(btn) {
     try {
       const table = getTableFromButton(btn);
@@ -556,11 +606,9 @@
       const table = getTableFromButton(btn);
       if (!table) { showToast('No table found to copy', { type: 'warn' }); return; }
       let title = table.closest('.table-wrapper')?.querySelector('h3')?.textContent || '';
-      let rows = Array.from(table.rows);
-      if (rows.length === 0) return;
-      let head = Array.from(rows[0].cells).map(c => c.textContent.trim()).join(" | ");
-      let md = "**" + title + "**\n| " + head + " |\n| " + Array.from(rows[0].cells).map(() => '---').join(" | ") + " |\n";
-      for (let i = 1; i < rows.length; i++) { md += "| " + Array.from(rows[i].cells).map(c => c.textContent.trim()).join(" | ") + " |\n"; }
+      const lines = tableToMarkdownLines(table, title);
+      if (!lines || lines.length === 0) { showToast('Table empty', { type: 'warn' }); return; }
+      const md = lines.join('\n');
       copyToClipboard(md).then(() => showToast('Table copied in Markdown format!', { type: 'success' })).catch(() => {
         try { showCopyModal(md, { title: 'Copy table markdown' }); } catch (e) { showToast('Copy failed', { type: 'warn' }); }
       });
@@ -569,13 +617,18 @@
 
   function copyAllTablesPlain() {
     try {
-      let text = "";
+      let textPieces = [];
       document.querySelectorAll(".table-wrapper").forEach(wrapper => {
-        let title = wrapper.querySelector('h3')?.textContent || '';
-        let table = wrapper.querySelector('table');
-        if (!table) return;
-        text += title + "\n" + Array.from(table.rows).map(r => Array.from(r.cells).map(c => c.textContent.trim()).join("\t")).join("\n") + "\n";
+        try {
+          let title = wrapper.querySelector('h3')?.textContent || '';
+          let table = wrapper.querySelector('table');
+          if (!table) return;
+          textPieces.push(title);
+          textPieces.push(Array.from(table.rows).map(r => Array.from(r.cells).map(c => c.textContent.trim()).join("\t")).join("\n"));
+        } catch (e) { /* ignore single table error */ }
       });
+      const text = textPieces.join("\n\n");
+      if (!text) { showToast('No tables to copy', { type: 'warn' }); return; }
       copyToClipboard(text).then(() => showToast("All tables copied as plain text!", { type: 'success' })).catch(() => {
         try { showCopyModal(text, { title: 'Copy all tables' }); } catch (e) { showToast('Copy failed', { type: 'warn' }); }
       });
@@ -584,19 +637,23 @@
 
   function copyAllTablesMarkdown() {
     try {
-      let text = "";
-      document.querySelectorAll(".table-wrapper").forEach(wrapper => {
-        let title = wrapper.querySelector('h3')?.textContent || '';
-        let table = wrapper.querySelector('table');
-        if (!table) return;
-        let rows = Array.from(table.rows);
-        if (rows.length === 0) return;
-        let head = Array.from(rows[0].cells).map(c => c.textContent.trim()).join(" | ");
-        text += "**" + title + "**\n| " + head + " |\n| " + Array.from(rows[0].cells).map(() => '---').join(" | ") + " |\n";
-        for (let i = 1; i < rows.length; i++) { text += "| " + Array.from(rows[i].cells).map(c => c.textContent.trim()).join(" | ") + " |\n"; }
+      let pieces = [];
+      document.querySelectorAll(".table-wrapper").forEach((wrapper) => {
+        try {
+          const table = wrapper.querySelector('table');
+          if (!table) return;
+          const title = wrapper.querySelector('h3')?.textContent || '';
+          const lines = tableToMarkdownLines(table, title);
+          if (lines && lines.length) {
+            if (pieces.length) pieces.push(''); // blank line between tables
+            pieces.push(...lines);
+          }
+        } catch (e) { /* ignore single table error */ }
       });
-      copyToClipboard(text).then(() => showToast("All tables copied in Markdown format!", { type: 'success' })).catch(() => {
-        try { showCopyModal(text, { title: 'Copy all tables markdown' }); } catch (e) { showToast('Copy failed', { type: 'warn' }); }
+      if (pieces.length === 0) { showToast('No tables to export', { type: 'warn' }); return; }
+      const md = pieces.join('\n');
+      copyToClipboard(md).then(() => showToast("All tables copied in Markdown format!", { type: 'success' })).catch(() => {
+        try { showCopyModal(md, { title: 'Copy all tables markdown' }); } catch (e) { showToast('Copy failed', { type: 'warn' }); }
       });
     } catch (e) { showToast('Copy failed', { type: 'warn' }); }
   }
@@ -614,16 +671,9 @@
         }
         return v;
       }).join(',')).join('\r\n');
-      const safeName = (filename || table.closest('.table-wrapper')?.querySelector('h3')?.textContent || 'table').replace(/[\/\\:*?"<>|]/g, '_') + '.csv';
+      const safeName = sanitizeFileName((filename || table.closest('.table-wrapper')?.querySelector('h3')?.textContent || 'table')) + '.csv';
       const blob = new Blob(["\uFEFF", csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = safeName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      downloadBlob(blob, safeName);
       showToast('CSV exported', { type: 'success' });
     } catch (e) { showToast('CSV export failed', { type: 'warn' }); }
   }
@@ -634,35 +684,12 @@
       const table = getTableFromButton(btn);
       if (!table) { showToast('No table found to export', { type: 'warn' }); return; }
       const title = table.closest('.table-wrapper')?.querySelector('h3')?.textContent || '';
-      const rows = Array.from(table.rows);
-      if (rows.length === 0) { showToast('Table empty', { type: 'warn' }); return; }
-
-      const headCells = Array.from(rows[0].cells).map(c => (c.textContent || '').trim());
-      const headerLine = '| ' + headCells.join(' | ') + ' |';
-      const sepLine = '| ' + headCells.map(() => '---').join(' | ') + ' |';
-
-      let md = '';
-      if (title) md += '**' + title + '**\n\n';
-      md += headerLine + '\n' + sepLine + '\n';
-      for (let i = 1; i < rows.length; i++) {
-        const rowCells = Array.from(rows[i].cells).map(c => {
-          const txt = (c.textContent || '').trim().replace(/\|/g, '\\|').replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\n/g, '<br>');
-          return txt;
-        });
-        md += '| ' + rowCells.join(' | ') + ' |\n';
-      }
-
-      const baseName = (filename || title || 'table').replace(/[\/\\:*?"<>|]/g, '_');
-      const safeName = baseName + '.md';
+      const lines = tableToMarkdownLines(table, title);
+      if (!lines || lines.length === 0) { showToast('Table empty', { type: 'warn' }); return; }
+      const md = lines.join('\n');
+      const safeName = sanitizeFileName((filename || title || 'table')) + '.md';
       const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = safeName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      downloadBlob(blob, safeName);
       showToast('Markdown exported', { type: 'success' });
     } catch (e) {
       console.error('exportTableMarkdown failed', e);
@@ -672,39 +699,23 @@
 
   function exportAllTablesMarkdown({ filename } = {}) {
     try {
-      let md = '';
+      const pieces = [];
       document.querySelectorAll(".table-wrapper").forEach((wrapper) => {
         try {
           const table = wrapper.querySelector('table');
           if (!table) return;
           const title = wrapper.querySelector('h3')?.textContent || '';
-          const rows = Array.from(table.rows);
-          if (!rows || rows.length === 0) return;
-          if (md) md += '\n\n';
-          if (title) md += '**' + title + '**\n\n';
-          const headCells = Array.from(rows[0].cells).map(c => (c.textContent || '').trim());
-          md += '| ' + headCells.join(' | ') + ' |\n';
-          md += '| ' + headCells.map(() => '---').join(' | ') + ' |\n';
-          for (let i = 1; i < rows.length; i++) {
-            const rowCells = Array.from(rows[i].cells).map(c => {
-              const txt = (c.textContent || '').trim().replace(/\|/g, '\\|').replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\n/g, '<br>');
-              return txt;
-            });
-            md += '| ' + rowCells.join(' | ') + ' |\n';
-          }
+          const lines = tableToMarkdownLines(table, title);
+          if (!lines || lines.length === 0) return;
+          if (pieces.length) pieces.push(''); // blank line between tables
+          pieces.push(...lines);
         } catch (e) { /* ignore single table error */ }
       });
-      if (!md) { showToast('No tables to export', { type: 'warn' }); return; }
-      const safeName = (filename || 'all_tables').replace(/[\/\\:*?"<>|]/g, '_') + '.md';
+      if (pieces.length === 0) { showToast('No tables to export', { type: 'warn' }); return; }
+      const md = pieces.join('\n');
+      const safeName = sanitizeFileName((filename || 'all_tables')) + '.md';
       const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = safeName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      downloadBlob(blob, safeName);
       showToast('All tables exported', { type: 'success' });
     } catch (e) {
       console.error('exportAllTablesMarkdown failed', e);
@@ -736,16 +747,9 @@
         return obj;
       });
       const jsonStr = JSON.stringify(rows, null, 2);
-      const safeName = (filename || table.closest('.table-wrapper')?.querySelector('h3')?.textContent || 'table').replace(/[\/\\:*?"<>|]/g, '_') + '.json';
+      const safeName = sanitizeFileName((filename || table.closest('.table-wrapper')?.querySelector('h3')?.textContent || 'table')) + '.json';
       const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = safeName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      downloadBlob(blob, safeName);
       showToast('JSON exported', { type: 'success' });
     } catch (e) { console.error(e); showToast('Export JSON failed', { type: 'warn' }); }
   }
@@ -767,7 +771,7 @@
         return;
       }
 
-      const baseName = (filename || table.closest('.table-wrapper')?.querySelector('h3')?.textContent || 'table').replace(/[\/\\:*?"<>|]/g, '_');
+      const baseName = sanitizeFileName((filename || table.closest('.table-wrapper')?.querySelector('h3')?.textContent || 'table'));
       const safeName = baseName + '.xlsx';
 
       // If SheetJS is available, create a real .xlsx
@@ -792,14 +796,7 @@
           if (typeof window.XLSX.write === 'function') {
             const wbout = window.XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
             const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = safeName;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(url);
+            downloadBlob(blob, safeName);
             showToast('XLSX exported', { type: 'success' });
             return;
           }
@@ -814,14 +811,7 @@
         const rows = aoa.map(r => r.map(v => '"' + (String(v || '').replace(/"/g, '""')) + '"').join('\t'));
         const tsv = rows.join('\n');
         const blob = new Blob(["\uFEFF", tsv], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = safeName;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
+        downloadBlob(blob, safeName);
         showToast('XLSX exported (fallback TSV). Install assets/xlsx.full.min.js for true .xlsx support.', { type: 'warn' });
         return;
       } catch (err2) {
@@ -876,19 +866,23 @@
 
   function resetAllTables() {
     try {
-      document.querySelectorAll(".table-container table").forEach((table, idx) => {
-        const tbody = safeGetTBody(table);
-        if (!tbody) return;
-        tbody.innerHTML = "";
-        (originalTableRows[idx] || []).forEach(r => {
-          const clone = r.cloneNode(true);
-          tbody.appendChild(clone);
-        });
-        Array.from(tbody.rows).forEach(r => {
-          Array.from(r.cells).forEach(c => { c.dataset.origHtml = c.innerHTML; });
-        });
-        sortStates[idx] = Array(table.rows[0]?.cells.length || 0).fill(0);
-        updateHeaderSortUI(idx);
+      const tables = Array.from(document.querySelectorAll(".table-container table"));
+      tables.forEach((table, idx) => {
+        try {
+          const tbody = safeGetTBody(table);
+          if (!tbody) return;
+          tbody.innerHTML = "";
+          // restore using stored originalTableRows clones
+          (originalTableRows[idx] || []).forEach(r => {
+            const clone = r.cloneNode(true);
+            tbody.appendChild(clone);
+          });
+          Array.from(tbody.rows).forEach(r => {
+            Array.from(r.cells).forEach(c => { c.dataset.origHtml = c.innerHTML; });
+          });
+          sortStates[idx] = Array(table.rows[0]?.cells.length || 0).fill(0);
+          updateHeaderSortUI(idx);
+        } catch (e) { /* continue */ }
       });
       document.querySelectorAll('.table-wrapper').forEach(w => { w.classList.remove('table-collapsed'); const btn = w.querySelector('.toggle-table-btn'); if (btn) btn.textContent = "Collapse Table"; });
       const toggleAllBtn = document.getElementById('toggleAllBtn');
@@ -1209,19 +1203,34 @@
     } catch (err) { /* silent */ }
   });
 
-  // delegated click: TOC anchor scroll
+  // delegated click: TOC anchor scroll (fixed: scroll to actual target when present)
   document.addEventListener('click', function (e) {
     try {
       const a = e.target.closest && e.target.closest('#tocBar a[href^="#"]');
       if (!a) return;
       e.preventDefault();
-      const id = a.getAttribute('href').substring(1);
-      const container = document.getElementById(id)?.closest('.table-wrapper');
-      if (!container) return;
+      const id = (a.getAttribute('href') || '').substring(1);
+      if (!id) return;
+
       const headerHeight = document.getElementById('stickyMainHeader')?.offsetHeight || 0;
-      const containerTop = container.getBoundingClientRect().top + window.pageYOffset;
-      window.scrollTo({ top: containerTop - headerHeight - 5, behavior: 'smooth' });
-      try { history.replaceState(null, '', '#' + id); } catch (err) { }
+      const target = document.getElementById(id);
+
+      if (target) {
+        // Scroll to the actual element (row, header, etc.) with header offset.
+        const rect = target.getBoundingClientRect();
+        const top = (window.pageYOffset || document.documentElement.scrollTop || 0) + rect.top;
+        window.scrollTo({ top: Math.max(0, top - headerHeight - 5), behavior: 'smooth' });
+        try { history.replaceState(null, '', '#' + id); } catch (err) {}
+        try { target.focus && target.focus({ preventScroll: true }); } catch (err) {}
+        return;
+      }
+
+      // Fallback: if element not found, try to scroll to nearest table wrapper
+      const container = a.closest('.table-wrapper');
+      if (!container) return;
+      const containerTop = container.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop || 0);
+      window.scrollTo({ top: Math.max(0, containerTop - headerHeight - 5), behavior: 'smooth' });
+      try { history.replaceState(null, '', '#' + id); } catch (err) {}
     } catch (err) { /* silent */ }
   });
 
