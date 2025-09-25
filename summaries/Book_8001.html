@@ -4,8 +4,8 @@
 <meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
 <title>Tables Viewer v2.1</title>
 <style>:root{--main-header-height:56px;}</style>
-<link rel="stylesheet" href="assets/style.css?v=1758771186">
-<link rel="stylesheet" href="assets/overrides.css?v=1758771186">
+<link rel="stylesheet" href="assets/style.css?v=1758792660">
+<link rel="stylesheet" href="assets/overrides.css?v=1758792660">
 </head><body>
 <div id="tables-viewer" role="region" aria-label="Tables viewer">
 <div id="stickyMainHeader">
@@ -514,48 +514,39 @@
 </tbody></table></div>
   <div class='row-count'></div>
 </div>
-<script src="assets/xlsx.full.min.js?v=1758771186" defer></script>
-<script src="assets/script.js?v=1758771186" defer></script>
-<script src="assets/worker.js?v=1758771186" defer></script>
-
+<script src="assets/xlsx.full.min.js?v=1758792660" defer></script>
+<script src="assets/script.js?v=1758792660" defer></script>
+<script src="assets/worker.js?v=1758792660" defer></script>
 <script>
 (function(){
   const template = "{table}_{date}";
+  const userVal = "";
+  const hrefPrefix = "assets";
   function formatName(tableName) {
     const date = (new Date()).toISOString().slice(0,10);
-    return template.replace('{table}', tableName).replace('{date}', date).replace('{user}', '');
+    return template.replace('{table}', tableName).replace('{date}', date).replace('{user}', userVal);
   }
   const btn = document.getElementById('exportBtn');
   if(btn) {
     btn.addEventListener('click', async function() {
       try {
         const html = document.documentElement.outerHTML;
-        if(html.length > 2000000) {
-          alert('Export refused: html too large');
-          return;
-        }
+        if(html.length > 2000000) { alert('Export refused: html too large'); return; }
         if(window.Worker) {
-          const worker = new Worker((function(){
-            try{ return 'assets/worker.js'; }catch(e){ return null; }
-          })());
-          if(worker){
-            worker.postMessage({html:html, format:'pdf'});
-            worker.onmessage = function(e){ console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
-          } else {
-            alert('Worker not available');
-          }
-        } else {
-          alert('Export worker not supported in this environment.');
-        }
-      } catch(err) {
-        console.warn('Export failed', err);
-        alert('Export worker not available. See console for details.');
-      }
+          const workerUrl = (function(){ try{ return hrefPrefix + '/worker.js'; }catch(e){ return null; } })();
+          if(workerUrl) {
+            try {
+              const worker = new Worker(workerUrl);
+              worker.postMessage({html: html, format: 'pdf'});
+              worker.onmessage = function(e) { console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+            } catch(err) { console.warn('Worker create failed', err); alert('Worker not available'); }
+          } else { alert('Worker not available'); }
+        } else { alert('Export worker not supported in this environment.'); }
+      } catch(err) { console.warn('Export failed', err); alert('Export worker not available. See console for details.'); }
     });
   }
 })();
 </script>
-
 </div>
 </body>
 </html>
