@@ -1,7 +1,4 @@
-// assets/script.js — Merged, carefully checked (queued toasts, robust clipboard, copy modal, CSV export, stable sorting, normalized search)
-// Revised: do NOT inject per-table toolbar; attach safe handlers to server-rendered buttons when missing.
-// XLSX export integrated with SheetJS when available; graceful fallback included.
-
+// assets/script.js — Fully revised: TOC row-based links (single table) + mobile-friendly button positioning
 (function () {
   'use strict';
 
@@ -1055,6 +1052,124 @@
     } catch (_) {}
   }
 
+  // --- Mobile/table-control optimization ----------------------------------
+  function optimizeTableControls() {
+    try {
+      const mql = window.matchMedia ? window.matchMedia('(max-width:600px)') : null;
+      const isMobile = mql ? mql.matches : (window.innerWidth <= 600);
+      document.querySelectorAll('.table-wrapper').forEach(wrapper => {
+        try {
+          const header = wrapper.querySelector('.table-header-wrapper');
+          if (!header) return;
+          // ensure consistent class and safe container styles
+          header.classList.add('table-controls');
+          header.style.boxSizing = 'border-box';
+          header.style.overflowX = 'auto';
+          header.style.webkitOverflowScrolling = 'touch';
+          header.style.display = header.style.display || 'flex';
+          header.style.flexWrap = header.style.flexWrap || 'wrap';
+          header.style.justifyContent = header.style.justifyContent || 'space-between';
+          header.style.gap = header.style.gap || '8px';
+          header.style.alignItems = header.style.alignItems || 'center';
+
+          // find or create copy-buttons wrapper
+          let copyButtons = header.querySelector('.copy-buttons');
+          if (!copyButtons) {
+            // gather all non-toggle buttons in header and wrap them
+            const possibleBtns = Array.from(header.querySelectorAll('button')).filter(b => !b.classList.contains('toggle-table-btn'));
+            if (possibleBtns.length > 0) {
+              copyButtons = document.createElement('div');
+              copyButtons.className = 'copy-buttons';
+              copyButtons.style.display = 'flex';
+              copyButtons.style.gap = '6px';
+              possibleBtns.forEach(b => copyButtons.appendChild(b));
+              // insert at start
+              header.insertBefore(copyButtons, header.firstChild);
+            }
+          }
+
+          // ensure toggle button is visible and positioned
+          const toggleBtn = header.querySelector('.toggle-table-btn');
+          if (toggleBtn) {
+            // prefer moving the toggle's parent container if present
+            const toggleParent = toggleBtn.parentElement && toggleBtn.parentElement !== header ? toggleBtn.parentElement : null;
+            if (toggleParent && toggleParent !== header) {
+              try { header.insertBefore(toggleParent, header.firstChild); } catch (_) {}
+            } else {
+              try { header.insertBefore(toggleBtn, header.firstChild); } catch (_) {}
+            }
+
+            if (isMobile) {
+              toggleBtn.style.order = '-1';
+              toggleBtn.style.flex = '1 1 100%';
+              toggleBtn.style.width = '100%';
+              toggleBtn.style.boxSizing = 'border-box';
+              toggleBtn.style.margin = '0';
+              toggleBtn.style.padding = toggleBtn.style.padding || '6px 8px';
+              toggleBtn.style.fontWeight = '600';
+              // ensure visible when first column is sticky and table overflows
+              if (toggleBtn.parentElement) toggleBtn.parentElement.style.width = '100%';
+            } else {
+              toggleBtn.style.order = '';
+              toggleBtn.style.flex = '';
+              toggleBtn.style.width = '';
+              toggleBtn.style.boxSizing = '';
+              toggleBtn.style.marginLeft = '10px';
+              toggleBtn.style.fontWeight = '';
+            }
+          }
+
+          // compact copy buttons on mobile
+          if (copyButtons) {
+            if (isMobile) {
+              copyButtons.style.flex = '1 1 auto';
+              copyButtons.style.gap = '6px';
+              Array.from(copyButtons.querySelectorAll('button')).forEach(b => {
+                b.style.padding = '4px 6px';
+                b.style.fontSize = '12px';
+                b.style.flex = '0 1 auto';
+                b.style.minWidth = 'unset';
+                // keep icons visible if icon-only class present
+                if (b.classList.contains('icon-only')) {
+                  b.style.width = '36px';
+                  b.style.height = '36px';
+                  b.style.padding = '6px';
+                }
+              });
+            } else {
+              copyButtons.style.flex = '';
+              copyButtons.style.gap = '';
+              Array.from(copyButtons.querySelectorAll('button')).forEach(b => {
+                b.style.padding = '';
+                b.style.fontSize = '';
+                b.style.flex = '';
+                b.style.minWidth = '';
+                if (b.classList.contains('icon-only')) {
+                  b.style.width = '';
+                  b.style.height = '';
+                }
+              });
+            }
+          }
+        } catch (e) { /* per-wrapper silent */ }
+      });
+    } catch (e) { /* global silent */ }
+  }
+
+  // bind resize and mql change
+  const _debouncedOptimize = debounce(optimizeTableControls, 120);
+  if (window.matchMedia) {
+    try {
+      const mql = window.matchMedia('(max-width:600px)');
+      if (typeof mql.addEventListener === 'function') {
+        mql.addEventListener('change', _debouncedOptimize);
+      } else if (typeof mql.addListener === 'function') {
+        mql.addListener(_debouncedOptimize);
+      }
+    } catch (_) {}
+  }
+  window.addEventListener('resize', _debouncedOptimize);
+
   // --- Attach handlers and initial DOM setup ------------------------------
   document.addEventListener('DOMContentLoaded', function () {
     try {
@@ -1147,7 +1262,7 @@
             try {
               const btn = wrapper.querySelector(h.sel);
               if (!btn) return;
-              // if server provided inline onclick, assume it's wired and skip
+              // if server provided inline onclick, assume it's wired and skip adding duplicate handler
               if (btn.getAttribute && btn.getAttribute('onclick')) return;
               if (btn.dataset && btn.dataset.tvHandlerAttached) return;
               btn.addEventListener('click', function (ev) { try { h.fn(this); } catch (e) { /* silent */ } });
@@ -1159,6 +1274,9 @@
 
       // Build single-table TOC if condition applies
       try { buildSingleTableToc(); setTimeout(buildSingleTableToc, 500); } catch (e) {}
+
+      // Optimize table controls position/size for mobile
+      try { optimizeTableControls(); setTimeout(optimizeTableControls, 200); } catch (e) { /* silent */ }
 
       // Single consolidated keydown handler for "/" and "Escape"
       document.addEventListener("keydown", function (e) {
