@@ -1,6 +1,7 @@
 /* style.css — Tables Viewer v2.1
-   Revised: 2025-09-25 (mobile toggle fixed)
+   Revised: 2025-09-25
    Purpose: consistent list markers inside table cells, UI polish, and complete code styling (inline + block)
+   Notes: merged user file + code styling + dark-mode code overrides + copy-button helpers
 */
 
 /* === color vars (preserve existing + add code-specific vars) === */
@@ -539,70 +540,6 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
 .copy-button-output:hover {
   box-shadow: 0 4px 14px rgba(37,99,235,0.06);
   border-color: rgba(37,99,235,0.12);
-}
-
-/* --------------------------
-   Table-controls styling and mobile optimization (updated)
-   -------------------------- */
-
-/* default table controls layout (non-invasive) */
-.table-controls {
-  display:flex;
-  gap:8px;
-  align-items:center;
-  flex-wrap:wrap;
-}
-
-/* make sure copy-buttons and table-controls align well */
-.table-controls .copy-buttons {
-  margin-left: 0;
-}
-
-/* Mobile-friendly table controls: compact, wrap, collapse toggle prominent */
-@media (max-width:600px){
-  .table-controls {
-    display:flex;
-    flex-wrap:wrap;
-    gap:6px;
-    justify-content:flex-start;
-    align-items:flex-start;
-  }
-
-  /* Collapse toggle: make prominent and always visible on its own row */
-  .table-controls .toggle-table-btn,
-  .table-controls button.toggle-table-btn {
-    flex: 1 0 100%;
-    order: -1; /* ensure it appears before other controls */
-    text-align: center;
-    padding: 8px 10px;
-    font-weight:600;
-    font-size:13px;
-    border-radius:6px;
-    box-sizing: border-box;
-    white-space:nowrap;
-  }
-
-  /* Other controls compact and wrap below the toggle */
-  .table-controls button:not(.toggle-table-btn) {
-    flex: 1 1 auto;
-    font-size: 12px;
-    padding: 5px 8px;
-    min-width: 0;
-    white-space:nowrap;
-  }
-
-  /* Make copy buttons compact on mobile */
-  .table-controls .copy-buttons button,
-  .table-controls .copy-btn {
-    padding:4px 6px;
-    font-size:12px;
-  }
-
-  /* ensure toggle doesn't push horizontally; keep container scroll-free */
-  .table-wrapper .table-header-wrapper,
-  .table-controls {
-    overflow: visible;
-  }
 }
 
 /* End of file */
