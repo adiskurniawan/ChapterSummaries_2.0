@@ -1,4 +1,4 @@
-// script.js — fully revised, robust loader + table utilities (single-file)
+// script.js â€” fully revised, robust loader + table utilities (single-file)
 // Revisions summary:
 // - Export Markdown UI targets hidden (kept functions for re-enable)
 // - Robust base path detection and exposure via window.__tv_base
@@ -112,7 +112,7 @@
   ensureIndexAndWorkerAttrs(TV_BASE);
 
   // -----------------------------
-  // Extra.js loader — sequential, robust
+  // Extra.js loader â€” sequential, robust
   // -----------------------------
   function createScriptElement(src, opts) {
     opts = opts || {};
@@ -378,7 +378,7 @@
       closeBtn.type = 'button';
       closeBtn.ariaLabel = 'Dismiss notification';
       closeBtn.title = 'Dismiss';
-      closeBtn.innerHTML = '✕';
+      closeBtn.innerHTML = 'âœ•';
       Object.assign(closeBtn.style, { border: 'none', background: 'transparent', color: 'inherit', cursor: 'pointer', fontSize: '14px', lineHeight: '1', padding: '4px', margin: '0' });
       closeBtn.addEventListener('click', function (ev) { try { ev.stopPropagation(); } catch (_) {} _hideActiveToast(el, true); }, { passive: true });
       el.addEventListener('click', function () { _hideActiveToast(el, true); }, { passive: true });
@@ -831,6 +831,7 @@
     } catch (e) { showToast('Copy failed', { type: 'warn' }); }
   }
 
+  // --- Export CSV, Markdown, JSON, XLSX, PDF (existing code preserved) ---
   function exportTableCSV(btn, { filename } = {}) {
     try {
       const table = getTableFromButton(btn);
@@ -851,7 +852,6 @@
     } catch (e) { showToast('CSV export failed', { type: 'warn' }); }
   }
 
-  // --- New export functions (Markdown, JSON, XLSX, PDF) ------------------
   function exportTableMarkdown(btn, { filename } = {}) {
     try {
       const table = getTableFromButton(btn);
@@ -1323,12 +1323,13 @@
           if (!copyButtons) {
             const possibleBtns = Array.from(header.querySelectorAll('button')).filter(b => !b.classList.contains('toggle-table-btn'));
             if (possibleBtns.length > 0) {
-              copyButtons = document.createElement('div');
-              copyButtons.className = 'copy-buttons';
-              copyButtons.style.display = 'flex';
-              copyButtons.style.gap = '6px';
-              possibleBtns.forEach(b => copyButtons.appendChild(b));
-              header.insertBefore(copyButtons, header.firstChild);
+              const cb = document.createElement('div');
+              cb.className = 'copy-buttons';
+              cb.style.display = 'flex';
+              cb.style.gap = '6px';
+              possibleBtns.forEach(b => cb.appendChild(b));
+              header.insertBefore(cb, header.firstChild);
+              copyButtons = cb;
             }
           }
 
@@ -1342,6 +1343,7 @@
             }
 
             if (isMobile) {
+              try { toggleBtn.classList.remove('table-toggle-inline'); } catch (_) {}
               toggleBtn.style.order = '-1';
               toggleBtn.style.flex = '1 1 100%';
               toggleBtn.style.width = '100%';
@@ -1351,12 +1353,18 @@
               toggleBtn.style.fontWeight = '600';
               if (toggleBtn.parentElement) toggleBtn.parentElement.style.width = '100%';
             } else {
-              toggleBtn.style.order = '';
-              toggleBtn.style.flex = '';
-              toggleBtn.style.width = '';
-              toggleBtn.style.boxSizing = '';
-              toggleBtn.style.marginLeft = '10px';
-              toggleBtn.style.fontWeight = '';
+              try { toggleBtn.classList.add('table-toggle-inline'); } catch (_) {}
+              // clear mobile overrides if present so CSS can control desktop layout
+              try {
+                toggleBtn.style.order = '';
+                toggleBtn.style.flex = '';
+                toggleBtn.style.width = '';
+                toggleBtn.style.boxSizing = '';
+                toggleBtn.style.margin = '';
+                toggleBtn.style.padding = '';
+                toggleBtn.style.fontWeight = '';
+                if (toggleBtn.parentElement) toggleBtn.parentElement.style.width = '';
+              } catch (_) {}
             }
           }
 
@@ -1466,7 +1474,7 @@
           b.id = 'backToTop';
           b.type = 'button';
           b.title = 'Back to top';
-          b.textContent = '↑';
+          b.textContent = 'â†‘';
           b.style.display = 'none';
           document.body.appendChild(b);
           b.addEventListener('click', backToTop);
@@ -1621,8 +1629,6 @@
   window.exportTablePDF = exportTablePDF;
   window.exportTableMarkdown = exportTableMarkdown; // function retained but UI hidden
   window.exportAllTablesMarkdown = exportAllTablesMarkdown; // function retained but UI hidden
-  window.exportTableMarkdown = exportTableMarkdown;
-  window.exportAllTablesMarkdown = exportAllTablesMarkdown;
   window.exportTableMarkdown = exportTableMarkdown;
   window.exportAllTablesMarkdown = exportAllTablesMarkdown;
   window.exportTableMarkdown = exportTableMarkdown;

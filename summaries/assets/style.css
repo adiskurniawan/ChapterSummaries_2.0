@@ -542,4 +542,30 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
   border-color: rgba(37,99,235,0.12);
 }
 
+/* --------------------------
+   Small inline toggle button for table collapse/expand
+   (class-controlled; JS should add/remove .table-toggle-inline)
+   -------------------------- */
+.table-controls .table-toggle-inline {
+  flex: 0 0 auto;
+  width: auto;
+  margin: 0;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: normal;
+  line-height: 1.2;
+  box-sizing: border-box;
+  min-width: 40px;
+}
+
+/* optional: icon-only variant */
+.table-controls .table-toggle-inline.icon-only {
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* End of file */
