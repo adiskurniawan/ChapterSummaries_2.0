@@ -1,8 +1,6 @@
-// script.js — fully revised, robust loader + table utilities (single-file)
-// Revisions summary:
-// - Compact collapse/expand toggle enforced by class .table-toggle-inline
-// - Removed inline size overrides for toggle button; CSS controls layout
-// - Preserved original UI/search/export/highlight logic and robustness guards
+// script.js — revised: no structural DOM mutations at startup
+// Purpose: keep behavior, event wiring, and optimizations.
+// Ensure server-side HTML provides .table-wrapper/.table-container/.table-controls etc.
 
 (function () {
   'use strict';
@@ -810,7 +808,7 @@
     } catch (e) { showToast('Copy failed', { type: 'warn' }); }
   }
 
-  // Export helpers preserved (CSV, Markdown, JSON, XLSX, PDF)
+  // Export helpers (unchanged)
   function exportTableCSV(btn, { filename } = {}) {
     try {
       const table = getTableFromButton(btn);
@@ -1040,7 +1038,7 @@
     } catch (e) { showToast('Reset failed', { type: 'warn' }); }
   }
 
-  // Hide-only logic functions kept (they simply hide UI elements)
+  // Hide-only logic functions (styling changes only)
   function hideResetAllTablesOption() {
     try {
       const selectors = ['.reset-all-btn', '.reset-btn', '#resetAllBtn', '[data-action="reset-all"]'];
@@ -1114,7 +1112,7 @@
     } catch (e) { /* silent */ }
   }
 
-  // Search & highlight functions preserved (unchanged)
+  // Search & highlight functions (unchanged)
   function clearHighlights(cell) {
     if (!cell) return;
     if (cell.dataset && cell.dataset.origHtml) {
@@ -1275,16 +1273,18 @@
     } catch (_) {}
   }
 
-  // Mobile/table-control optimization — simplified and class-driven
+  // Mobile/table-control optimization — class-driven and non-structural
   function optimizeTableControls() {
     try {
       const mql = window.matchMedia ? window.matchMedia('(max-width:600px)') : null;
       const isMobile = mql ? mql.matches : (window.innerWidth <= 600);
       document.querySelectorAll('.table-wrapper').forEach(wrapper => {
         try {
-          const header = wrapper.querySelector('.table-header-wrapper');
+          const header = wrapper.querySelector('.table-header-wrapper') || wrapper.querySelector('.table-controls') || null;
           if (!header) return;
           header.classList.add('table-controls');
+
+          // Only apply non-structural inline style adjustments.
           header.style.boxSizing = header.style.boxSizing || 'border-box';
           header.style.overflowX = header.style.overflowX || 'auto';
           header.style.webkitOverflowScrolling = header.style.webkitOverflowScrolling || 'touch';
@@ -1294,34 +1294,12 @@
           header.style.gap = header.style.gap || '8px';
           header.style.alignItems = header.style.alignItems || 'center';
 
-          let copyButtons = header.querySelector('.copy-buttons');
-          if (!copyButtons) {
-            const possibleBtns = Array.from(header.querySelectorAll('button')).filter(b => !b.classList.contains('toggle-table-btn') && !b.classList.contains('table-toggle-inline'));
-            if (possibleBtns.length > 0) {
-              const cb = document.createElement('div');
-              cb.className = 'copy-buttons';
-              cb.style.display = 'flex';
-              cb.style.gap = '6px';
-              possibleBtns.forEach(b => cb.appendChild(b));
-              header.insertBefore(cb, header.firstChild);
-              copyButtons = cb;
-            }
-          }
-
           const toggleBtn = header.querySelector('.toggle-table-btn') || header.querySelector('.toggle-table');
           if (toggleBtn) {
-            const toggleParent = toggleBtn.parentElement && toggleBtn.parentElement !== header ? toggleBtn.parentElement : null;
-            if (toggleParent && toggleParent !== header) {
-              try { header.insertBefore(toggleParent, header.firstChild); } catch (_) {}
-            } else {
-              try { header.insertBefore(toggleBtn, header.firstChild); } catch (_) {}
-            }
-
-            // Ensure compact inline class on all viewports. Remove legacy class.
-            try { toggleBtn.classList.remove('toggle-table-btn', 'table-toggle-mobile'); } catch (_) {}
+            try { toggleBtn.classList.remove('table-toggle-mobile'); } catch (_) {}
             try { toggleBtn.classList.add('table-toggle-inline'); } catch (_) {}
 
-            // Clear inline overrides. CSS controls sizing.
+            // Clear legacy inline overrides that cause inconsistent sizing.
             try {
               toggleBtn.style.order = '';
               toggleBtn.style.flex = '';
@@ -1334,36 +1312,27 @@
             } catch (_) {}
           }
 
-          if (copyButtons) {
-            if (isMobile) {
-              copyButtons.style.flex = '1 1 auto';
-              copyButtons.style.gap = '6px';
-              Array.from(copyButtons.querySelectorAll('button')).forEach(b => {
-                b.style.padding = '4px 6px';
-                b.style.fontSize = '12px';
-                b.style.flex = '0 1 auto';
-                b.style.minWidth = 'unset';
-                if (b.classList.contains('icon-only')) {
-                  b.style.width = '36px';
-                  b.style.height = '36px';
-                  b.style.padding = '6px';
-                }
-              });
-            } else {
-              copyButtons.style.flex = '';
-              copyButtons.style.gap = '';
-              Array.from(copyButtons.querySelectorAll('button')).forEach(b => {
-                b.style.padding = '';
-                b.style.fontSize = '';
-                b.style.flex = '';
-                b.style.minWidth = '';
-                if (b.classList.contains('icon-only')) {
-                  b.style.width = '';
-                  b.style.height = '';
-                }
-              });
-            }
-          }
+          // Adjust padding/font-size of buttons only (non-structural).
+          Array.from(header.querySelectorAll('button')).forEach(b => {
+            try {
+              if (isMobile) {
+                b.style.padding = b.style.padding || '4px 6px';
+                b.style.fontSize = b.style.fontSize || '12px';
+                b.style.flex = b.style.flex || '0 1 auto';
+                b.style.minWidth = b.style.minWidth || 'unset';
+              } else {
+                // Reset device-specific inline adjustments if present.
+                b.style.padding = b.style.padding || '';
+                b.style.fontSize = b.style.fontSize || '';
+                b.style.flex = b.style.flex || '';
+                b.style.minWidth = b.style.minWidth || '';
+              }
+              if (b.classList.contains('icon-only')) {
+                if (isMobile) { b.style.width = b.style.width || '36px'; b.style.height = b.style.height || '36px'; b.style.padding = b.style.padding || '6px'; }
+                else { b.style.width = b.style.width || ''; b.style.height = b.style.height || ''; }
+              }
+            } catch (_) {}
+          });
         } catch (e) { /* per-wrapper silent */ }
       });
     } catch (e) { /* global silent */ }
@@ -1382,22 +1351,13 @@
   }
   window.addEventListener('resize', _debouncedOptimize);
 
-  // Attach handlers and initial DOM setup
+  // Attach handlers and initial DOM setup (non-structural only)
   document.addEventListener('DOMContentLoaded', function () {
     try {
-      // Wrap tables in .table-container if missing
-      document.querySelectorAll('.table-wrapper').forEach(wrapper => {
-        if (wrapper.querySelector('.table-container')) return;
-        const table = wrapper.querySelector('table');
-        if (!table) return;
-        const container = document.createElement('div');
-        container.className = 'table-container';
-        wrapper.insertBefore(container, table);
-        container.appendChild(table);
-      });
-
-      // Build snapshots and sortStates after DOM is stable
-      document.querySelectorAll(".table-container table").forEach((table, idx) => {
+      // Build snapshots and sortStates after DOM is stable.
+      // Use a tolerant selector that does not mutate DOM.
+      const tableNodes = Array.from(document.querySelectorAll('.table-container table, .table-wrapper table, table.tv-table'));
+      tableNodes.forEach((table, idx) => {
         try {
           const tbody = safeGetTBody(table);
           originalTableRows[idx] = tbody ? Array.from(tbody.rows).map(r => r.cloneNode(true)) : [];
@@ -1409,7 +1369,7 @@
       });
 
       // attach per-cell original HTML snapshot used to restore highlights safely
-      document.querySelectorAll('.table-container table').forEach(table => {
+      tableNodes.forEach(table => {
         const tbody = safeGetTBody(table);
         if (!tbody) return;
         Array.from(tbody.rows).forEach(r => {
@@ -1433,7 +1393,7 @@
       const toggleAll = document.getElementById('toggleAllBtn');
       if (toggleAll) toggleAll.textContent = anyExpanded ? "Collapse All Tables" : "Expand All Tables";
 
-      // Ensure backToTop exists
+      // Ensure backToTop exists (small non-structural helper; safe to create)
       if (!document.getElementById('backToTop')) {
         try {
           const b = document.createElement('button');
@@ -1457,7 +1417,8 @@
         } catch (e) { /* silent */ }
       }
 
-      // Attach handlers to server-rendered toolbar buttons when missing
+      // Attach handlers to server-rendered toolbar buttons when present.
+      // Do not create or move elements. Only attach event listeners.
       try {
         document.querySelectorAll('.table-wrapper').forEach(wrapper => {
           const handlers = [
@@ -1466,7 +1427,7 @@
             { sel: '.copy-markdown-btn, .copy-markdown, .copy-markdown-table', fn: copyTableMarkdown },
             { sel: '.export-csv-btn, .export-csv, .export-csv-table', fn: exportTableCSV },
             { sel: '.export-json-btn, .export-json, .export-json-table', fn: exportTableJSON },
-            { sel: '.export-xlsx-btn, .export-xlsx, .export-xlsx-table', fn: exportTableXLSX },
+            { sel: '.export-xlsx-btn, .export-xlsx, .export-xlsx-table, .export-xls', fn: exportTableXLSX },
             { sel: '.export-pdf-btn, .export-pdf, .export-pdf-table', fn: exportTablePDF }
             // NOTE: export-markdown intentionally excluded from automatic handler attachment.
           ];
@@ -1474,6 +1435,7 @@
             try {
               const btn = wrapper.querySelector(h.sel);
               if (!btn) return;
+              // skip if inline onclick present or handler already attached
               if (btn.getAttribute && btn.getAttribute('onclick')) return;
               if (btn.dataset && btn.dataset.tvHandlerAttached) return;
               btn.addEventListener('click', function (ev) { try { h.fn(this); } catch (e) { /* silent */ } });
@@ -1486,13 +1448,13 @@
       // Build single-table TOC if condition applies
       try { buildSingleTableToc(); setTimeout(buildSingleTableToc, 500); } catch (e) {}
 
-      // Optimize table controls position/size for all viewports
+      // Optimize table controls position/size for all viewports (non-structural)
       try { optimizeTableControls(); setTimeout(optimizeTableControls, 200); } catch (e) { /* silent */ }
 
-      // Hide Reset All Tables UI targets (only hide; function retained)
+      // Hide Reset All Tables UI targets (styling only)
       try { hideResetAllTablesOption(); setTimeout(hideResetAllTablesOption, 500); } catch (e) {}
 
-      // Hide Export Markdown UI targets (only hide; functions retained)
+      // Hide Export Markdown UI targets (styling only)
       try { hideExportMarkdownOption(); setTimeout(hideExportMarkdownOption, 500); } catch (e) {}
 
       // Single consolidated keydown handler for "/" and "Escape"
