@@ -1,7 +1,6 @@
 /* style.css — Tables Viewer v2.1
-   Revised: 2025-09-25
-   Purpose: consistent list markers inside table cells, UI polish, and complete code styling (inline + block)
-   Notes: merged user file + code styling + dark-mode code overrides + copy-button helpers
+   Revised: 2025-09-25 (revised again)
+   Purpose: consistent list markers inside table cells, UI polish, and compact toggle button
 */
 
 /* === color vars (preserve existing + add code-specific vars) === */
@@ -289,7 +288,13 @@ thead th[role="button"]:hover{background:#eef6ff}
 
 /* Table header area, collapse controls */
 .table-wrapper .table-header-wrapper{gap:8px}
-.toggle-table-btn{margin-left:10px;font-size:12px;padding:6px 10px}
+/* Keep a minimal legacy rule but prefer class-driven styling */
+.toggle-table-btn{
+  margin-left:10px;
+  font-size:12px;
+  padding:4px 8px;
+  min-width:36px;
+}
 .table-wrapper.table-collapsed .table-container table tbody{display:none}
 .table-wrapper.table-collapsed .copy-buttons button{opacity:.65}
 
@@ -313,9 +318,7 @@ thead th[role="button"]:hover{background:#eef6ff}
 #backToTop:hover{opacity:.85}
 .row-count{font-size:13px;color:var(--muted);margin-top:6px;margin-left:6px}
 
-/* --------------------------
-   Lists inside table cells: force consistent markers
-   -------------------------- */
+/* Lists inside table cells */
 td ul, td ol {
   margin: .45rem 0;
   padding-left: 1.25rem;
@@ -360,9 +363,7 @@ td ol > li::before {
   margin-left: -2.2ch;
 }
 
-/* === Code styling (global + table-specific) === */
-
-/* Inline code (global) */
+/* Code styling */
 code {
   background: var(--code-bg);
   padding: 2px 6px;
@@ -372,8 +373,6 @@ code {
   line-height: 1;
   color: inherit;
 }
-
-/* Fenced code blocks */
 pre code {
   background: var(--code-bg);
   display: block;
@@ -385,8 +384,6 @@ pre code {
   white-space: pre;
   tab-size: 4;
 }
-
-/* Keep table cell inline code slightly tighter to match cell padding */
 td code{
   background: var(--code-bg-alt);
   padding: 2px 6px;
@@ -395,35 +392,14 @@ td code{
   font-size:.9em;
   line-height:1;
 }
+pre { margin: 1em 0; padding: 0; background: transparent; }
 
-/* Remove extra padding inside <pre> itself (consistent with existing file) */
-pre {
-  margin: 1em 0;
-  padding: 0;
-  background: transparent;
-}
+[data-theme="dark"] code { background: var(--code-bg); color: var(--code-text-dark); }
+[data-theme="dark"] pre code { background: var(--code-bg); color: var(--code-text-dark); }
+[data-theme="dark"] td code { background: rgba(255,255,255,0.02); color: var(--code-text-dark); }
+[data-theme="dark"] td > ul > li::before, [data-theme="dark"] td ol > li::before { color: var(--text); }
 
-/* Dark theme overrides for code */
-[data-theme="dark"] code {
-  background: var(--code-bg);
-  color: var(--code-text-dark);
-}
-[data-theme="dark"] pre code {
-  background: var(--code-bg);
-  color: var(--code-text-dark);
-}
-[data-theme="dark"] td code {
-  background: rgba(255,255,255,0.02);
-  color: var(--code-text-dark);
-}
-
-/* Ensure nested lists inside <td> inherit color in dark mode too */
-[data-theme="dark"] td > ul > li::before,
-[data-theme="dark"] td ol > li::before {
-  color: var(--text);
-}
-
-/* Accessibility: increase focus outline visibility */
+/* Accessibility focus */
 a:focus, button:focus, input:focus, select:focus, textarea:focus {
   outline: 3px solid rgba(37,99,235,0.18);
   outline-offset: 2px;
@@ -436,7 +412,6 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
   thead th{position:sticky;top:48px;z-index:4}
   .table-container{border-radius:6px}
 
-  /* Make the tv-header stack on very small screens */
   #tv-header{
     flex-direction:column;
     align-items:stretch;
@@ -445,7 +420,6 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
     justify-content:flex-start;
   }
 
-  /* Force search full width on mobile and place above controls if wrapping */
   #tv-header input[type="search"],
   #tv-header input[type="text"],
   #stickyMainHeader input[type="search"],
@@ -459,7 +433,6 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
     padding:4px 7px;
   }
 
-  /* Slightly tighter header buttons on very small screens */
   #tv-header button,
   #tv-header .btn,
   #stickyMainHeader button {
@@ -480,28 +453,12 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
   }
 }
 
-/* Prevent ancestor overflow from disabling sticky positioning */
-#tables-viewer, #mainContent {
-  overflow: visible;
-}
-
-/* small visual polish for toc links */
+#tables-viewer, #mainContent { overflow: visible; }
 #tocBar a:hover{ background:var(--toc-link-hover-bg); color:var(--toc-link-hover-color) }
 
-/* --------------------------
-   Copy-button / copy-ready output helpers
-   -------------------------- */
-
-/* container for copy buttons (existing site uses .copy-buttons) */
-.copy-buttons{
-  display:flex;
-  gap:8px;
-  align-items:center;
-}
-
-/* individual copy button styling (non-invasive) */
-.copy-buttons button.copy-btn,
-.copy-btn {
+/* Copy button helpers */
+.copy-buttons{ display:flex; gap:8px; align-items:center; }
+.copy-buttons button.copy-btn, .copy-btn {
   background: var(--button-bg);
   color: var(--button-text);
   border: 1px solid var(--border);
@@ -512,10 +469,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
   align-items:center;
   gap:8px;
 }
-
-/* Visual styling for copy-ready code-blocks that appear as "copy-button table" output */
-.copy-button-output pre,
-.copy-button-table pre {
+.copy-button-output pre, .copy-button-table pre {
   margin: 0;
   border: 1px solid rgba(0,0,0,0.06);
   background: var(--panel);
@@ -526,46 +480,41 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus {
   font-size: 0.92em;
   line-height: 1.45;
 }
-
-/* Slight visual separation when a copy-ready markdown table is present in the UI */
 .copy-button-output {
   padding: 8px;
   border-radius: 8px;
   background: rgba(0,0,0,0.01);
   border: 1px dashed rgba(0,0,0,0.03);
 }
-
-/* Light visual accent for focus on copy outputs */
-.copy-button-output:focus-within,
-.copy-button-output:hover {
+.copy-button-output:focus-within, .copy-button-output:hover {
   box-shadow: 0 4px 14px rgba(37,99,235,0.06);
   border-color: rgba(37,99,235,0.12);
 }
 
-/* --------------------------
-   Small inline toggle button for table collapse/expand
-   (class-controlled; JS should add/remove .table-toggle-inline)
-   -------------------------- */
+/* Small inline toggle button for table collapse/expand
+   Enforced via JS class .table-toggle-inline.
+   Uses strong specificity to override legacy rules that made it wide.
+*/
 .table-controls .table-toggle-inline {
-  flex: 0 0 auto;
-  width: auto;
-  margin: 0;
-  padding: 4px 8px;
-  font-size: 12px;
-  font-weight: normal;
-  line-height: 1.2;
-  box-sizing: border-box;
-  min-width: 40px;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  margin: 0 0 0 6px !important;
+  padding: 4px 8px !important;
+  font-size: 12px !important;
+  font-weight: normal !important;
+  line-height: 1.2 !important;
+  box-sizing: border-box !important;
+  min-width: 36px !important;
 }
 
 /* optional: icon-only variant */
 .table-controls .table-toggle-inline.icon-only {
-  width: 36px;
-  height: 36px;
-  padding: 6px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  width: 36px !important;
+  height: 36px !important;
+  padding: 6px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 /* End of file */

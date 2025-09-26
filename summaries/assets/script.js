@@ -1,11 +1,8 @@
 // script.js — fully revised, robust loader + table utilities (single-file)
 // Revisions summary:
-// - Export Markdown UI targets hidden (kept functions for re-enable)
-// - Robust base path detection and exposure via window.__tv_base
-// - Ensure data-index-url and data-worker-url set on body early
-// - Sequential, deterministic loader for extra.js with multiple candidate paths
-// - Small robustness fixes: safe guards, DOMContentLoaded handling, no duplicate loaders
-// - Preserves original UI/search/export/highlight logic (except UI hiding requested)
+// - Compact collapse/expand toggle enforced by class .table-toggle-inline
+// - Removed inline size overrides for toggle button; CSS controls layout
+// - Preserved original UI/search/export/highlight logic and robustness guards
 
 (function () {
   'use strict';
@@ -49,13 +46,10 @@
   // Robust base-path detection
   // -----------------------------
   function detectScriptBase() {
-    // 1) document.currentScript
     let src = safe(() => document.currentScript && document.currentScript.src) || '';
     if (isString(src) && src) {
       return src.replace(/[^\/]*$/, '');
     }
-
-    // 2) search known script patterns
     try {
       const scripts = document.getElementsByTagName('script');
       for (let i = scripts.length - 1; i >= 0; i--) {
@@ -67,8 +61,6 @@
         }
       }
     } catch (e) { /* ignore */ }
-
-    // 3) fallback to document location dir
     try {
       const loc = location;
       return loc.origin + loc.pathname.substring(0, loc.pathname.lastIndexOf('/') + 1 || '/');
@@ -84,7 +76,6 @@
   function ensureIndexAndWorkerAttrs(base) {
     try {
       if (!document.body) {
-        // DOM not ready yet, schedule on DOMContentLoaded
         document.addEventListener('DOMContentLoaded', function bound() {
           document.removeEventListener('DOMContentLoaded', bound);
           ensureIndexAndWorkerAttrs(base);
@@ -118,7 +109,6 @@
     opts = opts || {};
     const s = document.createElement('script');
     s.src = src;
-    // deterministic execution order for scripts that depend on each other
     s.async = !!opts.async;
     s.defer = !!opts.defer;
     if (opts.type) s.type = opts.type;
@@ -186,14 +176,9 @@
   }
 
   // -----------------------------
-  // Begin main UI logic (preserved from original script.js)
-  // All original functions retained. Small robustness fixes applied where noted.
+  // Begin main UI logic
   // -----------------------------
 
-  // --- Public config -------------------------------------------------------
-  // (already set above via tvConfig default)
-
-  // --- Helpers --------------------------------------------------------------
   function normalizeForSearchLocal(s) {
     try {
       return (s || '')
@@ -224,7 +209,6 @@
     };
   }
 
-  // --- Clipboard with robust fallback -------------------------------------
   function copyToClipboard(text) {
     return new Promise((resolve, reject) => {
       if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -257,7 +241,6 @@
     });
   }
 
-  // --- Download helper & filename sanitize --------------------------------
   function sanitizeFileName(name) {
     try {
       if (!name) return 'download';
@@ -282,7 +265,7 @@
     }
   }
 
-  // --- Toast / Notification system (queued, accessible, adaptive) ----------
+  // Toast system (unchanged)
   let _toastQueue = [];
   let _activeToast = null;
   let _toastIdCounter = 0;
@@ -378,7 +361,7 @@
       closeBtn.type = 'button';
       closeBtn.ariaLabel = 'Dismiss notification';
       closeBtn.title = 'Dismiss';
-      closeBtn.innerHTML = '✕';
+      closeBtn.innerHTML = '✖';
       Object.assign(closeBtn.style, { border: 'none', background: 'transparent', color: 'inherit', cursor: 'pointer', fontSize: '14px', lineHeight: '1', padding: '4px', margin: '0' });
       closeBtn.addEventListener('click', function (ev) { try { ev.stopPropagation(); } catch (_) {} _hideActiveToast(el, true); }, { passive: true });
       el.addEventListener('click', function () { _hideActiveToast(el, true); }, { passive: true });
@@ -428,7 +411,7 @@
     } catch (e) { /* silent */ }
   }
 
-  // --- Copy modal (fallback UI) ------------------------------------------
+  // Copy modal (unchanged)
   function showCopyModal(text, { title = 'Copy text' } = {}) {
     try {
       const existing = document.getElementById('tv-copy-modal');
@@ -510,7 +493,7 @@
     } catch (e) { try { alert(String(text || '')); } catch (_) {} return null; }
   }
 
-  // --- Safe utilities -----------------------------------------------------
+  // Utilities
   function getSearchEl() {
     return document.getElementById('searchBox') || document.getElementById('searchInput') || document.getElementById('search');
   }
@@ -522,11 +505,10 @@
     } catch (e) { return null; }
   }
 
-  // --- Single-table TOC logic (only applied when exactly one table exists) -
   function buildSingleTableToc() {
     try {
       const wrappers = document.querySelectorAll('.table-wrapper');
-      if (!wrappers || wrappers.length !== 1) return; // only when exactly one table
+      if (!wrappers || wrappers.length !== 1) return;
       const tocBar = document.getElementById('tocBar');
       if (!tocBar) return;
       const table = wrappers[0].querySelector('.table-container table') || wrappers[0].querySelector('table');
@@ -593,7 +575,6 @@
   let originalTableRows = [];
   let sortStates = [];
 
-  // --- DOM helpers used by many functions ---------------------------------
   function safeGetTBody(table) {
     if (!table) return null;
     return (table.tBodies && table.tBodies[0]) || null;
@@ -627,7 +608,7 @@
     } catch (e) { /* silent */ }
   }
 
-  // --- Sorting and toggles ------------------------------------------------
+  // Sorting and toggles
   function sortTableByColumn(tableIdx, colIdx) {
     try {
       const table = document.querySelectorAll(".table-container table")[tableIdx];
@@ -712,7 +693,6 @@
     } catch (e) { /* silent */ }
   }
 
-  // --- Row counts ---------------------------------------------------------
   function updateRowCounts() {
     document.querySelectorAll(".table-wrapper").forEach((wrapper, idx) => {
       const table = wrapper.querySelector("table");
@@ -729,7 +709,6 @@
     });
   }
 
-  // --- Copy / Export helper: centralize table extraction ------------------
   function formatCellForMarkdown(cell) {
     try {
       let txt = (cell.textContent || '').trim();
@@ -831,6 +810,7 @@
     } catch (e) { showToast('Copy failed', { type: 'warn' }); }
   }
 
+  // Export helpers preserved (CSV, Markdown, JSON, XLSX, PDF)
   function exportTableCSV(btn, { filename } = {}) {
     try {
       const table = getTableFromButton(btn);
@@ -851,7 +831,6 @@
     } catch (e) { showToast('CSV export failed', { type: 'warn' }); }
   }
 
-  // --- New export functions (Markdown, JSON, XLSX, PDF) ------------------
   function exportTableMarkdown(btn, { filename } = {}) {
     try {
       const table = getTableFromButton(btn);
@@ -1061,14 +1040,13 @@
     } catch (e) { showToast('Reset failed', { type: 'warn' }); }
   }
 
-  // --- Hide-only logic for "Reset All Tables" option ---------------------
+  // Hide-only logic functions kept (they simply hide UI elements)
   function hideResetAllTablesOption() {
     try {
       const selectors = ['.reset-all-btn', '.reset-btn', '#resetAllBtn', '[data-action="reset-all"]'];
       selectors.forEach(s => {
         try { document.querySelectorAll(s).forEach(el => { if (el && el.style) el.style.display = 'none'; }); } catch (_) {}
       });
-      // Also hide buttons/links whose visible text or title includes 'reset all tables' (case-insensitive)
       const needle = 'reset all tables';
       const shortNeedle = 'reset all';
       document.querySelectorAll('button, a, input').forEach(el => {
@@ -1079,7 +1057,6 @@
           }
         } catch (_) {}
       });
-      // Hide elements inside potential menus/toolbars
       try {
         document.querySelectorAll('#toolbar, .toolbar, .menu, .dropdown-menu').forEach(menu => {
           menu.querySelectorAll('button, a, li').forEach(item => {
@@ -1095,7 +1072,6 @@
     } catch (e) { /* silent */ }
   }
 
-  // --- Hide-only logic for "Export Markdown" option -----------------------
   function hideExportMarkdownOption() {
     try {
       const selectors = [
@@ -1120,7 +1096,6 @@
         } catch (_) {}
       });
 
-      // Also traverse toolbars/menus
       try {
         document.querySelectorAll('#toolbar, .toolbar, .menu, .dropdown-menu').forEach(menu => {
           menu.querySelectorAll('button, a, li').forEach(item => {
@@ -1139,7 +1114,7 @@
     } catch (e) { /* silent */ }
   }
 
-  // --- Search & highlight (robust) ---------------------------------------
+  // Search & highlight functions preserved (unchanged)
   function clearHighlights(cell) {
     if (!cell) return;
     if (cell.dataset && cell.dataset.origHtml) {
@@ -1300,7 +1275,7 @@
     } catch (_) {}
   }
 
-  // --- Mobile/table-control optimization ----------------------------------
+  // Mobile/table-control optimization — simplified and class-driven
   function optimizeTableControls() {
     try {
       const mql = window.matchMedia ? window.matchMedia('(max-width:600px)') : null;
@@ -1310,9 +1285,9 @@
           const header = wrapper.querySelector('.table-header-wrapper');
           if (!header) return;
           header.classList.add('table-controls');
-          header.style.boxSizing = 'border-box';
-          header.style.overflowX = 'auto';
-          header.style.webkitOverflowScrolling = 'touch';
+          header.style.boxSizing = header.style.boxSizing || 'border-box';
+          header.style.overflowX = header.style.overflowX || 'auto';
+          header.style.webkitOverflowScrolling = header.style.webkitOverflowScrolling || 'touch';
           header.style.display = header.style.display || 'flex';
           header.style.flexWrap = header.style.flexWrap || 'wrap';
           header.style.justifyContent = header.style.justifyContent || 'space-between';
@@ -1321,18 +1296,19 @@
 
           let copyButtons = header.querySelector('.copy-buttons');
           if (!copyButtons) {
-            const possibleBtns = Array.from(header.querySelectorAll('button')).filter(b => !b.classList.contains('toggle-table-btn'));
+            const possibleBtns = Array.from(header.querySelectorAll('button')).filter(b => !b.classList.contains('toggle-table-btn') && !b.classList.contains('table-toggle-inline'));
             if (possibleBtns.length > 0) {
-              copyButtons = document.createElement('div');
-              copyButtons.className = 'copy-buttons';
-              copyButtons.style.display = 'flex';
-              copyButtons.style.gap = '6px';
-              possibleBtns.forEach(b => copyButtons.appendChild(b));
-              header.insertBefore(copyButtons, header.firstChild);
+              const cb = document.createElement('div');
+              cb.className = 'copy-buttons';
+              cb.style.display = 'flex';
+              cb.style.gap = '6px';
+              possibleBtns.forEach(b => cb.appendChild(b));
+              header.insertBefore(cb, header.firstChild);
+              copyButtons = cb;
             }
           }
 
-          const toggleBtn = header.querySelector('.toggle-table-btn');
+          const toggleBtn = header.querySelector('.toggle-table-btn') || header.querySelector('.toggle-table');
           if (toggleBtn) {
             const toggleParent = toggleBtn.parentElement && toggleBtn.parentElement !== header ? toggleBtn.parentElement : null;
             if (toggleParent && toggleParent !== header) {
@@ -1341,23 +1317,21 @@
               try { header.insertBefore(toggleBtn, header.firstChild); } catch (_) {}
             }
 
-            if (isMobile) {
-              toggleBtn.style.order = '-1';
-              toggleBtn.style.flex = '1 1 100%';
-              toggleBtn.style.width = '100%';
-              toggleBtn.style.boxSizing = 'border-box';
-              toggleBtn.style.margin = '0';
-              toggleBtn.style.padding = toggleBtn.style.padding || '6px 8px';
-              toggleBtn.style.fontWeight = '600';
-              if (toggleBtn.parentElement) toggleBtn.parentElement.style.width = '100%';
-            } else {
+            // Ensure compact inline class on all viewports. Remove legacy class.
+            try { toggleBtn.classList.remove('toggle-table-btn', 'table-toggle-mobile'); } catch (_) {}
+            try { toggleBtn.classList.add('table-toggle-inline'); } catch (_) {}
+
+            // Clear inline overrides. CSS controls sizing.
+            try {
               toggleBtn.style.order = '';
               toggleBtn.style.flex = '';
               toggleBtn.style.width = '';
               toggleBtn.style.boxSizing = '';
-              toggleBtn.style.marginLeft = '10px';
+              toggleBtn.style.margin = '';
+              toggleBtn.style.padding = '';
               toggleBtn.style.fontWeight = '';
-            }
+              if (toggleBtn.parentElement) toggleBtn.parentElement.style.width = '';
+            } catch (_) {}
           }
 
           if (copyButtons) {
@@ -1408,7 +1382,7 @@
   }
   window.addEventListener('resize', _debouncedOptimize);
 
-  // --- Attach handlers and initial DOM setup ------------------------------
+  // Attach handlers and initial DOM setup
   document.addEventListener('DOMContentLoaded', function () {
     try {
       // Wrap tables in .table-container if missing
@@ -1512,7 +1486,7 @@
       // Build single-table TOC if condition applies
       try { buildSingleTableToc(); setTimeout(buildSingleTableToc, 500); } catch (e) {}
 
-      // Optimize table controls position/size for mobile
+      // Optimize table controls position/size for all viewports
       try { optimizeTableControls(); setTimeout(optimizeTableControls, 200); } catch (e) { /* silent */ }
 
       // Hide Reset All Tables UI targets (only hide; function retained)
@@ -1545,7 +1519,7 @@
     } catch (e) { /* silent */ }
   });
 
-  // delegated click: sorting (bind header clicks to sort behavior)
+  // delegated click: sorting
   document.addEventListener('click', function (e) {
     try {
       const el = e.target;
@@ -1564,7 +1538,7 @@
     } catch (err) { /* silent */ }
   });
 
-  // delegated click: TOC anchor scroll (fixed: scroll to actual target when present)
+  // delegated click: TOC anchor scroll
   document.addEventListener('click', function (e) {
     try {
       const a = e.target.closest && e.target.closest('#tocBar a[href^="#"]');
@@ -1593,7 +1567,6 @@
     } catch (err) { /* silent */ }
   });
 
-  // backToTop visibility on scroll
   window.addEventListener("scroll", function () {
     try {
       const btn = document.getElementById("backToTop");
@@ -1619,18 +1592,6 @@
   window.exportTableJSON = exportTableJSON;
   window.exportTableXLSX = exportTableXLSX;
   window.exportTablePDF = exportTablePDF;
-  window.exportTableMarkdown = exportTableMarkdown; // function retained but UI hidden
-  window.exportAllTablesMarkdown = exportAllTablesMarkdown; // function retained but UI hidden
-  window.exportTableMarkdown = exportTableMarkdown;
-  window.exportAllTablesMarkdown = exportAllTablesMarkdown;
-  window.exportTableMarkdown = exportTableMarkdown;
-  window.exportAllTablesMarkdown = exportAllTablesMarkdown;
-  window.exportTableMarkdown = exportTableMarkdown;
-  window.exportAllTablesMarkdown = exportAllTablesMarkdown;
-  window.exportTableMarkdown = exportTableMarkdown;
-  window.exportAllTablesMarkdown = exportAllTablesMarkdown;
-  // (repeated assignments harmless; ensures availability)
-
   window.exportTableMarkdown = exportTableMarkdown;
   window.exportAllTablesMarkdown = exportAllTablesMarkdown;
 
@@ -1650,7 +1611,6 @@
     } catch (e) { /* silent */ }
   };
 
-  // --- Final: quick diagnostics (non-blocking)
   try {
     const idxUrl = document.body && document.body.getAttribute('data-index-url');
     const wUrl = document.body && document.body.getAttribute('data-worker-url');
