@@ -1,10 +1,9 @@
-/* style.css — Tables Viewer v2.1
-   Merged safe version (preserve project layout; add accessibility, reduced-motion, print rules)
-   Source: original project baseline and improved variant (conservative merge). */
+/* style.css — Revised merge (merged content + ChatGPT-like typography + math)
+   Produced: 2025-09-30
+   Notes: single-file replacement. Review in test environment before deploying.
+*/
 
-/* =========================
-   Theme variables
-   ========================= */
+/* ========== Variables ========== */
 :root{
   --bg:#ffffff;
   --text:#111827;
@@ -26,11 +25,20 @@
   --code-bg-alt: #f3f4f6;
   --code-text-dark: #e6e6e6;
   --code-radius: 6px;
+
+  /* UI helpers */
   --focus-ring: rgba(37,99,235,0.18);
   --table-min-width: 420px;
+
+  /* typography additions */
+  --measure:65ch;
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Roboto Mono", "Courier New", monospace;
+  --emoji-fonts: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla","EmojiSymbols";
+  --accent: #2563eb;
 }
 
-/* Respect user or app dark-theme override and prefer-color-scheme */
+/* Dark theme variables */
 @media (prefers-color-scheme: dark) {
   :root {
     --bg:#1e1e2f;
@@ -46,14 +54,12 @@
     --toc-link:#93c5fd;
     --toc-link-hover-bg:#1e3a8a;
     --toc-link-hover-color:#ffffff;
-
-    /* code dark override */
     --code-bg: #2d2d2d;
     --code-text-dark: #e6e6e6;
   }
 }
 
-/* Allow explicit data-theme override to take precedence */
+/* Explicit data-theme override */
 [data-theme="dark"]{
   --bg:#1e1e2f;
   --text:#e0e0e0;
@@ -71,20 +77,24 @@
   --code-bg: #2d2d2d;
 }
 
-/* =========================
-   Base layout + typography
-   ========================= */
-html,body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;
-  font-size:15px;
-  line-height:1.45;
+/* ========== Rendering & Base ========== */
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.45;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-variant-ligatures: common-ligatures;
+  -webkit-text-size-adjust: 100%;
 }
-a{color:inherit;text-decoration:none}
+a { color: inherit; text-decoration: none; }
+:focus { outline: none; }
 
-/* Buttons (broad defaults) */
+/* ========== Buttons ========== */
 button{
   background:var(--button-bg);
   color:var(--button-text);
@@ -98,9 +108,7 @@ button{
   justify-content:center;
 }
 
-/* =========================
-   Table container and responsive behavior
-   ========================= */
+/* ========== Table container & default table ========== */
 .table-container{
   width:100%;
   overflow-x:auto;
@@ -110,17 +118,15 @@ button{
 table{
   width:100%;
   border-collapse:collapse;
-  table-layout:fixed; /* preserve project's column behavior */
+  table-layout:fixed;
   word-wrap:break-word;
   margin-bottom:18px;
   background:transparent;
   font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   font-size:15px;
-  min-width:var(--table-min-width);
+  min-width:var(--table-min-width,420px);
 }
-
-/* Headers and cells */
-thead th, th{
+thead th, th {
   padding:12px 14px;
   text-align:left;
   vertical-align:middle;
@@ -146,20 +152,13 @@ table strong, table b{
   color:var(--text);
   letter-spacing:-0.01em;
 }
-
-/* Row striping & hover */
 tr:nth-child(even){ background:var(--bg) }
 tr:hover td{ background:var(--row-hover) }
 .highlight{ background:var(--highlight)!important; transition:background .45s ease }
 .current-row td{ background:var(--current-row)!important }
 
-/* Sticky first column (preserve existing behavior) */
-thead th:first-child{
-  position:sticky;
-  left:0;
-  z-index:4;
-  background:var(--panel);
-}
+/* Sticky first column */
+thead th:first-child{ position:sticky; left:0; z-index:4; background:var(--panel); }
 td:first-child{
   background:var(--panel);
   font-weight:inherit;
@@ -169,16 +168,25 @@ td:first-child{
   min-width:140px;
   box-shadow:2px 0 5px -2px rgba(0,0,0,0.08);
 }
+table td, table th { border-color: rgba(0,0,0,0.06); }
 
-/* Subtle border color */
-table td, table th{ border-color:rgba(0,0,0,0.06) }
-
-/* Sort button and header interactions */
-.sort-btn{ display:flex; align-items:center; gap:6px; background:transparent; border:0; padding:6px 8px; cursor:pointer; border-radius:8px; font-size:12px; color:var(--muted); }
+/* Sorting affordances */
+.sort-btn{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  background:transparent;
+  border:0;
+  padding:6px 8px;
+  cursor:pointer;
+  border-radius:8px;
+  font-size:12px;
+  color:var(--muted);
+}
 .th-with-sort, thead th[role="button"], .sort-btn{ cursor:pointer }
 thead th[role="button"]:hover{ background:#eef6ff }
 
-/* Sticky header area */
+/* ========== Header sticky area ========== */
 #stickyMainHeader{
   position:sticky;
   top:0;
@@ -194,8 +202,6 @@ thead th[role="button"]:hover{ background:#eef6ff }
   backface-visibility: hidden;
   box-shadow: 0 1px 0 rgba(0,0,0,0.03);
 }
-
-/* Header layout */
 #tv-header{
   display:flex;
   gap:6px;
@@ -208,7 +214,6 @@ thead th[role="button"]:hover{ background:#eef6ff }
 #tv-header > div:first-child{ flex: 0 0 auto; display:flex; align-items:center; gap:8px; }
 #tv-header > div:last-child{ display:flex; gap:6px; align-items:center; justify-content:flex-end; flex: 1 1 auto; flex-wrap:wrap; overflow:visible; }
 
-/* Compact top buttons */
 #tv-header button, #tv-header .btn, #stickyMainHeader button {
   flex: 0 0 auto;
   padding: 4px 8px;
@@ -222,8 +227,9 @@ thead th[role="button"]:hover{ background:#eef6ff }
 }
 #tv-header button.icon-only, #tv-header .btn.icon-only { padding: 6px; width: 36px; height: 36px; min-width: 36px; min-height: 36px; font-size: 0; }
 
-/* Compact header search inputs */
-#tv-header input[type="search"], #tv-header input[type="text"], #stickyMainHeader input[type="search"], #stickyMainHeader input[type="text"]{
+/* Header inputs */
+#tv-header input[type="search"], #tv-header input[type="text"],
+#stickyMainHeader input[type="search"], #stickyMainHeader input[type="text"]{
   flex: 1 1 220px !important;
   min-width: 110px !important;
   width: auto !important;
@@ -235,10 +241,11 @@ thead th[role="button"]:hover{ background:#eef6ff }
   height: 34px;
 }
 
-/* TOC bar */
+/* TOC */
 #tocBar{ display:flex; align-items:center; gap:12px; width:100%; overflow-x:auto; padding:6px 4px; background:transparent; -webkit-overflow-scrolling:touch; }
 #tocBar ul{ display:flex; gap:8px; list-style:none; margin:0; padding:0; align-items:center; }
 #tocBar a{ white-space:nowrap; display:inline-block; padding:6px 10px; color:var(--toc-link); border-radius:6px; transition:background .18s ease,color .18s ease; }
+#tocBar a:hover{ background:var(--toc-link-hover-bg); color:var(--toc-link-hover-color) }
 
 /* Page layout */
 #mainContent{ padding:20px }
@@ -256,8 +263,6 @@ thead th[role="button"]:hover{ background:#eef6ff }
 
 /* Table header area, collapse controls */
 .table-wrapper .table-header-wrapper{ gap:8px }
-
-/* Keep a minimal legacy rule but prefer class-driven styling */
 .toggle-table-btn{ margin-left:10px; font-size:12px; padding:4px 8px; min-width:36px; }
 .table-wrapper.table-collapsed .table-container table tbody{ display:none }
 .table-wrapper.table-collapsed .copy-buttons button{ opacity:.65 }
@@ -280,56 +285,42 @@ thead th[role="button"]:hover{ background:#eef6ff }
   transition:opacity .3s ease;
 }
 #backToTop:hover{ opacity:.85 }
+
 .row-count{ font-size:13px; color:var(--muted); margin-top:6px; margin-left:6px }
 
-/* Lists inside table cells (preserve project behavior) */
+/* Lists in cells */
 td ul, td ol { margin: .45rem 0; padding-left: 1.25rem; list-style: none; }
 td ul li, td ol li { margin-bottom: .3rem; line-height:1.36; }
 td > ul > li::before { content: "– "; color: var(--text); display: inline-block; width: 1.1ch; margin-left: -1.1ch; }
 td ul ul, td ul ol, td ol ul { margin-top:.2rem; margin-bottom:.35rem; padding-left:1rem; }
 td ul ul > li::before { content: "• "; display:inline-block; width:1.1ch; margin-left:-1.1ch; color:var(--muted); font-size:0.9em; }
+
 td ol { counter-reset: table-ol; padding-left: 1.6rem; }
 td ol > li { counter-increment: table-ol; }
-td ol > li::before { content: counter(table-ol) ". "; color: var(--text); display: inline-block; width: 2.2ch; margin-left: -2.2ch; }
+td ol > li::before { content: counter(table-ol) "."; color: var(--text); display: inline-block; width: 2.2ch; margin-left: -2.2ch; }
 
-/* =========================
-   Code styling
-   ========================= */
-code {
-  background: var(--code-bg);
-  padding: 2px 6px;
-  border-radius: var(--code-radius);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-  font-size: 0.92em;
-  line-height: 1;
-  color: inherit;
-}
-pre code {
-  background: var(--code-bg);
-  display: block;
-  padding: 10px 14px;
-  border-radius: calc(var(--code-radius));
-  overflow-x: auto;
-  line-height: 1.45;
-  font-size: 0.92em;
-  white-space: pre;
-  tab-size: 4;
-}
-td code{ background: var(--code-bg-alt); padding: 2px 6px; border-radius: 6px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size:.9em; line-height:1; }
+/* ========== Code styling ========== */
+code { background: var(--code-bg); padding: 2px 6px; border-radius: var(--code-radius); font-family: var(--font-mono); font-size: 0.92em; line-height: 1; color: inherit; }
+pre code { background: var(--code-bg); display: block; padding: 10px 14px; border-radius: calc(var(--code-radius)); overflow-x: auto; line-height: 1.45; font-size: 0.92em; white-space: pre; tab-size: 4; }
+td code{ background: var(--code-bg-alt); padding: 2px 6px; border-radius: 6px; font-family: var(--font-mono); font-size:.9em; line-height:1; }
 pre { margin: 1em 0; padding: 0; background: transparent; }
 
 [data-theme="dark"] code { background: var(--code-bg); color: var(--code-text-dark); }
 [data-theme="dark"] pre code { background: var(--code-bg); color: var(--code-text-dark); }
 [data-theme="dark"] td code { background: rgba(255,255,255,0.02); color: var(--code-text-dark); }
 
-/* Accessibility focus — use focus-visible if supported */
-:focus { outline: none; }
+/* List marker color fix in dark theme */
+[data-theme="dark"] td > ul > li::before,
+[data-theme="dark"] td ol > li::before { color: var(--text); }
+
+/* ========== Accessibility focus ========== */
 :focus-visible, a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
+a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
 
-/* Small-screen adjustments */
+/* ========== Small screens ========== */
 @media (max-width:600px){
   table{ font-size:15px }
   td,th{ padding:10px 12px }
@@ -349,17 +340,17 @@ pre { margin: 1em 0; padding: 0; background: transparent; }
   #tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) { display:none !important; }
 }
 
+/* Keep viewer visible */
 #tables-viewer, #mainContent { overflow: visible; }
-#tocBar a:hover{ background:var(--toc-link-hover-bg); color:var(--toc-link-hover-color) }
 
 /* Copy button helpers */
 .copy-buttons{ display:flex; gap:8px; align-items:center; }
 .copy-buttons button.copy-btn, .copy-btn { background: var(--button-bg); color: var(--button-text); border: 1px solid var(--border); padding: 6px 10px; border-radius: 6px; font-size:13px; display:inline-flex; align-items:center; gap:8px; }
-.copy-button-output pre, .copy-button-table pre { margin: 0; border: 1px solid rgba(0,0,0,0.06); background: var(--panel); padding: 8px 10px; border-radius: 8px; overflow-x: auto; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.92em; line-height: 1.45; }
+.copy-button-output pre, .copy-button-table pre { margin: 0; border: 1px solid rgba(0,0,0,0.06); background: var(--panel); padding: 8px 10px; border-radius: 8px; overflow-x: auto; font-family: var(--font-mono); font-size: 0.92em; line-height: 1.45; }
 .copy-button-output { padding: 8px; border-radius: 8px; background: rgba(0,0,0,0.01); border: 1px dashed rgba(0,0,0,0.03); }
 .copy-button-output:focus-within, .copy-button-output:hover { box-shadow: 0 4px 14px rgba(37,99,235,0.06); border-color: rgba(37,99,235,0.12); }
 
-/* Small inline toggle button for table collapse/expand — maintain specificity to avoid regressions */
+/* Inline toggle button */
 .table-controls .table-toggle-inline {
   flex: 0 0 auto !important;
   width: auto !important;
@@ -373,28 +364,15 @@ pre { margin: 1em 0; padding: 0; background: transparent; }
 }
 .table-controls .table-toggle-inline.icon-only { width: 36px !important; height: 36px !important; padding: 6px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; }
 
-/* =========================
-   Utilities & Accessibility helpers (non-breaking)
-   ========================= */
-/* visually-hidden / screen-reader only helper */
-.visually-hidden, .sr-only {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  padding: 0 !important;
-  margin: -1px !important;
-  overflow: hidden !important;
-  clip: rect(0 0 0 0) !important;
-  white-space: nowrap !important;
-  border: 0 !important;
-}
+/* ========== Utilities ========== */
+.visually-hidden, .sr-only { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0 0 0 0) !important; white-space: nowrap !important; border: 0 !important; }
 
-/* Reduced motion preference - disable non-essential animations for users who prefer reduced motion */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
 }
 
-/* Print-friendly rules (avoid sticky, keep content linear) */
+/* Print rules */
 @media print {
   :root { color-scheme: light; }
   body { background: #fff; color: #000; }
@@ -405,17 +383,124 @@ pre { margin: 1em 0; padding: 0; background: transparent; }
   table { page-break-inside: avoid; break-inside: avoid; }
 }
 
-/* =========================
-   Small quality-of-life guard rules
-   - keep these last to avoid clobbering project selectors
-   ========================= */
+/* Guard for tiny screens */
+@media (max-width:360px){ :root{ --table-min-width: 320px; } }
 
-/* ensure focus outlines present for keyboard users */
-a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+/* ========== ChatGPT-like typography enhancements ========== */
 
-/* ensure table minimum width does not shrink dangerously on small screens */
-@media (max-width:360px){
-  :root{ --table-min-width: 320px; }
+/* measure & content container */
+.content, .chat, .markdown, #mainContent, article {
+  max-width: min(var(--measure), 88vw);
+  margin-left: auto;
+  margin-right: auto;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
 }
 
-/* End of merged safe stylesheet */
+/* Markdown headings scale */
+.markdown h1, h1 { font-size: 1.40rem; margin: 0.75em 0 0.35em; font-weight:700; letter-spacing:-0.01em; }
+.markdown h2, h2 { font-size: 1.15rem; margin: 0.65em 0 0.3em; font-weight:700; }
+.markdown h3, h3 { font-size: 1.03rem; margin: 0.55em 0 0.25em; font-weight:600; }
+.markdown h4, h4 { font-size: 0.98rem; margin:0.45em 0; font-weight:600; }
+.markdown p, .markdown li { margin: 0.6em 0; line-height: 1.5; }
+
+/* Blockquote style */
+.markdown blockquote, blockquote {
+  margin: 1em 0;
+  padding: .6em 1em;
+  border-left: 4px solid rgba(37,99,235,0.12);
+  background: rgba(37,99,235,0.02);
+  color: var(--muted);
+  border-radius: 8px;
+}
+[data-theme="dark"] .markdown blockquote, [data-theme="dark"] blockquote {
+  background: rgba(255,255,255,0.02);
+  color: var(--muted);
+}
+
+/* inline vs block code */
+.markdown code, code.inline-code {
+  background: rgba(27,31,35,0.04);
+  padding: .15em .4em;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: .95em;
+  white-space: pre-wrap;
+}
+.markdown pre, pre {
+  background: var(--code-bg);
+  padding: 12px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: .95em;
+  line-height: 1.45;
+  tab-size: 4;
+}
+
+/* keyboard keys */
+kbd {
+  font-family: var(--font-mono);
+  background: rgba(0,0,0,0.06);
+  border: 1px solid rgba(0,0,0,0.06);
+  padding: 3px 6px;
+  border-radius: 6px;
+  font-size: .9em;
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,0.04);
+}
+[data-theme="dark"] kbd {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.06);
+}
+
+/* superscript / subscript */
+sup, sub { font-size: .75em; line-height: 0; }
+sup { vertical-align: super; }
+sub { vertical-align: sub; }
+
+/* small / footnotes */
+.small, .footnote { font-size: .85em; color: var(--muted); }
+
+/* links — stronger affordance */
+.markdown a, a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.markdown a:focus, a:focus {
+  outline: 3px solid var(--focus-ring);
+  border-radius: 6px;
+}
+
+/* selection */
+::selection { background: rgba(37,99,235,0.25); color: var(--text); }
+
+/* emoji fallback */
+.emoji, .markdown .emoji { font-family: var(--emoji-fonts); font-size: 1em; }
+
+/* hyphenation & long-word handling */
+.markdown, .content, p, li, td {
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+/* math / KaTeX / MathJax compatibility */
+.katex, .MathJax {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 1em;
+  line-height: 1.45;
+}
+.katex-display, .MathJax_Display {
+  display: block;
+  margin: 1em 0;
+  text-align: center;
+  overflow-x: auto;
+  padding: .2em 0;
+}
+.math-inline { display:inline-block; vertical-align: -0.15em; }
+
+/* ========== Final guard rules ========== */
+a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
