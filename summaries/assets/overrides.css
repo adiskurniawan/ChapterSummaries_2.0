@@ -14,7 +14,6 @@
 [data-theme="dark"], body.dark-mode {
   --header-bg: #2a2e3a;
   --header-color: #e6eef6;
-  /* improved header highlight for dark mode: slightly lighter than header-bg for clear contrast */
   --header-highlight-bg: #33363f;
   --header-highlight-color: #ffffff;
   --row-odd-bg: #242834;
@@ -24,9 +23,8 @@
   --text: #e6eef6;
 }
 
-/* Targeted header alignment overrides */
+/* Table layout basics */
 .table-container table { table-layout: fixed; border-collapse: collapse; width:100%; box-sizing: border-box; }
-/* Do not change tr -> flex: keep table semantics */
 .table-container table thead th {
   vertical-align: middle;
   padding: 10px;
@@ -35,7 +33,6 @@
   background-color: var(--header-bg);
   color: var(--header-color);
 }
-/* Ensure header inner wrapper takes full height and centers content */
 .table-container table thead th .th-with-sort,
 .table-container table thead th .th-with-sort > div {
   display: flex;
@@ -47,7 +44,6 @@
   overflow: hidden;
 }
 
-/* Sticky first column header: use the same header background */
 .table-container table thead th:first-child {
   position: sticky;
   left: 0;
@@ -56,18 +52,15 @@
   color: var(--header-color) !important;
 }
 
-/* Sticky first column cells: sync explicitly with row backgrounds */
 .table-container table tbody td:first-child {
   position: sticky;
   left: 0;
   z-index: 4;
   box-shadow: 2px 0 5px -2px rgba(0,0,0,0.08);
-  /* fallback */
   background-color: inherit !important;
   color: inherit !important;
 }
 
-/* Zebra rows: set row background for all cells (so first column can copy it) */
 .table-container table tbody tr:nth-child(odd) td {
   background-color: var(--row-odd-bg);
 }
@@ -75,15 +68,6 @@
   background-color: var(--row-even-bg);
 }
 
-/* Ensure the sticky first column copies the same zebra colors (explicit to avoid stacking issues) */
-.table-container table tbody tr:nth-child(odd) td:first-child {
-  background-color: var(--row-odd-bg) !important;
-}
-.table-container table tbody tr:nth-child(even) td:first-child {
-  background-color: var(--row-even-bg) !important;
-}
-
-/* Hover highlight: applied to entire row (including first column) */
 .table-container table tbody tr:hover td {
   background-color: var(--row-hover-bg) !important;
 }
@@ -91,33 +75,13 @@
   background-color: var(--row-hover-bg) !important;
 }
 
-/* Header hover/focus/active — ensures header highlight is distinct from row hover in dark mode */
-[data-theme="dark"] .table-container table thead th:hover,
-[data-theme="dark"] .table-container table thead th:focus,
-[data-theme="dark"] .table-container table thead th.sort-active,
-body.dark-mode .table-container table thead th:hover,
-body.dark-mode .table-container table thead th:focus,
-body.dark-mode .table-container table thead th.sort-active {
-  background-color: var(--header-highlight-bg) !important;
-  color: var(--header-highlight-color) !important;
-  transition: background-color 120ms ease, color 120ms ease;
-  outline: 2px solid rgba(255,255,255,0.03);
-}
-/* ensure sticky first column header also respects highlight on hover/focus */
-[data-theme="dark"] .table-container table thead th:first-child:hover,
-body.dark-mode .table-container table thead th:first-child:hover {
-  background-color: var(--header-highlight-bg) !important;
-  color: var(--header-highlight-color) !important;
-}
-
-/* proportional widths based on total_units (kept for compatibility) */
+/* Width variables */
 .table-container table thead th:first-child { width: 28.57%; }
 .table-container table thead th:not(:first-child) { width: 71.43%; }
 .table-container table tbody td:first-child { width: 28.57%; }
 .table-container table tbody td:not(:first-child) { width: 71.43%; }
 
-/* --- Lists inside table cells: force consistent markers --- */
-/* top-level unordered lists: use en-dash marker (–) */
+/* Lists inside table cells: consistent markers */
 .table-container table td > ul, .table-container table td > ol {
   margin: .45rem 0;
   padding-left: 1.25rem;
@@ -157,22 +121,3 @@ body.dark-mode .table-container table thead th:first-child:hover {
   margin-left: -2.2ch;
 }
 
-/* Debug fallback: ensure list markers apply if other sheets are heavy-handed */
-.table-container td ul,
-.table-container td ol {
-  list-style: none !important;
-  margin: .45rem 0 !important;
-  padding-left: 1.25rem !important;
-}
-.table-container td ul > li::before {
-  content: "– " !important;
-  display: inline-block !important;
-  width: 1.4ch !important;
-  margin-left: -1.4ch !important;
-  color: var(--text) !important;
-}
-.table-container td ul ul > li::before {
-  content: "• " !important;
-  font-size: 0.9em !important;
-  color: var(--muted) !important;
-}

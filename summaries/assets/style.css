@@ -1,10 +1,11 @@
-/* style.css — Revised merge (merged content + ChatGPT-like typography + math)
-   Produced: 2025-09-30
-   Notes: single-file replacement. Review in test environment before deploying.
+/* style.css — Enhanced (ChatGPT-like typography, safe tweaks)
+   Applied: 2025-10-01
+   Notes: minimal, additive changes for typography, accessibility, and small UX refinements.
 */
 
 /* ========== Variables ========== */
 :root{
+  color-scheme: light dark;
   --bg:#ffffff;
   --text:#111827;
   --panel:#f8fafc;
@@ -77,22 +78,30 @@
   --code-bg: #2d2d2d;
 }
 
-/* ========== Rendering & Base ========== */
+/* ========== Global normalization & base ========== */
+*, *::before, *::after { box-sizing: border-box; }
+
 html, body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
-  font-size: 15px;
-  line-height: 1.45;
+  font-size: 15px; /* keep 15px for parity; switch to 16px if you want slightly larger UI */
+  font-weight: 400; /* explicit base weight */
+  line-height: 1.50; /* increased for ChatGPT-like rhythm */
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-variant-ligatures: common-ligatures;
   -webkit-text-size-adjust: 100%;
+  transition: background-color .12s ease, color .12s ease;
 }
 a { color: inherit; text-decoration: none; }
 :focus { outline: none; }
+
+/* Small helpers */
+img, video, svg { max-width: 100%; height: auto; display: block; }
+code, pre, kbd { font-family: var(--font-mono); }
 
 /* ========== Buttons ========== */
 button{
@@ -106,6 +115,7 @@ button{
   display:inline-flex;
   align-items:center;
   justify-content:center;
+  transition: background-color .12s ease, box-shadow .12s ease, border-color .12s ease;
 }
 
 /* ========== Table container & default table ========== */
@@ -135,9 +145,11 @@ thead th, th {
   font-weight:700;
   font-size:1.03rem;
   position:sticky;
-  top:48px;
+  top:var(--tv-header-min-height,48px);
   z-index:3;
   cursor:default;
+  /* ensure anchored headings don't get hidden under sticky header */
+  scroll-margin-top: calc(var(--tv-header-min-height,48px) + 8px);
 }
 tbody td, td{
   padding:12px 14px;
@@ -158,7 +170,7 @@ tr:hover td{ background:var(--row-hover) }
 .current-row td{ background:var(--current-row)!important }
 
 /* Sticky first column */
-thead th:first-child{ position:sticky; left:0; z-index:4; background:var(--panel); }
+thead th:first-child{ position:sticky; left:0; z-index:4; background:var(--panel); top:var(--tv-header-min-height,48px); }
 td:first-child{
   background:var(--panel);
   font-weight:inherit;
@@ -300,9 +312,10 @@ td ol > li { counter-increment: table-ol; }
 td ol > li::before { content: counter(table-ol) "."; color: var(--text); display: inline-block; width: 2.2ch; margin-left: -2.2ch; }
 
 /* ========== Code styling ========== */
-code { background: var(--code-bg); padding: 2px 6px; border-radius: var(--code-radius); font-family: var(--font-mono); font-size: 0.92em; line-height: 1; color: inherit; }
-pre code { background: var(--code-bg); display: block; padding: 10px 14px; border-radius: calc(var(--code-radius)); overflow-x: auto; line-height: 1.45; font-size: 0.92em; white-space: pre; tab-size: 4; }
-td code{ background: var(--code-bg-alt); padding: 2px 6px; border-radius: 6px; font-family: var(--font-mono); font-size:.9em; line-height:1; }
+/* keep tabular numbers for better numeric alignment */
+code { background: var(--code-bg); padding: 2px 6px; border-radius: var(--code-radius); font-family: var(--font-mono); font-size: 0.92em; line-height: 1; color: inherit; font-variant-numeric: tabular-nums; }
+pre code { background: var(--code-bg); display: block; padding: 10px 14px; border-radius: calc(var(--code-radius)); overflow-x: auto; line-height: 1.45; font-size: 0.92em; white-space: pre; tab-size: 4; font-variant-numeric: tabular-nums; }
+td code{ background: var(--code-bg-alt); padding: 2px 6px; border-radius: 6px; font-family: var(--font-mono); font-size:.9em; line-height:1; font-variant-numeric: tabular-nums; }
 pre { margin: 1em 0; padding: 0; background: transparent; }
 
 [data-theme="dark"] code { background: var(--code-bg); color: var(--code-text-dark); }
@@ -324,7 +337,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 @media (max-width:600px){
   table{ font-size:15px }
   td,th{ padding:10px 12px }
-  thead th{ position:sticky; top:48px; z-index:4 }
+  thead th{ position:sticky; top:var(--tv-header-min-height,48px); z-index:4 }
   .table-container{ border-radius:6px }
   #tv-header{ flex-direction:column; align-items:stretch; }
   #tv-header > div:last-child{ justify-content:flex-start; }
@@ -398,11 +411,11 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   -ms-hyphens: auto;
 }
 
-/* Markdown headings scale */
-.markdown h1, h1 { font-size: 1.40rem; margin: 0.75em 0 0.35em; font-weight:700; letter-spacing:-0.01em; }
-.markdown h2, h2 { font-size: 1.15rem; margin: 0.65em 0 0.3em; font-weight:700; }
-.markdown h3, h3 { font-size: 1.03rem; margin: 0.55em 0 0.25em; font-weight:600; }
-.markdown h4, h4 { font-size: 0.98rem; margin:0.45em 0; font-weight:600; }
+/* Markdown headings scale + scroll anchor safety */
+.markdown h1, h1 { font-size: 1.40rem; margin: 0.75em 0 0.35em; font-weight:700; letter-spacing:-0.01em; line-height:1.25; scroll-margin-top: calc(var(--tv-header-min-height,48px) + 8px); }
+.markdown h2, h2 { font-size: 1.15rem; margin: 0.65em 0 0.3em; font-weight:700; line-height:1.28; scroll-margin-top: calc(var(--tv-header-min-height,48px) + 8px); }
+.markdown h3, h3 { font-size: 1.03rem; margin: 0.55em 0 0.25em; font-weight:600; line-height:1.28; scroll-margin-top: calc(var(--tv-header-min-height,48px) + 8px); }
+.markdown h4, h4 { font-size: 0.98rem; margin:0.45em 0; font-weight:600; line-height:1.28; scroll-margin-top: calc(var(--tv-header-min-height,48px) + 8px); }
 .markdown p, .markdown li { margin: 0.6em 0; line-height: 1.5; }
 
 /* Blockquote style */
