@@ -1,123 +1,125 @@
 /* style.css — Fully corrected, inline-block utilities integrated, header-link neutralization preserved
-Applied: 2025-10-03
-Notes:
-- Merged base rules with safe enhancements and ChatGPT-style inline bubbles.
-- Inline utilities: .inline, .inline-block, .inline-flex, .panel-inline, .toolbar-inline.
-- Header-anchor neutralization scoped to table headers.
-- Reviewed for syntax and balanced braces (checked multiple times).
+   Applied: 2025-10-03 (finalized)
+   Notes:
+   - Preserves original layout and behaviors by default.
+   - Provides opt-in inline-table controls:
+       1) add class `inline-mode` to .table-container or .table-wrapper to make that table inline
+       2) add `inline-tables-enabled` to <body> to enable inline display for all tables (responsive-safe)
+   - Includes grey inline <code> background and other accessibility / dark-mode tweaks.
+   - Reviewed for balanced braces and common syntax issues.
 */
 
 /* ========== Variables ========== */
 :root {
-color-scheme: light dark;
+  color-scheme: light dark;
 
---bg: #ffffff;
---text: #111827;
---panel: #f8fafc;
---border: #e5e7eb;
---row-hover: #d0ebff;
---highlight: #fff3a2;
---current-row: #ffeaa2;
---button-bg: #f3f4f6;
---button-text: #111827;
---muted: rgba(17,24,39,0.45);
---toc-link: #2563eb;
---toc-link-hover-bg: #e0f2fe;
---toc-link-hover-color: #1e40af;
---tv-header-min-height: 48px;
+  --bg: #ffffff;
+  --text: #111827;
+  --panel: #f8fafc;
+  --border: #e5e7eb;
+  --row-hover: #d0ebff;
+  --highlight: #fff3a2;
+  --current-row: #ffeaa2;
+  --button-bg: #f3f4f6;
+  --button-text: #111827;
+  --muted: rgba(17,24,39,0.45);
+  --toc-link: #2563eb;
+  --toc-link-hover-bg: #e0f2fe;
+  --toc-link-hover-color: #1e40af;
+  --tv-header-min-height: 48px;
 
-/* code styling vars */
---code-bg: #f6f8fa;
---code-bg-alt: #f3f4f6;
---code-text-dark: #e6e6e6;
---code-radius: 6px;
+  /* code styling vars */
+  --code-bg: #f6f8fa;
+  --code-bg-alt: #f3f4f6;
+  --code-text-dark: #e6e6e6;
+  --code-radius: 6px;
 
-/* UI helpers */
---focus-ring: rgba(37,99,235,0.18);
---focus-bg: rgba(37,99,235,0.04);
---table-min-width: 420px;
+  /* UI helpers */
+  --focus-ring: rgba(37,99,235,0.18);
+  --focus-bg: rgba(37,99,235,0.04);
+  --table-min-width: 420px;
 
-/* typography */
---measure: 65ch;
---font-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
---font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Roboto Mono", "Courier New", monospace;
---emoji-fonts: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla","EmojiSymbols";
---accent: #2563eb;
+  /* typography */
+  --measure: 65ch;
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Roboto Mono", "Courier New", monospace;
+  --emoji-fonts: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla","EmojiSymbols";
+  --accent: #2563eb;
 
-/* motion & transitions */
---trans-duration: 150ms;
---easing: cubic-bezier(.2,.9,.2,1);
+  /* motion & transitions */
+  --trans-duration: 150ms;
+  --easing: cubic-bezier(.2,.9,.2,1);
 }
 
 /* High contrast preference */
 @media (prefers-contrast: more) {
-:root {
---border: #9aa7b2;
---button-bg: #ffffff;
---button-text: #000;
---toc-link: #003ea6;
---focus-ring: rgba(0,62,166,0.28);
---muted: rgba(0,0,0,0.6);
-}
+  :root {
+    --border: #9aa7b2;
+    --button-bg: #ffffff;
+    --button-text: #000;
+    --toc-link: #003ea6;
+    --focus-ring: rgba(0,62,166,0.28);
+    --muted: rgba(0,0,0,0.6);
+  }
 }
 
 /* Dark theme variables */
 @media (prefers-color-scheme: dark) {
-:root {
---bg: #1e1e2f;
---text: #e0e0e0;
---panel: #2a2a3e;
---border: #3c3c4f;
---row-hover: #38384c;
---highlight: #fffa8c;
---current-row: #ffd86c;
---button-bg: #44445a;
---button-text: #e0e0e0;
---muted: rgba(224,224,224,0.35);
---toc-link: #93c5fd;
---toc-link-hover-bg: #1e3a8a;
---toc-link-hover-color: #ffffff;
---code-bg: #2d2d2d;
---code-text-dark: #e6e6e6;
-}
+  :root {
+    --bg: #1e1e2f;
+    --text: #e0e0e0;
+    --panel: #2a2a3e;
+    --border: #3c3c4f;
+    --row-hover: #38384c;
+    --highlight: #fffa8c;
+    --current-row: #ffd86c;
+    --button-bg: #44445a;
+    --button-text: #e0e0e0;
+    --muted: rgba(224,224,224,0.35);
+    --toc-link: #93c5fd;
+    --toc-link-hover-bg: #1e3a8a;
+    --toc-link-hover-color: #ffffff;
+    --code-bg: #2d2d2d;
+    --code-text-dark: #e6e6e6;
+  }
 }
 
 /* Explicit data-theme override */
 [data-theme="dark"] {
---bg: #1e1e2f;
---text: #e0e0e0;
---panel: #2a2a3e;
---border: #3c3c4f;
---row-hover: #38384c;
---highlight: #fffa8c;
---current-row: #ffd86c;
---button-bg: #44445a;
---button-text: #e0e0e0;
---muted: rgba(224,224,224,0.35);
---toc-link: #93c5fd;
---toc-link-hover-bg: #1e3a8a;
---toc-link-hover-color: #ffffff;
---code-bg: #2d2d2d;
+  --bg: #1e1e2f;
+  --text: #e0e0e0;
+  --panel: #2a2a3e;
+  --border: #3c3c4f;
+  --row-hover: #38384c;
+  --highlight: #fffa8c;
+  --current-row: #ffd86c;
+  --button-bg: #44445a;
+  --button-text: #e0e0e0;
+  --muted: rgba(224,224,224,0.35);
+  --toc-link: #93c5fd;
+  --toc-link-hover-bg: #1e3a8a;
+  --toc-link-hover-color: #ffffff;
+  --code-bg: #2d2d2d;
 }
 
 /* ========== Global normalization & base ========== */
 *, *::before, *::after { box-sizing: border-box; }
 
 html, body {
-margin: 0;
-background: var(--bg);
-color: var(--text);
-font-family: var(--font-sans);
-font-size: clamp(15px, 0.9rem + 0.6vw, 16px);
-font-weight: 400;
-line-height: 1.5;
-text-rendering: optimizeLegibility;
--webkit-font-smoothing: antialiased;
--moz-osx-font-smoothing: grayscale;
-font-variant-ligatures: common-ligatures;
--webkit-text-size-adjust: 100%;
-transition: background-color var(--trans-duration) var(--easing), color var(--trans-duration) var(--easing);
-min-height: 100vh;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: clamp(15px, 0.9rem + 0.6vw, 16px);
+  font-weight: 400;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-variant-ligatures: common-ligatures;
+  -webkit-text-size-adjust: 100%;
+  transition: background-color var(--trans-duration) var(--easing), color var(--trans-duration) var(--easing);
+  min-height: 100vh;
 }
 
 /* default link behavior (consolidated) */
@@ -131,18 +133,18 @@ code, pre, kbd { font-family: var(--font-mono); }
 
 /* ========== Buttons ========== */
 button {
-background: var(--button-bg);
-color: var(--button-text);
-border: 1px solid var(--border);
-padding: 6px 12px;
-border-radius: 6px;
-cursor: pointer;
-font-size: 14px;
-display: inline-flex;
-align-items: center;
-justify-content: center;
-transition: transform var(--trans-duration) var(--easing), box-shadow var(--trans-duration) var(--easing), background-color var(--trans-duration) var(--easing), border-color var(--trans-duration) var(--easing);
-will-change: transform;
+  background: var(--button-bg);
+  color: var(--button-text);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--trans-duration) var(--easing), box-shadow var(--trans-duration) var(--easing), background-color var(--trans-duration) var(--easing), border-color var(--trans-duration) var(--easing);
+  will-change: transform;
 }
 button:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,0.04); }
 button:active { transform: scale(.99); box-shadow: 0 3px 8px rgba(0,0,0,0.06); }
@@ -150,49 +152,52 @@ button:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px
 
 /* ========== Table container & default table ========== */
 .table-container {
-width: 100%;
-overflow-x: auto;
--webkit-overflow-scrolling: touch;
-border-radius: 8px;
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 8px;
+  background: transparent;
 }
+
+/* Core table defaults */
 table {
-width: 100%;
-border-collapse: collapse;
-table-layout: fixed;
-word-wrap: break-word;
-margin-bottom: 18px;
-background: transparent;
-font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-font-size: 15px;
-min-width: var(--table-min-width, 420px);
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  word-wrap: break-word;
+  margin-bottom: 18px;
+  background: transparent;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  min-width: var(--table-min-width, 420px);
 }
 thead th, th {
-padding: 12px 14px;
-text-align: left;
-vertical-align: middle;
-border: 1px solid var(--border);
-background: var(--panel);
-font-weight: 700;
-font-size: 1.03rem;
-position: sticky;
-top: var(--tv-header-min-height, 48px);
-z-index: 3;
-cursor: default;
-scroll-margin-top: calc(var(--tv-header-min-height,48px) + 8px);
+  padding: 12px 14px;
+  text-align: left;
+  vertical-align: middle;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  font-weight: 700;
+  font-size: 1.03rem;
+  position: sticky;
+  top: var(--tv-header-min-height, 48px);
+  z-index: 3;
+  cursor: default;
+  scroll-margin-top: calc(var(--tv-header-min-height,48px) + 8px);
 }
 tbody td, td {
-padding: 12px 14px;
-border: 1px solid var(--border);
-vertical-align: top;
-font-weight: 400;
-word-break: break-word;
-white-space: normal;
-overflow-wrap: anywhere;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  vertical-align: top;
+  font-weight: 400;
+  word-break: break-word;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 table strong, table b {
-font-weight: 600;
-color: var(--text);
-letter-spacing: -0.01em;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
 }
 tr:nth-child(even) td { background: var(--bg); }
 tr:hover td { background: var(--row-hover); }
@@ -201,98 +206,98 @@ tr:hover td { background: var(--row-hover); }
 
 /* Sticky first column */
 thead th:first-child {
-position: sticky;
-left: 0;
-z-index: 4;
-background: var(--panel);
-top: var(--tv-header-min-height,48px);
+  position: sticky;
+  left: 0;
+  z-index: 4;
+  background: var(--panel);
+  top: var(--tv-header-min-height,48px);
 }
 td:first-child {
-background: var(--panel);
-font-weight: inherit;
-position: sticky;
-left: 0;
-z-index: 2;
-min-width: 140px;
-box-shadow: 2px 0 5px -2px rgba(0,0,0,0.08);
+  background: var(--panel);
+  font-weight: inherit;
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  min-width: 140px;
+  box-shadow: 2px 0 5px -2px rgba(0,0,0,0.08);
 }
 table td, table th { border-color: rgba(0,0,0,0.06); }
 
 /* Sorting affordances */
 .sort-btn {
-display: flex;
-align-items: center;
-gap: 6px;
-background: transparent;
-border: 0;
-padding: 6px 8px;
-cursor: pointer;
-border-radius: 8px;
-font-size: 12px;
-color: var(--muted);
-transition: color var(--trans-duration) var(--easing), background var(--trans-duration) var(--easing);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 0;
+  padding: 6px 8px;
+  cursor: pointer;
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--muted);
+  transition: color var(--trans-duration) var(--easing), background var(--trans-duration) var(--easing);
 }
 .th-with-sort, thead th[role="button"], .sort-btn { cursor: pointer; }
 thead th[role="button"]:hover { background: rgba(0,0,0,0.02); }
 
 /* ========== Header sticky area ========== */
 #stickyMainHeader {
-position: sticky;
-top: 0;
-background: var(--bg);
-z-index: 1001;
-padding: 10px 14px;
-border-bottom: 1px solid var(--border);
-display: flex;
-flex-direction: column;
-gap: 6px;
-align-items: stretch;
--webkit-backface-visibility: hidden;
-backface-visibility: hidden;
-box-shadow: 0 1px 0 rgba(0,0,0,0.03);
-transition: box-shadow var(--trans-duration) var(--easing), background var(--trans-duration) var(--easing);
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 1001;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: stretch;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+  transition: box-shadow var(--trans-duration) var(--easing), background var(--trans-duration) var(--easing);
 }
 #tv-header {
-display: flex;
-gap: 6px;
-align-items: center;
-justify-content: space-between;
-flex-wrap: wrap;
-width: 100%;
-min-height: var(--tv-header-min-height);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  width: 100%;
+  min-height: var(--tv-header-min-height);
 }
 #tv-header > div:first-child { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; }
 #tv-header > div:last-child { display: flex; gap: 6px; align-items: center; justify-content: flex-end; flex: 1 1 auto; flex-wrap: wrap; overflow: visible; }
 
 /* Header control sizes */
 #tv-header button, #tv-header .btn, #stickyMainHeader button {
-flex: 0 0 auto;
-padding: 4px 8px;
-font-size: 13px;
-border-radius: 5px;
-line-height: 1.1;
-min-height: 40px;
-min-width: 36px;
-white-space: nowrap;
-gap: 6px;
+  flex: 0 0 auto;
+  padding: 4px 8px;
+  font-size: 13px;
+  border-radius: 5px;
+  line-height: 1.1;
+  min-height: 40px;
+  min-width: 36px;
+  white-space: nowrap;
+  gap: 6px;
 }
 #tv-header button.icon-only, #tv-header .btn.icon-only { padding: 6px; width: 36px; height: 36px; min-width: 36px; min-height: 36px; font-size: 0; }
 
 /* Header inputs */
 #tv-header input[type="search"], #tv-header input[type="text"],
 #stickyMainHeader input[type="search"], #stickyMainHeader input[type="text"] {
-flex: 1 1 220px !important;
-min-width: 110px !important;
-width: auto !important;
-max-width: 100% !important;
-box-sizing: border-box;
-padding: 6px 8px;
-font-size: 13px;
-border-radius: 6px;
-height: 34px;
-border: 1px solid var(--border);
-background: var(--panel);
-transition: box-shadow var(--trans-duration) var(--easing), border-color var(--trans-duration) var(--easing);
+  flex: 1 1 220px !important;
+  min-width: 110px !important;
+  width: auto !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  font-size: 13px;
+  border-radius: 6px;
+  height: 34px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  transition: box-shadow var(--trans-duration) var(--easing), border-color var(--trans-duration) var(--easing);
 }
 #tv-header input[type="search"]:focus, #tv-header input[type="text"]:focus { box-shadow: 0 6px 18px rgba(0,0,0,0.04); border-color: var(--accent); }
 
@@ -311,9 +316,9 @@ transition: box-shadow var(--trans-duration) var(--easing), border-color var(--t
 
 /* Responsive tweaks */
 @media (max-width:900px) {
-#tv-header input[type="search"] { width:180px !important; min-width:120px !important; }
-#tocBar { gap:8px; padding:4px; }
-#mainContent { padding:12px; }
+  #tv-header input[type="search"] { width:180px !important; min-width:120px !important; }
+  #tocBar { gap:8px; padding:4px; }
+  #mainContent { padding:12px; }
 }
 
 /* Table header area, collapse controls */
@@ -324,20 +329,20 @@ transition: box-shadow var(--trans-duration) var(--easing), border-color var(--t
 
 /* Back-to-top */
 #backToTop {
-display: none;
-position: fixed;
-bottom: 24px;
-right: 24px;
-z-index: 1100;
-padding: 10px 14px;
-font-size: 14px;
-border-radius: 8px;
-background: var(--button-bg);
-color: var(--button-text);
-border: 1px solid var(--border);
-cursor: pointer;
-box-shadow: 0 2px 6px rgba(0,0,0,.15);
-transition: opacity .3s ease;
+  display: none;
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1100;
+  padding: 10px 14px;
+  font-size: 14px;
+  border-radius: 8px;
+  background: var(--button-bg);
+  color: var(--button-text);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,.15);
+  transition: opacity .3s ease;
 }
 #backToTop:hover { opacity: .85; }
 
@@ -371,31 +376,31 @@ pre { margin: 1em 0; padding: 0; background: transparent; }
 
 /* ========== Accessibility focus enhancements ========== */
 :focus-visible, a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible {
-outline: 3px solid var(--focus-ring);
-outline-offset: 2px;
-background: var(--focus-bg);
-border-radius: 8px;
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+  background: var(--focus-bg);
+  border-radius: 8px;
 }
 a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
 
 /* ========== Small screens ========== */
 @media (max-width:600px) {
-table { font-size:15px; }
-td, th { padding:10px 12px; }
-thead th { position: sticky; top: var(--tv-header-min-height,48px); z-index: 4; }
-.table-container { border-radius:6px; }
-#tv-header { flex-direction: column; align-items: stretch; }
-#tv-header > div:last-child { justify-content: flex-start; }
-#tv-header input[type="search"], #tv-header input[type="text"], #stickyMainHeader input[type="search"], #stickyMainHeader input[type="text"] {
-flex-basis: 100% !important; width: 100% !important; order: 1; margin-bottom:6px; height:32px; font-size:12px; padding:4px 7px;
-}
-#tv-header button, #tv-header .btn, #stickyMainHeader button { padding: 3px 7px; font-size: 12px; min-height:36px; }
+  table { font-size:15px; }
+  td, th { padding:10px 12px; }
+  thead th { position: sticky; top: var(--tv-header-min-height,48px); z-index: 4; }
+  .table-container { border-radius:6px; }
+  #tv-header { flex-direction: column; align-items: stretch; }
+  #tv-header > div:last-child { justify-content: flex-start; }
+  #tv-header input[type="search"], #tv-header input[type="text"], #stickyMainHeader input[type="search"], #stickyMainHeader input[type="text"] {
+    flex-basis: 100% !important; width: 100% !important; order: 1; margin-bottom:6px; height:32px; font-size:12px; padding:4px 7px;
+  }
+  #tv-header button, #tv-header .btn, #stickyMainHeader button { padding: 3px 7px; font-size: 12px; min-height:36px; }
 }
 
 /* Very-narrow screens - hide less-essential header buttons */
 @media (max-width:420px) {
-#tv-header > div:last-child { overflow-x:auto; -webkit-overflow-scrolling:touch; }
-#tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) { display:none !important; }
+  #tv-header > div:last-child { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  #tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) { display:none !important; }
 }
 
 /* Keep viewer visible */
@@ -410,199 +415,199 @@ flex-basis: 100% !important; width: 100% !important; order: 1; margin-bottom:6px
 
 /* Inline toggle button */
 .table-controls .table-toggle-inline {
-flex: 0 0 auto !important;
-width: auto !important;
-margin: 0 0 0 6px !important;
-padding: 4px 8px !important;
-font-size: 12px !important;
-font-weight: normal !important;
-line-height: 1.2 !important;
-box-sizing: border-box !important;
-min-width: 36px !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  margin: 0 0 0 6px !important;
+  padding: 4px 8px !important;
+  font-size: 12px !important;
+  font-weight: normal !important;
+  line-height: 1.2 !important;
+  box-sizing: border-box !important;
+  min-width: 36px !important;
 }
 .table-controls .table-toggle-inline.icon-only { width: 36px !important; height: 36px !important; padding: 6px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; }
 
 /* ========== Utilities: inline-block / inline-flex / panel-inline ========== */
 /* Generic inline utilities */
 .inline, .inline-block {
-display: inline-block;
-vertical-align: middle;
-box-sizing: border-box;
-max-width: 100%;
-white-space: normal;
-word-break: break-word;
-overflow: visible;
--webkit-tap-highlight-color: transparent;
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  max-width: 100%;
+  white-space: normal;
+  word-break: break-word;
+  overflow: visible;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Inline-flex alignment utility */
 .inline-flex {
-display: inline-flex;
-vertical-align: middle;
-align-items: center;
-box-sizing: border-box;
-max-width: 100%;
+  display: inline-flex;
+  vertical-align: middle;
+  align-items: center;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 /* Small panels/cards used inline */
 .panel-inline, .card {
-display: inline-block;
-vertical-align: middle;
-box-sizing: border-box;
-max-width: 100%;
-width: auto;
-padding: 8px 10px;
-border-radius: 8px;
-background: var(--panel);
-border: 1px solid var(--border);
-line-height: 1.2;
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  max-width: 100%;
+  width: auto;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  line-height: 1.2;
 }
 
 /* Ensure images, svgs and iframes inside inline blocks do not overflow */
 .inline-block img, .inline-block svg, .inline-flex img, .inline-flex svg, .card img, .card svg, .panel-inline img {
-max-width: 100%;
-height: auto;
-display: block;
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
 
 /* Inline elements inside table cells: ensure natural sizing, wrap and alignment */
 td > .inline, td > .inline-block, td > .inline-flex, td > .panel-inline,
 th > .inline, th > .inline-block, th > .inline-flex {
-vertical-align: middle;
-max-width: 100%;
-white-space: normal;
-word-break: break-word;
-box-sizing: border-box;
+  vertical-align: middle;
+  max-width: 100%;
+  white-space: normal;
+  word-break: break-word;
+  box-sizing: border-box;
 }
 
 /* Prevent inline children from exceeding cell width */
 td > .inline-block, th > .inline-block {
-max-width: 100%;
-overflow-wrap: anywhere;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 /* Inline control groups used in headers or toolbars */
 .header-inline-group, .toolbar-inline {
-display: inline-flex;
-align-items: center;
-gap: 6px;
-vertical-align: middle;
-white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  vertical-align: middle;
+  white-space: nowrap;
 }
 
 /* ========== Inline-display table preview mode (conservative toggle) ========== */
 .table-wrapper.inline-mode {
-display: block; /* wrapper remains block to keep headers & controls stacked */
+  display: block; /* wrapper remains block to keep headers & controls stacked */
 }
 .table-wrapper.inline-mode .table-container {
-display: inline-block;
-vertical-align: top;
-width: auto;
-max-width: 100%;
-overflow: visible;
-box-shadow: none;
+  display: inline-block;
+  vertical-align: top;
+  width: auto;
+  max-width: 100%;
+  overflow: visible;
+  box-shadow: none;
 }
 .table-wrapper.inline-mode .table-container table {
-display: table;
-table-layout: auto; /* allow natural column sizing when shown inline */
-min-width: 0;
+  display: table;
+  table-layout: auto; /* allow natural column sizing when shown inline */
+  min-width: 0;
 }
 /* Guard: ensure wide tables still scroll on overflow */
 .table-wrapper.inline-mode .table-container {
-max-width: 100%;
-overflow-x: auto;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 /* ========== ChatGPT-like inline bubble (assistant/user) ========== */
 /* container */
 .chat-row {
-display: flex;
-gap: 8px;
-align-items: flex-start;
-margin: 8px 0;
-width: 100%;
-box-sizing: border-box;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 8px 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 .chat-row.user { justify-content: flex-end; }
 .chat-row.assistant { justify-content: flex-start; }
 
 /* avatar (optional) */
 .chat-avatar {
-display: inline-flex;
-flex: 0 0 auto;
-width: 36px;
-height: 36px;
-border-radius: 50%;
-align-items: center;
-justify-content: center;
-font-size: 14px;
-font-weight: 600;
-color: var(--button-text);
-background: rgba(0,0,0,0.06);
-box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--button-text);
+  background: rgba(0,0,0,0.06);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.03);
 }
 
 /* the bubble itself */
 .chat-inline {
-display: inline-block;
-vertical-align: middle;
-max-width: 78%;
-box-sizing: border-box;
-padding: 10px 14px;
-border-radius: 12px;
-line-height: 1.35;
-font-size: 0.95rem;
-word-break: break-word;
-white-space: pre-wrap;
-box-shadow: 0 1px 0 rgba(0,0,0,0.04);
-transition: background-color 140ms ease, color 140ms ease, transform 120ms ease;
--webkit-tap-highlight-color: transparent;
-outline: none;
+  display: inline-block;
+  vertical-align: middle;
+  max-width: 78%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border-radius: 12px;
+  line-height: 1.35;
+  font-size: 0.95rem;
+  word-break: break-word;
+  white-space: pre-wrap;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+  transition: background-color 140ms ease, color 140ms ease, transform 120ms ease;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
 }
 .chat-inline.assistant {
-background: var(--panel);
-color: var(--text);
-border: 1px solid rgba(0,0,0,0.03);
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid rgba(0,0,0,0.03);
 }
 .chat-inline.user {
-background: var(--button-bg);
-color: var(--button-text);
-border: 1px solid rgba(0,0,0,0.04);
+  background: var(--button-bg);
+  color: var(--button-text);
+  border: 1px solid rgba(0,0,0,0.04);
 }
 .chat-inline:hover, .chat-inline:focus { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,0.06); }
 .chat-inline:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; background: var(--focus-bg); }
 
 /* dark theme tweaks for chat bubbles */
 [data-theme="dark"] .chat-inline.assistant {
-background: rgba(255,255,255,0.02);
-color: var(--text);
-border-color: rgba(255,255,255,0.03);
+  background: rgba(255,255,255,0.02);
+  color: var(--text);
+  border-color: rgba(255,255,255,0.03);
 }
 [data-theme="dark"] .chat-inline.user {
-background: rgba(255,255,255,0.03);
-color: var(--text);
-border-color: rgba(255,255,255,0.04);
+  background: rgba(255,255,255,0.03);
+  color: var(--text);
+  border-color: rgba(255,255,255,0.04);
 }
 
 /* responsive adjustments */
 @media (max-width:720px) {
-.chat-inline { max-width: 86%; padding: 8px 10px; font-size: 0.93rem; }
-.chat-avatar { width: 32px; height: 32px; font-size: 13px; }
+  .chat-inline { max-width: 86%; padding: 8px 10px; font-size: 0.93rem; }
+  .chat-avatar { width: 32px; height: 32px; font-size: 13px; }
 }
 
 /* === Header-link neutralization (scoped & explicit) ===
-Prevent any underline/outline/box-shadow/background or native tap highlight
-for anchor elements inside table headers while preserving keyboard focus for other anchors.
+   Prevent any underline/outline/box-shadow/background or native tap highlight
+   for anchor elements inside table headers while preserving keyboard focus for other anchors.
 */
 thead th > a, thead th > a:link, thead th > a:visited,
 thead th > a:hover, thead th > a:focus, thead th > a:active,
 th > a, th > a:link, th > a:visited, th > a:hover, th > a:focus, th > a:active {
-color: inherit !important;
-text-decoration: none !important;
-outline: none !important;
-box-shadow: none !important;
-background: transparent !important;
--webkit-tap-highlight-color: transparent !important;
+  color: inherit !important;
+  text-decoration: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  -webkit-tap-highlight-color: transparent !important;
 }
 
 /* Prevent header cell hover background change that may look like a line */
@@ -616,46 +621,45 @@ thead th a, th a { color: inherit !important; }
 
 /* hyphenation & long-word handling */
 .markdown, .content, p, li, td {
-hyphens: auto;
--webkit-hyphens: auto;
-word-break: break-word;
-overflow-wrap: anywhere;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 /* math / KaTeX / MathJax compatibility */
 .katex, .MathJax {
-font-family: "Times New Roman", Times, serif;
-font-size: 1em;
-line-height: 1.45;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 1em;
+  line-height: 1.45;
 }
 .katex-display, .MathJax_Display {
-display: block;
-margin: 1em 0;
-text-align: center;
-overflow-x: auto;
-padding: .2em 0;
+  display: block;
+  margin: 1em 0;
+  text-align: center;
+  overflow-x: auto;
+  padding: .2em 0;
 }
 .math-inline { display:inline-block; vertical-align: -0.15em; }
 
 /* ========== Reduced motion ========== */
 @media (prefers-reduced-motion: reduce) {
-
-* { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; transform: none !important; }
-  }
+  * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; transform: none !important; }
+}
 
 /* ========== Print rules (conservative) ========== */
 @media print {
-:root { color-scheme: light; }
-body { background: #fff; color: #000; }
-#stickyMainHeader, thead th { position: static !important; top: auto !important; }
-td:first-child, thead th:first-child { position: static !important; left: auto !important; box-shadow: none !important; }
-.table-container { overflow: visible !important; }
-.copy-button-output, .copy-buttons, #tocBar, #tv-header { display: none !important; }
-table { page-break-inside: avoid; break-inside: avoid; }
+  :root { color-scheme: light; }
+  body { background: #fff; color: #000; }
+  #stickyMainHeader, thead th { position: static !important; top: auto !important; }
+  td:first-child, thead th:first-child { position: static !important; left: auto !important; box-shadow: none !important; }
+  .table-container { overflow: visible !important; }
+  .copy-button-output, .copy-buttons, #tocBar, #tv-header { display: none !important; }
+  table { page-break-inside: avoid; break-inside: avoid; }
 }
 
 /* ========== Optional/risky enhancements (commented) ==========
-Uncomment and test individually.
+   Uncomment and test individually.
 */
 
 /* Scrollbar styling (modern browsers) */
@@ -664,29 +668,90 @@ Uncomment and test individually.
 .table-container::-webkit-scrollbar-thumb, .copy-button-output pre::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 8px; }
 .table-container::-webkit-scrollbar-track, .copy-button-output pre::-webkit-scrollbar-track { background: transparent; }
 @supports (scrollbar-width: thin) {
-.table-container { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.08) transparent; }
+  .table-container { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.08) transparent; }
 }
 */
 
-/* Code-block header styling */
+/* Code-block header styling (optional) */
 /*
 .code-block { margin: 1em 0; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); background: var(--panel); }
 .code-block-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-block:8px; padding-inline:12px; background: linear-gradient(180deg, rgba(0,0,0,0.02), transparent); border-bottom: 1px solid rgba(0,0,0,0.04); font-size: 0.85rem; color: var(--muted); }
 */
 
-/* RTL logical properties alternative */
+/* RTL logical properties alternative (optional) */
 /*
 thead th:first-child{ position:sticky; inset-inline-start:0; z-index:5; background:var(--panel); top:var(--tv-header-min-height,48px); }
 td:first-child{ position:sticky; inset-inline-start:0; z-index:4; }
 */
 
-/* Extended print rules from v3 */
+/* Extended print rules from v3 (optional) */
 /*
 @media print {
-body { font-size: 16px; }
-thead { display: table-header-group; }
-tr { page-break-inside: avoid; }
-th, td { border: 1px solid #ccc !important; padding: 8px !important; }
-pre, code { white-space: pre-wrap !important; word-break: break-word !important; }
+  body { font-size: 16px; }
+  thead { display: table-header-group; }
+  tr { page-break-inside: avoid; }
+  th, td { border: 1px solid #ccc !important; padding: 8px !important; }
+  pre, code { white-space: pre-wrap !important; word-break: break-word !important; }
 }
 */
+
+/* ========== Inline-block opt-in + global toggle ==========
+   Usage:
+     - To make a single table inline: add class "inline-mode" to .table-container or .table-wrapper
+     - To make ALL tables inline (temporary global toggle), add class "inline-tables-enabled" to <body>.
+   The rules below are responsive: on narrow viewports inline display falls back to block/full width.
+*/
+.table-container.inline-mode,
+.table-wrapper.inline-mode .table-container,
+body.inline-tables-enabled .table-container {
+  display: inline-block !important;
+  vertical-align: top !important;
+  width: auto !important;
+  /* prefer half-width for side-by-side on wide screens; can be adjusted */
+  max-width: 48% !important;
+  overflow: visible !important;
+  box-shadow: none !important;
+  background: var(--panel) !important;
+  padding: 0.5rem !important;
+  margin: 0.5rem 0.75rem !important;
+  border-radius: 8px !important;
+}
+
+/* keep tables readable on mobile even when inline-mode is toggled */
+@media (max-width:900px) {
+  body.inline-tables-enabled .table-container,
+  .table-container.inline-mode,
+  .table-wrapper.inline-mode .table-container {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0.0 !important;
+    margin-right: 0.0 !important;
+    padding: 0 !important;
+  }
+}
+
+/* Ensure the sticky first-column and zebra colors still work when inline */
+.table-container.inline-mode table thead th:first-child,
+.table-wrapper.inline-mode table thead th:first-child,
+body.inline-tables-enabled .table-container table thead th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 6;
+  background: var(--panel) !important;
+}
+.table-container.inline-mode table tbody td:first-child,
+.table-wrapper.inline-mode table tbody td:first-child,
+body.inline-tables-enabled .table-container table tbody td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 4;
+  background-color: inherit !important;
+}
+
+/* Fine-tune: reduce max-width if many tables side-by-side would overflow container */
+@media (min-width:1200px) {
+  body.inline-tables-enabled .table-container { max-width: 44% !important; }
+}
+
+/* End of file */
