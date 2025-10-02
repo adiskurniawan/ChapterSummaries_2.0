@@ -1,6 +1,14 @@
-/* style.css — Enhanced (ChatGPT-like typography, safe tweaks)
-   Applied: 2025-10-01
-   Notes: minimal, additive changes for typography, accessibility, and small UX refinements.
+/* style.css — Merged (v2 base + safe v3 enhancements)
+   Applied: 2025-10-02
+   Revision: neutralize header-link hover/outline while keeping full feature set
+   Notes:
+     - v2 is stable base. Safe v3 features added: fluid font-size, motion vars,
+       button micro-interactions, high-contrast media.
+     - Header anchors are explicitly neutralized to remove any light-blue line
+       or browser highlight on hover/focus while preserving accessibility for
+       other interactive elements.
+     - Risky items (scrollbar styling, code-block header, RTL logical props,
+       extended print rules) remain commented at the bottom for controlled testing.
 */
 
 /* ========== Variables ========== */
@@ -29,6 +37,7 @@
 
   /* UI helpers */
   --focus-ring: rgba(37,99,235,0.18);
+  --focus-bg: rgba(37,99,235,0.04);
   --table-min-width: 420px;
 
   /* typography additions */
@@ -37,6 +46,22 @@
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Roboto Mono", "Courier New", monospace;
   --emoji-fonts: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla","EmojiSymbols";
   --accent: #2563eb;
+
+  /* motion & transitions */
+  --trans-duration: 150ms;
+  --easing: cubic-bezier(.2,.9,.2,1);
+}
+
+/* High contrast preference (additive) */
+@media (prefers-contrast: more) {
+  :root{
+    --border: #9aa7b2;
+    --button-bg: #ffffff;
+    --button-text: #000;
+    --toc-link: #003ea6;
+    --focus-ring: rgba(0,62,166,0.28);
+    --muted: rgba(0,0,0,0.6);
+  }
 }
 
 /* Dark theme variables */
@@ -81,22 +106,24 @@
 /* ========== Global normalization & base ========== */
 *, *::before, *::after { box-sizing: border-box; }
 
+/* fluid base size */
 html, body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
-  font-size: 15px; /* keep 15px for parity; switch to 16px if you want slightly larger UI */
-  font-weight: 400; /* explicit base weight */
-  line-height: 1.50; /* increased for ChatGPT-like rhythm */
+  font-size: clamp(15px, 0.9rem + 0.6vw, 16px);
+  font-weight: 400;
+  line-height: 1.50;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-variant-ligatures: common-ligatures;
   -webkit-text-size-adjust: 100%;
-  transition: background-color .12s ease, color .12s ease;
+  transition: background-color var(--trans-duration) var(--easing), color var(--trans-duration) var(--easing);
+  min-height: 100vh;
 }
-a { color: inherit; text-decoration: none; }
+a { color: inherit; text-decoration: none; transition: color var(--trans-duration) var(--easing), background var(--trans-duration) var(--easing); }
 
 /* Small helpers */
 img, video, svg { max-width: 100%; height: auto; display: block; }
@@ -114,8 +141,12 @@ button{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  transition: background-color .12s ease, box-shadow .12s ease, border-color .12s ease;
+  transition: transform var(--trans-duration) var(--easing), box-shadow var(--trans-duration) var(--easing), background-color var(--trans-duration) var(--easing), border-color var(--trans-duration) var(--easing);
+  will-change: transform;
 }
+button:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,0.04); }
+button:active { transform: scale(.99); box-shadow: 0 3px 8px rgba(0,0,0,0.06); }
+button:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; background: var(--focus-bg); border-radius: 6px; }
 
 /* ========== Table container & default table ========== */
 .table-container{
@@ -147,7 +178,6 @@ thead th, th {
   top:var(--tv-header-min-height,48px);
   z-index:3;
   cursor:default;
-  /* ensure anchored headings don't get hidden under sticky header */
   scroll-margin-top: calc(var(--tv-header-min-height,48px) + 8px);
 }
 tbody td, td{
@@ -169,7 +199,13 @@ tr:hover td{ background:var(--row-hover) }
 .current-row td{ background:var(--current-row)!important }
 
 /* Sticky first column */
-thead th:first-child{ position:sticky; left:0; z-index:4; background:var(--panel); top:var(--tv-header-min-height,48px); }
+thead th:first-child{
+  position:sticky;
+  left:0;
+  z-index:4;
+  background:var(--panel);
+  top:var(--tv-header-min-height,48px);
+}
 td:first-child{
   background:var(--panel);
   font-weight:inherit;
@@ -193,9 +229,11 @@ table td, table th { border-color: rgba(0,0,0,0.06); }
   border-radius:8px;
   font-size:12px;
   color:var(--muted);
+  transition: color var(--trans-duration) var(--easing), background var(--trans-duration) var(--easing);
 }
 .th-with-sort, thead th[role="button"], .sort-btn{ cursor:pointer }
-thead th[role="button"]:hover{ background:#eef6ff }
+/* avoid strong blue tint on hover; keep subtle panel background */
+thead th[role="button"]:hover{ background: rgba(0,0,0,0.02); }
 
 /* ========== Header sticky area ========== */
 #stickyMainHeader{
@@ -212,6 +250,7 @@ thead th[role="button"]:hover{ background:#eef6ff }
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+  transition: box-shadow var(--trans-duration) var(--easing), background var(--trans-duration) var(--easing);
 }
 #tv-header{
   display:flex;
@@ -225,6 +264,7 @@ thead th[role="button"]:hover{ background:#eef6ff }
 #tv-header > div:first-child{ flex: 0 0 auto; display:flex; align-items:center; gap:8px; }
 #tv-header > div:last-child{ display:flex; gap:6px; align-items:center; justify-content:flex-end; flex: 1 1 auto; flex-wrap:wrap; overflow:visible; }
 
+/* Header control sizes */
 #tv-header button, #tv-header .btn, #stickyMainHeader button {
   flex: 0 0 auto;
   padding: 4px 8px;
@@ -250,7 +290,11 @@ thead th[role="button"]:hover{ background:#eef6ff }
   font-size: 13px;
   border-radius: 6px;
   height: 34px;
+  border:1px solid var(--border);
+  background:var(--panel);
+  transition: box-shadow var(--trans-duration) var(--easing), border-color var(--trans-duration) var(--easing);
 }
+#tv-header input[type="search"]:focus, #tv-header input[type="text"]:focus { box-shadow: 0 6px 18px rgba(0,0,0,0.04); border-color: var(--accent); }
 
 /* TOC */
 #tocBar{ display:flex; align-items:center; gap:12px; width:100%; overflow-x:auto; padding:6px 4px; background:transparent; -webkit-overflow-scrolling:touch; }
@@ -297,6 +341,7 @@ thead th[role="button"]:hover{ background:#eef6ff }
 }
 #backToTop:hover{ opacity:.85 }
 
+/* Row count */
 .row-count{ font-size:13px; color:var(--muted); margin-top:6px; margin-left:6px }
 
 /* Lists in cells */
@@ -311,7 +356,6 @@ td ol > li { counter-increment: table-ol; }
 td ol > li::before { content: counter(table-ol) "."; color: var(--text); display: inline-block; width: 2.2ch; margin-left: -2.2ch; }
 
 /* ========== Code styling ========== */
-/* keep tabular numbers for better numeric alignment */
 code { background: var(--code-bg); padding: 2px 6px; border-radius: var(--code-radius); font-family: var(--font-mono); font-size: 0.92em; line-height: 1; color: inherit; font-variant-numeric: tabular-nums; }
 pre code { background: var(--code-bg); display: block; padding: 10px 14px; border-radius: calc(var(--code-radius)); overflow-x: auto; line-height: 1.45; font-size: 0.92em; white-space: pre; tab-size: 4; font-variant-numeric: tabular-nums; }
 td code{ background: var(--code-bg-alt); padding: 2px 6px; border-radius: 6px; font-family: var(--font-mono); font-size:.9em; line-height:1; font-variant-numeric: tabular-nums; }
@@ -325,10 +369,12 @@ pre { margin: 1em 0; padding: 0; background: transparent; }
 [data-theme="dark"] td > ul > li::before,
 [data-theme="dark"] td ol > li::before { color: var(--text); }
 
-/* ========== Accessibility focus ========== */
+/* ========== Accessibility focus enhancements ========== */
 :focus-visible, a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
+  background: var(--focus-bg);
+  border-radius: 8px;
 }
 a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
 
@@ -360,7 +406,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 .copy-buttons button.copy-btn, .copy-btn { background: var(--button-bg); color: var(--button-text); border: 1px solid var(--border); padding: 6px 10px; border-radius: 6px; font-size:13px; display:inline-flex; align-items:center; gap:8px; }
 .copy-button-output pre, .copy-button-table pre { margin: 0; border: 1px solid rgba(0,0,0,0.06); background: var(--panel); padding: 8px 10px; border-radius: 8px; overflow-x: auto; font-family: var(--font-mono); font-size: 0.92em; line-height: 1.45; }
 .copy-button-output { padding: 8px; border-radius: 8px; background: rgba(0,0,0,0.01); border: 1px dashed rgba(0,0,0,0.03); }
-.copy-button-output:focus-within, .copy-button-output:hover { box-shadow: 0 4px 14px rgba(37,99,235,0.06); border-color: rgba(37,99,235,0.12); }
+.copy-button-output:focus-within, .copy-button-output:hover { box-shadow: 0 8px 24px rgba(37,99,235,0.06); border-color: rgba(37,99,235,0.12); }
 
 /* Inline toggle button */
 .table-controls .table-toggle-inline {
@@ -381,10 +427,10 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+  * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; transform: none !important; }
 }
 
-/* Print rules */
+/* Print rules (conservative) */
 @media print {
   :root { color-scheme: light; }
   body { background: #fff; color: #000; }
@@ -394,9 +440,6 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   .copy-button-output, .copy-buttons, #tocBar, #tv-header { display: none !important; }
   table { page-break-inside: avoid; break-inside: avoid; }
 }
-
-/* Guard for tiny screens */
-@media (max-width:360px){ :root{ --table-min-width: 320px; } }
 
 /* ========== ChatGPT-like typography enhancements ========== */
 
@@ -474,12 +517,33 @@ sub { vertical-align: sub; }
 /* small / footnotes */
 .small, .footnote { font-size: .85em; color: var(--muted); }
 
-/* links — stronger affordance */
-.markdown a, a {
-  color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+/* links — stronger affordance for content */
+a { color: var(--accent); text-decoration: none; transition: color var(--trans-duration) var(--easing), background var(--trans-duration) var(--easing); }
+.markdown a, .content a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.markdown a:hover, .content a:hover { text-decoration: underline; }
+
+/* === Header-link neutralization ===
+   Prevent any underline/outline/box-shadow/background or native tap highlight
+   for anchor elements inside table headers. This is scoped and explicit.
+*/
+thead th a, thead th a:link, thead th a:visited,
+thead th a:hover, thead th a:focus, thead th a:active,
+th a, th a:link, th a:visited, th a:hover, th a:focus, th a:active {
+  color: inherit !important;
+  text-decoration: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  -webkit-tap-highlight-color: transparent !important;
 }
+
+/* Prevent header cell hover background change that may look like a line */
+thead th:hover, th:hover { background: var(--panel) !important; }
+
+/* Keep header anchor color readable without hover tint */
+thead th a, th a { color: inherit !important; }
+
+/* Focus affordance preserved for non-header anchors and other controls */
 .markdown a:focus, a:focus {
   outline: 3px solid var(--focus-ring);
   border-radius: 6px;
@@ -516,3 +580,71 @@ sub { vertical-align: sub; }
 
 /* ========== Final guard rules ========== */
 a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+
+/* End of merged core rules */
+
+/* ========== Optional/risky enhancements (commented) ==========
+
+   Uncomment and test individually.
+
+*/
+
+/* Scrollbar styling (modern browsers) */
+/*
+.table-container::-webkit-scrollbar, .copy-button-output pre::-webkit-scrollbar { height: 10px; width: 8px; }
+.table-container::-webkit-scrollbar-thumb, .copy-button-output pre::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 8px; }
+.table-container::-webkit-scrollbar-track, .copy-button-output pre::-webkit-scrollbar-track { background: transparent; }
+@supports (scrollbar-width: thin) {
+  .table-container { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.08) transparent; }
+}
+*/
+
+/* Code-block header styling (filename / actions) */
+/*
+.code-block {
+  margin: 1em 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--panel);
+}
+.code-block-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding-block:8px;
+  padding-inline:12px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.02), transparent);
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+*/
+
+/* RTL logical properties alternative to left/inline handling */
+/*
+thead th:first-child{
+  position:sticky;
+  inset-inline-start:0;
+  z-index:5;
+  background:var(--panel);
+  top:var(--tv-header-min-height,48px);
+}
+td:first-child{
+  position:sticky;
+  inset-inline-start:0;
+  z-index:4;
+}
+*/
+
+/* Extended print rules from v3 */
+/*
+@media print {
+  body { font-size: 16px; }
+  thead { display: table-header-group; }
+  tr { page-break-inside: avoid; }
+  th, td { border: 1px solid #ccc !important; padding: 8px !important; }
+  pre, code { white-space: pre-wrap !important; word-break: break-word !important; }
+}
+*/
