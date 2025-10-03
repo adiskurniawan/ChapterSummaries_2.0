@@ -648,3 +648,121 @@ td:first-child{
   pre, code { white-space: pre-wrap !important; word-break: break-word !important; }
 }
 */
+
+/* ---------- TOPIC HEADING BAR: HORIZONTAL SINGLE ROW (corrected) ---------- */
+
+/*
+  This block ensures Topic headings (Topic 1, Topic 2, ...) remain on
+  one horizontal row and behave like the Table 1/Table 2 TOC items
+  on mobile. It uses nowrap flex with horizontal scroll and subtle
+  fade edges that adapt to light/dark backgrounds.
+*/
+
+.table-heading-bar {
+  display: flex;
+  flex-wrap: nowrap;            /* keep all topics on a single row */
+  gap: 8px;
+  margin-bottom: 6px;
+  align-items: center;
+  overflow-x: auto;             /* allow horizontal scroll when needed */
+  -webkit-overflow-scrolling: touch;
+  position: relative;           /* for absolute pseudo-elements */
+  padding: 6px 12px;            /* space for fade edges and touch targets */
+  margin-left: -12px;           /* visually align with other page paddings */
+  margin-right: -12px;
+  overscroll-behavior-x: contain;
+  white-space: nowrap;          /* prevent wrapping of inline text */
+}
+
+/* Fade edges implemented with absolutely-positioned pseudo-elements
+   so they sit above the scrolling content but do not block pointer events. */
+.table-heading-bar::before,
+.table-heading-bar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 28px;
+  pointer-events: none;
+  z-index: 12;
+}
+
+/* Left fade (from background to transparent to reveal scrollable content) */
+.table-heading-bar::before {
+  left: 0;
+  background: linear-gradient(to right, var(--bg) 0%, rgba(0,0,0,0) 100%);
+}
+
+/* Right fade */
+.table-heading-bar::after {
+  right: 0;
+  background: linear-gradient(to left, var(--bg) 0%, rgba(0,0,0,0) 100%);
+}
+
+/* Dark theme: use same variable-based approach; var(--bg) will be dark */
+[data-theme="dark"] .table-heading-bar::before,
+[data-theme="dark"] .table-heading-bar::after {
+  /* keeps consistent fade using the background variable */
+  background: linear-gradient(to right, var(--bg) 0%, rgba(0,0,0,0) 100%);
+}
+
+/* Individual topic headings */
+.table-heading {
+  flex: 0 0 auto;              /* do not shrink, maintain intrinsic width */
+  display: inline-block;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 6px 10px;
+  background: var(--panel);
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.18s ease, color 0.18s ease, transform 120ms var(--easing);
+  min-height: 36px;
+  line-height: 1;
+  white-space: nowrap;         /* preserve label on single line */
+}
+.table-heading:active { transform: translateY(1px); }
+.table-heading:hover {
+  background: var(--toc-link-hover-bg);
+  color: var(--toc-link-hover-color);
+}
+
+/* Make sure the topic headings are keyboard accessible focus-wise */
+.table-heading:focus {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 6px;
+  background: var(--focus-bg);
+}
+
+/* Mobile adjustments: slightly smaller paddings but still one row */
+@media (max-width:600px){
+  .table-heading-bar {
+    gap: 6px;
+    padding: 6px 8px;
+    margin-left: -8px;
+    margin-right: -8px;
+  }
+  .table-heading {
+    font-size: 0.88rem;
+    padding: 4px 8px;
+    min-height: 34px;
+  }
+}
+
+/* Extremely narrow (phones) — keep everything scrollable horizontally */
+@media (max-width:420px) {
+  .table-heading-bar { padding: 6px 6px; gap: 6px; }
+  .table-heading { padding: 4px 7px; font-size: 0.85rem; min-height: 32px; }
+}
+
+/* If you prefer visible left/right chevrons for scroll affordance,
+   add small buttons with absolute position left/right inside .table-heading-bar.
+   They must be on a higher z-index than ::before/::after and have pointer-events enabled. */
+
+/* ========== Final guard rules ========== */
+a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+
+/* End of file */

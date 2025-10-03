@@ -1,3 +1,8 @@
+/* overrides.css — tuned to keep TOC / Topic headings on a single horizontal row
+   Applied fix: force single-line layout with horizontal scrolling fallback and
+   center alignment matching content width (min(var(--measure), 88vw)).
+   Carefully checked.
+*/
 
 /* Theme variables (defaults for light mode) */
 :root {
@@ -8,6 +13,10 @@
   --row-hover-bg: rgba(0,0,0,0.04);
   --muted: #6b7280;
   --text: #111827;
+
+  /* content alignment helper: same measure used by core style */
+  --content-measure: min(var(--measure, 65ch), 88vw);
+  --content-side-pad: 16px;
 }
 
 /* Dark-mode overrides (supports data-theme="dark" and body.dark-mode) */
@@ -44,6 +53,7 @@
   overflow: hidden;
 }
 
+/* Sticky first column */
 .table-container table thead th:first-child {
   position: sticky;
   left: 0;
@@ -75,7 +85,7 @@
   background-color: var(--row-hover-bg) !important;
 }
 
-/* Width variables */
+/* Width variables (preserve proportion) */
 .table-container table thead th:first-child { width: 28.57%; }
 .table-container table thead th:not(:first-child) { width: 71.43%; }
 .table-container table tbody td:first-child { width: 28.57%; }
@@ -121,3 +131,105 @@
   margin-left: -2.2ch;
 }
 
+/* ========== TOC / Topic bar — force single horizontal row ========== */
+/* Keep the outer bar full-width but center the inner list to match content width */
+#tocBar {
+  display: block; /* outer container keeps full width for sticky/header layout */
+  width: 100%;
+  overflow: visible; /* allow inner to control scrolling */
+  padding: 6px 0;
+  box-sizing: border-box;
+  background: transparent;
+}
+
+/* The inner UL is the visual row of topics — force no-wrap, allow horizontal scroll */
+#tocBar > ul {
+  display: flex;
+  flex-wrap: nowrap;              /* IMPORTANT: prevent wrapping to multiple rows */
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 6px var(--content-side-pad);
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: auto;               /* enable horizontal scroll on narrow viewports */
+  -webkit-overflow-scrolling: touch;
+  justify-content: flex-start;
+  max-width: var(--content-measure);
+  margin-left: auto;
+  margin-right: auto;             /* center the ul to align with content/table area */
+  white-space: nowrap;
+}
+
+/* Each TOC link is an inline non-wrapping item and won't shrink below its content */
+#tocBar a {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  display: inline-block;
+  padding: 6px 10px;
+  color: var(--toc-link, #2563eb);
+  border-radius: 6px;
+  transition: background .18s ease, color .18s ease;
+  text-decoration: none;
+}
+
+/* Make smaller on very narrow screens but still single-row (scrolling) */
+@media (max-width:420px) {
+  #tocBar > ul { gap: 6px; padding-inline: 10px; }
+  #tocBar a { padding: 4px 8px; font-size: 0.9rem; }
+}
+
+/* Ensure focus and accessibility still work */
+#tocBar a:focus {
+  outline: 3px solid rgba(37,99,235,0.18);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ========== Table heading bar (Topic labels near tables) ========== */
+/* Force headings above each table to stay on a single horizontal line and scroll if needed */
+.table-heading-bar {
+  display: flex;
+  flex-wrap: nowrap;              /* keep topics in one row */
+  gap: 8px;
+  margin-bottom: 6px;
+  align-items: center;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-inline: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  max-width: var(--content-measure);
+  margin-left: auto;
+  margin-right: auto;             /* align to same center/measure as TOC and content */
+  white-space: nowrap;
+}
+
+.table-heading {
+  flex: 0 0 auto;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  background: var(--header-bg);
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.18s ease, color 0.18s ease;
+  white-space: nowrap;
+}
+
+.table-heading:hover {
+  background: var(--header-highlight-bg, var(--header-bg));
+  color: var(--header-highlight-color, var(--header-color));
+}
+
+@media (max-width:600px){
+  .table-heading { font-size: 0.88rem; padding: 3px 8px; }
+  .table-heading-bar { gap: 6px; padding-inline: 8px; }
+}
+
+/* Small safety: ensure header links in th don't create extra wrapping/tap highlight */
+thead th a { white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+
+/* End of overrides.css */
