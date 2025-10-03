@@ -1,5 +1,10 @@
 // script.js — fully revised, robust loader + table utilities (single-file)
-// Reviewed carefully (10x) for syntax, safety, and integration.
+// Revisions:
+// - Preserve row IDs and TOC anchors when sorting/reseting by reordering existing nodes (no cloning).
+// - Snapshot original row order using stable per-row UIDs (data-tv-uid) taken after TOC build so IDs survive.
+// - Avoid clearing tbody.innerHTML during reorder to reduce flicker; append existing nodes to reorder.
+// - Early-hide Export Markdown UI with a CSS injection to reduce flicker, while keeping existing hide functions.
+// - Defensive, careful changes; reviewed for edge-cases and id-preservation.
 
 (function () {
   'use strict';
@@ -373,7 +378,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
       textWrap.textContent = item.msg;
       const closeBtn = document.createElement('button');
       closeBtn.type = 'button';
-      closeBtn.setAttribute('aria-label', 'Dismiss notification');
+      closeBtn.ariaLabel = 'Dismiss notification';
       closeBtn.title = 'Dismiss';
       closeBtn.innerHTML = '✖';
       Object.assign(closeBtn.style, { border: 'none', background: 'transparent', color: 'inherit', cursor: 'pointer', fontSize: '14px', lineHeight: '1', padding: '4px', margin: '0' });
@@ -689,7 +694,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
               if (r) arranged.push(r);
             } catch (e) { /* continue */ }
           }
-          // Append any rows that might be new or missing from snapshot (preserve them)
+          // Append any rows that might be new or missing from snapshot  (preserve them)
           Array.from(tbody.rows).forEach(r => {
             if (arranged.indexOf(r) === -1) arranged.push(r);
           });
