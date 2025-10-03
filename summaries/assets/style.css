@@ -648,3 +648,31 @@ td:first-child{
   pre, code { white-space: pre-wrap !important; word-break: break-word !important; }
 }
 */
+/* ================= Table headings integration ================= */
+
+/* Wrap each table with heading alignment */
+.table-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;          /* spacing between heading and table */
+  margin-bottom: 18px;
+}
+
+/* Headings above tables */
+.table-heading {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.28;
+  scroll-margin-top: calc(var(--tv-header-min-height,48px) + 8px);
+}
+
+/* Mobile-specific tweaks */
+@media (max-width: 600px) {
+  .table-wrapper {
+    gap: 4px;
+  }
+  .table-heading {
+    font-size: 0.95rem;
+  }
+}
