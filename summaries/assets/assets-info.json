@@ -1,0 +1,34 @@
+{
+  "generated": 1759584095,
+  "assets_written": true,
+  "files": {
+    "assets-info.json": {
+      "size": 630,
+      "mtime": 1759584095
+    },
+    "extra.js": {
+      "size": 44019,
+      "mtime": 1759556049
+    },
+    "overrides.css": {
+      "size": 5957,
+      "mtime": 1759584095
+    },
+    "script.js": {
+      "size": 79824,
+      "mtime": 1759557027
+    },
+    "style.css": {
+      "size": 27809,
+      "mtime": 1759508453
+    },
+    "worker.js": {
+      "size": 9009,
+      "mtime": 1758331710
+    },
+    "xlsx.full.min.js": {
+      "size": 951904,
+      "mtime": 1758605028
+    }
+  }
+}
