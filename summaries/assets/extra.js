@@ -363,7 +363,7 @@
     function initWorkerWithIndex(idx) {
       if (!window.Worker) return false;
       try {
-        if (localWorker) try { localWorker.terminate(); } catch (_) { }
+        if (localWorker) try { localWorker.terminate(); } catch (_) {}
         const w = new Worker(WORKER_URL);
         attachWorker(w);
         w.postMessage({ type: 'index', index: idx });
@@ -748,7 +748,7 @@
         if (!d) return;
         // d should contain results, qid, q, partial flags if worker supports streaming
         deliverResultsEnhanced(d.results || [], { q: d.q, qid: d.qid, partial: !!d.partial });
-      } catch (err) { log2('tv:search:worker handler failed', err); }
+      } catch (err) { log2('tv:search-worker handler failed', err); }
     });
 
     // advanced query implementation (overrides base search)
@@ -834,7 +834,7 @@
         s.id = 'tv-search-adv-style';
         s.textContent = '.tv-result{padding:6px 8px;border-bottom:1px solid rgba(0,0,0,0.04)} .tv-summary{font-weight:600} .tv-hl{background:yellow;color:inherit}';
         (document.head || document.documentElement).appendChild(s);
-      } catch (_) { }
+      } catch (_) {}
     })();
 
     // wire UI and warm-up
@@ -856,5 +856,122 @@
     })();
 
   })();
+
+})();
+
+
+// =======================
+// Client-side Topic patch
+// Replaces "Table N" -> "Topic N" at runtime when exactly one table/TOC item exists.
+// Safe, reversible, minimal DOM changes.
+// Append this after the existing extra.js contents.
+// =======================
+(function(){
+  'use strict';
+
+  function replaceTextPreserveChildren(el, re, repl) {
+    if (!el) return false;
+    try {
+      for (const child of Array.from(el.childNodes)) {
+        if (child.nodeType === 3) { // text node
+          if (re.test(child.nodeValue || '')) {
+            child.nodeValue = child.nodeValue.replace(re, repl);
+            return true;
+          }
+        } else if (child.nodeType === 1) { // element
+          const txt = child.textContent || '';
+          if (re.test(txt) && child.childNodes.length === 1 && child.firstChild && child.firstChild.nodeType === 3) {
+            child.firstChild.nodeValue = child.firstChild.nodeValue.replace(re, repl);
+            return true;
+          }
+        }
+      }
+      // fallback: replace whole textContent (last resort)
+      const all = el.textContent || '';
+      if (re.test(all)) {
+        el.textContent = all.replace(re, repl);
+        return true;
+      }
+    } catch (e) { /* silent */ }
+    return false;
+  }
+
+  function findTocAnchors() {
+    const anchors = new Set();
+    const reLabel = /^\s*Table\s*\d+\b/i;
+    // prefer obvious TOC containers
+    const containers = Array.from(document.querySelectorAll('nav, .toc, .table-of-contents, #toc, .toc-list, .tv-toc, .tables-toc, aside'));
+    for (const c of containers) {
+      try {
+        Array.from(c.querySelectorAll('a')).forEach(a => {
+          if (reLabel.test((a.textContent||'').trim())) anchors.add(a);
+        });
+      } catch (_) {}
+    }
+    // fallback: anchors that point to table-like targets
+    if (anchors.size === 0) {
+      Array.from(document.querySelectorAll('a[href^="#"]')).forEach(a => {
+        const txt = (a.textContent||'').trim();
+        if (!reLabel.test(txt)) return;
+        const href = a.getAttribute('href');
+        try {
+          const target = href && href.startsWith('#') ? document.querySelector(href) : null;
+          if (target && (target.classList.contains('table-wrapper') || target.querySelector && target.querySelector('table'))) anchors.add(a);
+          else {
+            const id = href && href.slice(1);
+            if (id && /table|tbl|topic|toc|chapter/i.test(id)) anchors.add(a);
+          }
+        } catch (_) {}
+      });
+    }
+    return Array.from(anchors);
+  }
+
+  function replaceTableWithTopicIfSingle() {
+    try {
+      const tocLinks = findTocAnchors();
+      const tableWrappers = Array.from(document.querySelectorAll('.table-wrapper, .tables, table'));
+      if (!(tocLinks.length === 1 || tableWrappers.length === 1)) return;
+      const a = tocLinks[0] || null;
+      // if no anchor found but exactly one table wrapper, try to find that table's heading
+      if (a) {
+        replaceTextPreserveChildren(a, /\bTable\b/i, 'Topic');
+        const aria = a.getAttribute && a.getAttribute('aria-label');
+        if (aria && /\bTable\b/i.test(aria)) a.setAttribute('aria-label', aria.replace(/\bTable\b/i,'Topic'));
+        const href = a.getAttribute && a.getAttribute('href');
+        if (href && href.startsWith('#')) {
+          const tgt = document.querySelector(href);
+          if (tgt) {
+            const heading = tgt.querySelector('h1,h2,h3,h4,.table-title,.table-header') || tgt;
+            replaceTextPreserveChildren(heading, /\bTable\b/i, 'Topic');
+            const dt = heading.getAttribute && heading.getAttribute('data-title');
+            if (dt && /\bTable\b/i.test(dt)) heading.setAttribute('data-title', dt.replace(/\bTable\b/i,'Topic'));
+          }
+        }
+      } else if (tableWrappers.length === 1) {
+        const wrapper = tableWrappers[0];
+        const heading = wrapper.querySelector('h1,h2,h3,h4,.table-title,.table-header') || wrapper;
+        replaceTextPreserveChildren(heading, /\bTable\b/i, 'Topic');
+      }
+    } catch (e) { /* silent */ }
+  }
+
+  function initReplace() {
+    replaceTableWithTopicIfSingle();
+    try {
+      const mo = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+          if (m.addedNodes && m.addedNodes.length) { replaceTableWithTopicIfSingle(); return; }
+          if (m.type === 'attributes' && (m.attributeName === 'class' || m.attributeName === 'aria-label' || m.attributeName === 'data-title')) { replaceTableWithTopicIfSingle(); return; }
+        }
+      });
+      mo.observe(document.body || document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['class','aria-label','data-title'] });
+      // also re-run on viewport changes
+      window.addEventListener('resize', function(){ try { replaceTableWithTopicIfSingle(); } catch(_){} }, { passive: true });
+    } catch (_) {}
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initReplace);
+  else initReplace();
 
 })();
