@@ -1716,3 +1716,152 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
   } catch (e) { /* silent */ }
 
 })();
+
+/* =========================
+   Append: extra.js loader + topic fallback
+   Safe, idempotent bootstrap to ensure Topic labels in single-table mobile TOC
+   ========================= */
+(function(){
+  'use strict';
+
+  if (window.__tv_extra_loader_patched) return;
+  window.__tv_extra_loader_patched = true;
+
+  function detectScriptBase() {
+    try {
+      const sel = document.querySelector('script[src*="script.js"], script[src*="/assets/script.js"]');
+      if (sel && sel.src) return sel.src.replace(/script\.js(\?.*)?$/, '');
+      const sAll = document.getElementsByTagName('script');
+      for (let i = sAll.length - 1; i >= 0; i--) {
+        const src = sAll[i].src || '';
+        if (src.indexOf('/assets/') !== -1 && src.indexOf('script') !== -1) return src.replace(/script\.js(\?.*)?$/, '');
+      }
+    } catch (e) { }
+    try { return location.origin + (location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1) || '/'); } catch (e) { return './'; }
+  }
+
+  const BASE = detectScriptBase();
+  const CANDIDATES = [
+    BASE + 'extra.js',
+    BASE + 'assets/extra.js',
+    (location.origin || '') + '/assets/extra.js',
+    './assets/extra.js',
+    './extra.js'
+  ];
+
+  function loadScriptOnce(src, onload, onerror) {
+    try {
+      const exist = Array.from(document.getElementsByTagName('script')).some(s => (s.src||'').indexOf(src) !== -1);
+      if (exist) { if (typeof onload === 'function') onload(); return; }
+      const s = document.createElement('script');
+      s.src = src;
+      s.async = true;
+      s.onload = function() { try{ if (typeof onload === 'function') onload(); } catch(e){} };
+      s.onerror = function(e) { try{ if (typeof onerror === 'function') onerror(e); } catch(_){} };
+      (document.head || document.documentElement).appendChild(s);
+    } catch (e) {
+      if (typeof onerror === 'function') onerror(e);
+    }
+  }
+
+  function attemptLoadExtra(cands, cb) {
+    if (!cands || !cands.length) { if (cb) cb(false); return; }
+    const src = cands.shift();
+    loadScriptOnce(src, function(){ if (cb) cb(true, src); }, function(){ attemptLoadExtra(cands, cb); });
+  }
+
+  function minimalTopicFallback() {
+    try {
+      const reLabel = /^\s*Table\s*\d+\b/i;
+      let anchors = [];
+      const containers = Array.from(document.querySelectorAll('nav, .toc, .table-of-contents, #toc, .toc-list, .tv-toc, .tables-toc, aside'));
+      for (const c of containers) {
+        try {
+          anchors = anchors.concat(Array.from(c.querySelectorAll('a')).filter(a => reLabel.test((a.textContent||'').trim())));
+        } catch(e){}
+      }
+      if (anchors.length === 0) {
+        anchors = Array.from(document.querySelectorAll('a[href^="#"]')).filter(a => reLabel.test((a.textContent||'').trim()));
+      }
+      const tableWrappers = Array.from(document.querySelectorAll('.table-wrapper, .tables, table'));
+      if (!(anchors.length === 1 || tableWrappers.length === 1)) return;
+
+      const replaceNodeText = (el, re, repl) => {
+        if (!el) return false;
+        for (const child of Array.from(el.childNodes)) {
+          if (child.nodeType === 3) {
+            if (re.test(child.nodeValue||'')) {
+              child.nodeValue = child.nodeValue.replace(re, repl);
+              return true;
+            }
+          } else if (child.nodeType === 1 && child.childNodes.length === 1 && child.firstChild.nodeType === 3) {
+            if (re.test(child.firstChild.nodeValue||'')) {
+              child.firstChild.nodeValue = child.firstChild.nodeValue.replace(re, repl);
+              return true;
+            }
+          }
+        }
+        const all = el.textContent || '';
+        if (re.test(all)) {
+          el.textContent = all.replace(re, repl);
+          return true;
+        }
+        return false;
+      };
+
+      const a = anchors.length === 1 ? anchors[0] : null;
+      if (a) {
+        replaceNodeText(a, /\bTable\b/i, 'Topic');
+        const aria = a.getAttribute && a.getAttribute('aria-label');
+        if (aria && /\bTable\b/i.test(aria)) a.setAttribute('aria-label', aria.replace(/\bTable\b/i,'Topic'));
+        const href = a.getAttribute && a.getAttribute('href');
+        if (href && href.startsWith('#')) {
+          const tgt = document.querySelector(href);
+          if (tgt) {
+            const heading = tgt.querySelector('h1,h2,h3,h4,.table-title,.table-header') || tgt;
+            replaceNodeText(heading, /\bTable\b/i, 'Topic');
+            const dt = heading.getAttribute && heading.getAttribute('data-title');
+            if (dt && /\bTable\b/i.test(dt)) heading.setAttribute('data-title', dt.replace(/\bTable\b/i,'Topic'));
+          }
+        }
+      } else if (tableWrappers.length === 1) {
+        const wrapper = tableWrappers[0];
+        const heading = wrapper.querySelector('h1,h2,h3,h4,.table-title,.table-header') || wrapper;
+        replaceNodeText(heading, /\bTable\b/i, 'Topic');
+      }
+    } catch (e) { /* silent */ }
+  }
+
+  function __tv_patch_diag() {
+    return {
+      loadedExtraScript: !!document.querySelector('script[src*="extra.js"]'),
+      topicPatchFlag: !!window.__tv_topic_patch_loaded,
+      anchorsFound: Array.from(document.querySelectorAll('a')).filter(a=>/\bTable\s*\d+\b/i.test((a.textContent||'').trim())).slice(0,10).map(a=> (a.textContent||'').trim())
+    };
+  }
+  window.__tv_patch_diag = __tv_patch_diag;
+
+  if (window.__tv_no_auto_extra_load) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(minimalTopicFallback, 80); });
+    else setTimeout(minimalTopicFallback, 80);
+    return;
+  }
+
+  attemptLoadExtra(CANDIDATES.slice(), function(success, src){
+    setTimeout(function(){
+      if (window.__tv_topic_patch_loaded) {
+        return;
+      }
+      minimalTopicFallback();
+    }, 300);
+  });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(function(){ if (!window.__tv_topic_patch_loaded) minimalTopicFallback(); }, 120); });
+  } else {
+    setTimeout(function(){ if (!window.__tv_topic_patch_loaded) minimalTopicFallback(); }, 120);
+  }
+
+  window.__tv_trigger_topic_fallback = function(){ minimalTopicFallback(); };
+
+})();
