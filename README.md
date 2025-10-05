@@ -10,5 +10,4 @@ https://tinyurl.com/53dwxbf2
 
 On one hand, you introduce key details and direct ChatGPT. On the other hand, overloading the prompt with too much data or excessively technical details can confuse the model and result in irrelevant responses. So the art in effective prompting lies in providing just enough data to inform and guide ChatGPT’s response without overshadowing your main question or request.
 
-𝗣𝗿𝗼𝗷𝗲𝗰𝘁 𝗙𝗼𝗹𝗱𝗲𝗿𝘀: https://tinyurl.com/kum9h6dj
-𝗦𝗮𝗺𝗽𝗹𝗲 𝗥𝗲𝘀𝘂𝗹𝘁: https://youtu.be/vByPAsVVNwc
+𝗣𝗿𝗼𝗷𝗲𝗰𝘁 𝗙𝗼𝗹𝗱𝗲𝗿𝘀: https://tinyurl.com/kum9h6dj | 𝗦𝗮𝗺𝗽𝗹𝗲 𝗥𝗲𝘀𝘂𝗹𝘁: https://youtu.be/vByPAsVVNwc
