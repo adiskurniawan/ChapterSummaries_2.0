@@ -965,3 +965,33 @@ Uncomment and test individually.
 a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
 
 /* End of file */
+
+/* --- 2025-10-07 Mobile fix: keep table buttons inline --- */
+@media (max-width: 600px) {
+  .table-controls {
+    display: flex;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .table-controls a,
+  .table-controls button,
+  .table-controls summary,
+  .table-controls .toggle-table-btn,
+  .table-controls .table-toggle-inline {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  /* Slight scroll padding for nicer UX */
+  .table-controls::-webkit-scrollbar {
+    height: 6px;
+  }
+  .table-controls::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+  }
+}
