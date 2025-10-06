@@ -1,8 +1,7 @@
 /* style.css — Merged (v2 base + safe v3 enhancements)
-Applied: 2025-10-05
+Applied: 2025-10-05 (REVISED: Topic-heading single-row robust override)
 Revision: added caption fallback, column-type rules, export-button styling,
 print polish, gradient fix, minor focus consolidation.
-Checked 10×.
 */
 
 /* ========== Variables ========== */
@@ -732,46 +731,59 @@ pre, code { white-space: pre-wrap !important; word-break: break-word !important;
 }
 */
 
-/* ---------- TOPIC HEADING BAR: HORIZONTAL SINGLE ROW (conflict-resistant) ---------- */
+/* ---------- TOPIC HEADING BAR: HORIZONTAL SINGLE ROW (final robust override) ---------- */
 
 /*
-This block enforces single-row horizontal topic headings with high specificity
-and limited use of !important only where necessary to defeat aggressive third-party CSS.
-It targets the typical markup used by the renderer: h3.table-heading, a.table-heading,
-and elements with class .table-heading inside the .table-heading-bar container.
+This block enforces a single horizontal row of topic headings (Topic 1, Topic 2, etc.)
+across breakpoints, even when third-party styles try to make children block-level or full-width.
+Key behaviors:
+
+keep items on one line (flex-wrap: nowrap)
+
+allow horizontal scrolling when content overflows
+
+ensure children remain inline-flex / non-growing
+
+strong specificity + !important to defeat conflicting frameworks
 */
 
-/* Primary container: highest reasonable specificity /
-#tables-viewer .table-heading-bar,
+/* Container (covers common DOM placements and alternative classnames) /
 #mainContent .table-heading-bar,
 .content .table-heading-bar,
-.table-heading-bar {
+.table-heading-bar,
+#mainContent .topic-heading-bar,
+.content .topic-heading-bar,
+.topic-heading-bar {
 display: flex !important;
-flex-wrap: nowrap !important; / keep topics on a single horizontal line /
--webkit-flex-wrap: nowrap !important;
-gap: 8px;
-margin-bottom: 6px;
-align-items: center;
+flex-wrap: nowrap !important; / keep all topics on a single row /
+gap: 8px !important;
+margin-bottom: 6px !important;
+align-items: center !important;
 overflow-x: auto !important; / allow horizontal scroll when needed /
--webkit-overflow-scrolling: touch;
-position: relative; / for absolute pseudo-elements /
-padding: 6px 12px; / space for fade edges and touch targets /
-margin-left: -12px; / visually align with page padding /
-margin-right: -12px;
-overscroll-behavior-x: contain;
-white-space: nowrap !important; / prevent wrapping inside items */
--webkit-user-select: none;
+-webkit-overflow-scrolling: touch !important;
+position: relative !important; / for absolute pseudo-elements /
+padding: 6px 12px !important; / space for fade edges and touch targets /
+margin-left: -12px !important; / visually align with other page paddings /
+margin-right: -12px !important;
+overscroll-behavior-x: contain !important;
+white-space: nowrap !important; / prevent wrapping of inline text /
+touch-action: pan-x !important; / prefer horizontal pan for touch */
+box-sizing: border-box !important;
 }
 
-/* fade edges for scroll affordance */
-#tables-viewer .table-heading-bar::before,
+/* Fade pseudo-elements sit above the scrollable content and do not block pointer events */
 #mainContent .table-heading-bar::before,
 .content .table-heading-bar::before,
 .table-heading-bar::before,
-#tables-viewer .table-heading-bar::after,
 #mainContent .table-heading-bar::after,
 .content .table-heading-bar::after,
-.table-heading-bar::after {
+.table-heading-bar::after,
+#mainContent .topic-heading-bar::before,
+.content .topic-heading-bar::before,
+.topic-heading-bar::before,
+#mainContent .topic-heading-bar::after,
+.content .topic-heading-bar::after,
+.topic-heading-bar::after {
 content: "";
 position: absolute;
 top: 0;
@@ -781,150 +793,160 @@ pointer-events: none;
 z-index: 12;
 }
 
-/* left fade */
-#tables-viewer .table-heading-bar::before,
+/* Left and right fade backgrounds (variable-aware for dark mode) */
 #mainContent .table-heading-bar::before,
 .content .table-heading-bar::before,
-.table-heading-bar::before {
+.table-heading-bar::before,
+#mainContent .topic-heading-bar::before,
+.content .topic-heading-bar::before,
+.topic-heading-bar::before {
 left: 0;
 background: linear-gradient(to right, var(--bg) 0%, rgba(0,0,0,0) 100%);
 }
-
-/* right fade */
-#tables-viewer .table-heading-bar::after,
 #mainContent .table-heading-bar::after,
 .content .table-heading-bar::after,
-.table-heading-bar::after {
+.table-heading-bar::after,
+#mainContent .topic-heading-bar::after,
+.content .topic-heading-bar::after,
+.topic-heading-bar::after {
 right: 0;
 background: linear-gradient(to left, var(--bg) 0%, rgba(0,0,0,0) 100%);
 }
 
-/* dark theme fade adapt */
-[data-theme="dark"] #tables-viewer .table-heading-bar::before,
+/* Dark theme: keep using var(--bg) so fades match theme */
 [data-theme="dark"] #mainContent .table-heading-bar::before,
 [data-theme="dark"] .content .table-heading-bar::before,
-[data-theme="dark"] .table-heading-bar::before {
+[data-theme="dark"] .table-heading-bar::before,
+[data-theme="dark"] #mainContent .topic-heading-bar::before,
+[data-theme="dark"] .content .topic-heading-bar::before,
+[data-theme="dark"] .topic-heading-bar::before {
 background: linear-gradient(to right, var(--bg) 0%, rgba(0,0,0,0) 100%);
 }
-[data-theme="dark"] #tables-viewer .table-heading-bar::after,
 [data-theme="dark"] #mainContent .table-heading-bar::after,
 [data-theme="dark"] .content .table-heading-bar::after,
-[data-theme="dark"] .table-heading-bar::after {
+[data-theme="dark"] .table-heading-bar::after,
+[data-theme="dark"] #mainContent .topic-heading-bar::after,
+[data-theme="dark"] .content .topic-heading-bar::after,
+[data-theme="dark"] .topic-heading-bar::after {
 background: linear-gradient(to left, var(--bg) 0%, rgba(0,0,0,0) 100%);
 }
 
-/* Individual topic items: cover anchors, headings, and generic elements /
-#tables-viewer .table-heading-bar > a.table-heading,
-#mainContent .table-heading-bar > a.table-heading,
-.content .table-heading-bar > a.table-heading,
-.table-heading-bar > a.table-heading,
-.table-heading-bar > h3.table-heading,
-.table-heading-bar > .table-heading {
-flex: 0 0 auto !important; / keep intrinsic width /
+/* Ensure direct children remain inline, do not expand to 100% width */
+#mainContent .table-heading-bar > *,
+.content .table-heading-bar > *,
+.table-heading-bar > *,
+#mainContent .topic-heading-bar > *,
+.content .topic-heading-bar > ,
+.topic-heading-bar > * {
+flex: 0 0 auto !important; / do not grow or shrink to fill row */
 display: inline-flex !important;
 align-items: center !important;
 justify-content: center !important;
-gap: 6px;
-text-align: center;
-font-size: 0.95rem;
-font-weight: 600;
-padding: 6px 10px;
-background: var(--panel);
-border-radius: 6px;
-cursor: pointer;
-user-select: none;
-transition: background 0.18s ease, color 0.18s ease, transform 120ms var(--easing);
-min-height: 36px;
-line-height: 1;
+gap: 6px !important;
 white-space: nowrap !important;
-margin: 0 !important; / prevent default heading margins */
-box-sizing: border-box;
-text-decoration: none !important;
-color: inherit !important;
+min-width: 0 !important;
+margin: 0 !important;
+box-sizing: border-box !important;
 }
 
-/* ensure anchors behave like inline controls and do not expand */
-#tables-viewer .table-heading-bar > a.table-heading,
-#mainContent .table-heading-bar > a.table-heading,
-.content .table-heading-bar > a.table-heading,
-.table-heading-bar > a.table-heading {
+/* Common specific element forms used by renderer /
+.table-heading-bar > h3.table-heading,
+.table-heading-bar > a.table-heading,
+.table-heading-bar > .table-heading,
+.topic-heading-bar > h3.topic-heading,
+.topic-heading-bar > a.topic-heading,
+.topic-heading-bar > .topic-heading {
+font-size: 0.95rem !important;
+font-weight: 600 !important;
+padding: 6px 10px !important;
+background: var(--panel) !important;
+border-radius: 6px !important;
+cursor: pointer !important;
+user-select: none !important;
+min-height: 36px !important;
+line-height: 1 !important;
+text-align: center !important;
+white-space: nowrap !important;
+margin: 0 !important; / prevent heading margin wrapping */
+box-sizing: border-box !important;
+width: auto !important;
+}
+
+/* Keep small controls inside the heading bar from becoming full-width */
+.table-heading-bar button,
+.table-heading-bar .btn,
+.table-heading-bar a,
+.topic-heading-bar button,
+.topic-heading-bar .btn,
+.topic-heading-bar a {
+flex: 0 0 auto !important;
+width: auto !important;
 display: inline-flex !important;
 align-items: center !important;
 justify-content: center !important;
-line-height: 1;
-vertical-align: middle;
+padding: 4px 8px !important;
+white-space: nowrap !important;
 }
 
-/* ensure focus and hover are visible and consistent */
-#tables-viewer .table-heading-bar > a.table-heading:focus,
-#tables-viewer .table-heading-bar > h3.table-heading:focus,
-#tables-viewer .table-heading-bar > .table-heading:focus,
-#tables-viewer .table-heading-bar > a.table-heading:focus-visible,
-.table-heading-bar > a.table-heading:focus-visible,
-.table-heading-bar > h3.table-heading:focus-visible,
-.table-heading-bar > .table-heading:focus-visible {
-outline: 3px solid var(--focus-ring);
-outline-offset: 2px;
-border-radius: 6px;
-background: var(--focus-bg) !important;
-}
-
-/* hover/tap feedback */
-#tables-viewer .table-heading-bar > a.table-heading:hover,
-#tables-viewer .table-heading-bar > h3.table-heading:hover,
-.table-heading-bar > .table-heading:hover {
+/* Hover/focus polish */
+.table-heading-bar > h3.table-heading:hover,
+.table-heading-bar > a.table-heading:hover,
+.topic-heading-bar > h3.topic-heading:hover,
+.topic-heading-bar > a.topic-heading:hover {
 background: var(--toc-link-hover-bg) !important;
 color: var(--toc-link-hover-color) !important;
 }
-
-/* defensive: ensure items won't flex-grow and will shrink-only when necessary */
-#tables-viewer .table-heading-bar > * {
-flex-shrink: 0 !important;
-flex-basis: auto !important;
-min-width: 0 !important;
+.table-heading-bar > h3.table-heading:focus,
+.table-heading-bar > a.table-heading:focus,
+.topic-heading-bar > h3.topic-heading:focus,
+.topic-heading-bar > a.topic-heading:focus {
+outline: 3px solid var(--focus-ring) !important;
+outline-offset: 2px !important;
+background: var(--focus-bg) !important;
 }
 
-/* mobile adjustments (still single row; smaller padding) */
+/* Mobile adjustments (strong overrides): keep single-row and reduced padding */
 @media (max-width:600px){
-#tables-viewer .table-heading-bar,
 #mainContent .table-heading-bar,
 .content .table-heading-bar,
-.table-heading-bar {
-gap: 6px;
-padding: 6px 8px;
-margin-left: -8px;
-margin-right: -8px;
+.table-heading-bar,
+#mainContent .topic-heading-bar,
+.content .topic-heading-bar,
+.topic-heading-bar {
+gap: 6px !important;
+padding: 6px 8px !important;
+margin-left: -8px !important;
+margin-right: -8px !important;
 }
-#tables-viewer .table-heading-bar > a.table-heading,
-#tables-viewer .table-heading-bar > h3.table-heading,
-#tables-viewer .table-heading-bar > .table-heading,
-.table-heading-bar > a.table-heading,
 .table-heading-bar > h3.table-heading,
-.table-heading-bar > .table-heading {
+.table-heading-bar > a.table-heading,
+.table-heading-bar > .table-heading,
+.topic-heading-bar > h3.topic-heading,
+.topic-heading-bar > a.topic-heading,
+.topic-heading-bar > .topic-heading {
 font-size: 0.88rem !important;
 padding: 4px 8px !important;
 min-height: 34px !important;
 }
 }
 
-/* extremely narrow phones (defensive) */
+/* Extremely narrow phones: final fallback */
 @media (max-width:420px) {
-#tables-viewer .table-heading-bar,
 #mainContent .table-heading-bar,
 .content .table-heading-bar,
-.table-heading-bar { padding: 6px 6px; gap: 6px; }
-#tables-viewer .table-heading-bar > a.table-heading,
-#tables-viewer .table-heading-bar > h3.table-heading,
-.table-heading-bar > .table-heading {
+.table-heading-bar,
+#mainContent .topic-heading-bar,
+.content .topic-heading-bar,
+.topic-heading-bar { padding: 6px 6px !important; gap: 6px !important; }
+.table-heading-bar > h3.table-heading,
+.table-heading-bar > .table-heading,
+.topic-heading-bar > h3.topic-heading,
+.topic-heading-bar > .topic-heading {
 padding: 4px 7px !important;
 font-size: 0.85rem !important;
 min-height: 32px !important;
 }
 }
-
-/* If you prefer visible left/right chevrons for scroll affordance,
-add small buttons with absolute position left/right inside .table-heading-bar.
-They must be on a higher z-index than ::before/::after and have pointer-events enabled. */
 
 /* ========== Final guard rules ========== */
 a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
