@@ -3,6 +3,9 @@ Applied: 2025-10-05
 Revision: added caption fallback, column-type rules, export-button styling,
 print polish, gradient fix, minor focus consolidation.
 Checked 25×.
+
+2025-10-07: Added unified global table controls CSS and safe opt-in hiding of inline toggles.
+Checked 10×.
 */
 
 /* ========== Variables ========== */
@@ -975,3 +978,127 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 .table-wrapper .table-heading-bar + .table-container {
   margin-top: 0.25em;
 }
+
+/* ========== NEW: Unified global table controls (safe, opt-in) ==========
+   Insert an element with id="global-table-controls" at the top of #tables-viewer
+   to present all table toggle buttons in a single compact horizontal row.
+
+   To automatically hide inline per-table toggle buttons, add the class
+   `hide-inline-controls` to #tables-viewer (opt-in to avoid accidental breaking).
+   Example:
+     <div id="tables-viewer" class="hide-inline-controls">...</div>
+*/
+
+/* Global controls container */
+#global-table-controls,
+#tables-viewer #global-table-controls {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  gap: 6px;
+  align-items: center;
+  overflow-x: auto !important;
+  padding: 6px 8px;
+  margin-bottom: 0.6em;
+  white-space: nowrap !important;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+  background: var(--panel);
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.03);
+}
+
+/* Compact buttons within the global row */
+#global-table-controls .toggle-table-btn,
+#global-table-controls button,
+#global-table-controls .table-toggle-inline,
+#tables-viewer #global-table-controls .toggle-table-btn {
+  font-size: 11px !important;
+  padding: 4px 8px !important;
+  min-height: 30px !important;
+  min-width: 30px !important;
+  line-height: 1 !important;
+  border-radius: 6px !important;
+  gap: 6px !important;
+  border: 1px solid var(--border);
+  background: var(--button-bg);
+  color: var(--button-text);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--trans-duration) var(--easing), background var(--trans-duration) var(--easing), border-color var(--trans-duration) var(--easing);
+}
+
+/* Icon-only compact variant */
+#global-table-controls .toggle-table-btn.icon-only,
+#global-table-controls button.icon-only {
+  width: 30px !important;
+  height: 30px !important;
+  padding: 4px !important;
+  font-size: 0 !important;
+  min-width: 30px !important;
+}
+
+/* focus & hover for global row buttons */
+#global-table-controls .toggle-table-btn:focus-visible,
+#global-table-controls button:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+  background: var(--focus-bg);
+  border-radius: 6px;
+}
+#global-table-controls .toggle-table-btn:hover,
+#global-table-controls button:hover {
+  transform: translateY(-1px);
+  background: var(--panel);
+}
+
+/* mobile: allow wrapping and slightly smaller touch targets */
+@media (max-width:600px){
+  #global-table-controls { gap: 6px; padding: 6px 6px; border-radius: 6px; }
+  #global-table-controls .toggle-table-btn,
+  #global-table-controls button {
+    font-size: 10px !important;
+    padding: 3px 6px !important;
+    min-height: 28px !important;
+    min-width: 28px !important;
+  }
+  #global-table-controls { flex-wrap: wrap !important; }
+}
+
+/* opt-in: hide inline toggle buttons when developer prefers global controls
+   (useful to avoid duplicate controls). This requires addding .hide-inline-controls
+   to the #tables-viewer container to activate. */
+#tables-viewer.hide-inline-controls .table-controls .toggle-table-btn,
+#tables-viewer.hide-inline-controls .table-controls .table-toggle-inline,
+#tables-viewer.hide-inline-controls .table-controls summary,
+#tables-viewer.hide-inline-controls .table-controls a.toggle-table-btn {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* If the developer instead wants to automatically hide inline toggles placed
+   after a global controls element (sibling), they can use the following selector.
+   This is slightly more aggressive; it hides inline toggles for subsequent table wrappers. */
+#global-table-controls ~ .table-wrapper .table-controls .toggle-table-btn,
+#global-table-controls ~ .table-wrapper .table-controls .table-toggle-inline {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Small helper: if icons are used in global buttons and rotation behavior is desired,
+   keep the small rotation affordance non-destructive. */
+#global-table-controls .toggle-table-btn .icon,
+#global-table-controls .toggle-table-btn .svg-icon { transition: transform var(--trans-duration) var(--easing); }
+#global-table-controls .toggle-table-btn.active .icon,
+#global-table-controls .toggle-table-btn.active .svg-icon { transform: rotate(180deg); }
+
+/* Accessibility: ensure global controls are reachable via keyboard */
+#global-table-controls .toggle-table-btn { -webkit-tap-highlight-color: transparent; }
+
+/* ========== Final guard rules ========== */
+a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+
+/* End of file */
