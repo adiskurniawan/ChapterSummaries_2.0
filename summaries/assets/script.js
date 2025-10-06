@@ -1,47 +1,35 @@
-/* script.js — revised for performance and defensive hardening
-   - Maintains all external globals and function names.
-   - Optimizes DOM queries, caching, and highlight work.
-   - Preserves behavior, signatures, and UX.
-   - Reviewed for safety; keep backups before replacing.
-*/
+// script.js — fully revised, robust loader + table utilities (single-file)
+// Revisions:
+// - Preserve row IDs and TOC anchors when sorting/reseting by reordering existing nodes (no cloning).
+// - Snapshot original row order using stable per-row UIDs (data-tv-uid) taken after TOC build so IDs survive.
+// - Avoid clearing tbody.innerHTML during reorder to reduce flicker; append existing nodes to reorder.
+// - Early-hide Export Markdown UI with a CSS injection to reduce flicker, while keeping existing hide functions.
+// - Defensive, careful changes; reviewed for edge-cases and id-preservation.
+
 (function () {
   'use strict';
 
   // -----------------------------
-  // Minimal helpers (consolidated)
-  // -----------------------------
-  const d = document;
-  const w = window;
-  const noop = function () { };
-  const safe = (fn, fallback) => { try { return fn(); } catch (e) { return fallback; } };
-  const isString = (x) => typeof x === 'string';
-  const q = (sel, root = d) => safe(() => root.querySelector(sel), null);
-  const qa = (sel, root = d) => safe(() => Array.from(root.querySelectorAll(sel)), []);
-  const once = (fn) => {
-    let called = false;
-    return function () { if (called) return; called = true; try { fn(); } catch (e) { /* silent */ } };
-  };
-  const rIC = w.requestIdleCallback ? w.requestIdleCallback.bind(w) : (cb) => setTimeout(cb, 50);
-
-  // -----------------------------
-  // Public config and API (unchanged names)
+  // Public config and API
   // -----------------------------
   const defaultConfig = { highlight: true, debounceMs: 150, chunkSize: 300 };
-  w.tvConfig = w.tvConfig || {};
-  Object.assign(w.tvConfig, defaultConfig);
+  window.tvConfig = window.tvConfig || {};
+  Object.assign(window.tvConfig, defaultConfig);
 
-  w.setTvSearchConfig = function (cfg) {
+  window.setTvSearchConfig = function (cfg) {
     try {
       if (!cfg || typeof cfg !== 'object') return;
-      if (typeof cfg.highlight === 'boolean') w.tvConfig.highlight = cfg.highlight;
-      if (typeof cfg.debounceMs === 'number') w.tvConfig.debounceMs = Math.max(0, cfg.debounceMs);
-      if (typeof cfg.chunkSize === 'number') w.tvConfig.chunkSize = Math.max(50, cfg.chunkSize);
+      if (typeof cfg.highlight === 'boolean') window.tvConfig.highlight = cfg.highlight;
+      if (typeof cfg.debounceMs === 'number') window.tvConfig.debounceMs = Math.max(0, cfg.debounceMs);
+      if (typeof cfg.chunkSize === 'number') window.tvConfig.chunkSize = Math.max(50, cfg.chunkSize);
     } catch (e) { /* silent */ }
   };
 
   // -----------------------------
-  // URL helpers
+  // Small cross-cutting helpers
   // -----------------------------
+  function safe(fn) { try { return fn(); } catch (e) { return undefined; } }
+  function isString(x) { return typeof x === 'string'; }
   function joinUrl(base, rel) {
     try {
       if (!base) return rel;
@@ -51,17 +39,24 @@
       return (base.replace(/\/?$/, '/') + rel.replace(/^\//, ''));
     }
   }
+  function once(fn) {
+    let called = false;
+    return function () { if (called) return; called = true; try { fn(); } catch (e) {} };
+  }
 
   // -----------------------------
-  // Robust base-path detection (unchanged semantics)
+  // Robust base-path detection
   // -----------------------------
   function detectScriptBase() {
-    let src = safe(() => d.currentScript && d.currentScript.src) || '';
-    if (isString(src) && src) return src.replace(/[^\/]*$/, '');
+    let src = safe(() => document.currentScript && document.currentScript.src) || '';
+    if (isString(src) && src) {
+      return src.replace(/[^\/]*$/, '');
+    }
     try {
-      const scripts = d.getElementsByTagName('script');
+      const scripts = document.getElementsByTagName('script');
       for (let i = scripts.length - 1; i >= 0; i--) {
-        const ssrc = scripts[i].src || '';
+        const s = scripts[i];
+        const ssrc = s.src || '';
         if (!ssrc) continue;
         if (ssrc.indexOf('/assets/script.js') !== -1 || /(^|\/)script\.js(\?.*)?$/.test(ssrc)) {
           return ssrc.replace(/[^\/]*$/, '');
@@ -75,42 +70,46 @@
   }
 
   const TV_BASE = detectScriptBase();
-  w.__tv_base = w.__tv_base || TV_BASE;
+  window.__tv_base = window.__tv_base || TV_BASE;
 
   // -----------------------------
-  // Ensure index / worker attrs
+  // Ensure index / worker URLs are available (for extra.js)
   // -----------------------------
   function ensureIndexAndWorkerAttrs(base) {
     try {
-      if (!d.body) {
-        d.addEventListener('DOMContentLoaded', function bound() {
-          d.removeEventListener('DOMContentLoaded', bound);
+      if (!document.body) {
+        document.addEventListener('DOMContentLoaded', function bound() {
+          document.removeEventListener('DOMContentLoaded', bound);
           ensureIndexAndWorkerAttrs(base);
         });
         return;
       }
-      const existingIndex = d.body.getAttribute('data-index-url');
-      const existingWorker = d.body.getAttribute('data-worker-url');
+      const existingIndex = document.body.getAttribute('data-index-url');
+      const existingWorker = document.body.getAttribute('data-worker-url');
+
       const defaultIndex = joinUrl(base, 'tables_index.json');
       const defaultWorker = joinUrl(base, 'worker.js');
+
       if (!existingIndex || existingIndex.trim() === '') {
-        try { d.body.setAttribute('data-index-url', defaultIndex); } catch (e) {}
+        try { document.body.setAttribute('data-index-url', defaultIndex); } catch (e) {}
       }
       if (!existingWorker || existingWorker.trim() === '') {
-        try { d.body.setAttribute('data-worker-url', defaultWorker); } catch (e) {}
+        try { document.body.setAttribute('data-worker-url', defaultWorker); } catch (e) {}
       }
-      w.tvIndexUrl = w.tvIndexUrl || d.body.getAttribute('data-index-url') || defaultIndex;
-      w.tvWorkerUrl = w.tvWorkerUrl || d.body.getAttribute('data-worker-url') || defaultWorker;
+
+      window.tvIndexUrl = window.tvIndexUrl || document.body.getAttribute('data-index-url') || defaultIndex;
+      window.tvWorkerUrl = window.tvWorkerUrl || document.body.getAttribute('data-worker-url') || defaultWorker;
     } catch (e) { /* silent */ }
   }
+
   ensureIndexAndWorkerAttrs(TV_BASE);
 
   // -----------------------------
-  // Extra.js loader (sequential) — kept behavior
+  // Extra.js loader — sequential, robust
   // -----------------------------
   function createScriptElement(src, opts) {
     opts = opts || {};
-    const s = d.createElement('script');
+    const s = document.createElement('script');
     s.src = src;
     s.async = !!opts.async;
     s.defer = !!opts.defer;
@@ -121,8 +120,9 @@
 
   function loadExtraSequentially(possiblePaths, onDone, onAllFailed) {
     if (!possiblePaths || possiblePaths.length === 0) { if (onAllFailed) onAllFailed(); return; }
-    const parent = d.head || d.getElementsByTagName('head')[0] || d.documentElement || d.body;
+    const parent = document.head || document.getElementsByTagName('head')[0] || document.documentElement || document.body;
     let idx = 0;
+
     function tryNext() {
       if (idx >= possiblePaths.length) {
         if (onAllFailed) onAllFailed();
@@ -135,9 +135,14 @@
           try { if (console && console.info) console.info('tv:extra loaded ->', path); } catch (_) {}
           if (onDone) onDone(path);
         });
-        s.onerror = function () { try { s.remove(); } catch (_) {} setTimeout(tryNext, 20); };
+        s.onerror = function () {
+          try { s.remove(); } catch (_) {}
+          setTimeout(tryNext, 20);
+        };
         parent.appendChild(s);
-      } catch (e) { setTimeout(tryNext, 20); }
+      } catch (e) {
+        setTimeout(tryNext, 20);
+      }
     }
     tryNext();
   }
@@ -152,19 +157,21 @@
 
   function startExtraLoader() {
     try {
-      if (w._tv_extra_loader_attached || w.tvExtra || d.querySelector('script[src*="extra.js"]')) {
+      if (window._tv_extra_loader_attached || window.tvExtra || document.querySelector('script[src*="extra.js"]')) {
         try { if (console && console.info) console.info('tv:extra already present or loader attached; skipping'); } catch (_) {}
         return;
       }
-      w._tv_extra_loader_attached = true;
-      loadExtraSequentially(extraCandidates, function () { }, function () {
+      window._tv_extra_loader_attached = true;
+      loadExtraSequentially(extraCandidates, function (path) {
+        // success - nothing else required
+      }, function () {
         try { if (console && console.warn) console.warn('tv:extra loader: all candidate paths failed.'); } catch (_) {}
       });
     } catch (e) { /* silent */ }
   }
 
-  if (d.readyState === 'loading') {
-    d.addEventListener('DOMContentLoaded', function () { ensureIndexAndWorkerAttrs(TV_BASE); startExtraLoader(); });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { ensureIndexAndWorkerAttrs(TV_BASE); startExtraLoader(); });
   } else {
     ensureIndexAndWorkerAttrs(TV_BASE);
     startExtraLoader();
@@ -180,26 +187,113 @@
 #exportMarkdownBtn, [data-action="export-markdown"],
 button[data-format="md"], a[data-format="md"] { display: none !important; }
 `;
-    if (d.head) {
-      const se = d.createElement('style');
+    if (document.head) {
+      const se = document.createElement('style');
       se.setAttribute('data-tv-early-hide-md', '1');
-      se.appendChild(d.createTextNode(hideMdCss));
-      d.head.appendChild(se);
+      se.appendChild(document.createTextNode(hideMdCss));
+      document.head.appendChild(se);
     }
   } catch (e) { /* silent */ }
 
   // -----------------------------
-  // Toasts & modal helpers (unchanged semantics)
+  // Begin main UI logic
   // -----------------------------
+  function normalizeForSearchLocal(s) {
+    try {
+      return (s || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^\p{L}\p{N}\s]/gu, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    } catch (e) {
+      return (s || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^\w\s]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+  }
+
+  function debounce(fn, wait) {
+    let t;
+    return function (...args) {
+      clearTimeout(t);
+      t = setTimeout(() => {
+        try { fn.apply(this, args); } catch (e) { /* silent */ }
+      }, wait);
+    };
+  }
+
+  function copyToClipboard(text) {
+    return new Promise((resolve, reject) => {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(resolve).catch(() => {
+          tryLegacyCopy(text).then(resolve).catch(reject);
+        });
+        return;
+      }
+      tryLegacyCopy(text).then(resolve).catch(reject);
+    });
+  }
+  function tryLegacyCopy(t) {
+    return new Promise((resolve, reject) => {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = t;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (ok) resolve();
+        else reject(new Error('execCommand failed'));
+      } catch (err) {
+        try { console.warn('tv:copyToClipboard:legacy failed', err); } catch (_) {}
+        reject(err);
+      }
+    });
+  }
+
+  function sanitizeFileName(name) {
+    try {
+      if (!name) return 'download';
+      return String(name).trim().replace(/[\/\\:*?"<>|]/g, '_').replace(/\s+/g, '_').slice(0, 200) || 'download';
+    } catch (e) { return 'download'; }
+  }
+
+  function downloadBlob(blob, filename) {
+    try {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = sanitizeFileName(filename);
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      return true;
+    } catch (e) {
+      try { console.error('downloadBlob failed', e); } catch (_) {}
+      return false;
+    }
+  }
+
+  // Toast system (unchanged)
   let _toastQueue = [];
   let _activeToast = null;
   let _toastIdCounter = 0;
 
   function _ensureToastContainer() {
     try {
-      let c = d.getElementById('tv-toast-container');
+      let c = document.getElementById('tv-toast-container');
       if (c) return c;
-      c = d.createElement('div');
+      c = document.createElement('div');
       c.id = 'tv-toast-container';
       c.setAttribute('role', 'status');
       c.setAttribute('aria-live', 'polite');
@@ -216,7 +310,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
         pointerEvents: 'none',
         maxWidth: 'calc(100% - 48px)'
       });
-      d.body.appendChild(c);
+      document.body.appendChild(c);
       return c;
     } catch (e) { return null; }
   }
@@ -252,15 +346,15 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
       const item = _toastQueue.shift();
       const container = _ensureToastContainer();
       if (!container) { try { alert(item.msg); } catch (_) {} setTimeout(_processToastQueue, 0); return; }
-      const el = d.createElement('div');
+      const el = document.createElement('div');
       el.className = 'tv-toast';
       el.setAttribute('data-toast-id', item.id);
       el.setAttribute('role', 'status');
       el.setAttribute('aria-live', 'polite');
       el.tabIndex = -1;
       Object.assign(el.style, {
-        background: (getComputedStyle(d.documentElement).getPropertyValue('--panel') || '#fff').trim(),
-        color: (getComputedStyle(d.documentElement).getPropertyValue('--text') || '#111').trim(),
+        background: (getComputedStyle(document.documentElement).getPropertyValue('--panel') || '#fff').trim(),
+        color: (getComputedStyle(document.documentElement).getPropertyValue('--text') || '#111').trim(),
         padding: '8px 12px',
         borderRadius: '8px',
         boxShadow: '0 6px 18px rgba(0,0,0,0.12)',
@@ -278,11 +372,11 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
       if (item.type === 'success') { el.style.background = '#16a34a'; el.style.color = '#fff'; }
       else if (item.type === 'warn') { el.style.background = '#f59e0b'; el.style.color = '#fff'; }
       else if (item.type === 'error') { el.style.background = '#dc2626'; el.style.color = '#fff'; }
-      const textWrap = d.createElement('div');
+      const textWrap = document.createElement('div');
       textWrap.style.flex = '1 1 auto';
       textWrap.style.minWidth = '0';
       textWrap.textContent = item.msg;
-      const closeBtn = d.createElement('button');
+      const closeBtn = document.createElement('button');
       closeBtn.type = 'button';
       closeBtn.ariaLabel = 'Dismiss notification';
       closeBtn.title = 'Dismiss';
@@ -300,7 +394,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
       const to = setTimeout(() => { _hideActiveToast(el, false); }, timeoutMs);
       _activeToast = { id: item.id, el, timeoutId: to };
       try {
-        const prevActive = d.activeElement;
+        const prevActive = document.activeElement;
         if (container && typeof container.focus === 'function') {
           container.tabIndex = -1;
           container.focus({ preventScroll: true });
@@ -336,54 +430,54 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
     } catch (e) { /* silent */ }
   }
 
-  // Copy modal (unchanged behavior)
+  // Copy modal (unchanged)
   function showCopyModal(text, { title = 'Copy text' } = {}) {
     try {
-      const existing = d.getElementById('tv-copy-modal');
+      const existing = document.getElementById('tv-copy-modal');
       if (existing) existing.remove();
-      const overlay = d.createElement('div');
+      const overlay = document.createElement('div');
       overlay.id = 'tv-copy-modal';
       Object.assign(overlay.style, { position: 'fixed', inset: '0', background: 'rgba(0,0,0,0.45)', zIndex: 1400, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' });
-      const panel = d.createElement('div');
+      const panel = document.createElement('div');
       panel.setAttribute('role', 'dialog');
       panel.setAttribute('aria-modal', 'true');
       panel.tabIndex = -1;
-      const rootStyles = getComputedStyle(d.documentElement);
+      const rootStyles = getComputedStyle(document.documentElement);
       const panelBg = rootStyles.getPropertyValue('--panel') || '#fff';
       const textColor = rootStyles.getPropertyValue('--text') || '#111';
       Object.assign(panel.style, { background: panelBg.trim(), color: textColor.trim(), borderRadius: '8px', boxShadow: '0 12px 40px rgba(0,0,0,0.35)', maxWidth: 'min(90%,1000px)', width: '100%', maxHeight: '80vh', overflow: 'auto', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' });
-      const hdr = d.createElement('div');
+      const hdr = document.createElement('div');
       hdr.style.display = 'flex';
       hdr.style.justifyContent = 'space-between';
       hdr.style.alignItems = 'center';
-      const h = d.createElement('strong');
+      const h = document.createElement('strong');
       h.textContent = title || 'Copy';
-      const closeBtn = d.createElement('button');
+      const closeBtn = document.createElement('button');
       closeBtn.type = 'button';
       closeBtn.textContent = 'Close';
       Object.assign(closeBtn.style, { marginLeft: '8px' });
       closeBtn.addEventListener('click', () => overlay.remove());
       hdr.appendChild(h);
       hdr.appendChild(closeBtn);
-      const ta = d.createElement('textarea');
+      const ta = document.createElement('textarea');
       ta.value = text || '';
       ta.readOnly = false;
       ta.style.width = '100%';
       ta.style.height = '320px';
       ta.style.resize = 'vertical';
-      ta.style.whiteSpace = 'pre-wrap';
+/* removed inline whiteSpace to respect stylesheet; previously set by script */;
       ta.style.fontFamily = 'monospace, monospace';
       ta.style.fontSize = '13px';
       ta.setAttribute('aria-label', 'Copy text area');
-      const controls = d.createElement('div');
+      const controls = document.createElement('div');
       controls.style.display = 'flex';
       controls.style.gap = '8px';
       controls.style.justifyContent = 'flex-end';
-      const selectBtn = d.createElement('button');
+      const selectBtn = document.createElement('button');
       selectBtn.type = 'button';
       selectBtn.textContent = 'Select All';
       selectBtn.addEventListener('click', () => { try { ta.focus(); ta.select(); } catch (_) {} });
-      const copyBtn = d.createElement('button');
+      const copyBtn = document.createElement('button');
       copyBtn.type = 'button';
       copyBtn.textContent = 'Copy';
       copyBtn.addEventListener('click', () => {
@@ -394,7 +488,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
           showToast('Copy failed', { type: 'warn' });
         });
       });
-      const downloadBtn = d.createElement('button');
+      const downloadBtn = document.createElement('button');
       downloadBtn.type = 'button';
       downloadBtn.textContent = 'Download';
       downloadBtn.addEventListener('click', () => {
@@ -412,103 +506,98 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
       panel.appendChild(ta);
       panel.appendChild(controls);
       overlay.appendChild(panel);
-      d.body.appendChild(overlay);
+      document.body.appendChild(overlay);
       try { ta.focus(); ta.select(); } catch (_) {}
       return overlay;
     } catch (e) { try { alert(String(text || '')); } catch (_) {} return null; }
   }
 
-  // Clipboard + download helpers (unchanged semantics)
-  function copyToClipboard(text) {
-    return new Promise((resolve, reject) => {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(resolve).catch(() => {
-          tryLegacyCopy(text).then(resolve).catch(reject);
-        });
-        return;
-      }
-      tryLegacyCopy(text).then(resolve).catch(reject);
-    });
-  }
-  function tryLegacyCopy(t) {
-    return new Promise((resolve, reject) => {
-      try {
-        const ta = d.createElement('textarea');
-        ta.value = t;
-        ta.setAttribute('readonly', '');
-        ta.style.position = 'fixed';
-        ta.style.left = '-9999px';
-        d.body.appendChild(ta);
-        ta.select();
-        const ok = d.execCommand ? d.execCommand('copy') : document.execCommand('copy');
-        d.body.removeChild(ta);
-        if (ok) resolve();
-        else reject(new Error('execCommand failed'));
-      } catch (err) {
-        try { console.warn('tv:copyToClipboard:legacy failed', err); } catch (_) {}
-        reject(err);
-      }
-    });
-  }
-  function sanitizeFileName(name) {
-    try {
-      if (!name) return 'download';
-      return String(name).trim().replace(/[\/\\:*?"<>|]/g, '_').replace(/\s+/g, '_').slice(0, 200) || 'download';
-    } catch (e) { return 'download'; }
-  }
-  function downloadBlob(blob, filename) {
-    try {
-      const url = URL.createObjectURL(blob);
-      const a = d.createElement('a');
-      a.href = url;
-      a.download = sanitizeFileName(filename);
-      d.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-      return true;
-    } catch (e) {
-      try { console.error('downloadBlob failed', e); } catch (_) {}
-      return false;
-    }
+  // Utilities
+  function getSearchEl() {
+    return document.getElementById('searchBox') || document.getElementById('searchInput') || document.getElementById('search');
   }
 
-  // -----------------------------
-  // DOM utilities used repeatedly
-  // -----------------------------
-  function getSearchEl() {
-    return q('#searchBox') || q('#searchInput') || q('#search') || null;
-  }
   function getTableFromButton(btn) {
     try {
       const wrapper = btn && (btn.closest('.table-wrapper') || btn.closest('.table-container') || btn.closest('[data-table-id]'));
       return wrapper ? wrapper.querySelector('table') : null;
     } catch (e) { return null; }
   }
+
+  function buildSingleTableToc() {
+    try {
+      const wrappers = document.querySelectorAll('.table-wrapper');
+      if (!wrappers || wrappers.length !== 1) return;
+      const tocBar = document.getElementById('tocBar');
+      if (!tocBar) return;
+      const table = wrappers[0].querySelector('.table-container table') || wrappers[0].querySelector('table');
+      if (!table) return;
+
+      const tbody = safeGetTBody(table) || table;
+      const rows = Array.from((tbody && tbody.rows && tbody.rows.length) ? tbody.rows : (table.rows || []));
+      if (!rows || rows.length === 0) return;
+
+      const ul = document.createElement('ul');
+      ul.className = 'single-toc-list';
+      ul.style.listStyle = 'none';
+      ul.style.display = 'flex';
+      ul.style.gap = '8px';
+      ul.style.margin = '0';
+      ul.style.padding = '0';
+/* removed inline flexWrap to respect stylesheet; previously set by script */;
+
+      rows.forEach((row, idx) => {
+        try {
+          let id = row.id && String(row.id).trim() ? row.id : `tv-row-${idx+1}`;
+          if (document.getElementById(id) && document.getElementById(id) !== row) {
+            let suffix = 1;
+            while (document.getElementById(id + '-' + suffix)) suffix++;
+            id = id + '-' + suffix;
+          }
+          row.id = id;
+
+          const li = document.createElement('li');
+          li.className = 'toc-item';
+          const a = document.createElement('a');
+          a.className = 'toc-link';
+          a.href = `#${id}`;
+          a.textContent = `Topic ${idx+1}`;
+          const rowText = (row.textContent || '').trim();
+          if (rowText) {
+            a.setAttribute('aria-label', rowText);
+            a.title = rowText;
+          }
+          a.addEventListener('click', function (ev) {
+            ev.preventDefault();
+            const target = document.getElementById(id);
+            if (target) {
+              target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              try { history.replaceState(null, '', `#${id}`); } catch (e) { }
+              try { target.focus && target.focus({ preventScroll: true }); } catch (e) { }
+            }
+          });
+          li.appendChild(a);
+          ul.appendChild(li);
+        } catch (e) { /* ignore single row error */ }
+      });
+
+      const existingUl = tocBar.querySelector('ul');
+      if (existingUl) existingUl.remove();
+      tocBar.appendChild(ul);
+    } catch (err) {
+      try { console.warn('buildSingleTableToc error', err); } catch (_) {}
+    }
+  }
+  window.buildSingleTableToc = buildSingleTableToc;
+
+  // storage: original row orders (per-table list of UIDs), sort states
+  let originalRowOrders = []; // e.g. [ ['uid1','uid2',...], ... ]
+  let _tv_row_uid_counter = 1;
+  let sortStates = [];
+
   function safeGetTBody(table) {
     if (!table) return null;
     return (table.tBodies && table.tBodies[0]) || null;
-  }
-
-  // -----------------------------
-  // Row UID snapshot logic (hardened)
-  // -----------------------------
-  let originalRowOrders = {}; // map tableKey -> [uids...]
-  let _tv_row_uid_counter = 1;
-  let sortStates = {}; // map tableKey -> [states...]
-
-  // Create/get stable per-table key. Prefer data-table-id if present otherwise derive index key.
-  function _tableKeyFor(table, idxFallback) {
-    if (!table) return String(idxFallback || 0);
-    const wrapper = table.closest && table.closest('.table-wrapper');
-    const dataId = wrapper && wrapper.getAttribute && wrapper.getAttribute('data-table-id');
-    if (dataId) return 'tid:' + dataId;
-    if (table.id) return 'tableid:' + table.id;
-    // fallback to index into current DOM at call time (best-effort)
-    const tables = qa('.table-container table');
-    const idx = tables.indexOf(table);
-    if (idx !== -1) return 'idx:' + idx;
-    return 'ref:' + (idxFallback || 0);
   }
 
   function _ensureRowUidsAndSnapshot(table, tableIdx) {
@@ -516,44 +605,28 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
       const tbody = safeGetTBody(table) || table;
       if (!tbody) return;
       const rows = Array.from(tbody.rows || []);
-      const key = _tableKeyFor(table, tableIdx);
       const order = [];
       rows.forEach((r) => {
         if (!r.dataset.tvUid) {
+          // keep existing id attributes intact; tvUid is internal stable identifier
           r.dataset.tvUid = 'tvuid-' + (_tv_row_uid_counter++);
         }
         order.push(r.dataset.tvUid);
       });
-      originalRowOrders[key] = order;
+      originalRowOrders[tableIdx] = order;
     } catch (e) { /* silent */ }
   }
 
-  // Allow explicit rescan to recompute snapshots and sortStates (safe opt-in)
-  function rescanSnapshots() {
+  function updateHeaderSortUI(tableIdx) {
     try {
-      qa('.table-container table').forEach((table, idx) => {
-        _ensureRowUidsAndSnapshot(table, idx);
-        const key = _tableKeyFor(table, idx);
-        sortStates[key] = Array(table.rows[0]?.cells.length || 0).fill(0);
-      });
-      try { updateRowCounts(); } catch (_) {}
-    } catch (e) { /* silent */ }
-  }
-  // Expose opt-in API (non-invasive)
-  w.tvRescanSnapshots = rescanSnapshots;
-
-  // -----------------------------
-  // Header sort UI update (kept same output)
-  // -----------------------------
-  function updateHeaderSortUIByTable(table, key) {
-    try {
+      const table = document.querySelectorAll(".table-container table")[tableIdx];
       if (!table || !table.tHead) return;
       const ths = table.tHead.rows[0].cells;
       for (let c = 0; c < ths.length; c++) {
         const btn = ths[c].querySelector('.sort-btn');
         if (!btn) continue;
         btn.classList.remove('sort-state-0', 'sort-state-1', 'sort-state-2');
-        const state = (sortStates[key] && sortStates[key][c]) || 0;
+        const state = (sortStates[tableIdx] && sortStates[tableIdx][c]) || 0;
         btn.classList.add('sort-state-' + state);
         if (state === 1) ths[c].setAttribute('aria-sort', 'ascending');
         else if (state === 2) ths[c].setAttribute('aria-sort', 'descending');
@@ -572,37 +645,15 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
     } catch (e) { /* silent */ }
   }
 
-  function updateHeaderSortUI(tableIdx) {
-    try {
-      const tables = qa('.table-container table');
-      const table = tables[tableIdx];
-      if (!table) return;
-      const key = _tableKeyFor(table, tableIdx);
-      updateHeaderSortUIByTable(table, key);
-    } catch (e) { /* silent */ }
-  }
-
-  // -----------------------------
-  // Sorting (preserve semantics)
-  // - uses stable mapping to preserve IDs
-  // - uses Intl.Collator if available for consistent localeCompare
-  // -----------------------------
-  const collator = (function () {
-    try {
-      return new Intl.Collator(undefined, { sensitivity: 'base', numeric: true, usage: 'sort' });
-    } catch (e) { return null; }
-  })();
-
+  // Sorting and toggles — robust reordering without cloning to preserve IDs
   function sortTableByColumn(tableIdx, colIdx) {
     try {
-      const tables = qa('.table-container table');
-      const table = tables[tableIdx];
+      const table = document.querySelectorAll(".table-container table")[tableIdx];
       if (!table) return;
       const tbody = safeGetTBody(table);
       if (!tbody) return;
-      const key = _tableKeyFor(table, tableIdx);
-      sortStates[key] = sortStates[key] || [];
-      let state = (sortStates[key][colIdx]) || 0;
+      sortStates[tableIdx] = sortStates[tableIdx] || [];
+      let state = (sortStates[tableIdx][colIdx]) || 0;
       let rows = Array.from(tbody.rows);
 
       function cellValue(row, idx) {
@@ -611,29 +662,29 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
         } catch (e) { return ''; }
       }
 
-      // comparator util attempts numeric compare then string compare using collator
-      function cmpAsc(a, b) {
-        let valA = cellValue(a, colIdx);
-        let valB = cellValue(b, colIdx);
-        const nA = parseFloat(String(valA).replace(/,/g, '').replace(/\s+/g, ''));
-        const nB = parseFloat(String(valB).replace(/,/g, '').replace(/\s+/g, ''));
-        if (!isNaN(nA) && !isNaN(nB)) return nA - nB;
-        if (collator) return collator.compare(valA, valB);
-        return String(valA).localeCompare(String(valB));
-      }
-      function cmpDesc(a, b) {
-        return -cmpAsc(a, b);
-      }
-
       if (state === 0) {
-        rows.sort(cmpAsc);
-        sortStates[key][colIdx] = 1;
+        rows.sort((a, b) => {
+          let valA = cellValue(a, colIdx);
+          let valB = cellValue(b, colIdx);
+          const numA = parseFloat(String(valA).replace(/,/g, '').replace(/\s+/g, ''));
+          const numB = parseFloat(String(valB).replace(/,/g, '').replace(/\s+/g, ''));
+          if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+          return valA.localeCompare(valB);
+        });
+        sortStates[tableIdx][colIdx] = 1;
       } else if (state === 1) {
-        rows.sort(cmpDesc);
-        sortStates[key][colIdx] = 2;
+        rows.sort((a, b) => {
+          let valA = cellValue(a, colIdx);
+          let valB = cellValue(b, colIdx);
+          const numA = parseFloat(String(valA).replace(/,/g, '').replace(/\s+/g, ''));
+          const numB = parseFloat(String(valB).replace(/,/g, '').replace(/\s+/g, ''));
+          if (!isNaN(numA) && !isNaN(numB)) return numB - numA;
+          return valB.localeCompare(valA);
+        });
+        sortStates[tableIdx][colIdx] = 2;
       } else {
         // Reset to original order using stable UIDs snapshot if available
-        const order = originalRowOrders[key] || [];
+        const order = originalRowOrders[tableIdx];
         if (order && order.length) {
           const arranged = [];
           for (let i = 0; i < order.length; i++) {
@@ -643,44 +694,38 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
               if (r) arranged.push(r);
             } catch (e) { /* continue */ }
           }
-          // Append any rows that might be new or missing from snapshot
+          // Append any rows that might be new or missing from snapshot  (preserve them)
           Array.from(tbody.rows).forEach(r => {
             if (arranged.indexOf(r) === -1) arranged.push(r);
           });
           rows = arranged;
-          sortStates[key][colIdx] = 0;
+          sortStates[tableIdx][colIdx] = 0;
         } else {
-          sortStates[key][colIdx] = 0;
+          // No snapshot; treat as "no-op reset"
+          sortStates[tableIdx][colIdx] = 0;
         }
       }
 
       // reset other columns' states
-      const cols = sortStates[key] || [];
-      for (let i = 0; i < cols.length; i++) {
-        if (i !== colIdx) cols[i] = 0;
+      for (let i = 0; i < (sortStates[tableIdx] || []).length; i++) {
+        if (i !== colIdx) sortStates[tableIdx][i] = 0;
       }
-      sortStates[key] = cols;
 
-      // Reorder by appending existing nodes in desired order (moves in-place)
+      // Reorder by appending existing nodes in desired order (this moves them in-place, preserves ids)
       try {
-        // Use document fragment only to reduce reflow in some engines
-        const frag = d.createDocumentFragment();
         rows.forEach(r => {
-          try { frag.appendChild(r); } catch (e) {}
+          try { tbody.appendChild(r); } catch (e) {}
         });
-        tbody.appendChild(frag);
       } catch (e) { /* silent */ }
 
       // Ensure per-cell original HTML snapshot exists for highlight restoration
       Array.from(tbody.rows).forEach(r => {
         Array.from(r.cells).forEach(c => {
           if (!c.dataset.origHtml) c.dataset.origHtml = c.innerHTML;
-          // mark cache stale if origHtml changed
-          try { _normCacheInvalidateForCell(c); } catch (_) {}
         });
       });
 
-      updateHeaderSortUIByTable(table, key);
+      updateHeaderSortUI(tableIdx);
       try { updateRowCounts(); } catch (e) {}
     } catch (e) { /* silent */ }
   }
@@ -690,11 +735,39 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
     try { btnEl && btnEl.focus(); } catch (e) {}
   }
 
-  // -----------------------------
-  // Update row counts (kept behavior)
-  // -----------------------------
+  function toggleTable(btn) {
+    try {
+      const wrapper = btn.closest('.table-wrapper');
+      if (!wrapper) return;
+      const collapsed = wrapper.classList.toggle('table-collapsed');
+      btn.textContent = collapsed ? "Expand Table" : "Collapse Table";
+      const anyExpanded = document.querySelectorAll('.table-wrapper:not(.table-collapsed)').length > 0;
+      const toggleAllBtn = document.getElementById('toggleAllBtn');
+      if (toggleAllBtn) toggleAllBtn.textContent = anyExpanded ? "Collapse All Tables" : "Expand All Tables";
+      try { updateRowCounts(); } catch (e) {}
+    } catch (e) { /* silent */ }
+  }
+
+  function toggleAllTables() {
+    try {
+      const wrappers = Array.from(document.querySelectorAll('.table-wrapper'));
+      if (wrappers.length === 0) return;
+      const anyExpanded = wrappers.some(w => !w.classList.contains('table-collapsed'));
+      if (anyExpanded) {
+        wrappers.forEach(w => { w.classList.add('table-collapsed'); const btn = w.querySelector('.toggle-table-btn'); if (btn) btn.textContent = "Expand Table"; });
+        const toggleAllBtn = document.getElementById('toggleAllBtn');
+        if (toggleAllBtn) toggleAllBtn.textContent = "Expand All Tables";
+      } else {
+        wrappers.forEach(w => { w.classList.remove('table-collapsed'); const btn = w.querySelector('.toggle-table-btn'); if (btn) btn.textContent = "Collapse Table"; });
+        const toggleAllBtn = document.getElementById('toggleAllBtn');
+        if (toggleAllBtn) toggleAllBtn.textContent = "Collapse All Tables";
+      }
+      try { updateRowCounts(); } catch (e) {}
+    } catch (e) { /* silent */ }
+  }
+
   function updateRowCounts() {
-    qa(".table-wrapper").forEach((wrapper, idx) => {
+    document.querySelectorAll(".table-wrapper").forEach((wrapper, idx) => {
       const table = wrapper.querySelector("table");
       const countDiv = wrapper.querySelector(".row-count");
       if (!table || !countDiv) return;
@@ -709,9 +782,6 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
     });
   }
 
-  // -----------------------------
-  // Markdown/CSV/JSON/XLSX/PDF helpers (kept behavior)
-  // -----------------------------
   function formatCellForMarkdown(cell) {
     try {
       let txt = (cell.textContent || '').trim();
@@ -747,6 +817,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
     try {
       const table = getTableFromButton(btn);
       if (!table) { showToast('No table found to copy', { type: 'warn' }); return; }
+      const tbody = safeGetTBody(table) || table;
       let title = table.closest('.table-wrapper')?.querySelector('h3')?.textContent || '';
       let text = title + "\n" + Array.from(table.rows).map(r => Array.from(r.cells).map(c => c.textContent.trim()).join("\t")).join("\n");
       copyToClipboard(text).then(() => showToast('Table copied as plain text!', { type: 'success' })).catch(() => {
@@ -772,7 +843,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
   function copyAllTablesPlain() {
     try {
       let textPieces = [];
-      qa(".table-wrapper").forEach(wrapper => {
+      document.querySelectorAll(".table-wrapper").forEach(wrapper => {
         try {
           let title = wrapper.querySelector('h3')?.textContent || '';
           let table = wrapper.querySelector('table');
@@ -792,7 +863,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
   function copyAllTablesMarkdown() {
     try {
       let pieces = [];
-      qa(".table-wrapper").forEach((wrapper) => {
+      document.querySelectorAll(".table-wrapper").forEach((wrapper) => {
         try {
           const table = wrapper.querySelector('table');
           if (!table) return;
@@ -812,6 +883,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
     } catch (e) { showToast('Copy failed', { type: 'warn' }); }
   }
 
+  // Export helpers preserved (CSV, Markdown, JSON, XLSX, PDF)
   function exportTableCSV(btn, { filename } = {}) {
     try {
       const table = getTableFromButton(btn);
@@ -853,7 +925,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
   function exportAllTablesMarkdown({ filename } = {}) {
     try {
       const pieces = [];
-      qa(".table-wrapper").forEach((wrapper) => {
+      document.querySelectorAll(".table-wrapper").forEach((wrapper) => {
         try {
           const table = wrapper.querySelector('table');
           if (!table) return;
@@ -926,25 +998,25 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
       const baseName = sanitizeFileName((filename || table.closest('.table-wrapper')?.querySelector('h3')?.textContent || 'table'));
       const safeName = baseName + '.xlsx';
 
-      if (w.XLSX && w.XLSX.utils) {
+      if (window.XLSX && window.XLSX.utils) {
         try {
-          const wb = (typeof w.XLSX.utils.book_new === 'function') ? w.XLSX.utils.book_new() : { SheetNames: [], Sheets: {} };
-          const ws = w.XLSX.utils.aoa_to_sheet(aoa);
-          if (typeof w.XLSX.utils.book_append_sheet === 'function') {
-            w.XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+          const wb = (typeof window.XLSX.utils.book_new === 'function') ? window.XLSX.utils.book_new() : { SheetNames: [], Sheets: {} };
+          const ws = window.XLSX.utils.aoa_to_sheet(aoa);
+          if (typeof window.XLSX.utils.book_append_sheet === 'function') {
+            window.XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
           } else {
             wb.SheetNames.push('Sheet1');
             wb.Sheets['Sheet1'] = ws;
           }
 
-          if (typeof w.XLSX.writeFile === 'function') {
-            w.XLSX.writeFile(wb, safeName);
+          if (typeof window.XLSX.writeFile === 'function') {
+            window.XLSX.writeFile(wb, safeName);
             showToast('XLSX exported', { type: 'success' });
             return;
           }
 
-          if (typeof w.XLSX.write === 'function') {
-            const wbout = w.XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+          if (typeof window.XLSX.write === 'function') {
+            const wbout = window.XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
             const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
             downloadBlob(blob, safeName);
             showToast('XLSX exported', { type: 'success' });
@@ -995,15 +1067,15 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
             ${table.outerHTML}
           </body>
         </html>`;
-      const wref = w.open('', '_blank');
-      if (!wref) { showToast('Unable to open print window', { type: 'warn' }); return; }
-      wref.document.open();
-      wref.document.write(htmlDoc);
-      wref.document.close();
+      const w = window.open('', '_blank');
+      if (!w) { showToast('Unable to open print window', { type: 'warn' }); return; }
+      w.document.open();
+      w.document.write(htmlDoc);
+      w.document.close();
       setTimeout(() => {
         try {
-          wref.focus();
-          wref.print();
+          w.focus();
+          w.print();
           showToast('Print dialog opened for PDF export', { type: 'success' });
         } catch (e) {
           showToast('Print failed', { type: 'warn' });
@@ -1012,18 +1084,16 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
     } catch (e) { console.error(e); showToast('Export PDF failed', { type: 'warn' }); }
   }
 
-  // -----------------------------
-  // Reset all tables (kept semantics)
-  // -----------------------------
   function resetAllTables() {
     try {
-      const tables = Array.from(qa(".table-container table"));
+      const tables = Array.from(document.querySelectorAll(".table-container table"));
       tables.forEach((table, idx) => {
         try {
           const tbody = safeGetTBody(table);
           if (!tbody) return;
-          const key = _tableKeyFor(table, idx);
-          const order = originalRowOrders[key];
+
+          // Reorder existing nodes to original order if snapshot exists
+          const order = originalRowOrders[idx];
           if (order && order.length) {
             const arranged = [];
             for (let i = 0; i < order.length; i++) {
@@ -1033,24 +1103,26 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
                 if (r) arranged.push(r);
               } catch (e) { /* continue */ }
             }
+            // append any rows not in arranged
             Array.from(tbody.rows).forEach(r => {
               if (arranged.indexOf(r) === -1) arranged.push(r);
             });
             arranged.forEach(r => { try { tbody.appendChild(r); } catch (_) {} });
           } else {
-            // No snapshot; no-op
+            // fallback: do nothing (no snapshot available)
           }
 
+          // Ensure per-cell original HTML snapshot used to restore highlights safely
           Array.from(tbody.rows).forEach(r => {
-            Array.from(r.cells).forEach(c => { c.dataset.origHtml = c.innerHTML; _normCacheInvalidateForCell(c); });
+            Array.from(r.cells).forEach(c => { c.dataset.origHtml = c.innerHTML; });
           });
 
-          sortStates[_tableKeyFor(table, idx)] = Array(table.rows[0]?.cells.length || 0).fill(0);
+          sortStates[idx] = Array(table.rows[0]?.cells.length || 0).fill(0);
           updateHeaderSortUI(idx);
         } catch (e) { /* continue */ }
       });
-      qa('.table-wrapper').forEach(wrap => { wrap.classList.remove('table-collapsed'); const btn = wrap.querySelector('.toggle-table-btn'); if (btn) btn.textContent = "Collapse Table"; });
-      const toggleAllBtn = d.getElementById('toggleAllBtn');
+      document.querySelectorAll('.table-wrapper').forEach(w => { w.classList.remove('table-collapsed'); const btn = w.querySelector('.toggle-table-btn'); if (btn) btn.textContent = "Collapse Table"; });
+      const toggleAllBtn = document.getElementById('toggleAllBtn');
       if (toggleAllBtn) toggleAllBtn.textContent = "Collapse All Tables";
       const sb = getSearchEl(); if (sb) sb.value = "";
       searchTable();
@@ -1059,18 +1131,16 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
     } catch (e) { showToast('Reset failed', { type: 'warn' }); }
   }
 
-  // -----------------------------
-  // Hide UI helpers (kept behavior)
-  // -----------------------------
+  // Hide-only logic functions kept (they simply hide UI elements)
   function hideResetAllTablesOption() {
     try {
       const selectors = ['.reset-all-btn', '.reset-btn', '#resetAllBtn', '[data-action="reset-all"]'];
       selectors.forEach(s => {
-        try { d.querySelectorAll(s).forEach(el => { if (el && el.style) el.style.display = 'none'; }); } catch (_) {}
+        try { document.querySelectorAll(s).forEach(el => { if (el && el.style) el.style.display = 'none'; }); } catch (_) {}
       });
       const needle = 'reset all tables';
       const shortNeedle = 'reset all';
-      d.querySelectorAll('button, a, input').forEach(el => {
+      document.querySelectorAll('button, a, input').forEach(el => {
         try {
           const txt = ((el.textContent || '') + ' ' + (el.title || '')).toLowerCase();
           if (txt.indexOf(needle) !== -1 || txt.indexOf(shortNeedle) !== -1) {
@@ -1079,7 +1149,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
         } catch (_) {}
       });
       try {
-        d.querySelectorAll('#toolbar, .toolbar, .menu, .dropdown-menu').forEach(menu => {
+        document.querySelectorAll('#toolbar, .toolbar, .menu, .dropdown-menu').forEach(menu => {
           menu.querySelectorAll('button, a, li').forEach(item => {
             try {
               const txt = ((item.textContent || '') + ' ' + (item.title || '')).toLowerCase();
@@ -1101,11 +1171,11 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
         'button[data-format="md"]', 'a[data-format="md"]'
       ];
       selectors.forEach(s => {
-        try { d.querySelectorAll(s).forEach(el => { if (el && el.style) el.style.display = 'none'; }); } catch (_) {}
+        try { document.querySelectorAll(s).forEach(el => { if (el && el.style) el.style.display = 'none'; }); } catch (_) {}
       });
 
       const needles = ['export markdown', 'export md', 'markdown export', 'export as markdown'];
-      d.querySelectorAll('button, a, input, li, span').forEach(el => {
+      document.querySelectorAll('button, a, input, li, span').forEach(el => {
         try {
           const txt = ((el.textContent || '') + ' ' + (el.title || '')).toLowerCase();
           for (let n of needles) {
@@ -1118,7 +1188,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
       });
 
       try {
-        d.querySelectorAll('#toolbar, .toolbar, .menu, .dropdown-menu').forEach(menu => {
+        document.querySelectorAll('#toolbar, .toolbar, .menu, .dropdown-menu').forEach(menu => {
           menu.querySelectorAll('button, a, li').forEach(item => {
             try {
               const txt = ((item.textContent || '') + ' ' + (item.title || '')).toLowerCase();
@@ -1135,197 +1205,135 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
     } catch (e) { /* silent */ }
   }
 
-  // -----------------------------
-  // SEARCH & HIGHLIGHT (optimized & cached)
-  // - caches normalized map per cell keyed by cell.dataset.origHtml
-  // - invalidates cache on origHtml change
-  // -----------------------------
-  const _normCache = new WeakMap();
-  function _normCacheInvalidateForCell(cell) {
-    try {
-      if (!_normCache || !cell) return;
-      _normCache.delete(cell);
-    } catch (e) { /* silent */ }
-  }
-
-  function normalizeForSearchLocal(s) {
-    try {
-      return (s || '')
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^\p{L}\p{N}\s]/gu, '')
-        .replace(/\s+/g, ' ')
-        .trim();
-    } catch (e) {
-      return (s || '')
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^\w\s]/g, '')
-        .replace(/\s+/g, ' ')
-        .trim();
-    }
-  }
-
-  function buildNormalizedMapForCellCached(cell) {
-    try {
-      if (!cell) return { normStr: '', map: [], nodes: [] };
-      const origHtml = cell.dataset.origHtml || cell.innerHTML || '';
-      const cached = _normCache.get(cell);
-      if (cached && cached.origHtml === origHtml) return cached.value;
-      // build fresh
-      const nodes = [];
-      const walker = d.createTreeWalker(cell, NodeFilter.SHOW_TEXT, null, false);
-      while (walker.nextNode()) {
-        const tn = walker.currentNode;
-        if (!tn.nodeValue || tn.nodeValue.length === 0) continue;
-        if (tn.nodeValue.trim() === '') continue;
-        nodes.push(tn);
-      }
-      let normStr = '';
-      const map = [];
-      for (let ni = 0; ni < nodes.length; ni++) {
-        const raw = nodes[ni].nodeValue;
-        for (let i = 0; i < raw.length;) {
-          const cp = raw.codePointAt(i);
-          const ch = String.fromCodePoint(cp);
-          const charLen = cp > 0xFFFF ? 2 : 1;
-          const decomposed = ch.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-          let filtered;
-          try { filtered = decomposed.replace(/[^\p{L}\p{N}\s]/gu, ''); }
-          catch (e) { filtered = decomposed.replace(/[^\w\s]/g, ''); }
-          if (filtered.length > 0) {
-            for (let k = 0; k < filtered.length; k++) {
-              normStr += filtered[k];
-              map.push({ nodeIndex: ni, offsetInNode: i });
-            }
-          }
-          i += charLen;
-        }
-      }
-      const value = { normStr, map, nodes };
-      _normCache.set(cell, { origHtml, value });
-      return value;
-    } catch (e) { return { normStr: '', map: [], nodes: [] }; }
-  }
-
+  // Search & highlight functions preserved (unchanged)
   function clearHighlights(cell) {
     if (!cell) return;
-    try {
-      if (cell.dataset && cell.dataset.origHtml) {
-        if (cell.innerHTML !== cell.dataset.origHtml) {
-          cell.innerHTML = cell.dataset.origHtml;
-          _normCacheInvalidateForCell(cell);
+    if (cell.dataset && cell.dataset.origHtml) {
+      cell.innerHTML = cell.dataset.origHtml;
+      return;
+    }
+    const marks = Array.from(cell.querySelectorAll('mark'));
+    marks.forEach(m => {
+      const textNode = document.createTextNode(m.textContent);
+      if (m.parentNode) m.parentNode.replaceChild(textNode, m);
+    });
+  }
+
+  function buildNormalizedMapForCell(cell) {
+    const nodes = [];
+    const walker = document.createTreeWalker(cell, NodeFilter.SHOW_TEXT, null, false);
+    while (walker.nextNode()) {
+      const tn = walker.currentNode;
+      if (!tn.nodeValue || tn.nodeValue.length === 0) continue;
+      if (tn.nodeValue.trim() === '') continue;
+      nodes.push(tn);
+    }
+    let normStr = '';
+    const map = [];
+    for (let ni = 0; ni < nodes.length; ni++) {
+      const raw = nodes[ni].nodeValue;
+      for (let i = 0; i < raw.length;) {
+        const cp = raw.codePointAt(i);
+        const ch = String.fromCodePoint(cp);
+        const charLen = cp > 0xFFFF ? 2 : 1;
+        const decomposed = ch.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        let filtered;
+        try { filtered = decomposed.replace(/[^\p{L}\p{N}\s]/gu, ''); }
+        catch (e) { filtered = decomposed.replace(/[^\w\s]/g, ''); }
+        if (filtered.length > 0) {
+          for (let k = 0; k < filtered.length; k++) {
+            normStr += filtered[k];
+            map.push({ nodeIndex: ni, offsetInNode: i });
+          }
         }
-        return;
+        i += charLen;
       }
-      const marks = Array.from(cell.querySelectorAll('mark'));
-      marks.forEach(m => {
-        const textNode = d.createTextNode(m.textContent);
-        if (m.parentNode) m.parentNode.replaceChild(textNode, m);
-      });
-      _normCacheInvalidateForCell(cell);
-    } catch (e) { /* silent */ }
+    }
+    return { normStr, map, nodes };
   }
 
   function highlightMatches(cell, filterNorm) {
     if (!cell || !filterNorm) return;
-    try {
-      // restore original html if we have it cached
-      if (cell.dataset && cell.dataset.origHtml && cell.innerHTML !== cell.dataset.origHtml) {
-        cell.innerHTML = cell.dataset.origHtml;
-        _normCacheInvalidateForCell(cell);
-      }
-      const built = buildNormalizedMapForCellCached(cell);
-      const normStr = (built.normStr || '').toLowerCase();
-      if (!normStr || normStr.length === 0) return;
-      const map = built.map;
-      const nodes = built.nodes;
-      const needle = filterNorm.toLowerCase();
-      const matches = [];
-      let pos = 0;
-      while (true) {
-        const idx = normStr.indexOf(needle, pos);
-        if (idx === -1) break;
-        matches.push(idx);
-        pos = idx + needle.length;
-      }
-      if (matches.length === 0) return;
-
-      // process matches in reverse to avoid index shifts
-      for (let mi = matches.length - 1; mi >= 0; mi--) {
-        const startNorm = matches[mi];
-        const endNormExclusive = startNorm + needle.length;
-        const startMap = map[startNorm];
-        const endMap = map[endNormExclusive - 1];
-        if (!startMap || !endMap) continue;
-        const startNodeIndex = startMap.nodeIndex;
-        const startOffset = Math.max(0, Math.min((startMap.offsetInNode || 0), nodes[startNodeIndex].nodeValue.length));
-        const endNodeIndex = endMap.nodeIndex;
-        let endOffsetExclusive = Math.max(0, Math.min((endMap.offsetInNode || 0), nodes[endNodeIndex].nodeValue.length));
-        try {
-          const endNodeRaw = nodes[endNodeIndex].nodeValue;
-          const cp = endNodeRaw.codePointAt(endOffsetExclusive);
-          const charLen = cp > 0xFFFF ? 2 : 1;
-          endOffsetExclusive = Math.min(endOffsetExclusive + charLen, endNodeRaw.length);
-        } catch (e) { endOffsetExclusive = Math.min(endOffsetExclusive + 1, nodes[endNodeIndex].nodeValue.length); }
-        try {
-          if (startNodeIndex === endNodeIndex) {
-            const tn = nodes[startNodeIndex];
-            const rawLen = tn.nodeValue.length;
-            const s = Math.max(0, Math.min(startOffset, rawLen));
-            const e = Math.max(0, Math.min(endOffsetExclusive, rawLen));
-            if (s >= e) continue;
-            const after = tn.splitText(e);
-            const middle = tn.splitText(s);
-            const mark = d.createElement('mark');
-            mark.appendChild(d.createTextNode(middle.data));
-            middle.parentNode.replaceChild(mark, middle);
-          } else {
-            const startNode = nodes[startNodeIndex];
-            const endNode = nodes[endNodeIndex];
-            const rawStartLen = startNode.nodeValue.length;
-            const rawEndLen = endNode.nodeValue.length;
-            const sOff = Math.max(0, Math.min(startOffset, rawStartLen));
-            const eOff = Math.max(0, Math.min(endOffsetExclusive, rawEndLen));
-            const afterEnd = endNode.splitText(eOff);
-            const middleStart = startNode.splitText(sOff);
-            const wrapNodes = [];
-            let cur = middleStart;
-            while (cur) {
-              wrapNodes.push(cur);
-              if (cur === endNode) break;
-              cur = cur.nextSibling;
-              if (!cur) break;
-            }
-            if (wrapNodes.length === 0) continue;
-            const parent = wrapNodes[0].parentNode;
-            if (!parent) continue;
-            const mark = d.createElement('mark');
-            parent.insertBefore(mark, wrapNodes[0]);
-            wrapNodes.forEach(n => { try { mark.appendChild(n); } catch (e) {} });
+    if (cell.dataset && cell.dataset.origHtml) cell.innerHTML = cell.dataset.origHtml;
+    let built;
+    try { built = buildNormalizedMapForCell(cell); } catch (e) { return; }
+    const normStr = built.normStr.toLowerCase();
+    if (!normStr || normStr.length === 0) return;
+    const map = built.map;
+    const nodes = built.nodes;
+    const needle = filterNorm.toLowerCase();
+    const matches = [];
+    let pos = 0;
+    while (true) {
+      const idx = normStr.indexOf(needle, pos);
+      if (idx === -1) break;
+      matches.push(idx);
+      pos = idx + needle.length;
+    }
+    if (matches.length === 0) return;
+    for (let mi = matches.length - 1; mi >= 0; mi--) {
+      const startNorm = matches[mi];
+      const endNormExclusive = startNorm + needle.length;
+      const startMap = map[startNorm];
+      const endMap = map[endNormExclusive - 1];
+      if (!startMap || !endMap) continue;
+      const startNodeIndex = startMap.nodeIndex;
+      const startOffset = Math.max(0, Math.min((startMap.offsetInNode || 0), nodes[startNodeIndex].nodeValue.length));
+      const endNodeIndex = endMap.nodeIndex;
+      let endOffsetExclusive = Math.max(0, Math.min((endMap.offsetInNode || 0), nodes[endNodeIndex].nodeValue.length));
+      try {
+        const endNodeRaw = nodes[endNodeIndex].nodeValue;
+        const cp = endNodeRaw.codePointAt(endOffsetExclusive);
+        const charLen = cp > 0xFFFF ? 2 : 1;
+        endOffsetExclusive = Math.min(endOffsetExclusive + charLen, endNodeRaw.length);
+      } catch (e) { endOffsetExclusive = Math.min(endOffsetExclusive + 1, nodes[endNodeIndex].nodeValue.length); }
+      try {
+        if (startNodeIndex === endNodeIndex) {
+          const tn = nodes[startNodeIndex];
+          const rawLen = tn.nodeValue.length;
+          const s = Math.max(0, Math.min(startOffset, rawLen));
+          const e = Math.max(0, Math.min(endOffsetExclusive, rawLen));
+          if (s >= e) continue;
+          const after = tn.splitText(e);
+          const middle = tn.splitText(s);
+          const mark = document.createElement('mark');
+          mark.appendChild(document.createTextNode(middle.data));
+          middle.parentNode.replaceChild(mark, middle);
+        } else {
+          const startNode = nodes[startNodeIndex];
+          const endNode = nodes[endNodeIndex];
+          const rawStartLen = startNode.nodeValue.length;
+          const rawEndLen = endNode.nodeValue.length;
+          const sOff = Math.max(0, Math.min(startOffset, rawStartLen));
+          const eOff = Math.max(0, Math.min(endOffsetExclusive, rawEndLen));
+          const afterEnd = endNode.splitText(eOff);
+          const middleStart = startNode.splitText(sOff);
+          const wrapNodes = [];
+          let cur = middleStart;
+          while (cur) {
+            wrapNodes.push(cur);
+            if (cur === endNode) break;
+            cur = cur.nextSibling;
+            if (!cur) break;
           }
-        } catch (e) { continue; }
-      }
-      // invalidate cache as DOM text nodes were mutated
-      _normCacheInvalidateForCell(cell);
-    } catch (e) { /* silent */ }
+          if (wrapNodes.length === 0) continue;
+          const parent = wrapNodes[0].parentNode;
+          if (!parent) continue;
+          const mark = document.createElement('mark');
+          parent.insertBefore(mark, wrapNodes[0]);
+          wrapNodes.forEach(n => { try { mark.appendChild(n); } catch (e) {} });
+        }
+      } catch (e) { continue; }
+    }
   }
 
-  // -----------------------------
-  // Search loop (keeps behavior but debounced)
-  // -----------------------------
   function searchTable() {
     try {
       const searchEl = getSearchEl();
       const filterRaw = searchEl?.value || '';
       const filterNorm = normalizeForSearchLocal(filterRaw);
       let firstMatch = null;
-
-      // collect tables once
-      const tables = qa('.table-container table');
-      tables.forEach(table => {
+      document.querySelectorAll('.table-container table').forEach(table => {
         const tbody = safeGetTBody(table);
         if (!tbody) return;
         Array.from(tbody.rows).forEach(row => {
@@ -1339,44 +1347,31 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
           });
           row.style.display = (!filterNorm || rowMatches) ? '' : 'none';
           if (rowMatches) {
-            if (w.tvConfig && w.tvConfig.highlight) Array.from(row.cells).forEach(cell => highlightMatches(cell, filterNorm));
+            if (window.tvConfig && window.tvConfig.highlight) Array.from(row.cells).forEach(cell => highlightMatches(cell, filterNorm));
             if (!firstMatch) firstMatch = row;
           }
         });
       });
-
       try {
-        if (w.tableVirtualizer?.refresh) w.tableVirtualizer.refresh();
-        else if (w.tableVirtualizer?.update) w.tableVirtualizer.update();
+        if (window.tableVirtualizer?.refresh) window.tableVirtualizer.refresh();
+        else if (window.tableVirtualizer?.update) window.tableVirtualizer.update();
       } catch (_) {}
-
       if (firstMatch) {
         const rect = firstMatch.getBoundingClientRect();
-        const headerHeight = d.getElementById('stickyMainHeader')?.offsetHeight || 0;
-        const scrollTop = w.pageYOffset || d.documentElement.scrollTop || 0;
-        w.scrollTo({ top: scrollTop + rect.top - headerHeight - 5, behavior: 'smooth' });
+        const headerHeight = document.getElementById('stickyMainHeader')?.offsetHeight || 0;
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0;
+        window.scrollTo({ top: scrollTop + rect.top - headerHeight - 5, behavior: 'smooth' });
       }
       try { updateRowCounts(); } catch (_) {}
     } catch (_) {}
   }
 
-  const _debouncedSearch = (function () {
-    let t;
-    return function () {
-      const wait = (w.tvConfig && w.tvConfig.debounceMs) || 120;
-      clearTimeout(t);
-      t = setTimeout(() => { try { searchTable(); } catch (_) {} }, wait);
-    };
-  })();
-
-  // -----------------------------
-  // Mobile/table-control optimization (kept behavior)
-  // -----------------------------
+  // Mobile/table-control optimization — simplified and class-driven
   function optimizeTableControls() {
     try {
-      const mql = w.matchMedia ? w.matchMedia('(max-width:600px)') : null;
-      const isMobile = mql ? mql.matches : (w.innerWidth <= 600);
-      qa('.table-wrapper').forEach(wrapper => {
+      const mql = window.matchMedia ? window.matchMedia('(max-width:600px)') : null;
+      const isMobile = mql ? mql.matches : (window.innerWidth <= 600);
+      document.querySelectorAll('.table-wrapper').forEach(wrapper => {
         try {
           const header = wrapper.querySelector('.table-header-wrapper');
           if (!header) return;
@@ -1385,7 +1380,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
           header.style.overflowX = header.style.overflowX || 'auto';
           header.style.webkitOverflowScrolling = header.style.webkitOverflowScrolling || 'touch';
           header.style.display = header.style.display || 'flex';
-          header.style.flexWrap = header.style.flexWrap || 'wrap';
+/* removed inline flexWrap to respect stylesheet; previously set by script */;
           header.style.justifyContent = header.style.justifyContent || 'space-between';
           header.style.gap = header.style.gap || '8px';
           header.style.alignItems = header.style.alignItems || 'center';
@@ -1394,7 +1389,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
           if (!copyButtons) {
             const possibleBtns = Array.from(header.querySelectorAll('button')).filter(b => !b.classList.contains('toggle-table-btn') && !b.classList.contains('table-toggle-inline'));
             if (possibleBtns.length > 0) {
-              const cb = d.createElement('div');
+              const cb = document.createElement('div');
               cb.className = 'copy-buttons';
               cb.style.display = 'flex';
               cb.style.gap = '6px';
@@ -1412,8 +1407,12 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
             } else {
               try { header.insertBefore(toggleBtn, header.firstChild); } catch (_) {}
             }
+
+            // Ensure compact inline class on all viewports. Remove legacy class.
             try { toggleBtn.classList.remove('toggle-table-btn', 'table-toggle-mobile'); } catch (_) {}
             try { toggleBtn.classList.add('table-toggle-inline'); } catch (_) {}
+
+            // Clear inline overrides. CSS controls sizing.
             try {
               toggleBtn.style.order = '';
               toggleBtn.style.flex = '';
@@ -1461,123 +1460,52 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
     } catch (e) { /* global silent */ }
   }
 
-  const _debouncedOptimize = (function () {
-    let t;
-    return function () { clearTimeout(t); t = setTimeout(() => { try { optimizeTableControls(); } catch (_) {} }, 120); };
-  })();
-
-  if (w.matchMedia) {
+  const _debouncedOptimize = debounce(optimizeTableControls, 120);
+  if (window.matchMedia) {
     try {
-      const mql = w.matchMedia('(max-width:600px)');
-      if (typeof mql.addEventListener === 'function') mql.addEventListener('change', _debouncedOptimize);
-      else if (typeof mql.addListener === 'function') mql.addListener(_debouncedOptimize);
+      const mql = window.matchMedia('(max-width:600px)');
+      if (typeof mql.addEventListener === 'function') {
+        mql.addEventListener('change', _debouncedOptimize);
+      } else if (typeof mql.addListener === 'function') {
+        mql.addListener(_debouncedOptimize);
+      }
     } catch (_) {}
   }
-  w.addEventListener('resize', _debouncedOptimize);
+  window.addEventListener('resize', _debouncedOptimize);
 
-  // -----------------------------
-  // TOC builder (kept behavior; idempotent)
-  // -----------------------------
-  function buildSingleTableToc() {
+  // Attach handlers and initial DOM setup
+  document.addEventListener('DOMContentLoaded', function () {
     try {
-      const wrappers = qa('.table-wrapper');
-      if (!wrappers || wrappers.length !== 1) return;
-      const tocBar = d.getElementById('tocBar');
-      if (!tocBar) return;
-      const table = wrappers[0].querySelector('.table-container table') || wrappers[0].querySelector('table');
-      if (!table) return;
-
-      const tbody = safeGetTBody(table) || table;
-      const rows = Array.from((tbody && tbody.rows && tbody.rows.length) ? tbody.rows : (table.rows || []));
-      if (!rows || rows.length === 0) return;
-
-      const ul = d.createElement('ul');
-      ul.className = 'single-toc-list';
-      ul.style.listStyle = 'none';
-      ul.style.display = 'flex';
-      ul.style.gap = '8px';
-      ul.style.margin = '0';
-      ul.style.padding = '0';
-      ul.style.flexWrap = 'wrap';
-
-      rows.forEach((row, idx) => {
-        try {
-          let id = row.id && String(row.id).trim() ? row.id : `tv-row-${idx + 1}`;
-          if (d.getElementById(id) && d.getElementById(id) !== row) {
-            let suffix = 1;
-            while (d.getElementById(id + '-' + suffix)) suffix++;
-            id = id + '-' + suffix;
-          }
-          row.id = id;
-
-          const li = d.createElement('li');
-          li.className = 'toc-item';
-          const a = d.createElement('a');
-          a.className = 'toc-link';
-          a.href = `#${id}`;
-          a.textContent = `Topic ${idx + 1}`;
-          const rowText = (row.textContent || '').trim();
-          if (rowText) {
-            a.setAttribute('aria-label', rowText);
-            a.title = rowText;
-          }
-          a.addEventListener('click', function (ev) {
-            ev.preventDefault();
-            const target = d.getElementById(id);
-            if (target) {
-              target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              try { history.replaceState(null, '', `#${id}`); } catch (e) { }
-              try { target.focus && target.focus({ preventScroll: true }); } catch (e) { }
-            }
-          });
-          li.appendChild(a);
-          ul.appendChild(li);
-        } catch (e) { /* ignore single row error */ }
-      });
-
-      const existingUl = tocBar.querySelector('ul');
-      if (existingUl) existingUl.remove();
-      tocBar.appendChild(ul);
-    } catch (err) {
-      try { console.warn('buildSingleTableToc error', err); } catch (_) {}
-    }
-  }
-  w.buildSingleTableToc = buildSingleTableToc;
-
-  // -----------------------------
-  // Initialization (keeps flow)
-  // -----------------------------
-  d.addEventListener('DOMContentLoaded', function () {
-    try {
-      qa('.table-wrapper').forEach(wrapper => {
+      // Wrap tables in .table-container if missing
+      document.querySelectorAll('.table-wrapper').forEach(wrapper => {
         if (wrapper.querySelector('.table-container')) return;
         const table = wrapper.querySelector('table');
         if (!table) return;
-        const container = d.createElement('div');
+        const container = document.createElement('div');
         container.className = 'table-container';
         wrapper.insertBefore(container, table);
         container.appendChild(table);
       });
 
-      // Build single-table TOC first (so ids assigned)
-      try { buildSingleTableToc(); rIC(() => buildSingleTableToc()); } catch (e) {}
+      // Build single-table TOC first (so ids are assigned to rows)
+      try { buildSingleTableToc(); setTimeout(buildSingleTableToc, 500); } catch (e) {}
 
-      // Build snapshots and sortStates after DOM is stable
-      qa(".table-container table").forEach((table, idx) => {
+      // Build snapshots and sortStates after DOM is stable (now after TOC so row ids exist)
+      document.querySelectorAll(".table-container table").forEach((table, idx) => {
         try {
+          // Ensure each row has a stable internal UID and snapshot the original order
           _ensureRowUidsAndSnapshot(table, idx);
-          const key = _tableKeyFor(table, idx);
-          sortStates[key] = Array(table.rows[0]?.cells.length || 0).fill(0);
+
+          // store initial sort state per column
+          sortStates[idx] = Array(table.rows[0]?.cells.length || 0).fill(0);
         } catch (e) {
-          // ensure entries exist
-          const key = _tableKeyFor(table, idx);
-          sortStates[key] = sortStates[key] || [];
-          originalRowOrders[key] = originalRowOrders[key] || [];
+          sortStates[idx] = sortStates[idx] || [];
+          originalRowOrders[idx] = originalRowOrders[idx] || [];
         }
       });
 
       // attach per-cell original HTML snapshot used to restore highlights safely
-      qa('.table-container table').forEach(table => {
+      document.querySelectorAll('.table-container table').forEach(table => {
         const tbody = safeGetTBody(table);
         if (!tbody) return;
         Array.from(tbody.rows).forEach(r => {
@@ -1588,29 +1516,29 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
       });
 
       // Update header sort UI
-      qa(".table-container table").forEach((t, idx) => { updateHeaderSortUI(idx); });
+      document.querySelectorAll(".table-container table").forEach((t, idx) => { updateHeaderSortUI(idx); });
 
       // Update toggle buttons text
-      qa('.table-wrapper').forEach(wrap => {
-        const btn = wrap.querySelector('.toggle-table-btn');
-        if (btn) btn.textContent = wrap.classList.contains('table-collapsed') ? "Expand Table" : "Collapse Table";
+      document.querySelectorAll('.table-wrapper').forEach(w => {
+        const btn = w.querySelector('.toggle-table-btn');
+        if (btn) btn.textContent = w.classList.contains('table-collapsed') ? "Expand Table" : "Collapse Table";
       });
 
       // Toggle all button state
-      const anyExpanded = qa('.table-wrapper:not(.table-collapsed)').length > 0;
-      const toggleAll = d.getElementById('toggleAllBtn');
+      const anyExpanded = document.querySelectorAll('.table-wrapper:not(.table-collapsed)').length > 0;
+      const toggleAll = document.getElementById('toggleAllBtn');
       if (toggleAll) toggleAll.textContent = anyExpanded ? "Collapse All Tables" : "Expand All Tables";
 
       // Ensure backToTop exists
-      if (!d.getElementById('backToTop')) {
+      if (!document.getElementById('backToTop')) {
         try {
-          const b = d.createElement('button');
+          const b = document.createElement('button');
           b.id = 'backToTop';
           b.type = 'button';
           b.title = 'Back to top';
           b.textContent = '↑';
           b.style.display = 'none';
-          d.body.appendChild(b);
+          document.body.appendChild(b);
           b.addEventListener('click', backToTop);
         } catch (e) { /* ignore */ }
       }
@@ -1618,15 +1546,16 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
       // Attach search handlers (debounced)
       const sb = getSearchEl();
       if (sb) {
+        const deb = debounce(searchTable, (window.tvConfig && window.tvConfig.debounceMs) || 120);
         try {
-          sb.addEventListener('input', _debouncedSearch);
+          sb.addEventListener('input', deb);
           sb.addEventListener('keyup', function (e) { if (e.key === 'Enter') searchTable(); });
         } catch (e) { /* silent */ }
       }
 
       // Attach handlers to server-rendered toolbar buttons when missing
       try {
-        qa('.table-wrapper').forEach(wrapper => {
+        document.querySelectorAll('.table-wrapper').forEach(wrapper => {
           const handlers = [
             { sel: '.toggle-table-btn, .toggle-table', fn: toggleTable },
             { sel: '.copy-plain-btn, .copy-plain, .copy-plain-table', fn: copyTablePlain },
@@ -1635,6 +1564,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
             { sel: '.export-json-btn, .export-json, .export-json-table', fn: exportTableJSON },
             { sel: '.export-xlsx-btn, .export-xlsx, .export-xlsx-table', fn: exportTableXLSX },
             { sel: '.export-pdf-btn, .export-pdf, .export-pdf-table', fn: exportTablePDF }
+            // NOTE: export-markdown intentionally excluded from automatic handler attachment.
           ];
           handlers.forEach(h => {
             try {
@@ -1649,17 +1579,20 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
         });
       } catch (e) { /* silent */ }
 
-      // Optimize table controls
-      try { optimizeTableControls(); rIC(() => optimizeTableControls()); } catch (e) { /* silent */ }
+      // Optimize table controls position/size for all viewports
+      try { optimizeTableControls(); setTimeout(optimizeTableControls, 200); } catch (e) { /* silent */ }
 
-      // Hide UI targets
-      try { hideResetAllTablesOption(); rIC(() => hideResetAllTablesOption()); } catch (e) {}
-      try { hideExportMarkdownOption(); rIC(() => hideExportMarkdownOption()); } catch (e) {}
+      // Hide Reset All Tables UI targets (only hide; function retained)
+      try { hideResetAllTablesOption(); setTimeout(hideResetAllTablesOption, 500); } catch (e) {}
 
-      // Key handlers
+      // Hide Export Markdown UI targets (only hide; function retained)
+      // We already injected early-hide CSS; still run JS-based hide for completeness.
+      try { hideExportMarkdownOption(); setTimeout(hideExportMarkdownOption, 500); } catch (e) {}
+
+      // Single consolidated keydown handler for "/" and "Escape"
       document.addEventListener("keydown", function (e) {
         try {
-          const active = d.activeElement;
+          const active = document.activeElement;
           const tag = active && (active.tagName || "").toLowerCase();
           if (e.key === "/" && !e.ctrlKey && !e.metaKey && !e.altKey) {
             if (tag === 'input' || tag === 'textarea' || (active && active.isContentEditable)) return;
@@ -1680,7 +1613,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
     } catch (e) { /* silent */ }
   });
 
-  // delegated click: sorting (kept)
+  // delegated click: sorting
   document.addEventListener('click', function (e) {
     try {
       const el = e.target;
@@ -1690,7 +1623,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
       if (!th) return;
       const table = th.closest('table');
       if (!table) return;
-      const tables = Array.from(qa('.table-container table'));
+      const tables = Array.from(document.querySelectorAll('.table-container table'));
       const tableIdx = tables.indexOf(table);
       const colIdx = th.cellIndex;
       if (tableIdx === -1 || typeof colIdx === 'undefined' || colIdx < 0) return;
@@ -1707,91 +1640,65 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
       e.preventDefault();
       const id = (a.getAttribute('href') || '').substring(1);
       if (!id) return;
-      const headerHeight = d.getElementById('stickyMainHeader')?.offsetHeight || 0;
-      const target = d.getElementById(id);
+
+      const headerHeight = document.getElementById('stickyMainHeader')?.offsetHeight || 0;
+      const target = document.getElementById(id);
+
       if (target) {
         const rect = target.getBoundingClientRect();
-        const top = (w.pageYOffset || d.documentElement.scrollTop || 0) + rect.top;
-        w.scrollTo({ top: Math.max(0, top - headerHeight - 5), behavior: 'smooth' });
+        const top = (window.pageYOffset || document.documentElement.scrollTop || 0) + rect.top;
+        window.scrollTo({ top: Math.max(0, top - headerHeight - 5), behavior: 'smooth' });
         try { history.replaceState(null, '', '#' + id); } catch (err) {}
         try { target.focus && target.focus({ preventScroll: true }); } catch (err) {}
         return;
       }
+
       const container = a.closest('.table-wrapper');
       if (!container) return;
-      const containerTop = container.getBoundingClientRect().top + (w.pageYOffset || d.documentElement.scrollTop || 0);
-      w.scrollTo({ top: Math.max(0, containerTop - headerHeight - 5), behavior: 'smooth' });
+      const containerTop = container.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop || 0);
+      window.scrollTo({ top: Math.max(0, containerTop - headerHeight - 5), behavior: 'smooth' });
       try { history.replaceState(null, '', '#' + id); } catch (err) {}
     } catch (err) { /* silent */ }
   });
 
-  w.addEventListener("scroll", function () {
+  window.addEventListener("scroll", function () {
     try {
-      const btn = d.getElementById("backToTop");
+      const btn = document.getElementById("backToTop");
       if (!btn) return;
-      if (d.documentElement.scrollTop > 200 || w.scrollY > 200) btn.style.display = "block";
+      if (document.documentElement.scrollTop > 200 || window.scrollY > 200) btn.style.display = "block";
       else btn.style.display = "none";
     } catch (e) { /* silent */ }
   });
 
-  function backToTop() { try { w.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) {} }
+  function backToTop() { try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) {} }
 
-  // -----------------------------
-  // Expose functions (unchanged names)
-  // -----------------------------
-  w.headerSortButtonClicked = headerSortButtonClicked;
-  w.toggleTable = function toggleTable(btn) {
-    try {
-      const wrapper = btn.closest('.table-wrapper');
-      if (!wrapper) return;
-      const collapsed = wrapper.classList.toggle('table-collapsed');
-      btn.textContent = collapsed ? "Expand Table" : "Collapse Table";
-      const anyExpanded = qa('.table-wrapper:not(.table-collapsed)').length > 0;
-      const toggleAllBtn = d.getElementById('toggleAllBtn');
-      if (toggleAllBtn) toggleAllBtn.textContent = anyExpanded ? "Collapse All Tables" : "Expand All Tables";
-      try { updateRowCounts(); } catch (e) {}
-    } catch (e) { /* silent */ }
-  };
-  w.toggleAllTables = function toggleAllTables() {
-    try {
-      const wrappers = Array.from(qa('.table-wrapper'));
-      if (wrappers.length === 0) return;
-      const anyExpanded = wrappers.some(wr => !wr.classList.contains('table-collapsed'));
-      if (anyExpanded) {
-        wrappers.forEach(wrap => { wrap.classList.add('table-collapsed'); const btn = wrap.querySelector('.toggle-table-btn'); if (btn) btn.textContent = "Expand Table"; });
-        const toggleAllBtn = d.getElementById('toggleAllBtn');
-        if (toggleAllBtn) toggleAllBtn.textContent = "Expand All Tables";
-      } else {
-        wrappers.forEach(wrap => { wrap.classList.remove('table-collapsed'); const btn = wrap.querySelector('.toggle-table-btn'); if (btn) btn.textContent = "Collapse Table"; });
-        const toggleAllBtn = d.getElementById('toggleAllBtn');
-        if (toggleAllBtn) toggleAllBtn.textContent = "Collapse All Tables";
-      }
-      try { updateRowCounts(); } catch (e) {}
-    } catch (e) { /* silent */ }
-  };
-  w.copyTablePlain = copyTablePlain;
-  w.copyTableMarkdown = copyTableMarkdown;
-  w.copyAllTablesPlain = copyAllTablesPlain;
-  w.copyAllTablesMarkdown = copyAllTablesMarkdown;
-  w.resetAllTables = resetAllTables;
-  w.searchTable = searchTable;
-  w.exportTableCSV = exportTableCSV;
-  w.exportTableJSON = exportTableJSON;
-  w.exportTableXLSX = exportTableXLSX;
-  w.exportTablePDF = exportTablePDF;
-  w.exportTableMarkdown = exportTableMarkdown;
-  w.exportAllTablesMarkdown = exportAllTablesMarkdown;
+  // Expose functions used by HTML inline handlers
+  window.headerSortButtonClicked = headerSortButtonClicked;
+  window.toggleTable = toggleTable;
+  window.toggleAllTables = toggleAllTables;
+  window.copyTablePlain = copyTablePlain;
+  window.copyTableMarkdown = copyTableMarkdown;
+  window.copyAllTablesPlain = copyAllTablesPlain;
+  window.copyAllTablesMarkdown = copyAllTablesMarkdown;
+  window.resetAllTables = resetAllTables;
+  window.searchTable = searchTable;
+  window.exportTableCSV = exportTableCSV;
+  window.exportTableJSON = exportTableJSON;
+  window.exportTableXLSX = exportTableXLSX;
+  window.exportTablePDF = exportTablePDF;
+  window.exportTableMarkdown = exportTableMarkdown;
+  window.exportAllTablesMarkdown = exportAllTablesMarkdown;
 
-  w.toggleMode = function () {
+  window.toggleMode = function () {
     try {
-      const modeBtn = d.getElementById('modeBtn');
-      const dark = d.documentElement.getAttribute('data-theme') !== 'dark';
+      const modeBtn = document.getElementById('modeBtn');
+      const dark = document.documentElement.getAttribute('data-theme') !== 'dark';
       if (dark) {
-        d.documentElement.setAttribute('data-theme', 'dark');
+        document.documentElement.setAttribute('data-theme', 'dark');
         if (modeBtn) modeBtn.textContent = 'Light mode';
         localStorage.setItem('uiMode', 'dark');
       } else {
-        d.documentElement.removeAttribute('data-theme');
+        document.documentElement.removeAttribute('data-theme');
         if (modeBtn) modeBtn.textContent = 'Dark mode';
         localStorage.setItem('uiMode', 'light');
       }
@@ -1799,8 +1706,8 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
   };
 
   try {
-    const idxUrl = d.body && d.body.getAttribute('data-index-url');
-    const wUrl = d.body && d.body.getAttribute('data-worker-url');
+    const idxUrl = document.body && document.body.getAttribute('data-index-url');
+    const wUrl = document.body && document.body.getAttribute('data-worker-url');
     if (console && console.info) {
       console.info('tv:base', TV_BASE);
       console.info('tv:index-url', idxUrl);
@@ -1808,151 +1715,153 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
     }
   } catch (e) { /* silent */ }
 
-  // -----------------------------
-  // extra.js loader + topic fallback appended (kept identical semantics)
-  // -----------------------------
-  (function () {
-    'use strict';
-    if (w.__tv_extra_loader_patched) return;
-    w.__tv_extra_loader_patched = true;
+})();
 
-    function detectScriptBaseInner() {
-      try {
-        const sel = d.querySelector('script[src*="script.js"], script[src*="/assets/script.js"]');
-        if (sel && sel.src) return sel.src.replace(/script\.js(\?.*)?$/, '');
-        const sAll = d.getElementsByTagName('script');
-        for (let i = sAll.length - 1; i >= 0; i--) {
-          const src = sAll[i].src || '';
-          if (src.indexOf('/assets/') !== -1 && src.indexOf('script') !== -1) return src.replace(/script\.js(\?.*)?$/, '');
-        }
-      } catch (e) { }
-      try { return location.origin + (location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1) || '/'); } catch (e) { return './'; }
-    }
+/* =========================
+   Append: extra.js loader + topic fallback
+   Safe, idempotent bootstrap to ensure Topic labels in single-table mobile TOC
+   ========================= */
+(function(){
+  'use strict';
 
-    const BASE = detectScriptBaseInner();
-    const CANDIDATES = [
-      BASE + 'extra.js',
-      BASE + 'assets/extra.js',
-      (location.origin || '') + '/assets/extra.js',
-      './assets/extra.js',
-      './extra.js'
-    ];
+  if (window.__tv_extra_loader_patched) return;
+  window.__tv_extra_loader_patched = true;
 
-    function loadScriptOnce(src, onload, onerror) {
-      try {
-        const exist = Array.from(d.getElementsByTagName('script')).some(s => (s.src || '').indexOf(src) !== -1);
-        if (exist) { if (typeof onload === 'function') onload(); return; }
-        const s = d.createElement('script');
-        s.src = src;
-        s.async = true;
-        s.onload = function () { try { if (typeof onload === 'function') onload(); } catch (e) { } };
-        s.onerror = function (e) { try { if (typeof onerror === 'function') onerror(e); } catch (_) { } };
-        (d.head || d.documentElement).appendChild(s);
-      } catch (e) {
-        if (typeof onerror === 'function') onerror(e);
+  function detectScriptBase() {
+    try {
+      const sel = document.querySelector('script[src*="script.js"], script[src*="/assets/script.js"]');
+      if (sel && sel.src) return sel.src.replace(/script\.js(\?.*)?$/, '');
+      const sAll = document.getElementsByTagName('script');
+      for (let i = sAll.length - 1; i >= 0; i--) {
+        const src = sAll[i].src || '';
+        if (src.indexOf('/assets/') !== -1 && src.indexOf('script') !== -1) return src.replace(/script\.js(\?.*)?$/, '');
       }
+    } catch (e) { }
+    try { return location.origin + (location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1) || '/'); } catch (e) { return './'; }
+  }
+
+  const BASE = detectScriptBase();
+  const CANDIDATES = [
+    BASE + 'extra.js',
+    BASE + 'assets/extra.js',
+    (location.origin || '') + '/assets/extra.js',
+    './assets/extra.js',
+    './extra.js'
+  ];
+
+  function loadScriptOnce(src, onload, onerror) {
+    try {
+      const exist = Array.from(document.getElementsByTagName('script')).some(s => (s.src||'').indexOf(src) !== -1);
+      if (exist) { if (typeof onload === 'function') onload(); return; }
+      const s = document.createElement('script');
+      s.src = src;
+      s.async = true;
+      s.onload = function() { try{ if (typeof onload === 'function') onload(); } catch(e){} };
+      s.onerror = function(e) { try{ if (typeof onerror === 'function') onerror(e); } catch(_){} };
+      (document.head || document.documentElement).appendChild(s);
+    } catch (e) {
+      if (typeof onerror === 'function') onerror(e);
     }
+  }
 
-    function attemptLoadExtra(cands, cb) {
-      if (!cands || !cands.length) { if (cb) cb(false); return; }
-      const src = cands.shift();
-      loadScriptOnce(src, function () { if (cb) cb(true, src); }, function () { attemptLoadExtra(cands, cb); });
-    }
+  function attemptLoadExtra(cands, cb) {
+    if (!cands || !cands.length) { if (cb) cb(false); return; }
+    const src = cands.shift();
+    loadScriptOnce(src, function(){ if (cb) cb(true, src); }, function(){ attemptLoadExtra(cands, cb); });
+  }
 
-    function minimalTopicFallback() {
-      try {
-        const reLabel = /^\s*Table\s*\d+\b/i;
-        let anchors = [];
-        const containers = Array.from(d.querySelectorAll('nav, .toc, .table-of-contents, #toc, .toc-list, .tv-toc, .tables-toc, aside'));
-        for (const c of containers) {
-          try {
-            anchors = anchors.concat(Array.from(c.querySelectorAll('a')).filter(a => reLabel.test((a.textContent || '').trim())));
-          } catch (e) { }
-        }
-        if (anchors.length === 0) {
-          anchors = Array.from(d.querySelectorAll('a[href^="#"]')).filter(a => reLabel.test((a.textContent || '').trim()));
-        }
-        const tableWrappers = Array.from(d.querySelectorAll('.table-wrapper, .tables, table'));
-        if (!(anchors.length === 1 || tableWrappers.length === 1)) return;
+  function minimalTopicFallback() {
+    try {
+      const reLabel = /^\s*Table\s*\d+\b/i;
+      let anchors = [];
+      const containers = Array.from(document.querySelectorAll('nav, .toc, .table-of-contents, #toc, .toc-list, .tv-toc, .tables-toc, aside'));
+      for (const c of containers) {
+        try {
+          anchors = anchors.concat(Array.from(c.querySelectorAll('a')).filter(a => reLabel.test((a.textContent||'').trim())));
+        } catch(e){}
+      }
+      if (anchors.length === 0) {
+        anchors = Array.from(document.querySelectorAll('a[href^="#"]')).filter(a => reLabel.test((a.textContent||'').trim()));
+      }
+      const tableWrappers = Array.from(document.querySelectorAll('.table-wrapper, .tables, table'));
+      if (!(anchors.length === 1 || tableWrappers.length === 1)) return;
 
-        const replaceNodeText = (el, re, repl) => {
-          if (!el) return false;
-          for (const child of Array.from(el.childNodes)) {
-            if (child.nodeType === 3) {
-              if (re.test(child.nodeValue || '')) {
-                child.nodeValue = child.nodeValue.replace(re, repl);
-                return true;
-              }
-            } else if (child.nodeType === 1 && child.childNodes.length === 1 && child.firstChild.nodeType === 3) {
-              if (re.test(child.firstChild.nodeValue || '')) {
-                child.firstChild.nodeValue = child.firstChild.nodeValue.replace(re, repl);
-                return true;
-              }
+      const replaceNodeText = (el, re, repl) => {
+        if (!el) return false;
+        for (const child of Array.from(el.childNodes)) {
+          if (child.nodeType === 3) {
+            if (re.test(child.nodeValue||'')) {
+              child.nodeValue = child.nodeValue.replace(re, repl);
+              return true;
+            }
+          } else if (child.nodeType === 1 && child.childNodes.length === 1 && child.firstChild.nodeType === 3) {
+            if (re.test(child.firstChild.nodeValue||'')) {
+              child.firstChild.nodeValue = child.firstChild.nodeValue.replace(re, repl);
+              return true;
             }
           }
-          const all = el.textContent || '';
-          if (re.test(all)) {
-            el.textContent = all.replace(re, repl);
-            return true;
-          }
-          return false;
-        };
-
-        const a = anchors.length === 1 ? anchors[0] : null;
-        if (a) {
-          replaceNodeText(a, /\bTable\b/i, 'Topic');
-          const aria = a.getAttribute && a.getAttribute('aria-label');
-          if (aria && /\bTable\b/i.test(aria)) a.setAttribute('aria-label', aria.replace(/\bTable\b/i, 'Topic'));
-          const href = a.getAttribute && a.getAttribute('href');
-          if (href && href.startsWith('#')) {
-            const tgt = d.querySelector(href);
-            if (tgt) {
-              const heading = tgt.querySelector('h1,h2,h3,h4,.table-title,.table-header') || tgt;
-              replaceNodeText(heading, /\bTable\b/i, 'Topic');
-              const dt = heading.getAttribute && heading.getAttribute('data-title');
-              if (dt && /\bTable\b/i.test(dt)) heading.setAttribute('data-title', dt.replace(/\bTable\b/i, 'Topic'));
-            }
-          }
-        } else if (tableWrappers.length === 1) {
-          const wrapper = tableWrappers[0];
-          const heading = wrapper.querySelector('h1,h2,h3,h4,.table-title,.table-header') || wrapper;
-          replaceNodeText(heading, /\bTable\b/i, 'Topic');
         }
-      } catch (e) { /* silent */ }
-    }
-
-    function __tv_patch_diag() {
-      return {
-        loadedExtraScript: !!d.querySelector('script[src*="extra.js"]'),
-        topicPatchFlag: !!w.__tv_topic_patch_loaded,
-        anchorsFound: Array.from(d.querySelectorAll('a')).filter(a => /\bTable\s*\d+\b/i.test((a.textContent || '').trim())).slice(0, 10).map(a => (a.textContent || '').trim())
+        const all = el.textContent || '';
+        if (re.test(all)) {
+          el.textContent = all.replace(re, repl);
+          return true;
+        }
+        return false;
       };
-    }
-    w.__tv_patch_diag = __tv_patch_diag;
 
-    if (w.__tv_no_auto_extra_load) {
-      if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', function () { setTimeout(minimalTopicFallback, 80); });
-      else setTimeout(minimalTopicFallback, 80);
-      return;
-    }
-
-    attemptLoadExtra(CANDIDATES.slice(), function (success, src) {
-      setTimeout(function () {
-        if (w.__tv_topic_patch_loaded) {
-          return;
+      const a = anchors.length === 1 ? anchors[0] : null;
+      if (a) {
+        replaceNodeText(a, /\bTable\b/i, 'Topic');
+        const aria = a.getAttribute && a.getAttribute('aria-label');
+        if (aria && /\bTable\b/i.test(aria)) a.setAttribute('aria-label', aria.replace(/\bTable\b/i,'Topic'));
+        const href = a.getAttribute && a.getAttribute('href');
+        if (href && href.startsWith('#')) {
+          const tgt = document.querySelector(href);
+          if (tgt) {
+            const heading = tgt.querySelector('h1,h2,h3,h4,.table-title,.table-header') || tgt;
+            replaceNodeText(heading, /\bTable\b/i, 'Topic');
+            const dt = heading.getAttribute && heading.getAttribute('data-title');
+            if (dt && /\bTable\b/i.test(dt)) heading.setAttribute('data-title', dt.replace(/\bTable\b/i,'Topic'));
+          }
         }
-        minimalTopicFallback();
-      }, 300);
-    });
+      } else if (tableWrappers.length === 1) {
+        const wrapper = tableWrappers[0];
+        const heading = wrapper.querySelector('h1,h2,h3,h4,.table-title,.table-header') || wrapper;
+        replaceNodeText(heading, /\bTable\b/i, 'Topic');
+      }
+    } catch (e) { /* silent */ }
+  }
 
-    if (d.readyState === 'loading') {
-      d.addEventListener('DOMContentLoaded', function () { setTimeout(function () { if (!w.__tv_topic_patch_loaded) minimalTopicFallback(); }, 120); });
-    } else {
-      setTimeout(function () { if (!w.__tv_topic_patch_loaded) minimalTopicFallback(); }, 120);
-    }
+  function __tv_patch_diag() {
+    return {
+      loadedExtraScript: !!document.querySelector('script[src*="extra.js"]'),
+      topicPatchFlag: !!window.__tv_topic_patch_loaded,
+      anchorsFound: Array.from(document.querySelectorAll('a')).filter(a=>/\bTable\s*\d+\b/i.test((a.textContent||'').trim())).slice(0,10).map(a=> (a.textContent||'').trim())
+    };
+  }
+  window.__tv_patch_diag = __tv_patch_diag;
 
-    w.__tv_trigger_topic_fallback = function () { minimalTopicFallback(); };
+  if (window.__tv_no_auto_extra_load) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(minimalTopicFallback, 80); });
+    else setTimeout(minimalTopicFallback, 80);
+    return;
+  }
 
-  })();
+  attemptLoadExtra(CANDIDATES.slice(), function(success, src){
+    setTimeout(function(){
+      if (window.__tv_topic_patch_loaded) {
+        return;
+      }
+      minimalTopicFallback();
+    }, 300);
+  });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(function(){ if (!window.__tv_topic_patch_loaded) minimalTopicFallback(); }, 120); });
+  } else {
+    setTimeout(function(){ if (!window.__tv_topic_patch_loaded) minimalTopicFallback(); }, 120);
+  }
+
+  window.__tv_trigger_topic_fallback = function(){ minimalTopicFallback(); };
 
 })();
