@@ -1,41 +1,22 @@
 
-/* Theme variables (defaults for light mode) */
+/* overrides.css — generated override rules (conflict-resistant) */
+/* normalized column widths: left=28.57%, others=71.43% */
 :root {
-  --header-bg: #f3f4f6;
-  --header-color: #111827;
-  --row-odd-bg: #ffffff;
-  --row-even-bg: #fbfbfb;
-  --row-hover-bg: rgba(0,0,0,0.04);
-  --muted: #6b7280;
-  --text: #111827;
+  --ov-left-col-width: 28.57%;
+  --ov-other-col-width: 71.43%;
+  --ov-heading-gap: 8px;
 }
 
-/* Dark-mode overrides (supports data-theme="dark" and body.dark-mode) */
-[data-theme="dark"], body.dark-mode {
-  --header-bg: #2a2e3a;
-  --header-color: #e6eef6;
-  /* improved header highlight for dark mode: slightly lighter than header-bg for clear contrast */
-  --header-highlight-bg: #33363f;
-  --header-highlight-color: #ffffff;
-  --row-odd-bg: #242834;
-  --row-even-bg: #2a2e3a;
-  --row-hover-bg: rgba(255,255,255,0.08);
-  --muted: #9aa0b2;
-  --text: #e6eef6;
-}
-
-/* Targeted header alignment overrides */
+/* Table baseline adjustments (scoped, non-destructive) */
 .table-container table { table-layout: fixed; border-collapse: collapse; width:100%; box-sizing: border-box; }
-/* Do not change tr -> flex: keep table semantics */
 .table-container table thead th {
   vertical-align: middle;
   padding: 10px;
   box-sizing: border-box;
   white-space: normal;
-  background-color: var(--header-bg);
-  color: var(--header-color);
+  background-color: var(--header-bg, transparent);
+  color: var(--header-color, inherit);
 }
-/* Ensure header inner wrapper takes full height and centers content */
 .table-container table thead th .th-with-sort,
 .table-container table thead th .th-with-sort > div {
   display: flex;
@@ -47,77 +28,58 @@
   overflow: hidden;
 }
 
-/* Sticky first column header: use the same header background */
+/* Sticky first column header */
 .table-container table thead th:first-child {
   position: sticky;
   left: 0;
   z-index: 6;
-  background-color: var(--header-bg) !important;
-  color: var(--header-color) !important;
+  background-color: var(--header-bg, inherit) !important;
+  color: var(--header-color, inherit) !important;
 }
-
-/* Sticky first column cells: sync explicitly with row backgrounds */
 .table-container table tbody td:first-child {
   position: sticky;
   left: 0;
   z-index: 4;
   box-shadow: 2px 0 5px -2px rgba(0,0,0,0.08);
-  /* fallback */
   background-color: inherit !important;
   color: inherit !important;
 }
 
-/* Zebra rows: set row background for all cells (so first column can copy it) */
-.table-container table tbody tr:nth-child(odd) td {
-  background-color: var(--row-odd-bg);
-}
-.table-container table tbody tr:nth-child(even) td {
-  background-color: var(--row-even-bg);
-}
+/* Zebra rows */
+.table-container table tbody tr:nth-child(odd) td { background-color: var(--row-odd-bg, transparent); }
+.table-container table tbody tr:nth-child(even) td { background-color: var(--row-even-bg, transparent); }
+.table-container table tbody tr:nth-child(odd) td:first-child { background-color: var(--row-odd-bg, transparent) !important; }
+.table-container table tbody tr:nth-child(even) td:first-child { background-color: var(--row-even-bg, transparent) !important; }
 
-/* Ensure the sticky first column copies the same zebra colors (explicit to avoid stacking issues) */
-.table-container table tbody tr:nth-child(odd) td:first-child {
-  background-color: var(--row-odd-bg) !important;
-}
-.table-container table tbody tr:nth-child(even) td:first-child {
-  background-color: var(--row-even-bg) !important;
-}
+/* Hover highlight */
+.table-container table tbody tr:hover td { background-color: var(--row-hover-bg, rgba(0,0,0,0.04)) !important; }
+.table-container table tbody tr:hover td:first-child { background-color: var(--row-hover-bg, rgba(0,0,0,0.04)) !important; }
 
-/* Hover highlight: applied to entire row (including first column) */
-.table-container table tbody tr:hover td {
-  background-color: var(--row-hover-bg) !important;
-}
-.table-container table tbody tr:hover td:first-child {
-  background-color: var(--row-hover-bg) !important;
-}
-
-/* Header hover/focus/active — ensures header highlight is distinct from row hover in dark mode */
+/* Dark-mode header highlight */
 [data-theme="dark"] .table-container table thead th:hover,
 [data-theme="dark"] .table-container table thead th:focus,
 [data-theme="dark"] .table-container table thead th.sort-active,
 body.dark-mode .table-container table thead th:hover,
 body.dark-mode .table-container table thead th:focus,
 body.dark-mode .table-container table thead th.sort-active {
-  background-color: var(--header-highlight-bg) !important;
-  color: var(--header-highlight-color) !important;
+  background-color: var(--header-highlight-bg, rgba(255,255,255,0.02)) !important;
+  color: var(--header-highlight-color, inherit) !important;
   transition: background-color 120ms ease, color 120ms ease;
   outline: 2px solid rgba(255,255,255,0.03);
 }
-/* ensure sticky first column header also respects highlight on hover/focus */
 [data-theme="dark"] .table-container table thead th:first-child:hover,
 body.dark-mode .table-container table thead th:first-child:hover {
-  background-color: var(--header-highlight-bg) !important;
-  color: var(--header-highlight-color) !important;
+  background-color: var(--header-highlight-bg, rgba(255,255,255,0.02)) !important;
+  color: var(--header-highlight-color, inherit) !important;
 }
 
-/* proportional widths based on total_units (kept for compatibility) */
-.table-container table thead th:first-child { width: 28.57%; }
-.table-container table thead th:not(:first-child) { width: 71.43%; }
-.table-container table tbody td:first-child { width: 28.57%; }
-.table-container table tbody td:not(:first-child) { width: 71.43%; }
+/* Proportional widths (first vs others). These are conservative and non-destructive. */
+.table-container table thead th:first-child { width: var(--ov-left-col-width); max-width: var(--ov-left-col-width); }
+.table-container table thead th:not(:first-child) { width: var(--ov-other-col-width); max-width: var(--ov-other-col-width); }
+.table-container table tbody td:first-child { width: var(--ov-left-col-width); max-width: var(--ov-left-col-width); }
+.table-container table tbody td:not(:first-child) { width: var(--ov-other-col-width); max-width: var(--ov-other-col-width); }
 
-/* --- Lists inside table cells: force consistent markers --- */
-/* top-level unordered lists: use en-dash marker (–) */
+/* Lists in table cells: consistent markers */
 .table-container table td > ul, .table-container table td > ol {
   margin: .45rem 0;
   padding-left: 1.25rem;
@@ -129,7 +91,7 @@ body.dark-mode .table-container table thead th:first-child:hover {
 }
 .table-container table td > ul > li::before {
   content: "– ";
-  color: var(--text);
+  color: var(--text, #111827);
   display: inline-block;
   width: 1.1ch;
   margin-left: -1.1ch;
@@ -139,25 +101,20 @@ body.dark-mode .table-container table thead th:first-child:hover {
   display: inline-block;
   width: 1.1ch;
   margin-left: -1.1ch;
-  color: var(--muted);
+  color: var(--muted, #6b7280);
   font-size: 0.9em;
 }
-.table-container table td ol {
-  counter-reset: table-ol;
-  padding-left: 1.6rem;
-}
-.table-container table td ol > li {
-  counter-increment: table-ol;
-}
+.table-container table td ol { counter-reset: table-ol; padding-left: 1.6rem; }
+.table-container table td ol > li { counter-increment: table-ol; }
 .table-container table td ol > li::before {
   content: counter(table-ol) ". ";
-  color: var(--text);
+  color: var(--text, #111827);
   display: inline-block;
   width: 2.2ch;
   margin-left: -2.2ch;
 }
 
-/* Debug fallback: ensure list markers apply if other sheets are heavy-handed */
+/* Debug fallback: force list markers if other sheets are heavy-handed */
 .table-container td ul,
 .table-container td ol {
   list-style: none !important;
@@ -169,10 +126,90 @@ body.dark-mode .table-container table thead th:first-child:hover {
   display: inline-block !important;
   width: 1.4ch !important;
   margin-left: -1.4ch !important;
-  color: var(--text) !important;
+  color: var(--text, #111827) !important;
 }
 .table-container td ul ul > li::before {
   content: "• " !important;
   font-size: 0.9em !important;
-  color: var(--muted) !important;
+  color: var(--muted, #6b7280) !important;
+}
+
+/* === Topic/Table heading: conflict-resistant rules ===
+   These rules are intentionally high-specificity and use !important where necessary.
+   They force Topic 1 / Topic 2 to remain on a single horizontal row on all viewports.
+*/
+#mainContent .table-heading-bar,
+.content .table-heading-bar,
+#tables-viewer .table-heading-bar,
+.table-heading-bar {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  gap: var(--ov-heading-gap, 8px) !important;
+  align-items: center !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  white-space: nowrap !important;
+  padding: 6px 12px !important;
+  margin-left: -12px !important;
+  margin-right: -12px !important;
+  overscroll-behavior-x: contain !important;
+}
+
+#mainContent .table-heading-bar > h3.table-heading,
+.content .table-heading-bar > h3.table-heading,
+#tables-viewer .table-heading-bar > h3.table-heading,
+.table-heading-bar > h3.table-heading,
+.table-heading-bar > a.table-heading,
+.table-heading-bar > .table-heading {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  hyphens: none !important;
+  margin: 0 !important;            /* remove default heading margins */
+  padding: 6px 10px !important;
+  min-height: 32px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  font-size: 0.95rem !important;
+}
+
+/* extra safeguard when frameworks inject display:block or width constraints */
+.table-heading-bar > h3.table-heading * {
+  white-space: nowrap !important;
+  display: inline !important;
+  overflow: visible !important;
+}
+
+@media (max-width: 600px) {
+  /* slightly reduced padding but keep single-row behavior */
+  #mainContent .table-heading-bar,
+  .content .table-heading-bar,
+  .table-heading-bar {
+    gap: 6px !important;
+    padding: 6px 8px !important;
+    margin-left: -8px !important;
+    margin-right: -8px !important;
+  }
+  .table-heading-bar > h3.table-heading,
+  .table-heading-bar > a.table-heading,
+  .table-heading-bar > .table-heading {
+    font-size: 0.88rem !important;
+    padding: 4px 8px !important;
+    min-height: 34px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  #mainContent .table-heading-bar,
+  .content .table-heading-bar,
+  .table-heading-bar { padding: 6px 6px !important; gap: 6px !important; }
+  .table-heading-bar > h3.table-heading,
+  .table-heading-bar > .table-heading {
+    padding: 4px 7px !important;
+    font-size: 0.85rem !important;
+    min-height: 32px !important;
+  }
 }

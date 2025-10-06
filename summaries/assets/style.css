@@ -327,10 +327,10 @@ transition: box-shadow var(--trans-duration) var(--easing), border-color var(--t
 
 /* ========== CAPTION, COLUMN-TYPE, EXPORT STYLES (ADDED) ========== */
 
-/* Caption fallback styling - provides CSS fallback and print-safety */
+/* Caption fallback styling - provides CSS fallback and print-safety /
 .table-caption {
-margin-top: 2mm;       /* inline already sets this; keep a CSS fallback */
-margin-left: 3mm;      /* shift captions right */
+margin-top: 2mm; / inline already sets this; keep a CSS fallback /
+margin-left: 3mm; / shift captions right */
 font-weight: 600;
 font-size: 0.95em;
 color: var(--text);
@@ -495,8 +495,8 @@ min-width: 36px !important;
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
 
-* { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; transform: none !important; }
-  }
+{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; transform: none !important; }
+}
 
 /* Print rules (conservative) */
 @media print {
@@ -672,8 +672,8 @@ Uncomment and test individually.
 
 */
 
-/* Scrollbar styling (modern browsers) */
-/*
+/* Scrollbar styling (modern browsers) /
+/
 .table-container::-webkit-scrollbar, .copy-button-output pre::-webkit-scrollbar { height: 10px; width: 8px; }
 .table-container::-webkit-scrollbar-thumb, .copy-button-output pre::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 8px; }
 .table-container::-webkit-scrollbar-track, .copy-button-output pre::-webkit-scrollbar-track { background: transparent; }
@@ -682,8 +682,8 @@ Uncomment and test individually.
 }
 */
 
-/* Code-block header styling (filename / actions) */
-/*
+/* Code-block header styling (filename / actions) /
+/
 .code-block {
 margin: 1em 0;
 border-radius: 10px;
@@ -705,8 +705,8 @@ color: var(--muted);
 }
 */
 
-/* RTL logical properties alternative to left/inline handling */
-/*
+/* RTL logical properties alternative to left/inline handling /
+/
 thead th:first-child{
 position:sticky;
 inset-inline-start:0;
@@ -721,8 +721,8 @@ z-index:4;
 }
 */
 
-/* Extended print rules from v3 */
-/*
+/* Extended print rules from v3 /
+/
 @media print {
 body { font-size: 16px; }
 thead { display: table-header-group; }
@@ -732,151 +732,194 @@ pre, code { white-space: pre-wrap !important; word-break: break-word !important;
 }
 */
 
-/* ---------- TOPIC HEADING BAR: HORIZONTAL SINGLE ROW (forced override) ---------- */
+/* ---------- TOPIC HEADING BAR: HORIZONTAL SINGLE ROW (conflict-resistant) ---------- */
 
 /*
-  Replaced prior block with a higher-specificity, conflict-resistant set of rules.
-  These rules preserve design while forcing single-row topic headings on mobile and desktop.
+This block enforces single-row horizontal topic headings with high specificity
+and limited use of !important only where necessary to defeat aggressive third-party CSS.
+It targets the typical markup used by the renderer: h3.table-heading, a.table-heading,
+and elements with class .table-heading inside the .table-heading-bar container.
 */
 
-/* primary container rules (more specific selectors to beat cascade) */
+/* Primary container: highest reasonable specificity /
+#tables-viewer .table-heading-bar,
 #mainContent .table-heading-bar,
 .content .table-heading-bar,
 .table-heading-bar {
-  display: flex !important;
-  flex-wrap: nowrap !important;            /* keep all topics on a single row */
-  gap: 8px;
-  margin-bottom: 6px;
-  align-items: center;
-  overflow-x: auto !important;             /* allow horizontal scroll when needed */
-  -webkit-overflow-scrolling: touch;
-  position: relative;           /* for absolute pseudo-elements */
-  padding: 6px 12px;            /* space for fade edges and touch targets */
-  margin-left: -12px;           /* visually align with other page paddings */
-  margin-right: -12px;
-  overscroll-behavior-x: contain;
-  white-space: nowrap !important;          /* prevent wrapping of inline text */
+display: flex !important;
+flex-wrap: nowrap !important; / keep topics on a single horizontal line /
+-webkit-flex-wrap: nowrap !important;
+gap: 8px;
+margin-bottom: 6px;
+align-items: center;
+overflow-x: auto !important; / allow horizontal scroll when needed /
+-webkit-overflow-scrolling: touch;
+position: relative; / for absolute pseudo-elements /
+padding: 6px 12px; / space for fade edges and touch targets /
+margin-left: -12px; / visually align with page padding /
+margin-right: -12px;
+overscroll-behavior-x: contain;
+white-space: nowrap !important; / prevent wrapping inside items */
+-webkit-user-select: none;
 }
 
-/* Fade edges implemented with absolutely-positioned pseudo-elements
-   so they sit above the scrolling content but do not block pointer events. */
+/* fade edges for scroll affordance */
+#tables-viewer .table-heading-bar::before,
 #mainContent .table-heading-bar::before,
 .content .table-heading-bar::before,
 .table-heading-bar::before,
+#tables-viewer .table-heading-bar::after,
 #mainContent .table-heading-bar::after,
 .content .table-heading-bar::after,
 .table-heading-bar::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 28px;
-  pointer-events: none;
-  z-index: 12;
+content: "";
+position: absolute;
+top: 0;
+bottom: 0;
+width: 28px;
+pointer-events: none;
+z-index: 12;
 }
 
-/* Left fade */
+/* left fade */
+#tables-viewer .table-heading-bar::before,
 #mainContent .table-heading-bar::before,
 .content .table-heading-bar::before,
 .table-heading-bar::before {
-  left: 0;
-  background: linear-gradient(to right, var(--bg) 0%, rgba(0,0,0,0) 100%);
+left: 0;
+background: linear-gradient(to right, var(--bg) 0%, rgba(0,0,0,0) 100%);
 }
 
-/* Right fade */
+/* right fade */
+#tables-viewer .table-heading-bar::after,
 #mainContent .table-heading-bar::after,
 .content .table-heading-bar::after,
 .table-heading-bar::after {
-  right: 0;
-  background: linear-gradient(to left, var(--bg) 0%, rgba(0,0,0,0) 100%);
+right: 0;
+background: linear-gradient(to left, var(--bg) 0%, rgba(0,0,0,0) 100%);
 }
 
-/* Dark theme: same variable-based approach */
+/* dark theme fade adapt */
+[data-theme="dark"] #tables-viewer .table-heading-bar::before,
 [data-theme="dark"] #mainContent .table-heading-bar::before,
 [data-theme="dark"] .content .table-heading-bar::before,
 [data-theme="dark"] .table-heading-bar::before {
-  background: linear-gradient(to right, var(--bg) 0%, rgba(0,0,0,0) 100%);
+background: linear-gradient(to right, var(--bg) 0%, rgba(0,0,0,0) 100%);
 }
+[data-theme="dark"] #tables-viewer .table-heading-bar::after,
 [data-theme="dark"] #mainContent .table-heading-bar::after,
 [data-theme="dark"] .content .table-heading-bar::after,
 [data-theme="dark"] .table-heading-bar::after {
-  background: linear-gradient(to left, var(--bg) 0%, rgba(0,0,0,0) 100%);
+background: linear-gradient(to left, var(--bg) 0%, rgba(0,0,0,0) 100%);
 }
 
-/* Individual topic headings (high specificity + inline-flex to avoid wrapping) */
-.table-heading-bar > h3.table-heading,
+/* Individual topic items: cover anchors, headings, and generic elements /
+#tables-viewer .table-heading-bar > a.table-heading,
+#mainContent .table-heading-bar > a.table-heading,
+.content .table-heading-bar > a.table-heading,
 .table-heading-bar > a.table-heading,
+.table-heading-bar > h3.table-heading,
 .table-heading-bar > .table-heading {
-  flex: 0 0 auto !important;              /* do not shrink, maintain intrinsic width */
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 6px;
-  text-align: center;
-  font-size: 0.95rem;
-  font-weight: 600;
-  padding: 6px 10px;
-  background: var(--panel);
-  border-radius: 6px;
-  cursor: pointer;
-  user-select: none;
-  transition: background 0.18s ease, color 0.18s ease, transform 120ms var(--easing);
-  min-height: 36px;
-  line-height: 1;
-  white-space: nowrap !important;         /* preserve label on single line */
-  margin: 0 !important;                   /* prevent default heading margins from wrapping */
+flex: 0 0 auto !important; / keep intrinsic width /
+display: inline-flex !important;
+align-items: center !important;
+justify-content: center !important;
+gap: 6px;
+text-align: center;
+font-size: 0.95rem;
+font-weight: 600;
+padding: 6px 10px;
+background: var(--panel);
+border-radius: 6px;
+cursor: pointer;
+user-select: none;
+transition: background 0.18s ease, color 0.18s ease, transform 120ms var(--easing);
+min-height: 36px;
+line-height: 1;
+white-space: nowrap !important;
+margin: 0 !important; / prevent default heading margins */
+box-sizing: border-box;
+text-decoration: none !important;
+color: inherit !important;
 }
 
-/* small interaction polish */
-.table-heading-bar > h3.table-heading:active,
-.table-heading-bar > .table-heading:active { transform: translateY(1px); }
-.table-heading-bar > h3.table-heading:hover,
-.table-heading-bar > .table-heading:hover {
-  background: var(--toc-link-hover-bg);
-  color: var(--toc-link-hover-color);
+/* ensure anchors behave like inline controls and do not expand */
+#tables-viewer .table-heading-bar > a.table-heading,
+#mainContent .table-heading-bar > a.table-heading,
+.content .table-heading-bar > a.table-heading,
+.table-heading-bar > a.table-heading {
+display: inline-flex !important;
+align-items: center !important;
+justify-content: center !important;
+line-height: 1;
+vertical-align: middle;
 }
 
-/* keyboard accessibility */
-.table-heading-bar > h3.table-heading:focus,
-.table-heading-bar > .table-heading:focus,
+/* ensure focus and hover are visible and consistent */
+#tables-viewer .table-heading-bar > a.table-heading:focus,
+#tables-viewer .table-heading-bar > h3.table-heading:focus,
+#tables-viewer .table-heading-bar > .table-heading:focus,
+#tables-viewer .table-heading-bar > a.table-heading:focus-visible,
+.table-heading-bar > a.table-heading:focus-visible,
 .table-heading-bar > h3.table-heading:focus-visible,
 .table-heading-bar > .table-heading:focus-visible {
-  outline: 3px solid var(--focus-ring);
-  outline-offset: 2px;
-  border-radius: 6px;
-  background: var(--focus-bg);
+outline: 3px solid var(--focus-ring);
+outline-offset: 2px;
+border-radius: 6px;
+background: var(--focus-bg) !important;
 }
 
-/* Mobile adjustments with !important to override external frameworks */
+/* hover/tap feedback */
+#tables-viewer .table-heading-bar > a.table-heading:hover,
+#tables-viewer .table-heading-bar > h3.table-heading:hover,
+.table-heading-bar > .table-heading:hover {
+background: var(--toc-link-hover-bg) !important;
+color: var(--toc-link-hover-color) !important;
+}
+
+/* defensive: ensure items won't flex-grow and will shrink-only when necessary */
+#tables-viewer .table-heading-bar > * {
+flex-shrink: 0 !important;
+flex-basis: auto !important;
+min-width: 0 !important;
+}
+
+/* mobile adjustments (still single row; smaller padding) */
 @media (max-width:600px){
-  #mainContent .table-heading-bar,
-  .content .table-heading-bar,
-  .table-heading-bar {
-    gap: 6px;
-    padding: 6px 8px;
-    margin-left: -8px;
-    margin-right: -8px;
-  }
-  .table-heading-bar > h3.table-heading,
-  .table-heading-bar > a.table-heading,
-  .table-heading-bar > .table-heading {
-    font-size: 0.88rem !important;
-    padding: 4px 8px !important;
-    min-height: 34px !important;
-  }
+#tables-viewer .table-heading-bar,
+#mainContent .table-heading-bar,
+.content .table-heading-bar,
+.table-heading-bar {
+gap: 6px;
+padding: 6px 8px;
+margin-left: -8px;
+margin-right: -8px;
+}
+#tables-viewer .table-heading-bar > a.table-heading,
+#tables-viewer .table-heading-bar > h3.table-heading,
+#tables-viewer .table-heading-bar > .table-heading,
+.table-heading-bar > a.table-heading,
+.table-heading-bar > h3.table-heading,
+.table-heading-bar > .table-heading {
+font-size: 0.88rem !important;
+padding: 4px 8px !important;
+min-height: 34px !important;
+}
 }
 
-/* Extremely narrow phones */
+/* extremely narrow phones (defensive) */
 @media (max-width:420px) {
-  #mainContent .table-heading-bar,
-  .content .table-heading-bar,
-  .table-heading-bar { padding: 6px 6px; gap: 6px; }
-  .table-heading-bar > h3.table-heading,
-  .table-heading-bar > .table-heading {
-    padding: 4px 7px !important;
-    font-size: 0.85rem !important;
-    min-height: 32px !important;
-  }
+#tables-viewer .table-heading-bar,
+#mainContent .table-heading-bar,
+.content .table-heading-bar,
+.table-heading-bar { padding: 6px 6px; gap: 6px; }
+#tables-viewer .table-heading-bar > a.table-heading,
+#tables-viewer .table-heading-bar > h3.table-heading,
+.table-heading-bar > .table-heading {
+padding: 4px 7px !important;
+font-size: 0.85rem !important;
+min-height: 32px !important;
+}
 }
 
 /* If you prefer visible left/right chevrons for scroll affordance,
