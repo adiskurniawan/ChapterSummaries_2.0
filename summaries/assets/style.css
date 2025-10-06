@@ -321,56 +321,7 @@ thead th[role="button"]:hover{ background: rgba(0,0,0,0.02); }
 
 /* Table header area, collapse controls */
 .table-wrapper .table-header-wrapper{ gap:8px }
-
-/* ===== unify collapse/expand button visuals ===== */
-.toggle-table-btn,
-.table-toggle-inline {
-  background: var(--button-bg);
-  color: var(--button-text);
-  border: 1px solid var(--border);
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 13px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 36px;
-  min-width: 36px;
-  cursor: pointer;
-  transition: transform var(--trans-duration) var(--easing), box-shadow var(--trans-duration) var(--easing), background var(--trans-duration) var(--easing);
-}
-.toggle-table-btn:hover,
-.table-toggle-inline:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
-}
-.toggle-table-btn:focus-visible,
-.table-toggle-inline:focus-visible {
-  outline: 3px solid var(--focus-ring);
-  outline-offset: 2px;
-  background: var(--focus-bg);
-}
-
-/* keep spacing consistent inside table header */
-.table-header-wrapper .toggle-table-btn,
-.table-header-wrapper .table-toggle-inline {
-  margin-left: 8px;
-  margin-right: 0;
-  order: 0;
-}
-
-/* mobile: make it easier to tap and keep inline with other controls */
-@media (max-width:600px){
-  .table-header-wrapper .toggle-table-btn,
-  .table-header-wrapper .table-toggle-inline {
-    padding: 8px 10px;
-    font-size: 13px;
-    min-height: 40px;
-    min-width: 44px;
-  }
-}
-
+.toggle-table-btn{ margin-left:10px; font-size:12px; padding:4px 8px; min-width:36px; }
 .table-wrapper.table-collapsed .table-container table tbody{ display:none }
 .table-wrapper.table-collapsed .copy-buttons button{ opacity:.65 }
 
