@@ -321,7 +321,34 @@ thead th[role="button"]:hover{ background: rgba(0,0,0,0.02); }
 
 /* Table header area, collapse controls */
 .table-wrapper .table-header-wrapper{ gap:8px }
-.toggle-table-btn{ margin-left:10px; font-size:12px; padding:4px 8px; min-width:36px; }
+
+/* Improved Collapse Table button styling to match other action buttons */
+.toggle-table-btn{
+  margin-left:10px;
+  font-size:13px;
+  padding:6px 10px;
+  min-width:36px;
+  background:var(--button-bg);
+  color:var(--button-text);
+  border:1px solid var(--border);
+  border-radius:6px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  cursor:pointer;
+  transition: transform var(--trans-duration) var(--easing), box-shadow var(--trans-duration) var(--easing), background-color var(--trans-duration) var(--easing), border-color var(--trans-duration) var(--easing);
+}
+.toggle-table-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,0.04); background: var(--panel); }
+.toggle-table-btn:active { transform: scale(.99); box-shadow: 0 3px 8px rgba(0,0,0,0.06); }
+.toggle-table-btn:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; background: var(--focus-bg); border-radius: 6px; }
+
+/* Collapsed rotation */
+.table-wrapper.table-collapsed .toggle-table-btn {
+  transform: rotate(180deg);
+  transition: transform var(--trans-duration) var(--easing);
+}
+
+/* Keep table body hidden when collapsed */
 .table-wrapper.table-collapsed .table-container table tbody{ display:none }
 .table-wrapper.table-collapsed .copy-buttons button{ opacity:.65 }
 
@@ -374,8 +401,8 @@ td.col-date, th.col-date {
 
 /* Collapsible / toggle improvements (small polish) */
 .table-wrapper.table-collapsed .toggle-table-btn {
-  transform: rotate(180deg);
-  transition: transform var(--trans-duration) var(--easing);
+  /* rotation handled above; ensure transform origin is center for consistent animation */
+  transform-origin: center;
 }
 .table-wrapper .toggle-table-btn {
   transition: transform var(--trans-duration) var(--easing);
@@ -457,6 +484,8 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     flex-basis: 100% !important; width: 100% !important; order: 1; margin-bottom:6px; height:32px; font-size:12px; padding:4px 7px;
   }
   #tv-header button, #tv-header .btn, #stickyMainHeader button { padding: 3px 7px; font-size: 12px; min-height:36px; }
+  /* mobile tweak for collapse button */
+  .toggle-table-btn { flex: 0 0 auto; font-size:12px; padding:6px 8px; }
 }
 
 /* Very-narrow screens - hide less-essential header buttons */
