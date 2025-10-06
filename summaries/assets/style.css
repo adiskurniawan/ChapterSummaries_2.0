@@ -732,108 +732,151 @@ pre, code { white-space: pre-wrap !important; word-break: break-word !important;
 }
 */
 
-/* ---------- TOPIC HEADING BAR: HORIZONTAL SINGLE ROW (corrected) ---------- */
+/* ---------- TOPIC HEADING BAR: HORIZONTAL SINGLE ROW (forced override) ---------- */
 
+/*
+  Replaced prior block with a higher-specificity, conflict-resistant set of rules.
+  These rules preserve design while forcing single-row topic headings on mobile and desktop.
+*/
+
+/* primary container rules (more specific selectors to beat cascade) */
+#mainContent .table-heading-bar,
+.content .table-heading-bar,
 .table-heading-bar {
-display: flex;
-flex-wrap: nowrap;            /* keep all topics on a single row */
-gap: 8px;
-margin-bottom: 6px;
-align-items: center;
-overflow-x: auto;             /* allow horizontal scroll when needed */
--webkit-overflow-scrolling: touch;
-position: relative;           /* for absolute pseudo-elements */
-padding: 6px 12px;            /* space for fade edges and touch targets */
-margin-left: -12px;           /* visually align with other page paddings */
-margin-right: -12px;
-overscroll-behavior-x: contain;
-white-space: nowrap;          /* prevent wrapping of inline text */
+  display: flex !important;
+  flex-wrap: nowrap !important;            /* keep all topics on a single row */
+  gap: 8px;
+  margin-bottom: 6px;
+  align-items: center;
+  overflow-x: auto !important;             /* allow horizontal scroll when needed */
+  -webkit-overflow-scrolling: touch;
+  position: relative;           /* for absolute pseudo-elements */
+  padding: 6px 12px;            /* space for fade edges and touch targets */
+  margin-left: -12px;           /* visually align with other page paddings */
+  margin-right: -12px;
+  overscroll-behavior-x: contain;
+  white-space: nowrap !important;          /* prevent wrapping of inline text */
 }
 
 /* Fade edges implemented with absolutely-positioned pseudo-elements
-so they sit above the scrolling content but do not block pointer events. */
+   so they sit above the scrolling content but do not block pointer events. */
+#mainContent .table-heading-bar::before,
+.content .table-heading-bar::before,
 .table-heading-bar::before,
+#mainContent .table-heading-bar::after,
+.content .table-heading-bar::after,
 .table-heading-bar::after {
-content: "";
-position: absolute;
-top: 0;
-bottom: 0;
-width: 28px;
-pointer-events: none;
-z-index: 12;
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 28px;
+  pointer-events: none;
+  z-index: 12;
 }
 
-/* Left fade (from background to transparent to reveal scrollable content) */
+/* Left fade */
+#mainContent .table-heading-bar::before,
+.content .table-heading-bar::before,
 .table-heading-bar::before {
-left: 0;
-background: linear-gradient(to right, var(--bg) 0%, rgba(0,0,0,0) 100%);
+  left: 0;
+  background: linear-gradient(to right, var(--bg) 0%, rgba(0,0,0,0) 100%);
 }
 
 /* Right fade */
+#mainContent .table-heading-bar::after,
+.content .table-heading-bar::after,
 .table-heading-bar::after {
-right: 0;
-background: linear-gradient(to left, var(--bg) 0%, rgba(0,0,0,0) 100%);
+  right: 0;
+  background: linear-gradient(to left, var(--bg) 0%, rgba(0,0,0,0) 100%);
 }
 
-/* Dark theme: use same variable-based approach; var(--bg) will be dark */
+/* Dark theme: same variable-based approach */
+[data-theme="dark"] #mainContent .table-heading-bar::before,
+[data-theme="dark"] .content .table-heading-bar::before,
 [data-theme="dark"] .table-heading-bar::before {
-background: linear-gradient(to right, var(--bg) 0%, rgba(0,0,0,0) 100%);
+  background: linear-gradient(to right, var(--bg) 0%, rgba(0,0,0,0) 100%);
 }
+[data-theme="dark"] #mainContent .table-heading-bar::after,
+[data-theme="dark"] .content .table-heading-bar::after,
 [data-theme="dark"] .table-heading-bar::after {
-background: linear-gradient(to left, var(--bg) 0%, rgba(0,0,0,0) 100%);
+  background: linear-gradient(to left, var(--bg) 0%, rgba(0,0,0,0) 100%);
 }
 
-/* Individual topic headings */
-.table-heading,
-.table-heading-bar h3.table-heading {
-flex: 0 0 auto;              /* do not shrink, maintain intrinsic width */
-display: inline-block;
-text-align: center;
-font-size: 0.95rem;
-font-weight: 600;
-padding: 6px 10px;
-background: var(--panel);
-border-radius: 6px;
-cursor: pointer;
-user-select: none;
-transition: background 0.18s ease, color 0.18s ease, transform 120ms var(--easing);
-min-height: 36px;
-line-height: 1;
-white-space: nowrap;         /* preserve label on single line */
-}
-.table-heading:active { transform: translateY(1px); }
-.table-heading:hover {
-background: var(--toc-link-hover-bg);
-color: var(--toc-link-hover-color);
-}
-
-/* Make sure the topic headings are keyboard accessible focus-wise */
-.table-heading:focus {
-outline: 3px solid var(--focus-ring);
-outline-offset: 2px;
-border-radius: 6px;
-background: var(--focus-bg);
+/* Individual topic headings (high specificity + inline-flex to avoid wrapping) */
+.table-heading-bar > h3.table-heading,
+.table-heading-bar > a.table-heading,
+.table-heading-bar > .table-heading {
+  flex: 0 0 auto !important;              /* do not shrink, maintain intrinsic width */
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 6px 10px;
+  background: var(--panel);
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.18s ease, color 0.18s ease, transform 120ms var(--easing);
+  min-height: 36px;
+  line-height: 1;
+  white-space: nowrap !important;         /* preserve label on single line */
+  margin: 0 !important;                   /* prevent default heading margins from wrapping */
 }
 
-/* Mobile adjustments: slightly smaller paddings but still one row */
+/* small interaction polish */
+.table-heading-bar > h3.table-heading:active,
+.table-heading-bar > .table-heading:active { transform: translateY(1px); }
+.table-heading-bar > h3.table-heading:hover,
+.table-heading-bar > .table-heading:hover {
+  background: var(--toc-link-hover-bg);
+  color: var(--toc-link-hover-color);
+}
+
+/* keyboard accessibility */
+.table-heading-bar > h3.table-heading:focus,
+.table-heading-bar > .table-heading:focus,
+.table-heading-bar > h3.table-heading:focus-visible,
+.table-heading-bar > .table-heading:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 6px;
+  background: var(--focus-bg);
+}
+
+/* Mobile adjustments with !important to override external frameworks */
 @media (max-width:600px){
-.table-heading-bar {
-gap: 6px;
-padding: 6px 8px;
-margin-left: -8px;
-margin-right: -8px;
-}
-.table-heading {
-font-size: 0.88rem;
-padding: 4px 8px;
-min-height: 34px;
-}
+  #mainContent .table-heading-bar,
+  .content .table-heading-bar,
+  .table-heading-bar {
+    gap: 6px;
+    padding: 6px 8px;
+    margin-left: -8px;
+    margin-right: -8px;
+  }
+  .table-heading-bar > h3.table-heading,
+  .table-heading-bar > a.table-heading,
+  .table-heading-bar > .table-heading {
+    font-size: 0.88rem !important;
+    padding: 4px 8px !important;
+    min-height: 34px !important;
+  }
 }
 
-/* Extremely narrow (phones) — keep everything scrollable horizontally */
+/* Extremely narrow phones */
 @media (max-width:420px) {
-.table-heading-bar { padding: 6px 6px; gap: 6px; }
-.table-heading { padding: 4px 7px; font-size: 0.85rem; min-height: 32px; }
+  #mainContent .table-heading-bar,
+  .content .table-heading-bar,
+  .table-heading-bar { padding: 6px 6px; gap: 6px; }
+  .table-heading-bar > h3.table-heading,
+  .table-heading-bar > .table-heading {
+    padding: 4px 7px !important;
+    font-size: 0.85rem !important;
+    min-height: 32px !important;
+  }
 }
 
 /* If you prefer visible left/right chevrons for scroll affordance,
