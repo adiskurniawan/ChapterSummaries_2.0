@@ -784,7 +784,8 @@ background: linear-gradient(to left, var(--bg) 0%, rgba(0,0,0,0) 100%);
 }
 
 /* Individual topic headings */
-.table-heading {
+.table-heading,
+.table-heading-bar h3.table-heading {
 flex: 0 0 auto;              /* do not shrink, maintain intrinsic width */
 display: inline-block;
 text-align: center;
