@@ -321,7 +321,34 @@ thead th[role="button"]:hover{ background: rgba(0,0,0,0.02); }
 
 /* Table header area, collapse controls */
 .table-wrapper .table-header-wrapper{ gap:8px }
-.toggle-table-btn{ margin-left:10px; font-size:12px; padding:4px 8px; min-width:36px; }
+
+/* Improved Collapse Table button styling to match other action buttons */
+.toggle-table-btn{
+  margin-left:10px;
+  font-size:13px;
+  padding:6px 10px;
+  min-width:36px;
+  background:var(--button-bg);
+  color:var(--button-text);
+  border:1px solid var(--border);
+  border-radius:6px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  cursor:pointer;
+  transition: transform var(--trans-duration) var(--easing), box-shadow var(--trans-duration) var(--easing), background-color var(--trans-duration) var(--easing), border-color var(--trans-duration) var(--easing);
+}
+.toggle-table-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,0.04); background: var(--panel); }
+.toggle-table-btn:active { transform: scale(.99); box-shadow: 0 3px 8px rgba(0,0,0,0.06); }
+.toggle-table-btn:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; background: var(--focus-bg); border-radius: 6px; }
+
+/* Collapsed rotation */
+.table-wrapper.table-collapsed .toggle-table-btn {
+  transform: rotate(180deg);
+  transition: transform var(--trans-duration) var(--easing);
+}
+
+/* Keep table body hidden when collapsed */
 .table-wrapper.table-collapsed .table-container table tbody{ display:none }
 .table-wrapper.table-collapsed .copy-buttons button{ opacity:.65 }
 
@@ -374,8 +401,8 @@ td.col-date, th.col-date {
 
 /* Collapsible / toggle improvements (small polish) */
 .table-wrapper.table-collapsed .toggle-table-btn {
-  transform: rotate(180deg);
-  transition: transform var(--trans-duration) var(--easing);
+  /* rotation handled above; ensure transform origin is center for consistent animation */
+  transform-origin: center;
 }
 .table-wrapper .toggle-table-btn {
   transition: transform var(--trans-duration) var(--easing);
@@ -457,6 +484,8 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     flex-basis: 100% !important; width: 100% !important; order: 1; margin-bottom:6px; height:32px; font-size:12px; padding:4px 7px;
   }
   #tv-header button, #tv-header .btn, #stickyMainHeader button { padding: 3px 7px; font-size: 12px; min-height:36px; }
+  /* mobile tweak for collapse button */
+  .toggle-table-btn { flex: 0 0 auto; font-size:12px; padding:6px 8px; }
 }
 
 /* Very-narrow screens - hide less-essential header buttons */
@@ -904,95 +933,3 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 .table-wrapper .table-heading-bar + .table-container {
   margin-top: 0.25em;
 }
-
-/* ------------------------------------------------------------------
-   Mobile collapse-button fix — appended override
-   (High-specificity, placed at file end to override earlier rules)
-   Reviewed multiple times to avoid regressions.
-   ------------------------------------------------------------------ */
-
-@media (max-width: 700px) {
-  /* Ensure header wrapper keeps controls inline and horizontally scrollable */
-  .table-wrapper .table-header-wrapper,
-  #mainContent .table-wrapper .table-header-wrapper,
-  .content .table-wrapper .table-header-wrapper {
-    display: flex !important;
-    align-items: center !important;
-    flex-wrap: nowrap !important;
-    gap: 6px !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    box-sizing: border-box !important;
-    padding-left: 6px !important;
-    padding-right: 6px !important;
-  }
-
-  /* Keep copy/export cluster compact and inline */
-  .table-wrapper .table-header-wrapper .copy-buttons,
-  .table-wrapper .table-header-wrapper .table-controls .copy-buttons {
-    display: flex !important;
-    gap: 6px !important;
-    align-items: center !important;
-    flex-wrap: nowrap !important;
-  }
-
-  /* Make the toggle/collapse button match other header controls and never wrap */
-  .table-wrapper .table-header-wrapper .toggle-table-btn,
-  .table-wrapper .table-header-wrapper .table-toggle-inline,
-  .table-wrapper .table-header-wrapper .toggle-table {
-    flex: 0 0 auto !important;
-    white-space: nowrap !important;
-    margin-left: 6px !important;
-    padding: 6px 10px !important;
-    font-size: 13px !important;
-    min-height: 34px !important;
-    min-width: 36px !important;
-    box-sizing: border-box !important;
-    border-radius: 6px !important;
-  }
-
-  /* Preserve icon-only sizing */
-  .table-wrapper .table-header-wrapper .toggle-table-btn.icon-only,
-  .table-wrapper .table-header-wrapper .table-toggle-inline.icon-only {
-    width: 36px !important;
-    height: 36px !important;
-    padding: 6px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
-
-  /* When collapsed, keep rotated affordance but with smooth transition */
-  .table-wrapper.table-collapsed .toggle-table-btn {
-    transform: rotate(180deg) !important;
-    transition: transform var(--trans-duration) var(--easing) !important;
-  }
-
-  /* Optional: small scrollbar visual polish that won't interfere with layout */
-  .table-wrapper .table-header-wrapper::-webkit-scrollbar {
-    height: 6px;
-    background: transparent;
-  }
-  .table-wrapper .table-header-wrapper::-webkit-scrollbar-thumb {
-    background: rgba(0,0,0,0.06);
-    border-radius: 6px;
-  }
-}
-
-/* Narrower override for very small phones to keep readability */
-@media (max-width: 420px) {
-  .table-wrapper .table-header-wrapper,
-  #mainContent .table-wrapper .table-header-wrapper {
-    gap: 6px !important;
-    padding-left: 4px !important;
-    padding-right: 4px !important;
-  }
-  .table-wrapper .table-header-wrapper .toggle-table-btn,
-  .table-wrapper .table-header-wrapper .table-toggle-inline {
-    padding: 5px 8px !important;
-    font-size: 12px !important;
-    min-height: 32px !important;
-  }
-}
-
-/* End of appended mobile-collapse fix */
