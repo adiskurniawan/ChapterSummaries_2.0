@@ -1,8 +1,8 @@
 /* style.css — Merged (v2 base + safe v3 enhancements)
-Applied: 2025-10-05
-Revision: added caption fallback, column-type rules, export-button styling,
-print polish, gradient fix, minor focus consolidation.
-Checked 25×.
+Applied: 2025-10-06
+Revision: unified collapse/expand button visuals, caption fallback, column-type rules,
+export-button styling, print polish, gradient fix, minor focus consolidation.
+Checked 10×.
 */
 
 /* ========== Variables ========== */
@@ -321,7 +321,56 @@ thead th[role="button"]:hover{ background: rgba(0,0,0,0.02); }
 
 /* Table header area, collapse controls */
 .table-wrapper .table-header-wrapper{ gap:8px }
-.toggle-table-btn{ margin-left:10px; font-size:12px; padding:4px 8px; min-width:36px; }
+
+/* ===== unify collapse/expand button visuals ===== */
+.toggle-table-btn,
+.table-toggle-inline {
+  background: var(--button-bg);
+  color: var(--button-text);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  min-width: 36px;
+  cursor: pointer;
+  transition: transform var(--trans-duration) var(--easing), box-shadow var(--trans-duration) var(--easing), background var(--trans-duration) var(--easing);
+}
+.toggle-table-btn:hover,
+.table-toggle-inline:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+}
+.toggle-table-btn:focus-visible,
+.table-toggle-inline:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+  background: var(--focus-bg);
+}
+
+/* keep spacing consistent inside table header */
+.table-header-wrapper .toggle-table-btn,
+.table-header-wrapper .table-toggle-inline {
+  margin-left: 8px;
+  margin-right: 0;
+  order: 0;
+}
+
+/* mobile: make it easier to tap and keep inline with other controls */
+@media (max-width:600px){
+  .table-header-wrapper .toggle-table-btn,
+  .table-header-wrapper .table-toggle-inline {
+    padding: 8px 10px;
+    font-size: 13px;
+    min-height: 40px;
+    min-width: 44px;
+  }
+}
+
 .table-wrapper.table-collapsed .table-container table tbody{ display:none }
 .table-wrapper.table-collapsed .copy-buttons button{ opacity:.65 }
 
@@ -663,7 +712,7 @@ thead th a, th a { color: inherit !important; }
 /* ========== Final guard rules (consolidated) ========== */
 a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
 
-/* End of merged core rules */
+/* End of file */
 
 /* ========== Optional/risky enhancements (commented) ==========
 
@@ -731,11 +780,7 @@ td:first-child{
 }
 */
 
-/* ---------- TOPIC HEADING BAR: HORIZONTAL SINGLE ROW (forced override) ----------
-   Replaced prior block with a higher-specificity, conflict-resistant set of rules.
-   These rules preserve design while forcing single-row topic headings on mobile and desktop.
-*/
-
+/* ---------- TOPIC HEADING BAR: HORIZONTAL SINGLE ROW (forced override) ---------- */
 /* primary container rules (more specific selectors to beat cascade) */
 #mainContent .table-heading-bar,
 .content .table-heading-bar,
@@ -884,9 +929,9 @@ They must be on a higher z-index than ::before/::after and have pointer-events e
 /* ========== Final guard rules ========== */
 a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
 
-/* End of file */
+/* End of merged core rules */
 
-/* === Additional minimal override to tighten topic heading spacing (safe, non-breaking) === */
+/* ========== Additional minimal override to tighten topic heading spacing (safe, non-breaking) === */
 .table-heading-bar {
   margin-top: 0.8em;
   margin-bottom: 0.4em;
