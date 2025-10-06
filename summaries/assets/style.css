@@ -319,11 +319,100 @@ thead th[role="button"]:hover{ background: rgba(0,0,0,0.02); }
   #mainContent{ padding:12px }
 }
 
-/* Table header area, collapse controls */
+/* Table header area, collapse controls (unified and robust) */
 .table-wrapper .table-header-wrapper{ gap:8px }
-.toggle-table-btn{ margin-left:10px; font-size:12px; padding:4px 8px; min-width:36px; }
+
+/* Base grouping for table control buttons to ensure consistent appearance across markup variants
+   including <a>, <button>, <summary> (inside <details>), and custom elements. */
+.table-controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+.table-controls a,
+.table-controls button,
+.table-controls summary,
+.table-controls .toggle-table-btn,
+.table-controls .table-toggle-inline {
+  display:inline-flex;
+  align-items:center;
+  gap:.4rem;
+  padding:6px 12px;
+  font-size:14px;
+  line-height:1;
+  border:1px solid var(--border);
+  border-radius:6px;
+  background:var(--button-bg);
+  color:var(--button-text);
+  text-decoration:none;
+  cursor:pointer;
+  transition: transform var(--trans-duration) var(--easing), background var(--trans-duration) var(--easing), border-color var(--trans-duration) var(--easing);
+  min-height:36px;
+  min-width:36px;
+  box-sizing:border-box;
+}
+
+/* Make <summary> behave like other controls when used as a collapse toggle */
+.table-controls summary { list-style:none; cursor:pointer; padding:6px 12px; }
+.table-controls summary::-webkit-details-marker { display: none; }
+.table-controls summary::marker { display: none; }
+
+/* Icon-only variants */
+.table-controls a.icon-only,
+.table-controls button.icon-only,
+.table-controls .table-toggle-inline.icon-only,
+.table-controls .toggle-table-btn.icon-only {
+  padding:6px;
+  width:36px;
+  height:36px;
+  font-size:0;
+  justify-content:center;
+}
+
+/* Export button styling: safe and consistent with other buttons */
+.table-controls .export-xlsx, .export-xlsx, .table-controls button.export-xlsx {
+  margin-left: 8px;
+  font-size: 0.85em;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  background: var(--button-bg);
+  color: var(--button-text);
+  border-radius: 6px;
+  transition: background var(--trans-duration) var(--easing), transform var(--trans-duration) var(--easing);
+}
+.table-controls .export-xlsx:hover, .export-xlsx:hover {
+  background: var(--panel);
+  transform: translateY(-1px);
+}
+
+/* Specific toggle button polish preserved */
+.toggle-table-btn{
+  margin-left:10px;
+  font-size:12px;
+  padding:4px 8px;
+  min-width:36px;
+  border-radius:6px;
+  background:var(--button-bg);
+  border:1px solid var(--border);
+}
+
+/* When table is collapsed rotate the icon */
+.table-wrapper.table-collapsed .toggle-table-btn {
+  transform: rotate(180deg);
+  transition: transform var(--trans-duration) var(--easing);
+}
+.table-wrapper .toggle-table-btn {
+  transition: transform var(--trans-duration) var(--easing);
+}
+
 .table-wrapper.table-collapsed .table-container table tbody{ display:none }
 .table-wrapper.table-collapsed .copy-buttons button{ opacity:.65 }
+
+/* focus + keyboard affordance for summary toggles */
+.table-controls summary:focus-visible,
+.table-controls summary:focus {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+  background: var(--focus-bg);
+  border-radius: 6px;
+}
 
 /* ========== CAPTION, COLUMN-TYPE, EXPORT STYLES (ADDED) ========== */
 
@@ -354,22 +443,6 @@ td.col-code, th.col-code {
 td[data-col-type="date"], th[data-col-type="date"],
 td.col-date, th.col-date {
   text-align: center;
-}
-
-/* Export button styling: safe and consistent with other buttons */
-.table-controls .export-xlsx, .export-xlsx, .table-controls button.export-xlsx {
-  margin-left: 8px;
-  font-size: 0.85em;
-  padding: 4px 8px;
-  border: 1px solid var(--border);
-  background: var(--button-bg);
-  color: var(--button-text);
-  border-radius: 6px;
-  transition: background var(--trans-duration) var(--easing), transform var(--trans-duration) var(--easing);
-}
-.table-controls .export-xlsx:hover, .export-xlsx:hover {
-  background: var(--panel);
-  transform: translateY(-1px);
 }
 
 /* Collapsible / toggle improvements (small polish) */
@@ -457,6 +530,18 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     flex-basis: 100% !important; width: 100% !important; order: 1; margin-bottom:6px; height:32px; font-size:12px; padding:4px 7px;
   }
   #tv-header button, #tv-header .btn, #stickyMainHeader button { padding: 3px 7px; font-size: 12px; min-height:36px; }
+
+  /* Ensure table controls compress nicely on mobile and match header button sizing */
+  .table-controls a,
+  .table-controls button,
+  .table-controls summary,
+  .table-controls .toggle-table-btn,
+  .table-controls .table-toggle-inline {
+    padding:4px 8px;
+    font-size:12px;
+    min-height:34px;
+    min-width:36px;
+  }
 }
 
 /* Very-narrow screens - hide less-essential header buttons */
@@ -731,33 +816,27 @@ td:first-child{
 }
 */
 
-/* ---------- TOPIC HEADING BAR: HORIZONTAL SINGLE ROW (forced override) ----------
-   Replaced prior block with a higher-specificity, conflict-resistant set of rules.
-   These rules preserve design while forcing single-row topic headings on mobile and desktop.
-*/
+/* ---------- TOPIC HEADING BAR: HORIZONTAL SINGLE ROW (forced override) ---------- */
 
-/* primary container rules (more specific selectors to beat cascade) */
 #mainContent .table-heading-bar,
 .content .table-heading-bar,
 .table-heading-bar {
   display: flex !important;
-  flex-wrap: nowrap !important;            /* keep all topics on a single row */
+  flex-wrap: nowrap !important;
   gap: 8px;
   margin-bottom: 6px;
   align-items: center;
-  overflow-x: auto !important;             /* allow horizontal scroll when needed */
+  overflow-x: auto !important;
   -webkit-overflow-scrolling: touch;
-  position: relative;           /* for absolute pseudo-elements */
-  padding: 6px 12px;            /* space for fade edges and touch targets */
-  margin-left: -12px;           /* visually align with other page paddings */
+  position: relative;
+  padding: 6px 12px;
+  margin-left: -12px;
   margin-right: -12px;
   overscroll-behavior-x: contain;
-  white-space: nowrap !important;          /* prevent wrapping of inline text */
+  white-space: nowrap !important;
   box-sizing: border-box !important;
 }
 
-/* Fade edges implemented with absolutely-positioned pseudo-elements
-   so they sit above the scrolling content but do not block pointer events. */
 #mainContent .table-heading-bar::before,
 .content .table-heading-bar::before,
 .table-heading-bar::before,
@@ -789,7 +868,6 @@ td:first-child{
   background: linear-gradient(to left, var(--bg) 0%, rgba(0,0,0,0) 100%);
 }
 
-/* Dark theme: same variable-based approach */
 [data-theme="dark"] #mainContent .table-heading-bar::before,
 [data-theme="dark"] .content .table-heading-bar::before,
 [data-theme="dark"] .table-heading-bar::before {
@@ -801,11 +879,10 @@ td:first-child{
   background: linear-gradient(to left, var(--bg) 0%, rgba(0,0,0,0) 100%);
 }
 
-/* Individual topic headings (high specificity + inline-flex to avoid wrapping) */
 .table-heading-bar > h3.table-heading,
 .table-heading-bar > a.table-heading,
 .table-heading-bar > .table-heading {
-  flex: 0 0 auto !important;              /* do not shrink, maintain intrinsic width */
+  flex: 0 0 auto !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -821,11 +898,10 @@ td:first-child{
   transition: background 0.18s ease, color 0.18s ease, transform 120ms var(--easing);
   min-height: 36px;
   line-height: 1;
-  white-space: nowrap !important;         /* preserve label on single line */
-  margin: 0 !important;                   /* prevent default heading margins from wrapping */
+  white-space: nowrap !important;
+  margin: 0 !important;
 }
 
-/* small interaction polish */
 .table-heading-bar > h3.table-heading:active,
 .table-heading-bar > .table-heading:active { transform: translateY(1px); }
 .table-heading-bar > h3.table-heading:hover,
@@ -834,7 +910,6 @@ td:first-child{
   color: var(--toc-link-hover-color);
 }
 
-/* keyboard accessibility */
 .table-heading-bar > h3.table-heading:focus,
 .table-heading-bar > .table-heading:focus,
 .table-heading-bar > h3.table-heading:focus-visible,
@@ -876,10 +951,6 @@ td:first-child{
     min-height: 32px !important;
   }
 }
-
-/* If you prefer visible left/right chevrons for scroll affordance,
-add small buttons with absolute position left/right inside .table-heading-bar.
-They must be on a higher z-index than ::before/::after and have pointer-events enabled. */
 
 /* ========== Final guard rules ========== */
 a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
