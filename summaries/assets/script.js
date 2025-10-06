@@ -465,7 +465,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
       ta.style.width = '100%';
       ta.style.height = '320px';
       ta.style.resize = 'vertical';
-      ta.style.whiteSpace = 'pre-wrap';
+/* removed inline whiteSpace to respect stylesheet; previously set by script */;
       ta.style.fontFamily = 'monospace, monospace';
       ta.style.fontSize = '13px';
       ta.setAttribute('aria-label', 'Copy text area');
@@ -544,7 +544,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
       ul.style.gap = '8px';
       ul.style.margin = '0';
       ul.style.padding = '0';
-      ul.style.flexWrap = 'wrap';
+/* removed inline flexWrap to respect stylesheet; previously set by script */;
 
       rows.forEach((row, idx) => {
         try {
@@ -1380,7 +1380,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
           header.style.overflowX = header.style.overflowX || 'auto';
           header.style.webkitOverflowScrolling = header.style.webkitOverflowScrolling || 'touch';
           header.style.display = header.style.display || 'flex';
-          header.style.flexWrap = header.style.flexWrap || 'wrap';
+/* removed inline flexWrap to respect stylesheet; previously set by script */;
           header.style.justifyContent = header.style.justifyContent || 'space-between';
           header.style.gap = header.style.gap || '8px';
           header.style.alignItems = header.style.alignItems || 'center';
