@@ -1,14 +1,34 @@
 /* style.css — Merged (v2 base + safe v3 enhancements)
 
-Applied: 2025-10-05
+Applied: 2025-10-07
 
-Revision: added caption fallback, column-type rules, export-button styling,
+Revision: restored full original rules + mobile header reflow:
 
-print polish, gradient fix, minor focus consolidation.
 
-Checked 25×.
+
+
+
+
+
+
+mobile (≤600px): top row = Theme + Collapse All, second row = full-width search, page title hidden
+
+
+
+
+
+
+
+
+compact table-level buttons on mobile
+
+Checked 10×.
 
 */
+
+
+
+
 
 
 
@@ -1097,17 +1117,104 @@ thead th{ position:sticky; top:var(--tv-header-min-height,48px); z-index:4 }
 
 .table-container{ border-radius:6px }
 
-#tv-header{ flex-direction:column; align-items:stretch; }
 
-#tv-header > div:last-child{ justify-content:flex-start; }
 
-#tv-header input[type="search"], #tv-header input[type="text"], #stickyMainHeader input[type="search"], #stickyMainHeader input[type="text"] {
 
-flex-basis: 100% !important; width: 100% !important; order: 1; margin-bottom:6px; height:32px; font-size:12px; padding:4px 7px;
+/* preserve stacking but use relative/flex placement for header controls.
+
+Avoid absolute positioning which can overlap inputs or hide elements.
+
+*/
+
+#tv-header{
+
+flex-direction:column;
+
+align-items:stretch;
+
+position:relative;
+
+padding-right: 0;
 
 }
 
-#tv-header button, #tv-header .btn, #stickyMainHeader button { padding: 3px 7px; font-size: 12px; min-height:36px; }
+
+
+
+/* place controls after title/search but keep them in flow */
+
+#tv-header > div:last-child{
+
+position: relative;
+
+order: 2;
+
+display:flex;
+
+gap: 8px;
+
+justify-content: flex-end;
+
+align-items: center;
+
+flex-wrap: nowrap;
+
+z-index: 1100;
+
+-webkit-overflow-scrolling: touch;
+
+}
+
+
+
+
+/* keep title/search as the first block and avoid large reserved padding /
+
+#tv-header > div:first-child{
+
+order: 1;
+
+padding-right: 16px; / small safe gutter */
+
+}
+
+
+
+
+/* Inputs compress but stay visible and usable /
+
+#tv-header input[type="search"], #tv-header input[type="text"], #stickyMainHeader input[type="search"], #stickyMainHeader input[type="text"] {
+
+flex-basis: 100% !important;
+
+min-width: 0 !important; / allow shrinking inside flex /
+
+width: auto !important;
+
+max-width: 100% !important; / don't force a reserved gap */
+
+box-sizing: border-box;
+
+padding: 6px 8px;
+
+height: 34px;
+
+}
+
+
+
+
+/* Ensure buttons are touch-friendly on mobile (slightly larger than default) */
+
+#tv-header button, #tv-header .btn, #stickyMainHeader button {
+
+padding: 6px 8px;
+
+font-size: 13px;
+
+min-height:36px;
+
+}
 
 
 
@@ -1134,16 +1241,66 @@ min-width:36px;
 
 }
 
+
+
+
+/* Restore and protect search bar elements in case other CSS hid or displaced them */
+
+#tv-header .search-bar,
+
+#tv-header .search,
+
+.search-bar,
+
+.search-input,
+
+#searchBar,
+
+.site-search {
+
+display:flex !important;
+
+align-items:center !important;
+
+width:100% !important;
+
+min-width:0 !important;
+
+z-index: 1202 !important;
+
 }
 
 
 
 
-/* Very-narrow screens - hide less-essential header buttons */
+/* If controls overflow allow horizontal scrolling rather than hide inputs */
+
+#tv-header > div:last-child { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+
+
+
+/* Reduce extreme packing on small devices */
+
+#tv-header .header-actions, #tv-header .header-controls { gap: 6px; }
+
+}
+
+
+
+
+/* Very-narrow screens - hide less-essential header buttons /
 
 @media (max-width:420px){
 
-#tv-header > div:last-child{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+/ keep pinned layout but allow horizontal scrolling if overcrowded */
+
+#tv-header > div:last-child{ overflow-x:auto; -webkit-overflow-scrolling:touch; max-width: 48%; }
+
+
+
+
+/* preserve critical controls only if needed */
 
 #tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) { display:none !important; }
 
@@ -1946,7 +2103,7 @@ background: var(--focus-bg);
 
 
 
-/* Mobile adjustments with !important to override external frameworks */
+/* Mobile adjustments with !important to override external frameworks (conservative) */
 
 @media (max-width:600px){
 
@@ -2063,9 +2220,7 @@ margin-top: 0.25em;
 
 
 
-/* ========== Last-applied mobile header adjustments (conservative, non-destructive) ==========
-
-Purpose:
+/* === Requested mobile header & compact table controls (final, last-applied) ===
 
 
 
@@ -2074,7 +2229,7 @@ Purpose:
 
 
 
-Keep title and header controls on the same row on phones when possible.
+top: Theme (#modeBtn) + Collapse All (#toggleAllBtn)
 
 
 
@@ -2083,7 +2238,7 @@ Keep title and header controls on the same row on phones when possible.
 
 
 
-Shrink the h1 visually and allow it to ellipsize.
+second row: full-width search input (#searchBox or input[type="search"])
 
 
 
@@ -2092,7 +2247,7 @@ Shrink the h1 visually and allow it to ellipsize.
 
 
 
-Protect and shrink the search input (overrides inline styles).
+page title hidden on small screens
 
 
 
@@ -2101,126 +2256,61 @@ Protect and shrink the search input (overrides inline styles).
 
 
 
-Increase tappable area for the theme toggle.
+compact table-level buttons
 
-These rules are last in the file so they override earlier mobile rules safely.
-
-*/
-
-
-
-
-
-
-
+/
 
 @media (max-width:600px){
 
-/* keep header as a single responsive row when space allows */
+/ make header a stacked flex column */
 
 #tv-header {
 
-flex-direction: row !important;
+display: flex !important;
 
-align-items: center !important;
-
-justify-content: space-between !important;
+flex-direction: column !important;
 
 gap: 8px !important;
 
-width: 100%;
+align-items: stretch !important;
+
+width: 100% !important;
 
 }
 
 
 
 
-/* title block adapts and can shrink /
+
+
+
+
+/* hide the title block to free horizontal space */
 
 #tv-header > div:first-child {
 
-flex: 1 1 auto !important;
-
-min-width: 0 !important; / allow ellipsis */
-
-display:flex !important;
-
-align-items:center !important;
-
-gap:8px !important;
+display: none !important;
 
 }
 
 
 
 
-/* smaller, single-line title with ellipsis */
-
-#tv-header > div:first-child h1,
-
-#tv-header > div:first-child .page-title {
-
-font-size: 1.00rem !important;
-
-margin: 0 !important;
-
-line-height: 1.15 !important;
-
-font-weight: 700 !important;
-
-white-space: nowrap !important;
-
-overflow: hidden !important;
-
-text-overflow: ellipsis !important;
-
-}
-
-
-
-
-/* controls pinned to the right; do not wrap onto multiple lines /
+/* ensure controls container wraps and stays in flow */
 
 #tv-header > div:last-child {
 
-flex: 0 0 auto !important;
+display: flex !important;
 
-display:flex !important;
+flex-wrap: wrap !important;
 
-gap:8px !important;
+align-items: center !important;
 
-align-items:center !important;
+justify-content: flex-end !important;
 
-justify-content:flex-end !important;
+gap: 8px !important;
 
-flex-wrap: nowrap !important;
-
-max-width: 48% !important; / conservative: leave room for title */
-
-overflow: visible !important;
-
-}
-
-
-
-
-/* Override any inline min-width on the search input and let it shrink */
-
-#tv-header input[type="search"],
-
-#tv-header input[type="text"],
-
-#searchBox {
-
-min-width: 0 !important;
-
-width: auto !important;
-
-max-width: calc(24ch + 8vw) !important;
-
-flex: 0 1 auto !important;
-
-margin: 0 !important;
+width: 100% !important;
 
 box-sizing: border-box !important;
 
@@ -2229,23 +2319,31 @@ box-sizing: border-box !important;
 
 
 
-/* Increase tappable area for theme toggle without changing icon visual size */
+/* primary top-row buttons become first in source order visually */
 
 #modeBtn,
 
+#toggleAllBtn,
+
 .mode-btn,
+
+.btn-theme,
 
 .theme-toggle,
 
 .theme-button,
 
-.btn-theme,
-
 button#modeBtn {
 
-padding: 8px 10px !important;
+order: 0 !important;
 
-font-size: 14px !important;
+flex: 0 0 auto !important;
+
+margin: 0 !important;
+
+padding: 6px 10px !important;
+
+font-size: 13px !important;
 
 min-width: 44px !important;
 
@@ -2264,72 +2362,154 @@ justify-content: center !important;
 
 
 
-/* compact other header buttons slightly to fit more items */
+/* force search to second row, full width — override inline styles */
 
-#tv-header button, #tv-header .btn {
+#tv-header input[type="search"],
 
-padding: 6px 8px !important;
+#tv-header input[type="text"],
 
-font-size: 13px !important;
+#searchBox,
+
+.search,
+
+.search-input,
+
+.site-search {
+
+order: 1 !important;
+
+flex: 0 0 100% !important;
+
+width: 100% !important;
+
+max-width: 100% !important;
+
+min-width: 0 !important;
+
+box-sizing: border-box !important;
+
+margin: 0 !important;
+
+height: 38px !important;
+
+padding: 6px 10px !important;
+
+font-size: 14px !important;
+
+border-radius: 6px !important;
+
+background: var(--panel) !important;
+
+border: 1px solid var(--border) !important;
 
 }
 
 
 
 
-/* if controls overflow, prefer horizontal scroll on the controls column
+/* remaining header controls follow after search */
 
-rather than hiding or pushing the search behind the title. */
+#tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) {
 
-#tv-header > div:last-child {
+order: 2 !important;
 
-overflow-x: auto !important;
+flex: 0 0 auto !important;
 
--webkit-overflow-scrolling: touch !important;
+padding: 4px 8px !important;
+
+font-size: 12px !important;
+
+min-height: 34px !important;
+
+margin-top: 6px !important;
 
 }
 
-}
 
 
 
-
-/* Very narrow screens fallback: preserve search, hide lower-priority buttons */
+/* very narrow phones: hide low-priority buttons but keep theme and collapse visible */
 
 @media (max-width:420px){
 
-#tv-header {
-
-overflow-x: visible !important;
-
-}
-
-
-
-
-/* allow more room for controls to scroll */
-
-#tv-header > div:last-child {
-
-max-width: 60% !important;
-
-}
-
-
-
-
-/* hide less-essential buttons to protect search & title visibility */
+#tv-header > div:last-child{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
 
 #tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) { display:none !important; }
 
+}
 
 
 
-/* tighten search input maximum width */
 
-#tv-header input[type="search"], #searchBox {
+/* Compact table control buttons while preserving touch hit area */
 
-max-width: calc(18ch + 6vw) !important;
+.table-controls a,
+
+.table-controls button,
+
+.table-controls summary,
+
+.table-controls .toggle-table-btn,
+
+.table-controls .table-toggle-inline,
+
+.copy-buttons button,
+
+.table-header-wrapper .copy-buttons button,
+
+.table-controls .export-xlsx,
+
+.export-xlsx {
+
+padding: 4px 6px !important;
+
+font-size: 12px !important;
+
+line-height: 1 !important;
+
+gap: 6px !important;
+
+min-height: 32px !important;
+
+min-width: 32px !important;
+
+border-radius: 6px !important;
+
+}
+
+
+
+
+/* icon-only variants keep a consistent hit area */
+
+.table-controls a.icon-only,
+
+.table-controls button.icon-only,
+
+.table-controls .table-toggle-inline.icon-only,
+
+.table-controls .toggle-table-btn.icon-only {
+
+padding: 6px !important;
+
+width: 36px !important;
+
+height: 36px !important;
+
+}
+
+
+
+
+/* compact copy button variant */
+
+.copy-buttons button.copy-btn, .copy-btn {
+
+padding: 4px 8px !important;
+
+font-size: 12px !important;
+
+min-height: 32px !important;
 
 }
 
@@ -2338,4 +2518,4 @@ max-width: calc(18ch + 6vw) !important;
 
 
 
-/* End of last-applied mobile header adjustments */
+/* End of file */
