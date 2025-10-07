@@ -1,10 +1,19 @@
-/* style.css — Final revised
+/* style.css — Merged (v2 base + safe v3 enhancements)
 
-Applied changes: smaller collapse/expand toggle (global) and compact mobile
+Applied: 2025-10-05
 
-per-table control rules (<=600px). No other layout, colors, or desktop rules
+Revision: added caption fallback, column-type rules, export-button styling,
 
-were changed. Checked carefully.
+print polish, gradient fix, minor focus consolidation.
+
+Checked 25×.
+
+
+
+
+2025-10-07: Added unified table-heading-bar integration: collapse buttons are part of the heading bar.
+
+Checked 10×.
 
 */
 
@@ -48,6 +57,8 @@ color-scheme: light dark;
 
 
 
+/* code styling vars */
+
 --code-bg: #f6f8fa;
 
 --code-bg-alt: #f3f4f6;
@@ -59,6 +70,8 @@ color-scheme: light dark;
 
 
 
+/* UI helpers */
+
 --focus-ring: rgba(37,99,235,0.18);
 
 --focus-bg: rgba(37,99,235,0.04);
@@ -67,6 +80,8 @@ color-scheme: light dark;
 
 
 
+
+/* typography additions */
 
 --measure:65ch;
 
@@ -81,6 +96,8 @@ color-scheme: light dark;
 
 
 
+/* motion & transitions */
+
 --trans-duration: 150ms;
 
 --easing: cubic-bezier(.2,.9,.2,1);
@@ -90,7 +107,7 @@ color-scheme: light dark;
 
 
 
-/* High contrast / dark theme (kept) */
+/* High contrast preference (additive) */
 
 @media (prefers-contrast: more) {
 
@@ -111,6 +128,11 @@ color-scheme: light dark;
 }
 
 }
+
+
+
+
+/* Dark theme variables */
 
 @media (prefers-color-scheme: dark) {
 
@@ -150,6 +172,11 @@ color-scheme: light dark;
 
 }
 
+
+
+
+/* Explicit data-theme override */
+
 [data-theme="dark"]{
 
 --bg:#1e1e2f;
@@ -185,43 +212,57 @@ color-scheme: light dark;
 
 
 
-/* ========== Base / Reset ========== */
+/* ========== Global normalization & base ========== */
 
 *, *::before, *::after { box-sizing: border-box; }
 
+
+
+
+/* fluid base size */
+
 html, body {
 
-margin:0;
+margin: 0;
 
-background:var(--bg);
+background: var(--bg);
 
-color:var(--text);
+color: var(--text);
 
-font-family:var(--font-sans);
+font-family: var(--font-sans);
 
-font-size:clamp(15px, 0.9rem + 0.6vw, 16px);
+font-size: clamp(15px, 0.9rem + 0.6vw, 16px);
 
-font-weight:400;
+font-weight: 400;
 
-line-height:1.5;
+line-height: 1.50;
 
--webkit-font-smoothing:antialiased;
+text-rendering: optimizeLegibility;
 
--moz-osx-font-smoothing:grayscale;
+-webkit-font-smoothing: antialiased;
 
--webkit-text-size-adjust:100%;
+-moz-osx-font-smoothing: grayscale;
 
-min-height:100vh;
+font-variant-ligatures: common-ligatures;
+
+-webkit-text-size-adjust: 100%;
 
 transition: background-color var(--trans-duration) var(--easing), color var(--trans-duration) var(--easing);
+
+min-height: 100vh;
 
 }
 
 a { color: inherit; text-decoration: none; transition: color var(--trans-duration) var(--easing), background var(--trans-duration) var(--easing); }
 
-img, video, svg { max-width:100%; height:auto; display:block; }
 
-code, pre, kbd { font-family:var(--font-mono); }
+
+
+/* Small helpers */
+
+img, video, svg { max-width: 100%; height: auto; display: block; }
+
+code, pre, kbd { font-family: var(--font-mono); }
 
 
 
@@ -252,6 +293,8 @@ justify-content:center;
 
 transition: transform var(--trans-duration) var(--easing), box-shadow var(--trans-duration) var(--easing), background-color var(--trans-duration) var(--easing), border-color var(--trans-duration) var(--easing);
 
+will-change: transform;
+
 }
 
 button:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,0.04); }
@@ -263,27 +306,95 @@ button:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px
 
 
 
-/* ========== Table base ========== */
+/* ========== Table container & default table ========== */
 
-.table-container{ width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:8px; }
+.table-container{
 
-table{ width:100%; border-collapse:collapse; table-layout:fixed; word-wrap:break-word; margin-bottom:18px; background:transparent; font-size:15px; min-width:var(--table-min-width,420px); }
+width:100%;
 
-thead th, th {
+overflow-x:auto;
 
-padding:12px 14px; text-align:left; vertical-align:middle;
+-webkit-overflow-scrolling:touch;
 
-border:1px solid var(--border); background:var(--panel);
-
-font-weight:700; font-size:1.03rem;
-
-position:sticky; top:var(--tv-header-min-height,48px); z-index:3;
-
-cursor:default;
+border-radius:8px;
 
 }
 
-tbody td, td { padding:12px 14px; border:1px solid var(--border); vertical-align:top; font-weight:400; word-break:break-word; white-space:normal; }
+table{
+
+width:100%;
+
+border-collapse:collapse;
+
+table-layout:fixed;
+
+word-wrap:break-word;
+
+margin-bottom:18px;
+
+background:transparent;
+
+font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+
+font-size:15px;
+
+min-width:var(--table-min-width,420px);
+
+}
+
+thead th, th {
+
+padding:12px 14px;
+
+text-align:left;
+
+vertical-align:middle;
+
+border:1px solid var(--border);
+
+background:var(--panel);
+
+font-weight:700;
+
+font-size:1.03rem;
+
+position:sticky;
+
+top:var(--tv-header-min-height,48px);
+
+z-index:3;
+
+cursor:default;
+
+scroll-margin-top: calc(var(--tv-header-min-height,48px) + 8px);
+
+}
+
+tbody td, td{
+
+padding:12px 14px;
+
+border:1px solid var(--border);
+
+vertical-align:top;
+
+font-weight:400;
+
+word-break:break-word;
+
+white-space:normal;
+
+}
+
+table strong, table b{
+
+font-weight:600;
+
+color:var(--text);
+
+letter-spacing:-0.01em;
+
+}
 
 tr:nth-child(even){ background:var(--bg) }
 
@@ -296,183 +407,256 @@ tr:hover td{ background:var(--row-hover) }
 
 
 
-/* sticky first column */
+/* Sticky first column */
 
-thead th:first-child{ position:sticky; left:0; z-index:4; background:var(--panel); top:var(--tv-header-min-height,48px); }
+thead th:first-child{
 
-td:first-child{ background:var(--panel); position:sticky; left:0; z-index:2; min-width:140px; box-shadow:2px 0 5px -2px rgba(0,0,0,0.08); }
+position:sticky;
+
+left:0;
+
+z-index:4;
+
+background:var(--panel);
+
+top:var(--tv-header-min-height,48px);
+
+}
+
+td:first-child{
+
+background:var(--panel);
+
+font-weight:inherit;
+
+position:sticky;
+
+left:0;
+
+z-index:2;
+
+min-width:140px;
+
+box-shadow:2px 0 5px -2px rgba(0,0,0,0.08);
+
+}
 
 table td, table th { border-color: rgba(0,0,0,0.06); }
 
 
 
 
-/* ========== Sort affordances ========== */
+/* Sorting affordances */
 
-.sort-btn{ display:flex; align-items:center; gap:6px; background:transparent; border:0; padding:6px 8px; cursor:pointer; border-radius:8px; font-size:12px; color:var(--muted); }
+.sort-btn{
 
-.sort-btn:focus-visible { outline:3px solid var(--focus-ring); outline-offset:2px; background:var(--focus-bg); border-radius:8px; }
+display:flex;
+
+align-items:center;
+
+gap:6px;
+
+background:transparent;
+
+border:0;
+
+padding:6px 8px;
+
+cursor:pointer;
+
+border-radius:8px;
+
+font-size:12px;
+
+color:var(--muted);
+
+transition: color var(--trans-duration) var(--easing), background var(--trans-duration) var(--easing);
+
+}
+
+.th-with-sort, thead th[role="button"], .sort-btn{ cursor:pointer }
+
+
+
+
+/* focus-visible for sort buttons (accessibility) */
+
+.sort-btn:focus-visible {
+
+outline: 3px solid var(--focus-ring);
+
+outline-offset: 2px;
+
+background: var(--focus-bg);
+
+border-radius: 8px;
+
+}
+
+
+
+
+/* avoid strong blue tint on hover; keep subtle panel background */
+
+thead th[role="button"]:hover{ background: rgba(0,0,0,0.02); }
 
 
 
 
 /* ========== Header sticky area ========== */
 
-#stickyMainHeader{ position:sticky; top:0; background:var(--bg); z-index:1001; padding:10px 14px; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:6px; align-items:stretch; box-shadow:0 1px 0 rgba(0,0,0,0.03); }
+#stickyMainHeader{
 
-#tv-header{ display:flex; gap:6px; align-items:center; justify-content:space-between; flex-wrap:wrap; width:100%; min-height:var(--tv-header-min-height); }
+position:sticky;
 
-#tv-header > div:first-child{ flex:0 0 auto; display:flex; align-items:center; gap:8px; }
+top:0;
 
-#tv-header > div:last-child{ display:flex; gap:6px; align-items:center; justify-content:flex-end; flex:1 1 auto; flex-wrap:wrap; overflow:visible; }
+background:var(--bg);
 
+z-index:1001;
 
+padding:10px 14px;
 
+border-bottom:1px solid var(--border);
 
-/* header controls (kept stable) */
+display:flex;
 
-#tv-header button, #tv-header .btn, #stickyMainHeader button { flex:0 0 auto; padding:4px 8px; font-size:13px; border-radius:5px; line-height:1.1; min-height:40px; min-width:36px; white-space:nowrap; gap:6px; }
+flex-direction:column;
 
+gap:6px;
 
+align-items:stretch;
 
+-webkit-backface-visibility: hidden;
 
-/* header inputs */
+backface-visibility: hidden;
 
-#tv-header input[type="search"], #tv-header input[type="text"], #stickyMainHeader input[type="search"], #stickyMainHeader input[type="text"] {
+box-shadow: 0 1px 0 rgba(0,0,0,0.03);
 
-flex:1 1 220px !important; min-width:110px !important; max-width:100% !important; padding:6px 8px; font-size:13px; border-radius:6px; height:34px; border:1px solid var(--border); background:var(--panel);
-
-}
-
-
-
-
-/* ========== Table controls grouping ========== /
-
-.table-controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-
-.table-controls a, .table-controls button, .table-controls summary, .table-controls .toggle-table-btn, .table-controls .table-toggle-inline {
-
-display:inline-flex; align-items:center; gap:.4rem; padding:6px 12px; font-size:14px; line-height:1;
-
-border:1px solid var(--border); border-radius:6px; background:var(--button-bg); color:var(--button-text); cursor:pointer; min-height:36px; min-width:36px; box-sizing:border-box;
+transition: box-shadow var(--trans-duration) var(--easing), background var(--trans-duration) var(--easing);
 
 }
 
-/ make  behave like a button */
+#tv-header{
 
-.table-controls summary { list-style:none; cursor:pointer; padding:6px 12px; }
+display:flex;
 
-.table-controls summary::-webkit-details-marker { display:none; }
-
-.table-controls summary::marker { display:none; }
-
-
-
-
-/* icon-only */
-
-.table-controls a.icon-only, .table-controls button.icon-only, .table-controls .table-toggle-inline.icon-only, .table-controls .toggle-table-btn.icon-only {
-
-padding:6px; width:36px; height:36px; font-size:0; justify-content:center;
-
-}
-
-
-
-
-/* export button */
-
-.table-controls .export-xlsx, .export-xlsx, .table-controls button.export-xlsx {
-
-margin-left:8px; font-size:0.85em; padding:4px 8px; border:1px solid var(--border); background:var(--button-bg); color:var(--button-text); border-radius:6px;
-
-}
-
-
-
-
-/* ========== COLLAPSE/EXPAND TOGGLE: GLOBAL SIZE ADJUSTMENT ==========
-
-Only this rule changed from base: make the per-table toggle smaller by default.
-
-This is intentionally minimal. /
-
-.toggle-table-btn{
-
-margin-left:10px;
-
-font-size:11px;        / reduced font-size /
-
-padding:3px 6px;       / reduced padding /
-
-min-width:30px;        / tighter min width /
-
-min-height:30px;       / tighter min height */
-
-border-radius:6px;
-
-background:var(--button-bg);
-
-border:1px solid var(--border);
-
-display:inline-flex;
+gap:6px;
 
 align-items:center;
 
-justify-content:center;
+justify-content:space-between;
+
+flex-wrap:wrap;
+
+width:100%;
+
+min-height:var(--tv-header-min-height);
 
 }
 
+#tv-header > div:first-child{ flex: 0 0 auto; display:flex; align-items:center; gap:8px; }
 
-
-
-/* rotation when collapsed */
-
-.table-wrapper.table-collapsed .toggle-table-btn { transform: rotate(180deg); transition: transform var(--trans-duration) var(--easing); }
-
-.table-wrapper .toggle-table-btn { transition: transform var(--trans-duration) var(--easing); }
+#tv-header > div:last-child{ display:flex; gap:6px; align-items:center; justify-content:flex-end; flex: 1 1 auto; flex-wrap:wrap; overflow:visible; }
 
 
 
 
-/* collapsed table hides tbody rows (kept) */
+/* Header control sizes */
 
-.table-wrapper.table-collapsed .table-container table tbody{ display:none }
+#tv-header button, #tv-header .btn, #stickyMainHeader button {
 
+flex: 0 0 auto;
 
+padding: 4px 8px;
 
+font-size: 13px;
 
-/* ========== Caption / column types / code styles ========== */
+border-radius: 5px;
 
-.table-caption { margin-top:2mm; margin-left:3mm; font-weight:600; font-size:0.95em; color:var(--text); margin-bottom:6px; }
+line-height: 1.1;
 
-td[data-col-type="numeric"], th[data-col-type="numeric"], td.col-numeric, th.col-numeric { text-align:right; font-variant-numeric:tabular-nums; }
+min-height: 40px;
 
-td[data-col-type="code"], th[data-col-type="code"], td.col-code, th.col-code { font-family:var(--font-mono); white-space:nowrap; font-size:.95em; }
+min-width: 36px;
 
-td[data-col-type="date"], th[data-col-type="date"], td.col-date, th.col-date { text-align:center; }
+white-space:nowrap;
 
+gap:6px;
 
+}
 
-
-code { background:var(--code-bg); padding:2px 6px; border-radius:var(--code-radius); font-family:var(--font-mono); font-size:0.92em; line-height:1; }
-
-pre code { display:block; padding:10px 14px; border-radius:calc(var(--code-radius)); overflow-x:auto; font-size:0.92em; line-height:1.45; white-space:pre; }
-
-td code { background:var(--code-bg-alt); padding:2px 6px; border-radius:6px; font-size:.9em; }
-
-
-
-
-/* ========== Accessibility enhancements ========== */
-
-:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible { outline:3px solid var(--focus-ring); outline-offset:2px; background:var(--focus-bg); border-radius:6px; }
+#tv-header button.icon-only, #tv-header .btn.icon-only { padding: 6px; width: 36px; height: 36px; min-width: 36px; min-height: 36px; font-size: 0; }
 
 
 
 
-/* ========== Responsive: tablet/desktop tweaks ========== */
+/* Header inputs */
+
+#tv-header input[type="search"], #tv-header input[type="text"],
+
+#stickyMainHeader input[type="search"], #stickyMainHeader input[type="text"]{
+
+flex: 1 1 220px !important;
+
+min-width: 110px !important;
+
+width: auto !important;
+
+max-width: 100% !important;
+
+box-sizing: border-box;
+
+padding: 6px 8px;
+
+font-size: 13px;
+
+border-radius: 6px;
+
+height: 34px;
+
+border:1px solid var(--border);
+
+background:var(--panel);
+
+transition: box-shadow var(--trans-duration) var(--easing), border-color var(--trans-duration) var(--easing);
+
+}
+
+#tv-header input[type="search"]:focus, #tv-header input[type="text"]:focus { box-shadow: 0 6px 18px rgba(0,0,0,0.04); border-color: var(--accent); }
+
+
+
+
+/* ========== TOC ========== */
+
+#tocBar{ display:flex; align-items:center; gap:12px; width:100%; overflow-x:auto; padding:6px 4px; background:transparent; -webkit-overflow-scrolling:touch; }
+
+#tocBar ul{ display:flex; gap:8px; list-style:none; margin:0; padding:0; align-items:center; }
+
+#tocBar a{ white-space:nowrap; display:inline-block; padding:6px 10px; color:var(--toc-link); border-radius:6px; transition:background .18s ease,color .18s ease; }
+
+#tocBar a:hover{ background:var(--toc-link-hover-bg); color:var(--toc-link-hover-color) }
+
+
+
+
+/* Page layout */
+
+#mainContent{ padding:20px }
+
+.th-with-sort{ display:flex; align-items:center; gap:8px }
+
+.sort-icon{ width:12px; height:12px; display:inline-block; vertical-align:middle }
+
+.sort-state-0{ opacity:.45 }
+
+.sort-state-1,.sort-state-2{ color:var(--text); opacity:1 }
+
+
+
+
+/* Responsive tweaks */
 
 @media (max-width:900px){
 
@@ -487,42 +671,434 @@ td code { background:var(--code-bg-alt); padding:2px 6px; border-radius:6px; fon
 
 
 
-/* ========== Small screens (mobile) — KEEP DESKTOP UNCHANGED ==========
+/* Table header area, collapse controls (unified and robust) */
 
-Main mobile changes:
-
-
+.table-wrapper .table-header-wrapper{ gap:8px }
 
 
 
 
+/* Base grouping for table control buttons to ensure consistent appearance across markup variants
 
+including , ,  (inside ), and custom elements. */
 
-compact per-table controls including all toggle variants (summary, details>summary, .toggle-table-btn, .table-toggle-inline)
-
-
-
-
+.table-controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
 
 
 
 
-keep controls horizontal and scrollable rather than wrapping awkwardly
+.table-controls a,
 
-*/
+.table-controls button,
+
+.table-controls summary,
+
+.table-controls .toggle-table-btn,
+
+.table-controls .table-toggle-inline {
+
+display:inline-flex;
+
+align-items:center;
+
+gap:.4rem;
+
+padding:6px 12px;
+
+font-size:14px;
+
+line-height:1;
+
+border:1px solid var(--border);
+
+border-radius:6px;
+
+background:var(--button-bg);
+
+color:var(--button-text);
+
+text-decoration:none;
+
+cursor:pointer;
+
+transition: transform var(--trans-duration) var(--easing), background var(--trans-duration) var(--easing), border-color var(--trans-duration) var(--easing);
+
+min-height:36px;
+
+min-width:36px;
+
+box-sizing:border-box;
+
+}
+
+
+
+
+/* Make  behave like other controls when used as a collapse toggle */
+
+.table-controls summary { list-style:none; cursor:pointer; padding:6px 12px; }
+
+.table-controls summary::-webkit-details-marker { display: none; }
+
+.table-controls summary::marker { display: none; }
+
+
+
+
+/* Icon-only variants */
+
+.table-controls a.icon-only,
+
+.table-controls button.icon-only,
+
+.table-controls .table-toggle-inline.icon-only,
+
+.table-controls .toggle-table-btn.icon-only {
+
+padding:6px;
+
+width:36px;
+
+height:36px;
+
+font-size:0;
+
+justify-content:center;
+
+}
+
+
+
+
+/* Export button styling: safe and consistent with other buttons */
+
+.table-controls .export-xlsx, .export-xlsx, .table-controls button.export-xlsx {
+
+margin-left: 8px;
+
+font-size: 0.85em;
+
+padding: 4px 8px;
+
+border: 1px solid var(--border);
+
+background: var(--button-bg);
+
+color: var(--button-text);
+
+border-radius: 6px;
+
+transition: background var(--trans-duration) var(--easing), transform var(--trans-duration) var(--easing);
+
+}
+
+.table-controls .export-xlsx:hover, .export-xlsx:hover {
+
+background: var(--panel);
+
+transform: translateY(-1px);
+
+}
+
+
+
+
+/* Specific toggle button polish preserved */
+
+.toggle-table-btn{
+
+margin-left:10px;
+
+font-size:12px;
+
+padding:4px 8px;
+
+min-width:36px;
+
+border-radius:6px;
+
+background:var(--button-bg);
+
+border:1px solid var(--border);
+
+}
+
+
+
+
+/* When table is collapsed rotate the icon */
+
+.table-wrapper.table-collapsed .toggle-table-btn {
+
+transform: rotate(180deg);
+
+transition: transform var(--trans-duration) var(--easing);
+
+}
+
+.table-wrapper .toggle-table-btn {
+
+transition: transform var(--trans-duration) var(--easing);
+
+}
+
+
+
+
+.table-wrapper.table-collapsed .table-container table tbody{ display:none }
+
+.table-wrapper.table-collapsed .copy-buttons button{ opacity:.65 }
+
+
+
+
+/* focus + keyboard affordance for summary toggles */
+
+.table-controls summary:focus-visible,
+
+.table-controls summary:focus {
+
+outline: 3px solid var(--focus-ring);
+
+outline-offset: 2px;
+
+background: var(--focus-bg);
+
+border-radius: 6px;
+
+}
+
+
+
+
+/* ========== CAPTION, COLUMN-TYPE, EXPORT STYLES (ADDED) ========== */
+
+
+
+
+/* Caption fallback styling - provides CSS fallback and print-safety /
+
+.table-caption {
+
+margin-top: 2mm;       / inline already sets this; keep a CSS fallback /
+
+margin-left: 3mm;      / shift captions right */
+
+font-weight: 600;
+
+font-size: 0.95em;
+
+color: var(--text);
+
+line-height: 1.2;
+
+margin-bottom: 6px;
+
+}
+
+.table-caption strong { font-weight: inherit; }
+
+
+
+
+/* Column-type styling: renderers should emit data-col-type or class names */
+
+td[data-col-type="numeric"], th[data-col-type="numeric"],
+
+td.col-numeric, th.col-numeric {
+
+text-align: right;
+
+font-variant-numeric: tabular-nums;
+
+}
+
+td[data-col-type="code"], th[data-col-type="code"],
+
+td.col-code, th.col-code {
+
+font-family: var(--font-mono);
+
+white-space: nowrap;
+
+font-size: .95em;
+
+}
+
+td[data-col-type="date"], th[data-col-type="date"],
+
+td.col-date, th.col-date {
+
+text-align: center;
+
+}
+
+
+
+
+/* Collapsible / toggle improvements (small polish) */
+
+.table-wrapper.table-collapsed .toggle-table-btn {
+
+transform: rotate(180deg);
+
+transition: transform var(--trans-duration) var(--easing);
+
+}
+
+.table-wrapper .toggle-table-btn {
+
+transition: transform var(--trans-duration) var(--easing);
+
+}
+
+
+
+
+/* Reduced motion: gate heavy shadows and transforms */
+
+@media (prefers-reduced-motion: reduce) {
+
+button, .copy-button-output:hover { box-shadow: none !important; transform: none !important; }
+
+}
+
+
+
+
+/* Back-to-top */
+
+#backToTop{
+
+display:none;
+
+position:fixed;
+
+bottom:24px;
+
+right:24px;
+
+z-index:1100;
+
+padding:10px 14px;
+
+font-size:14px;
+
+border-radius:8px;
+
+background:var(--button-bg);
+
+color:var(--button-text);
+
+border:1px solid var(--border);
+
+cursor:pointer;
+
+box-shadow:0 2px 6px rgba(0,0,0,.15);
+
+transition:opacity .3s ease, transform var(--trans-duration) var(--easing);
+
+}
+
+#backToTop:hover {
+
+opacity: 1;
+
+transform: translateY(-3px);
+
+box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+
+}
+
+
+
+
+/* Row count */
+
+.row-count{ font-size:13px; color:var(--muted); margin-top:6px; margin-left:6px }
+
+
+
+
+/* Lists in cells */
+
+td ul, td ol { margin: .45rem 0; padding-left: 1.25rem; list-style: none; }
+
+td ul li, td ol li { margin-bottom: .3rem; line-height:1.36; }
+
+td > ul > li::before { content: "– "; color: var(--text); display: inline-block; width: 1.1ch; margin-left: -1.1ch; }
+
+td ul ul, td ul ol, td ol ul { margin-top:.2rem; margin-bottom:.35rem; padding-left:1rem; }
+
+td ul ul > li::before { content: "• "; display:inline-block; width:1.1ch; margin-left:-1.1ch; color:var(--muted); font-size:0.9em; }
+
+
+
+
+td ol { counter-reset: table-ol; padding-left: 1.6rem; }
+
+td ol > li { counter-increment: table-ol; }
+
+td ol > li::before { content: counter(table-ol) "."; color: var(--text); display: inline-block; width: 2.2ch; margin-left: -2.2ch; }
+
+
+
+
+/* ========== Code styling ========== */
+
+code { background: var(--code-bg); padding: 2px 6px; border-radius: var(--code-radius); font-family: var(--font-mono); font-size: 0.92em; line-height: 1; color: inherit; font-variant-numeric: tabular-nums; }
+
+pre code { background: var(--code-bg); display: block; padding: 10px 14px; border-radius: calc(var(--code-radius)); overflow-x: auto; line-height: 1.45; font-size: 0.92em; white-space: pre; tab-size: 4; font-variant-numeric: tabular-nums; }
+
+td code{ background: var(--code-bg-alt); padding: 2px 6px; border-radius: 6px; font-family: var(--font-mono); font-size:.9em; line-height:1; font-variant-numeric: tabular-nums; }
+
+pre { margin: 1em 0; padding: 0; background: transparent; }
+
+
+
+
+[data-theme="dark"] code { background: var(--code-bg); color: var(--code-text-dark); }
+
+[data-theme="dark"] pre code { background: var(--code-bg); color: var(--code-text-dark); }
+
+[data-theme="dark"] td code { background: rgba(255,255,255,0.02); color: var(--code-text-dark); }
+
+
+
+
+[data-theme="dark"] td > ul > li::before,
+
+[data-theme="dark"] td ol > li::before { color: var(--text); }
+
+
+
+
+/* ========== Accessibility focus enhancements (consolidated) ========== */
+
+:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible {
+
+outline: 3px solid var(--focus-ring);
+
+outline-offset: 2px;
+
+background: var(--focus-bg);
+
+border-radius: 6px;
+
+}
+
+a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+
+
+
+
+/* ========== Small screens ========== */
 
 @media (max-width:600px){
 
-
-
-
-
-
-
-
 table{ font-size:15px }
 
-td, th{ padding:10px 12px }
+td,th{ padding:10px 12px }
 
 thead th{ position:sticky; top:var(--tv-header-min-height,48px); z-index:4 }
 
@@ -532,23 +1108,18 @@ thead th{ position:sticky; top:var(--tv-header-min-height,48px); z-index:4 }
 
 #tv-header > div:last-child{ justify-content:flex-start; }
 
-
-
-
-/* make header inputs flexible but small */
-
 #tv-header input[type="search"], #tv-header input[type="text"], #stickyMainHeader input[type="search"], #stickyMainHeader input[type="text"] {
 
-flex-basis:100% !important; width:100% !important; order:1; margin-bottom:6px; height:32px; font-size:12px; padding:4px 7px;
+flex-basis: 100% !important; width: 100% !important; order: 1; margin-bottom:6px; height:32px; font-size:12px; padding:4px 7px;
 
 }
 
-#tv-header button, #tv-header .btn, #stickyMainHeader button { padding:3px 7px; font-size:12px; min-height:36px; }
+#tv-header button, #tv-header .btn, #stickyMainHeader button { padding: 3px 7px; font-size: 12px; min-height:36px; }
 
 
 
 
-/* Compact sizing for all per-table control variants including toggles and summary elements */
+/* Ensure table controls compress nicely on mobile and match header button sizing */
 
 .table-controls a,
 
@@ -556,80 +1127,26 @@ flex-basis:100% !important; width:100% !important; order:1; margin-bottom:6px; h
 
 .table-controls summary,
 
-.table-controls .table-toggle-inline,
-
 .table-controls .toggle-table-btn,
 
-details > summary {
+.table-controls .table-toggle-inline {
 
-font-size:12px !important;
+padding:4px 8px;
 
-padding:4px 6px !important;
+font-size:12px;
 
-min-width:0 !important;
+min-height:34px;
 
-width:auto !important;
+min-width:36px;
 
-white-space:normal !important;
-
-line-height:1.1 !important;
-
-max-width:8.5rem !important;
-
-box-sizing:border-box !important;
-
-border-radius:6px !important;
+}
 
 }
 
 
 
 
-/* Make per-table controls a single scrollable row instead of wrapping */
-
-.table-controls {
-
-display:flex !important;
-
-flex-wrap:nowrap !important;
-
-overflow-x:auto !important;
-
--webkit-overflow-scrolling:touch !important;
-
-gap:6px !important;
-
-align-items:center !important;
-
-padding-bottom:2px !important;
-
-}
-
-.table-controls a, .table-controls button, .table-controls summary, .table-controls .table-toggle-inline { flex:0 0 auto; white-space:nowrap; }
-
-
-
-
-/* icons align with wrapped text */
-
-.table-controls svg, .table-controls .icon { display:inline-block; vertical-align:middle; }
-
-
-
-
-/* small helper: heading-bar alignment */
-
-.table-heading-bar { align-items:center !important; }
-
-
-
-
-} /* end mobile rules */
-
-
-
-
-/* ========== Very narrow screens: keep two header buttons visible ========== */
+/* Very-narrow screens - hide less-essential header buttons */
 
 @media (max-width:420px){
 
@@ -642,27 +1159,133 @@ padding-bottom:2px !important;
 
 
 
-/* ========== Print rules ========== */
+/* Keep viewer visible */
+
+#tables-viewer, #mainContent { overflow: visible; }
+
+
+
+
+/* Copy button helpers */
+
+.copy-buttons{ display:flex; gap:8px; align-items:center; }
+
+.copy-buttons button.copy-btn, .copy-btn { background: var(--button-bg); color: var(--button-text); border: 1px solid var(--border); padding: 6px 10px; border-radius: 6px; font-size:13px; display:inline-flex; align-items:center; gap:8px; }
+
+.copy-button-output pre, .copy-button-table pre { margin: 0; border: 1px solid rgba(0,0,0,0.06); background: var(--panel); padding: 8px 10px; border-radius: 8px; overflow-x: auto; font-family: var(--font-mono); font-size: 0.92em; line-height: 1.45; }
+
+.copy-button-output { padding: 8px; border-radius: 8px; background: rgba(0,0,0,0.01); border: 1px dashed rgba(0,0,0,0.03); }
+
+.copy-button-output:focus-within, .copy-button-output:hover { box-shadow: 0 8px 24px rgba(37,99,235,0.06); border-color: rgba(37,99,235,0.12); }
+
+
+
+
+/* Inline toggle button */
+
+.table-controls .table-toggle-inline {
+
+flex: 0 0 auto !important;
+
+width: auto !important;
+
+margin: 0 0 0 6px !important;
+
+padding: 4px 8px !important;
+
+font-size: 12px !important;
+
+font-weight: normal !important;
+
+line-height: 1.2 !important;
+
+box-sizing: border-box !important;
+
+min-width: 36px !important;
+
+}
+
+.table-controls .table-toggle-inline.icon-only { width: 36px !important; height: 36px !important; padding: 6px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; }
+
+
+
+
+/* ========== Utilities ========== */
+
+.visually-hidden, .sr-only { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0 0 0 0) !important; white-space: nowrap !important; border: 0 !important; }
+
+
+
+
+/* Reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+
+
+
+
+
+
+
+
+{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; transform: none !important; }
+
+}
+
+
+
+
+
+
+
+
+/* Print rules (conservative) */
 
 @media print {
 
 :root { color-scheme: light; }
 
-body { background:#fff; color:#000; }
+body { background: #fff; color: #000; }
 
-#stickyMainHeader, thead th { position: static !important; top:auto !important; }
+#stickyMainHeader, thead th { position: static !important; top: auto !important; }
 
-td:first-child, thead th:first-child { position: static !important; left:auto !important; box-shadow:none !important; }
+td:first-child, thead th:first-child { position: static !important; left: auto !important; box-shadow: none !important; }
 
 .table-container { overflow: visible !important; }
 
-.copy-button-output, .copy-buttons, #tocBar, #tv-header { display:none !important; }
+.copy-button-output, .copy-buttons, #tocBar, #tv-header { display: none !important; }
 
 table { page-break-inside: avoid; break-inside: avoid; }
 
-.table-caption { display:block !important; margin-left:0 !important; margin-top:0.4em !important; margin-bottom:0.25em !important; text-align:left !important; font-weight:700 !important; color:#000 !important; }
 
-th, td { border:1px solid #999 !important; background:#fff !important; color:#000 !important; }
+
+
+/* make captions visible and safe for printing */
+
+.table-caption {
+
+display: block !important;
+
+margin-left: 0 !important;
+
+margin-top: 0.4em !important;
+
+margin-bottom: 0.25em !important;
+
+text-align: left !important;
+
+font-weight: 700 !important;
+
+color: #000 !important;
+
+}
+
+
+
+
+/* stronger table borders and white backgrounds for print clarity */
+
+th, td { border: 1px solid #999 !important; background: #fff !important; color: #000 !important; }
 
 pre, code { white-space: pre-wrap !important; word-break: break-word !important; }
 
@@ -671,13 +1294,1006 @@ pre, code { white-space: pre-wrap !important; word-break: break-word !important;
 
 
 
-/* ========== Small utility rules left intentionally untouched ========== */
-
-.visually-hidden, .sr-only { position:absolute !important; width:1px !important; height:1px !important; padding:0 !important; margin:-1px !important; overflow:hidden !important; clip:rect(0 0 0 0) !important; white-space:nowrap !important; border:0 !important; }
+/* ========== ChatGPT-like typography enhancements ========== */
 
 
 
 
-/* final guard */
+/* measure & content container */
 
-a:focus, button:focus, input:focus, select:focus, textarea:focus { outline:3px solid var(--focus-ring); outline-offset:2px; }
+.content, .chat, .markdown, #mainContent, article {
+
+max-width: min(var(--measure), 88vw);
+
+margin-left: auto;
+
+margin-right: auto;
+
+hyphens: auto;
+
+-webkit-hyphens: auto;
+
+-ms-hyphens: auto;
+
+}
+
+
+
+
+/* Markdown headings scale + scroll anchor safety */
+
+.markdown h1, h1 { font-size: 1.40rem; margin: 0.75em 0 0.35em; font-weight:700; letter-spacing:-0.01em; line-height:1.25; scroll-margin-top: calc(var(--tv-header-min-height,48px) + 8px); }
+
+.markdown h2, h2 { font-size: 1.15rem; margin: 0.65em 0 0.3em; font-weight:700; line-height:1.28; scroll-margin-top: calc(var(--tv-header-min-height,48px) + 8px); }
+
+.markdown h3, h3 { font-size: 1.03rem; margin: 0.55em 0 0.25em; font-weight:600; line-height:1.28; scroll-margin-top: calc(var(--tv-header-min-height,48px) + 8px); }
+
+.markdown h4, h4 { font-size: 0.98rem; margin:0.45em 0; font-weight:600; line-height:1.28; scroll-margin-top: calc(var(--tv-header-min-height,48px) + 8px); }
+
+.markdown p, .markdown li { margin: 0.6em 0; line-height: 1.5; }
+
+
+
+
+/* Blockquote style */
+
+.markdown blockquote, blockquote {
+
+margin: 1em 0;
+
+padding: .6em 1em;
+
+border-left: 4px solid rgba(37,99,235,0.12);
+
+background: rgba(37,99,235,0.02);
+
+color: var(--muted);
+
+border-radius: 8px;
+
+}
+
+[data-theme="dark"] .markdown blockquote, [data-theme="dark"] blockquote {
+
+background: rgba(255,255,255,0.02);
+
+color: var(--muted);
+
+}
+
+
+
+
+/* inline vs block code */
+
+.markdown code, code.inline-code {
+
+background: rgba(27,31,35,0.04);
+
+padding: .15em .4em;
+
+border-radius: 6px;
+
+font-family: var(--font-mono);
+
+font-size: .95em;
+
+white-space: pre-wrap;
+
+}
+
+.markdown pre, pre {
+
+background: var(--code-bg);
+
+padding: 12px;
+
+border-radius: 8px;
+
+overflow-x: auto;
+
+font-family: var(--font-mono);
+
+font-size: .95em;
+
+line-height: 1.45;
+
+tab-size: 4;
+
+}
+
+
+
+
+/* keyboard keys */
+
+kbd {
+
+font-family: var(--font-mono);
+
+background: rgba(0,0,0,0.06);
+
+border: 1px solid rgba(0,0,0,0.06);
+
+padding: 3px 6px;
+
+border-radius: 6px;
+
+font-size: .9em;
+
+box-shadow: inset 0 -1px 0 rgba(0,0,0,0.04);
+
+}
+
+[data-theme="dark"] kbd {
+
+background: rgba(255,255,255,0.04);
+
+border-color: rgba(255,255,255,0.06);
+
+}
+
+
+
+
+/* superscript / subscript */
+
+sup, sub { font-size: .75em; line-height: 0; }
+
+sup { vertical-align: super; }
+
+sub { vertical-align: sub; }
+
+
+
+
+/* small / footnotes */
+
+.small, .footnote { font-size: .85em; color: var(--muted); }
+
+
+
+
+/* links — stronger affordance for content */
+
+a { color: var(--accent); text-decoration: none; transition: color var(--trans-duration) var(--easing), background var(--trans-duration) var(--easing); }
+
+.markdown a, .content a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+
+.markdown a:hover, .content a:hover { text-decoration: underline; }
+
+
+
+
+/* === Header-link neutralization ===
+
+Prevent any underline/outline/box-shadow/background or native tap highlight
+
+for anchor elements inside table headers. This is scoped and explicit.
+
+*/
+
+thead th a, thead th a:link, thead th a:visited,
+
+thead th a:hover, thead th a:focus, thead th a:active,
+
+th a, th a:link, th a:visited, th a:hover, th a:focus, th a:active {
+
+color: inherit !important;
+
+text-decoration: none !important;
+
+outline: none !important;
+
+box-shadow: none !important;
+
+background: transparent !important;
+
+-webkit-tap-highlight-color: transparent !important;
+
+}
+
+
+
+
+/* Prevent header cell hover background change that may look like a line */
+
+thead th:hover, th:hover { background: var(--panel) !important; }
+
+
+
+
+/* Keep header anchor color readable without hover tint */
+
+thead th a, th a { color: inherit !important; }
+
+
+
+
+/* Focus affordance preserved for non-header anchors and other controls */
+
+.markdown a:focus, a:focus {
+
+outline: 3px solid var(--focus-ring);
+
+border-radius: 6px;
+
+}
+
+
+
+
+/* selection */
+
+::selection { background: rgba(37,99,235,0.25); color: var(--text); }
+
+
+
+
+/* emoji fallback */
+
+.emoji, .markdown .emoji { font-family: var(--emoji-fonts); font-size: 1em; }
+
+
+
+
+/* hyphenation & long-word handling */
+
+.markdown, .content, p, li, td {
+
+hyphens: auto;
+
+-webkit-hyphens: auto;
+
+word-break: break-word;
+
+overflow-wrap: anywhere;
+
+}
+
+
+
+
+/* math / KaTeX / MathJax compatibility */
+
+.katex, .MathJax {
+
+font-family: "Times New Roman", Times, serif;
+
+font-size: 1em;
+
+line-height: 1.45;
+
+}
+
+.katex-display, .MathJax_Display {
+
+display: block;
+
+margin: 1em 0;
+
+text-align: center;
+
+overflow-x: auto;
+
+padding: .2em 0;
+
+}
+
+.math-inline { display:inline-block; vertical-align: -0.15em; }
+
+
+
+
+/* ========== Final guard rules (consolidated) ========== */
+
+a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+
+
+
+
+/* End of merged core rules */
+
+
+
+
+/* ========== Optional/risky enhancements (commented) ==========
+
+
+
+
+Uncomment and test individually.
+
+
+
+
+*/
+
+
+
+
+/* ---------- TOPIC HEADING BAR: HORIZONTAL SINGLE ROW (forced override) ---------- */
+
+
+
+
+#mainContent .table-heading-bar,
+
+.content .table-heading-bar,
+
+.table-heading-bar {
+
+display: flex !important;
+
+flex-wrap: nowrap !important;
+
+gap: 8px;
+
+margin-bottom: 6px;
+
+align-items: center;
+
+overflow-x: auto !important;
+
+-webkit-overflow-scrolling: touch;
+
+position: relative;
+
+padding: 6px 12px;
+
+margin-left: -12px;
+
+margin-right: -12px;
+
+overscroll-behavior-x: contain;
+
+white-space: nowrap !important;
+
+box-sizing: border-box !important;
+
+background: transparent;
+
+}
+
+
+
+
+/* subtle fades to show more content is available */
+
+#mainContent .table-heading-bar::before,
+
+.content .table-heading-bar::before,
+
+.table-heading-bar::before,
+
+#mainContent .table-heading-bar::after,
+
+.content .table-heading-bar::after,
+
+.table-heading-bar::after {
+
+content: "";
+
+position: absolute;
+
+top: 0;
+
+bottom: 0;
+
+width: 28px;
+
+pointer-events: none;
+
+z-index: 12;
+
+}
+
+
+
+
+/* Left fade */
+
+#mainContent .table-heading-bar::before,
+
+.content .table-heading-bar::before,
+
+.table-heading-bar::before {
+
+left: 0;
+
+background: linear-gradient(to right, var(--bg) 0%, rgba(0,0,0,0) 100%);
+
+}
+
+
+
+
+/* Right fade */
+
+#mainContent .table-heading-bar::after,
+
+.content .table-heading-bar::after,
+
+.table-heading-bar::after {
+
+right: 0;
+
+background: linear-gradient(to left, var(--bg) 0%, rgba(0,0,0,0) 100%);
+
+}
+
+
+
+
+[data-theme="dark"] #mainContent .table-heading-bar::before,
+
+[data-theme="dark"] .content .table-heading-bar::before,
+
+[data-theme="dark"] .table-heading-bar::before {
+
+background: linear-gradient(to right, var(--bg) 0%, rgba(0,0,0,0) 100%);
+
+}
+
+[data-theme="dark"] #mainContent .table-heading-bar::after,
+
+[data-theme="dark"] .content .table-heading-bar::after,
+
+[data-theme="dark"] .table-heading-bar::after {
+
+background: linear-gradient(to left, var(--bg) 0%, rgba(0,0,0,0) 100%);
+
+}
+
+
+
+
+.table-heading-bar > h3.table-heading,
+
+.table-heading-bar > a.table-heading,
+
+.table-heading-bar > .table-heading {
+
+flex: 0 0 auto !important;
+
+display: inline-flex !important;
+
+align-items: center !important;
+
+justify-content: center !important;
+
+gap: 6px;
+
+text-align: center;
+
+font-size: 0.95rem;
+
+font-weight: 600;
+
+padding: 6px 10px;
+
+background: var(--panel);
+
+border-radius: 6px;
+
+cursor: pointer;
+
+user-select: none;
+
+transition: background 0.18s ease, color 0.18s ease, transform 120ms var(--easing);
+
+min-height: 36px;
+
+line-height: 1;
+
+white-space: nowrap !important;
+
+margin: 0 !important;
+
+}
+
+
+
+
+.table-heading-bar > h3.table-heading:active,
+
+.table-heading-bar > .table-heading:active { transform: translateY(1px); }
+
+.table-heading-bar > h3.table-heading:hover,
+
+.table-heading-bar > .table-heading:hover {
+
+background: var(--toc-link-hover-bg);
+
+color: var(--toc-link-hover-color);
+
+}
+
+
+
+
+.table-heading-bar > h3.table-heading:focus,
+
+.table-heading-bar > .table-heading:focus,
+
+.table-heading-bar > h3.table-heading:focus-visible,
+
+.table-heading-bar > .table-heading:focus-visible {
+
+outline: 3px solid var(--focus-ring);
+
+outline-offset: 2px;
+
+border-radius: 6px;
+
+background: var(--focus-bg);
+
+}
+
+
+
+
+/* Mobile adjustments with !important to override external frameworks */
+
+@media (max-width:600px){
+
+#mainContent .table-heading-bar,
+
+.content .table-heading-bar,
+
+.table-heading-bar {
+
+gap: 6px;
+
+padding: 6px 8px;
+
+margin-left: -8px;
+
+margin-right: -8px;
+
+}
+
+.table-heading-bar > h3.table-heading,
+
+.table-heading-bar > a.table-heading,
+
+.table-heading-bar > .table-heading {
+
+font-size: 0.88rem !important;
+
+padding: 4px 8px !important;
+
+min-height: 34px !important;
+
+}
+
+}
+
+
+
+
+/* Extremely narrow phones */
+
+@media (max-width:420px) {
+
+#mainContent .table-heading-bar,
+
+.content .table-heading-bar,
+
+.table-heading-bar { padding: 6px 6px; gap: 6px; }
+
+.table-heading-bar > h3.table-heading,
+
+.table-heading-bar > .table-heading {
+
+padding: 4px 7px !important;
+
+font-size: 0.85rem !important;
+
+min-height: 32px !important;
+
+}
+
+}
+
+
+
+
+/* ========== NEW: collapse buttons become part of table-heading-bar ==========
+
+Goal: place per-table collapse toggle and other controls inside the heading bar,
+
+making them compact and consistent. This integrates with existing markup that
+
+already uses .table-controls inside a .table-heading-bar or .table-wrapper.
+
+*/
+
+
+
+
+/* When a table-heading-bar contains .table-controls, ensure compact layout /
+
+.table-heading-bar .table-controls {
+
+display: inline-flex;
+
+gap: 8px;
+
+align-items: center;
+
+flex-wrap: nowrap;
+
+margin-left: auto; / push controls to the right */
+
+}
+
+
+
+
+/* Compact appearance for collapse buttons inside heading bar */
+
+.table-heading-bar .table-controls .toggle-table-btn,
+
+.table-heading-bar .table-controls .table-toggle-inline,
+
+.table-heading-bar .table-controls button,
+
+.table-heading-bar .table-controls a {
+
+font-size: 11px !important;
+
+padding: 4px 8px !important;
+
+min-height: 30px !important;
+
+min-width: 30px !important;
+
+line-height: 1 !important;
+
+border-radius: 6px !important;
+
+gap: 6px !important;
+
+border: 1px solid var(--border);
+
+background: var(--button-bg);
+
+color: var(--button-text);
+
+display: inline-flex;
+
+align-items: center;
+
+justify-content: center;
+
+}
+
+
+
+
+/* Icon-only small variant for the heading-bar buttons */
+
+.table-heading-bar .table-controls .toggle-table-btn.icon-only,
+
+.table-heading-bar .table-controls button.icon-only,
+
+.table-heading-bar .table-controls a.icon-only {
+
+width: 30px !important;
+
+height: 30px !important;
+
+padding: 4px !important;
+
+font-size: 0 !important;
+
+}
+
+
+
+
+/* If heading bar is narrow, allow controls to wrap to next line gracefully */
+
+@media (max-width:520px) {
+
+.table-heading-bar .table-controls { flex-wrap: wrap; gap: 6px; margin-top: 6px; margin-left: 0; width: 100%; justify-content: flex-start; }
+
+.table-heading-bar { align-items: flex-start; padding-bottom: 8px; }
+
+}
+
+
+
+
+/* Keep original .table-controls functionality elsewhere unchanged (compat) /
+
+/ The above only tightens controls when inside .table-heading-bar */
+
+
+
+
+/* Small helper: rotate icon when active (non-destructive) */
+
+.table-heading-bar .toggle-table-btn .icon,
+
+.table-heading-bar .toggle-table-btn .svg-icon { transition: transform var(--trans-duration) var(--easing); }
+
+.table-heading-bar .toggle-table-btn.active .icon,
+
+.table-heading-bar .toggle-table-btn.active .svg-icon { transform: rotate(180deg); }
+
+
+
+
+/* opt-in: if developer wants a single global heading row instead of per-table heading bars,
+
+they may add #global-table-controls as described previously. This CSS keeps that option
+
+available but does not force it. */
+
+
+
+
+/* ========== Final guard rules ========== */
+
+a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+
+
+
+
+/* End of file */
+
+
+
+
+/* =========================
+
+MOBILE: per-table collapse removal + compact per-table buttons
+
+Applies only on screens <=600px (target: Samsung / mobile)
+
+
+
+
+
+
+
+
+keep floating C/E unchanged (we do not target .floating-controls or #floatingCE)
+
+
+
+
+
+
+
+
+only touch per-table controls inside .table-controls
+
+========================= */
+
+
+
+
+
+
+
+
+@media (max-width: 600px) {
+
+
+
+
+/* Mobile-only: single-letter caption for collapse/expand toggle.
+
+Replaces visible label with "C" (collapse action when currently expanded)
+
+and "E" (expand action when currently collapsed).
+
+This only affects visual caption text. It does not remove or change other
+
+layout rules present elsewhere in the stylesheet. /
+
+.table-controls .toggle-table-btn,
+
+.table-controls .collapse-btn,
+
+.table-controls .table-toggle-inline,
+
+.table-controls summary[aria-expanded],
+
+.table-controls button[aria-expanded],
+
+.table-controls a[aria-expanded],
+
+.table-controls [data-action="toggle-collapse"],
+
+.table-controls [data-collapsed] {
+
+font-size: 0 !important;    / visually hide original label while preserving accessibility */
+
+line-height: 0 !important;
+
+}
+
+
+
+
+.table-controls .toggle-table-btn::after,
+
+.table-controls .collapse-btn::after,
+
+.table-controls .table-toggle-inline::after,
+
+.table-controls summary[aria-expanded]::after,
+
+.table-controls button[aria-expanded]::after,
+
+.table-controls a[aria-expanded]::after,
+
+.table-controls [data-action="toggle-collapse"]::after,
+
+.table-controls [data-collapsed]::after {
+
+content: " "; /* default fallback; replaced by attribute-based rules below */
+
+font-size: 13px !important;
+
+line-height: normal !important;
+
+display: inline-block;
+
+vertical-align: middle;
+
+color: var(--button-text);
+
+}
+
+
+
+
+/* Map common accessible attributes to single-letter captions.
+
+"C" indicates the action will collapse the table (shown when the table is expanded).
+
+"E" indicates the action will expand the table (shown when the table is collapsed). */
+
+.table-controls [aria-expanded="true"]::after  { content: "C" !important; }
+
+.table-controls [aria-expanded="false"]::after { content: "E" !important; }
+
+
+
+
+/* Fallbacks for JS that uses data-collapsed or boolean data flags */
+
+.table-controls [data-collapsed="false"]::after { content: "C" !important; }
+
+.table-controls [data-collapsed="true"]::after  { content: "E" !important; }
+
+
+
+
+/* Support details/summary patterns */
+
+.table-controls details[open] summary::after       { content: "C" !important; }
+
+.table-controls details:not([open]) summary::after { content: "E" !important; }
+
+
+
+
+/* Hide per-table collapse toggles inside .table-controls.
+
+Targets common class names and accessible attributes.
+
+This removes the collapse button from each table on mobile only. /
+
+.table-controls .toggle-table-btn,
+
+.table-controls .collapse-btn,
+
+.table-controls summary[aria-label="Collapse"],
+
+.table-controls summary[title*="Collapse"],
+
+.table-controls button[aria-label*="Collapse"],
+
+.table-controls button[title*="Collapse"],
+
+.table-controls a[aria-label*="Collapse"],
+
+.table-controls a[title*="Collapse"] {
+
+display: none !important;
+
+visibility: hidden !important;
+
+pointer-events: none !important;
+
+}
+
+
+
+
+/* Make remaining per-table buttons more compact and let text wrap inside the button.
+
+These rules apply only to per-table controls, not header/top buttons. /
+
+.table-controls a,
+
+.table-controls button,
+
+.table-controls summary,
+
+.table-controls .table-toggle-inline {
+
+font-size: 12px !important;       / smaller text /
+
+padding: 4px 6px !important;      / tighter padding /
+
+min-width: 0 !important;          / allow buttons to size to content /
+
+width: auto !important;
+
+white-space: normal !important;   / allow wrapping inside button /
+
+line-height: 1.1 !important;
+
+max-width: 7.5rem !important;     / encourage wrapping over long single-line width /
+
+box-sizing: border-box !important;
+
+border-radius: 6px !important;    / preserve shape */
+
+}
+
+
+
+
+/* Ensure per-table controls remain a single scrollable row rather than wrapping to multiple rows */
+
+.table-controls {
+
+display: flex !important;
+
+flex-wrap: nowrap !important;
+
+overflow-x: auto !important;
+
+-webkit-overflow-scrolling: touch !important;
+
+gap: 6px !important;
+
+align-items: center !important;
+
+padding-bottom: 2px !important;
+
+}
+
+
+
+
+/* Make icons inside buttons align nicely when text wraps */
+
+.table-controls svg, .table-controls .icon { display: inline-block; vertical-align: middle; }
+
+
+
+
+/* Ensure heading bar controls remain aligned */
+
+.table-heading-bar { align-items: center !important; }
+
+
+
+
+/* Do not affect the floating Collapse/Expand control if present (kept intentionally) /
+
+/ since we do NOT select .floating-controls, .ce-floating, or #floatingCE here, it remains visible. */
+
+
+
+
+} /* end @media max-width:600px */
