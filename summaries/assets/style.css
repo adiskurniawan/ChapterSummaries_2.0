@@ -577,6 +577,8 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 /* ========== Utilities ========== */
 .visually-hidden, .sr-only { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0 0 0 0) !important; white-space: nowrap !important; border: 0 !important; }
 
+* { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; transform: none !important; }
