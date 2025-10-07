@@ -518,14 +518,16 @@ border-radius: 6px;
 }
 a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
 
-/* ========== Small screens ========== */
+/* ========== Small screens (REVISED - conservative, non-destructive) ========== */
 @media (max-width:600px){
 table{ font-size:15px }
 td,th{ padding:10px 12px }
 thead th{ position:sticky; top:var(--tv-header-min-height,48px); z-index:4 }
 .table-container{ border-radius:6px }
 
-/* preserve stacking but allow absolute placement of header controls */
+/* preserve stacking but use relative/flex placement for header controls.
+   Avoid absolute positioning which can overlap inputs or hide elements.
+*/
 #tv-header{
 flex-direction:column;
 align-items:stretch;
@@ -533,41 +535,42 @@ position:relative;
 padding-right: 0;
 }
 
-/* Move header controls to the top-right on small screens.
-Use absolute positioning to pin controls while keeping header inputs readable.
-Reserve space in the header's first child to avoid overlap. */
+/* place controls after title/search but keep them in flow */
 #tv-header > div:last-child{
-position: absolute;
-top: 6px;
-right: 8px;
-justify-content: flex-end;
+position: relative;
+order: 2;
+display:flex;
 gap: 8px;
-display: flex;
+justify-content: flex-end;
 align-items: center;
 flex-wrap: nowrap;
 z-index: 1100;
 -webkit-overflow-scrolling: touch;
 }
 
-/* Reserve horizontal space so first-child content (title/search) doesn't collide.
-Use a conservative value that works across common button counts. */
+/* keep title/search as the first block and avoid large reserved padding */
 #tv-header > div:first-child{
-padding-right: 92px;
+order: 1;
+padding-right: 16px; /* small safe gutter */
 }
 
-/* Inputs should compress and avoid overlapping pinned controls */
+/* Inputs compress but stay visible and usable */
 #tv-header input[type="search"], #tv-header input[type="text"], #stickyMainHeader input[type="search"], #stickyMainHeader input[type="text"] {
 flex-basis: 100% !important;
-min-width: 110px !important;
+min-width: 0 !important; /* allow shrinking inside flex */
 width: auto !important;
-max-width: calc(100% - 104px) !important; /* leave room for pinned controls */
+max-width: 100% !important; /* don't force a reserved gap */
 box-sizing: border-box;
 padding: 6px 8px;
 height: 34px;
 }
 
-/* Ensure buttons are compact on mobile */
-#tv-header button, #tv-header .btn, #stickyMainHeader button { padding: 3px 7px; font-size: 12px; min-height:36px; }
+/* Ensure buttons are touch-friendly on mobile (slightly larger than default) */
+#tv-header button, #tv-header .btn, #stickyMainHeader button {
+padding: 6px 8px;
+font-size: 13px;
+min-height:36px;
+}
 
 /* Ensure table controls compress nicely on mobile and match header button sizing */
 .table-controls a,
@@ -580,6 +583,26 @@ font-size:12px;
 min-height:34px;
 min-width:36px;
 }
+
+/* Restore and protect search bar elements in case other CSS hid or displaced them */
+#tv-header .search-bar,
+#tv-header .search,
+.search-bar,
+.search-input,
+#searchBar,
+.site-search {
+display:flex !important;
+align-items:center !important;
+width:100% !important;
+min-width:0 !important;
+z-index: 1202 !important;
+}
+
+/* If controls overflow allow horizontal scrolling rather than hide inputs */
+#tv-header > div:last-child { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* Reduce extreme packing on small devices */
+#tv-header .header-actions, #tv-header .header-controls { gap: 6px; }
 }
 
 /* Very-narrow screens - hide less-essential header buttons */
@@ -964,7 +987,7 @@ border-radius: 6px;
 background: var(--focus-bg);
 }
 
-/* Mobile adjustments with !important to override external frameworks */
+/* Mobile adjustments with !important to override external frameworks (conservative) */
 @media (max-width:600px){
 #mainContent .table-heading-bar,
 .content .table-heading-bar,
@@ -1020,8 +1043,7 @@ scroll-margin-top: calc(var(--tv-header-min-height, 48px) + 8px);
 margin-top: 0.25em;
 }
 
-/* === Requested mobile adjustments: smaller page title, larger theme button ===
-   Conservative, non-breaking overrides that target typical selectors.
+/* === Requested mobile adjustments: smaller page title, larger theme button (conservative) ===
    Placed at file end so they are last-applied and easy to remove if needed.
 */
 @media (max-width:600px){
@@ -1036,8 +1058,7 @@ margin-top: 0.25em;
   }
 
   /* Increase tappable area of theme toggle / mode button.
-     Targets common IDs and classes: #modeBtn, .mode-btn, .theme-toggle, .theme-button, .btn-theme.
-     Uses modest size bump to avoid layout shifts.
+     Targets specific IDs and classes only to avoid global button overrides.
   */
   #modeBtn,
   .mode-btn,
@@ -1066,4 +1087,4 @@ margin-top: 0.25em;
   }
 }
 
-/* End of file (enhanced) */
+/* End of file (revised, search bar preserved) */
