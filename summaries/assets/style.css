@@ -389,8 +389,8 @@ thead th[role="button"]:hover{ background: rgba(0,0,0,0.02); }
 /* --- SMALLER COLLAPSE/EXPAND TOGGLE: adjusted only this rule --- */
 .toggle-table-btn{
   margin-left:10px;
-  font-size:11px;        /* reduced font-size */
-  padding:3px 6px;       /* reduced padding */
+  font-size:11px;        /* reduced font-size globally */
+  padding:3px 6px;       /* reduced padding globally */
   min-width:30px;        /* tighter min width */
   min-height:30px;       /* tighter min height */
   border-radius:6px;
@@ -755,12 +755,6 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 
 /* End of merged core rules */
 
-/* ========== Optional/risky enhancements (commented) ==========
-
-Uncomment and test individually.
-
-*/
-
 /* ---------- TOPIC HEADING BAR: HORIZONTAL SINGLE ROW (forced override) ---------- */
 
 #mainContent .table-heading-bar,
@@ -966,344 +960,34 @@ Uncomment and test individually.
 /* ========== Final guard rules ========== */
 a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
 
-/* End of file */
-
-/* ------------------ Layout-only overrides (minimal edits) ------------------ */
-
-/* 1) Hide floating Collapse/Expand shortcut if present in markup.
-   This is layout-only. If your project does not include these selectors nothing changes. */
-.floating-controls,
-.ce-floating,
-#floatingCE,
-.floating-ce,
-.collapse-expand-float,
-.table-toggle-floating,
-.table-toggle-float,
-.collapse-float,
-.c-e-float,
-.collapse-icon-float,
-.collapse-floating,
-.collapse-toggle-float { display: none !important; }
-
-/* 2) Ensure Theme (#modeBtn) and Collapse All (#toggleAllBtn) sit on same row as Table Viewer title.
-   We only affect layout/placement. No color/typography changes. */
-#tv-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  width: 100%;
-}
-
-/* First child expected to contain the "Table Viewer" title. Keep it natural size. */
-#tv-header > div:first-child {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* Buttons group on the right. Keep minimal flex so they remain on same row as title. */
-#tv-header > div:last-child {
-  flex: 0 0 auto;
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-/* Ensure the specific buttons don't wrap away from the header row.
-   IDs used here are preserved from your codebase (modeBtn, toggleAllBtn).
-   If your project uses different IDs, keep them but adapt in markup. */
-#modeBtn, #toggleAllBtn {
-  flex: 0 0 auto;
-  white-space: nowrap;
-  margin: 0;
-  padding: 4px 8px;
-  min-width: 36px;
-  min-height: 36px;
-}
-
-/* On narrow viewports keep them visible on the same header line where possible.
-   This preserves your prior "very-narrow" hiding rule that specifically keeps these two. */
-@media (max-width: 520px) {
-  #tv-header { align-items: center; }
-  #tv-header > div:first-child { flex: 1 1 auto; min-width: 0; }
-  #tv-header > div:last-child { flex: 0 0 auto; }
-  #modeBtn, #toggleAllBtn { padding: 3px 7px; font-size: 12px; min-height:34px; }
-}
-
-/* 3) Make per-table buttons more compact (layout only).
-   Reduce padding and gaps for .table-controls in mobile and heading-bar contexts.
-   Visuals (colors, borders, radii) are unchanged. */
-.table-controls { gap: 6px; }
-
-.table-controls a,
-.table-controls button,
-.table-controls summary,
-.table-controls .toggle-table-btn,
-.table-controls .table-toggle-inline {
-  padding: 4px 8px;
-  font-size: 12px;
-  min-height: 32px;
-  min-width: 34px;
-}
-
-/* Compact inline behavior on mobile: keep all table controls on one horizontal row.
-   Allow horizontal scroll rather than wrapping. */
-@media (max-width: 600px) {
-  .table-controls {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    gap: 6px;
-    align-items: center;
-  }
-
-  .table-controls a,
-  .table-controls button,
-  .table-controls summary,
-  .table-controls .toggle-table-btn,
-  .table-controls .table-toggle-inline {
-    flex: 0 0 auto;
-    white-space: nowrap;
-  }
-
-  /* Slight scrollbar thumb styling for UX; purely layout/UX. */
-  .table-controls::-webkit-scrollbar { height: 6px; }
-  .table-controls::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 3px; }
-}
-
-/* 4) Small safety guard: ensure table-heading-bar keeps controls inline with heading */
-.table-heading-bar { align-items: center; }
-
-/* 5) Preserve existing very-narrow header hiding rule but ensure our two buttons remain visible */
-@media (max-width:420px){
-  #tv-header > div:last-child{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
-  /* keep only primary buttons visible; this matches your existing behavior */
-  #tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) { display:none !important; }
-}
-
-/* ------------------ EMERGENCY MOBILE FIXES v2 (stronger mobile overrides) ------------------
-   Purpose: ensure per-table floating 'C' is removed on mobile and that page title is left
-   with Theme and Collapse All on the same row in mobile view only. These rules are mobile-scoped
-   and use !important only where required to override inline or previously defined rules.
------------------------------------------------------------------------------- */
-
-@media (max-width: 600px) {
-
-  /* --- Force header to be a single horizontal row on mobile:
-       Title stays left. Right-side controls (including #modeBtn and #toggleAllBtn)
-       stay on the same row aligned right. This overrides previous column rules. --- */
-  #tv-header {
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 8px !important;
-    width: 100% !important;
-  }
-
-  /* Allow title container to shrink without centering text */
-  #tv-header > div:first-child {
-    flex: 0 0 auto !important;
-    min-width: 0 !important;
-    overflow: visible !important;
-  }
-
-  /* Keep the buttons container compact on the right */
-  #tv-header > div:last-child {
-    flex: 0 0 auto !important;
-    display: flex !important;
-    gap: 6px !important;
-    align-items: center !important;
-    justify-content: flex-end !important;
-    order: 2 !important;
-  }
-
-  /* Inputs and search fields if present should not push the right buttons off-row.
-     We place inputs after header content when space is limited (order 3).
-     This preserves desktop behavior while ensuring the two top buttons remain visible. */
-  #tv-header input[type="search"],
-  #tv-header input[type="text"],
-  #stickyMainHeader input[type="search"],
-  #stickyMainHeader input[type="text"] {
-    order: 3 !important;
-    flex: 1 1 auto !important;
-    min-width: 0 !important;
-    max-width: 50% !important;
-    margin-left: 8px !important;
-  }
-
-  /* Ensure modeBtn and toggleAllBtn are visible and aligned on mobile */
-  #modeBtn, #toggleAllBtn {
-    display: inline-flex !important;
-    flex: 0 0 auto !important;
-    white-space: nowrap !important;
-    padding: 4px 8px !important;
-    min-width: 36px !important;
-    min-height: 36px !important;
-    margin: 0 !important;
-  }
-
-  /* Reduce font-size barely to help them fit on small phones without changing visuals */
-  #modeBtn, #toggleAllBtn { font-size: 12px !important; }
-
-  /* --- Remove any floating per-table controls that sit outside normal flow.
-       This targets many common class names plus inline-positioned elements. --- */
-
-  /* Common named classes used for floating CE controls */
-  .floating-controls,
-  .ce-floating,
-  #floatingCE,
-  .floating-ce,
-  .collapse-expand-float,
-  .table-toggle-floating,
-  .table-toggle-float,
-  .collapse-float,
-  .c-e-float,
-  .collapse-icon-float,
-  .collapse-floating,
-  .collapse-toggle-float,
-  .floating-ce-toggle,
-  .ce-float,
-  .floating-CE {
-    display: none !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-    opacity: 0 !important;
-  }
-
-  /* If the floating element is implemented as a positioned small button inside the table wrapper,
-     force it back into the normal flow and hide any absolutely/ fixed positioned small toggles. */
-  .table-wrapper .toggle-table-btn,
-  .table-wrapper .table-toggle-inline,
-  .table-wrapper .table-toggle,
-  .table-wrapper summary,
-  .table-wrapper .collapse-btn,
-  .table-wrapper .c-e,
-  .table-wrapper .ce-btn {
-    position: static !important;
-    float: none !important;
-    right: auto !important;
-    left: auto !important;
-    top: auto !important;
-    margin: 0 !important;
-    display: inline-flex !important;
-    visibility: visible !important;
-  }
-
-  /* If inline styles set position:absolute or fixed, neutralize them for mobile */
-  .table-wrapper *[style*="position:absolute"],
-  .table-wrapper *[style*="position:fixed"] {
-    position: static !important;
-    display: inline-flex !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
-  }
-
-  /* Prevent tiny single-letter floating buttons from showing:
-     select very small square buttons inside table wrappers and hide them if they look floating. */
-  .table-wrapper button,
-  .table-wrapper a {
-    /* don't change styles here; only hide tiny absolutely-positioned ones */
-  }
-  /* A safe heuristic: hide any element inside a table wrapper that is absolutely positioned via computed style.
-     The attribute selector covers inline styles only. It's conservative but helps in many implementations. */
-  .table-wrapper [style*="position:absolute"], .table-wrapper [style*="position: fixed"] {
-    display: none !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
-
-  /* Ensure .table-controls become a single horizontal scroll row (stronger override) */
-  .table-controls {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    gap: 6px !important;
-    align-items: center !important;
-    padding-bottom: 2px !important;
-  }
-  .table-controls a,
-  .table-controls button,
-  .table-controls summary,
-  .table-controls .toggle-table-btn,
-  .table-controls .table-toggle-inline {
-    flex: 0 0 auto !important;
-    white-space: nowrap !important;
-    position: relative !important;
-  }
-
-  /* Slight scrollbar styling only on webkit (UX) */
-  .table-controls::-webkit-scrollbar { height: 6px; }
-  .table-controls::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 3px; }
-
-  /* Ensure heading-bar controls stay on same heading row and don't wrap out */
-  .table-heading-bar { flex-wrap: nowrap !important; align-items: center !important; }
-
-  /* Reinforce that per-table inline toggles are not floating */
-  .table-controls .table-toggle-inline,
-  .table-heading-bar .table-controls .table-toggle-inline,
-  .table-controls .toggle-table-btn {
-    position: relative !important;
-    transform: none !important;
-    margin: 0 !important;
-    right: auto !important;
-    left: auto !important;
-    top: auto !important;
-  }
-
-  /* If any script injects a floating 'C' via ::before or ::after, hide it on mobile.
-     This targets elements that may add content via pseudo elements as a last resort. */
-  .table-wrapper .toggle-table-btn::before,
-  .table-wrapper .toggle-table-btn::after,
-  .table-wrapper .table-toggle-inline::before,
-  .table-wrapper .table-toggle-inline::after {
-    content: none !important;
-  }
-
-  /* Safety: ensure no change to desktop by scoping strictly to mobile */
-}
-
-/* ------------------ End EMERGENCY MOBILE FIXES v2 ------------------ */
-
 /* =========================
-   MOBILE: per-table collapse removal + compact per-table buttons (kept from previous)
-   These rules remain but were not changed. They are scoped to <=600px.
+   MOBILE: compact per-table controls including collapse toggle (<=600px)
+   - Do NOT hide floating CE controls.
+   - Ensure the collapse toggle uses the same compact sizing as other per-table buttons.
    ========================= */
 
 @media (max-width: 600px) {
 
-  .table-controls .toggle-table-btn,
-  .table-controls .collapse-btn,
-  .table-controls summary[aria-label*="Collapse"],
-  .table-controls summary[title*="Collapse"],
-  .table-controls button[aria-label*="Collapse"],
-  .table-controls button[title*="Collapse"],
-  .table-controls a[aria-label*="Collapse"],
-  .table-controls a[title*="Collapse"] {
-    display: none !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
-
+  /* Compact sizing applied to all per-table control variants including toggles and summary tags */
   .table-controls a,
   .table-controls button,
   .table-controls summary,
-  .table-controls .table-toggle-inline {
-    font-size: 12px !important;
-    padding: 4px 6px !important;
-    min-width: 0 !important;
+  .table-controls .table-toggle-inline,
+  .table-controls .toggle-table-btn,
+  .table-controls details > summary,
+  details > summary {
+    font-size: 12px !important;       /* smaller text */
+    padding: 4px 6px !important;      /* tighter padding */
+    min-width: 0 !important;          /* allow buttons to size to content */
     width: auto !important;
-    white-space: normal !important;
+    white-space: normal !important;   /* allow wrapping inside button */
     line-height: 1.1 !important;
-    max-width: 7.5rem !important;
+    max-width: 7.5rem !important;     /* encourage wrapping over long single-line width */
     box-sizing: border-box !important;
-    border-radius: 6px !important;
+    border-radius: 6px !important;    /* preserve shape */
   }
 
+  /* Ensure per-table controls remain a single scrollable row rather than wrapping to multiple rows */
   .table-controls {
     display: flex !important;
     flex-wrap: nowrap !important;
@@ -1314,7 +998,16 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     padding-bottom: 2px !important;
   }
 
+  /* Make icons inside buttons align nicely when text wraps */
   .table-controls svg, .table-controls .icon { display: inline-block; vertical-align: middle; }
+
+  /* Ensure heading bar controls remain aligned */
   .table-heading-bar { align-items: center !important; }
 
+  /* Keep floating Collapse/Expand shortcut untouched. We do not select .floating-controls here. */
+
 } /* end @media max-width:600px */
+
+/* =========================
+   End mobile compacting
+   ========================= */
