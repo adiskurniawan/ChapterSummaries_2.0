@@ -1043,30 +1043,29 @@ scroll-margin-top: calc(var(--tv-header-min-height, 48px) + 8px);
 margin-top: 0.25em;
 }
 
-/* === Requested mobile adjustments: smaller page title, larger theme button (conservative) ===
-   Placed at file end so they are last-applied and easy to remove if needed.
+/* === Consolidated mobile tuning: title smaller, theme button larger, search protected ===
+   Conservative rules. Specific selectors to avoid broad side effects.
+   Placed last so these overrides win where needed.
 */
 @media (max-width:600px){
-  /* Make page title smaller and compact on phones while preserving anchors */
-  .markdown h1, h1 {
-    font-size: 1.05rem !important; /* tightened for mobile readability */
-    margin-top: 0.4em;
-    margin-bottom: 0.28em;
-    line-height: 1.18;
-    font-weight: 700;
-    scroll-margin-top: calc(var(--tv-header-min-height,48px) + 6px);
+  /* Compact page title variants */
+  .markdown h1, h1, .page-title, #pageTitle, h1.page-title {
+    font-size: 1.05rem !important;
+    line-height: 1.18 !important;
+    margin-top: 0.4em !important;
+    margin-bottom: 0.28em !important;
+    font-weight: 700 !important;
+    scroll-margin-top: calc(var(--tv-header-min-height,48px) + 6px) !important;
   }
 
-  /* Increase tappable area of theme toggle / mode button.
-     Targets specific IDs and classes only to avoid global button overrides.
-  */
+  /* Slightly larger, touch-friendly theme/mode toggle only */
   #modeBtn,
   .mode-btn,
   .theme-toggle,
   .theme-button,
   .btn-theme,
   button#modeBtn {
-    padding: 8px 10px !important;
+    padding: 8px 12px !important;
     font-size: 14px !important;
     min-width: 44px !important;
     min-height: 40px !important;
@@ -1076,7 +1075,7 @@ margin-top: 0.25em;
     justify-content: center !important;
   }
 
-  /* If the theme toggle is icon-only increase hit area without altering icon visual size */
+  /* Icon-only variant hit-area increase without scaling icons */
   #modeBtn.icon-only,
   .theme-button.icon-only,
   .btn-theme.icon-only {
@@ -1085,6 +1084,23 @@ margin-top: 0.25em;
     padding: 8px !important;
     font-size: 0 !important;
   }
+
+  /* Explicitly protect common search bar selectors from being hidden or overlapped */
+  #tv-header .search-bar,
+  #tv-header .search,
+  .search-bar,
+  .search-input,
+  #searchBar,
+  .site-search {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    z-index: 1202 !important;
+  }
+
+  /* If header actions overflow allow horizontal scroll rather than hide inputs */
+  #tv-header > div:last-child { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; }
 }
 
-/* End of file (revised, search bar preserved) */
+/* End of file (final revision) */
