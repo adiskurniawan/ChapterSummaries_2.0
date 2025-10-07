@@ -966,10 +966,85 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 
 /* End of file */
 
-/* --- 2025-10-07 Mobile fix: keep table buttons inline --- */
+/* ------------------ Layout-only overrides (minimal edits) ------------------ */
+
+/* 1) Hide floating Collapse/Expand shortcut if present in markup.
+   This is layout-only. If your project does not include these selectors nothing changes. */
+.floating-controls,
+.ce-floating,
+#floatingCE,
+.floating-ce,
+.collapse-expand-float { display: none !important; }
+
+/* 2) Ensure Theme (#modeBtn) and Collapse All (#toggleAllBtn) sit on same row as Table Viewer title.
+   We only affect layout/placement. No color/typography changes. */
+#tv-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
+/* First child expected to contain the "Table Viewer" title. Keep it natural size. */
+#tv-header > div:first-child {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Buttons group on the right. Keep minimal flex so they remain on same row as title. */
+#tv-header > div:last-child {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* Ensure the specific buttons don't wrap away from the header row.
+   IDs used here are preserved from your codebase (modeBtn, toggleAllBtn).
+   If your project uses different IDs, keep them but adapt in markup. */
+#modeBtn, #toggleAllBtn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  margin: 0;
+  padding: 4px 8px;
+  min-width: 36px;
+  min-height: 36px;
+}
+
+/* On narrow viewports keep them visible on the same header line where possible.
+   This preserves your prior "very-narrow" hiding rule that specifically keeps these two. */
+@media (max-width: 520px) {
+  #tv-header { align-items: center; }
+  #tv-header > div:first-child { flex: 1 1 auto; min-width: 0; }
+  #tv-header > div:last-child { flex: 0 0 auto; }
+  #modeBtn, #toggleAllBtn { padding: 3px 7px; font-size: 12px; min-height:34px; }
+}
+
+/* 3) Make per-table buttons more compact (layout only).
+   Reduce padding and gaps for .table-controls in mobile and heading-bar contexts.
+   Visuals (colors, borders, radii) are unchanged. */
+.table-controls { gap: 6px; }
+
+.table-controls a,
+.table-controls button,
+.table-controls summary,
+.table-controls .toggle-table-btn,
+.table-controls .table-toggle-inline {
+  padding: 4px 8px;
+  font-size: 12px;
+  min-height: 32px;
+  min-width: 34px;
+}
+
+/* Compact inline behavior on mobile: keep all table controls on one horizontal row.
+   Allow horizontal scroll rather than wrapping. */
 @media (max-width: 600px) {
   .table-controls {
-    display: flex;
+    display: flex !important;
     flex-wrap: nowrap !important;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -986,12 +1061,19 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     white-space: nowrap;
   }
 
-  /* Slight scroll padding for nicer UX */
-  .table-controls::-webkit-scrollbar {
-    height: 6px;
-  }
-  .table-controls::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 3px;
-  }
+  /* Slight scrollbar thumb styling for UX; purely layout/UX. */
+  .table-controls::-webkit-scrollbar { height: 6px; }
+  .table-controls::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 3px; }
 }
+
+/* 4) Small safety guard: ensure table-heading-bar keeps controls inline with heading */
+.table-heading-bar { align-items: center; }
+
+/* 5) Preserve existing very-narrow header hiding rule but ensure our two buttons remain visible */
+@media (max-width:420px){
+  #tv-header > div:last-child{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  /* keep only primary buttons visible; this matches your existing behavior */
+  #tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) { display:none !important; }
+}
+
+/* End of layout-only overrides */
