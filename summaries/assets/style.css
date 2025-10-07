@@ -1103,4 +1103,83 @@ margin-top: 0.25em;
   #tv-header > div:last-child { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; }
 }
 
-/* End of file (final revision) */
+/* ==== Strong header/search restore (LAST-APPLIED SAFEGUARD) ====
+   Forces search to remain visible and in-flow on narrow screens.
+   Targets broad common selectors used by many themes.
+*/
+@media (max-width:900px){
+  /* ensure header doesn't clip or absolutely position controls that overlap search */
+  #tv-header {
+    position: relative !important;
+    overflow: visible !important;
+    z-index: 1200 !important;
+  }
+
+  /* Keep the search element first and full-width */
+  #tv-header > div:first-child,
+  #tv-header .search-bar,
+  header .search-bar,
+  .search-bar,
+  .search,
+  .search-input,
+  #searchBar,
+  .site-search {
+    order: 1 !important;
+    display: flex !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    position: relative !important;
+    z-index: 9999 !important;
+  }
+
+  /* Put controls after the search in flow and avoid absolute positioning */
+  #tv-header > div:last-child,
+  #tv-header .header-actions,
+  #tv-header .header-controls,
+  #tv-header .controls {
+    order: 2 !important;
+    position: static !important;
+    flex: 0 0 auto !important;
+    display: inline-flex !important;
+    z-index: 9998 !important;
+  }
+
+  /* Ensure search inputs themselves are visible and usable */
+  #tv-header input[type="search"],
+  header input[type="search"],
+  .search-input input[type="search"],
+  .search input[type="search"] {
+    display: inline-block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  /* Prevent header action overflow from hiding the search */
+  #tv-header > div:last-child { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; }
+}
+
+/* Final last-resort emergency restore for extremely narrow devices */
+@media (max-width:420px){
+  header .search-bar,
+  .search-bar,
+  #searchBar,
+  .site-search {
+    order: 1 !important;
+    display: flex !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    position: relative !important;
+    z-index: 9999 !important;
+  }
+  #tv-header > div:last-child { order: 2 !important; position: static !important; }
+}
+
+/* End of file (final revision; search bar safeguards included) */
