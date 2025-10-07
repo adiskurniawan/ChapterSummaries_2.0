@@ -1695,11 +1695,11 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
       const dark = document.documentElement.getAttribute('data-theme') !== 'dark';
       if (dark) {
         document.documentElement.setAttribute('data-theme', 'dark');
-        if (modeBtn) modeBtn.textContent = 'Light';
+        if (modeBtn) modeBtn.textContent = 'Light mode';
         localStorage.setItem('uiMode', 'dark');
       } else {
         document.documentElement.removeAttribute('data-theme');
-        if (modeBtn) modeBtn.textContent = 'Dark';
+        if (modeBtn) modeBtn.textContent = 'Dark mode';
         localStorage.setItem('uiMode', 'light');
       }
     } catch (e) { /* silent */ }
