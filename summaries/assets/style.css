@@ -1027,7 +1027,7 @@ margin-top: 0.25em;
 @media (max-width:600px){
   /* Make page title smaller and compact on phones while preserving anchors */
   .markdown h1, h1 {
-    font-size: 1.05rem !important; /* tightened for mobile readability */
+    font-size: 1.01rem !important; /* tightened for mobile readability */
     margin-top: 0.4em;
     margin-bottom: 0.28em;
     line-height: 1.18;
@@ -1047,7 +1047,7 @@ margin-top: 0.25em;
   button#modeBtn {
     padding: 8px 10px !important;
     font-size: 14px !important;
-    min-width: 44px !important;
+    min-width: 50px !important;
     min-height: 40px !important;
     border-radius: 8px !important;
     display: inline-flex !important;
