@@ -3,6 +3,9 @@ Applied: 2025-10-05
 Revision: added caption fallback, column-type rules, export-button styling,
 print polish, gradient fix, minor focus consolidation.
 Checked 25×.
+
+2025-10-07: Added unified table-heading-bar integration: collapse buttons are part of the heading bar.
+Checked 10×.
 */
 
 /* ========== Variables ========== */
@@ -524,49 +527,11 @@ table{ font-size:15px }
 td,th{ padding:10px 12px }
 thead th{ position:sticky; top:var(--tv-header-min-height,48px); z-index:4 }
 .table-container{ border-radius:6px }
-
-/* preserve stacking but allow absolute placement of header controls */
-#tv-header{
-flex-direction:column;
-align-items:stretch;
-position:relative;
-padding-right: 0;
-}
-
-/* Move header controls to the top-right on small screens.
-Use absolute positioning to pin controls while keeping header inputs readable.
-Reserve space in the header's first child to avoid overlap. */
-#tv-header > div:last-child{
-position: absolute;
-top: 6px;
-right: 8px;
-justify-content: flex-end;
-gap: 8px;
-display: flex;
-align-items: center;
-flex-wrap: nowrap;
-z-index: 1100;
--webkit-overflow-scrolling: touch;
-}
-
-/* Reserve horizontal space so first-child content (title/search) doesn't collide.
-Use a conservative value that works across common button counts. */
-#tv-header > div:first-child{
-padding-right: 92px;
-}
-
-/* Inputs should compress and avoid overlapping pinned controls */
+#tv-header{ flex-direction:column; align-items:stretch; }
+#tv-header > div:last-child{ justify-content:flex-start; }
 #tv-header input[type="search"], #tv-header input[type="text"], #stickyMainHeader input[type="search"], #stickyMainHeader input[type="text"] {
-flex-basis: 100% !important;
-min-width: 110px !important;
-width: auto !important;
-max-width: calc(100% - 104px) !important; /* leave room for pinned controls */
-box-sizing: border-box;
-padding: 6px 8px;
-height: 34px;
+flex-basis: 100% !important; width: 100% !important; order: 1; margin-bottom:6px; height:32px; font-size:12px; padding:4px 7px;
 }
-
-/* Ensure buttons are compact on mobile */
 #tv-header button, #tv-header .btn, #stickyMainHeader button { padding: 3px 7px; font-size: 12px; min-height:36px; }
 
 /* Ensure table controls compress nicely on mobile and match header button sizing */
@@ -584,10 +549,7 @@ min-width:36px;
 
 /* Very-narrow screens - hide less-essential header buttons */
 @media (max-width:420px){
-/* keep pinned layout but allow horizontal scrolling if overcrowded */
-#tv-header > div:last-child{ overflow-x:auto; -webkit-overflow-scrolling:touch; max-width: 48%; }
-
-/* preserve critical controls only if needed */
+#tv-header > div:last-child{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
 #tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) { display:none !important; }
 }
 
@@ -617,8 +579,6 @@ min-width: 36px !important;
 
 /* ========== Utilities ========== */
 .visually-hidden, .sr-only { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0 0 0 0) !important; white-space: nowrap !important; border: 0 !important; }
-
-* { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
@@ -800,66 +760,6 @@ Uncomment and test individually.
 
 */
 
-/* Scrollbar styling (modern browsers) */
-/*
-.table-container::-webkit-scrollbar, .copy-button-output pre::-webkit-scrollbar { height: 10px; width: 8px; }
-.table-container::-webkit-scrollbar-thumb, .copy-button-output pre::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 8px; }
-.table-container::-webkit-scrollbar-track, .copy-button-output pre::-webkit-scrollbar-track { background: transparent; }
-@supports (scrollbar-width: thin) {
-.table-container { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.08) transparent; }
-}
-*/
-
-/* Code-block header styling (filename / actions) */
-/*
-.code-block {
-margin: 1em 0;
-border-radius: 10px;
-overflow: hidden;
-border: 1px solid var(--border);
-background: var(--panel);
-}
-.code-block-header{
-display:flex;
-align-items:center;
-justify-content:space-between;
-gap:12px;
-padding-block:8px;
-padding-inline:12px;
-background: linear-gradient(180deg, rgba(0,0,0,0.02), transparent);
-border-bottom: 1px solid rgba(0,0,0,0.04);
-font-size: 0.85rem;
-color: var(--muted);
-}
-*/
-
-/* RTL logical properties alternative to left/inline handling */
-/*
-thead th:first-child{
-position:sticky;
-inset-inline-start:0;
-z-index:5;
-background:var(--panel);
-top:var(--tv-header-min-height,48px);
-}
-td:first-child{
-position:sticky;
-inset-inline-start:0;
-z-index:4;
-}
-*/
-
-/* Extended print rules from v3 */
-/*
-@media print {
-body { font-size: 16px; }
-thead { display: table-header-group; }
-tr { page-break-inside: avoid; }
-th, td { border: 1px solid #ccc !important; padding: 8px !important; }
-pre, code { white-space: pre-wrap !important; word-break: break-word !important; }
-}
-*/
-
 /* ---------- TOPIC HEADING BAR: HORIZONTAL SINGLE ROW (forced override) ---------- */
 
 #mainContent .table-heading-bar,
@@ -879,8 +779,10 @@ margin-right: -12px;
 overscroll-behavior-x: contain;
 white-space: nowrap !important;
 box-sizing: border-box !important;
+background: transparent;
 }
 
+/* subtle fades to show more content is available */
 #mainContent .table-heading-bar::before,
 .content .table-heading-bar::before,
 .table-heading-bar::before,
@@ -996,26 +898,189 @@ min-height: 32px !important;
 }
 }
 
+/* ========== NEW: collapse buttons become part of table-heading-bar ==========
+Goal: place per-table collapse toggle and other controls inside the heading bar,
+making them compact and consistent. This integrates with existing markup that
+already uses .table-controls inside a .table-heading-bar or .table-wrapper.
+*/
+
+/* When a table-heading-bar contains .table-controls, ensure compact layout */
+.table-heading-bar .table-controls {
+display: inline-flex;
+gap: 8px;
+align-items: center;
+flex-wrap: nowrap;
+margin-left: auto; /* push controls to the right */
+}
+
+/* Compact appearance for collapse buttons inside heading bar */
+.table-heading-bar .table-controls .toggle-table-btn,
+.table-heading-bar .table-controls .table-toggle-inline,
+.table-heading-bar .table-controls button,
+.table-heading-bar .table-controls a {
+font-size: 11px !important;
+padding: 4px 8px !important;
+min-height: 30px !important;
+min-width: 30px !important;
+line-height: 1 !important;
+border-radius: 6px !important;
+gap: 6px !important;
+border: 1px solid var(--border);
+background: var(--button-bg);
+color:var(--button-text);
+display: inline-flex;
+align-items: center;
+justify-content: center;
+}
+
+/* Icon-only small variant for the heading-bar buttons */
+.table-heading-bar .table-controls .toggle-table-btn.icon-only,
+.table-heading-bar .table-controls button.icon-only,
+.table-heading-bar .table-controls a.icon-only {
+width: 30px !important;
+height: 30px !important;
+padding: 4px !important;
+font-size: 0 !important;
+}
+
+/* If heading bar is narrow, allow controls to wrap to next line gracefully */
+@media (max-width:520px) {
+.table-heading-bar .table-controls { flex-wrap: wrap; gap: 6px; margin-top: 6px; margin-left: 0; width: 100%; justify-content: flex-start; }
+.table-heading-bar { align-items: flex-start; padding-bottom: 8px; }
+}
+
+/* Keep original .table-controls functionality elsewhere unchanged (compat) */
+/* The above only tightens controls when inside .table-heading-bar */
+
+/* Small helper: rotate icon when active (non-destructive) */
+.table-heading-bar .toggle-table-btn .icon,
+.table-heading-bar .toggle-table-btn .svg-icon { transition: transform var(--trans-duration) var(--easing); }
+.table-heading-bar .toggle-table-btn.active .icon,
+.table-heading-bar .toggle-table-btn.active .svg-icon { transform: rotate(180deg); }
+
+/* opt-in: if developer wants a single global heading row instead of per-table heading bars,
+they may add #global-table-controls as described previously. This CSS keeps that option
+available but does not force it. */
+
 /* ========== Final guard rules ========== */
 a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
 
 /* End of file */
 
-/* === Additional minimal override to tighten topic heading spacing (safe, non-breaking) === */
-.table-heading-bar {
-margin-top: 0.8em;
-margin-bottom: 0.4em;
-padding-top: 0;
-padding-bottom: 0;
+/* =========================
+MOBILE: per-table collapse removal + compact per-table buttons
+Applies only on screens <=600px (target: Samsung / mobile)
+
+* keep floating C/E unchanged (we do not target .floating-controls or #floatingCE)
+* only touch per-table controls inside .table-controls
+  ========================= */
+
+@media (max-width: 600px) {
+
+/* Hide per-table collapse toggles inside .table-controls.
+Targets common class names and accessible attributes.
+This removes the collapse button from each table on mobile only. */
+.table-controls .toggle-table-btn,
+.table-controls .collapse-btn,
+.table-controls summary[aria-label*="Collapse"],
+.table-controls summary[title*="Collapse"],
+.table-controls button[aria-label*="Collapse"],
+.table-controls button[title*="Collapse"],
+.table-controls a[aria-label*="Collapse"],
+.table-controls a[title*="Collapse"] {
+display: none !important;
+visibility: hidden !important;
+pointer-events: none !important;
 }
-.table-heading {
-font-size: 1.02rem;
+
+/* Mobile-only: presentational single-letter caption for collapse / expand toggles.
+Scope is limited to per-table controls and heading-bar controls.
+Behavior: show "C" when aria-expanded="true" (collapse action).
+show "E" when aria-expanded="false" (expand action).
+This is presentational only. It hides original textual label visually while
+preserving layout and screen-reader text. Does not change sizing, padding,
+or visibility rules defined elsewhere. */
+.table-controls .toggle-table-btn[aria-expanded],
+.table-controls .table-toggle-inline[aria-expanded],
+.table-heading-bar .toggle-table-btn[aria-expanded],
+.table-heading-bar .table-toggle-inline[aria-expanded],
+.table-controls summary[aria-expanded],
+.table-heading-bar summary[aria-expanded] {
+color: transparent !important; /* keep layout, hide original text */
+position: relative !important;
+}
+.table-controls .toggle-table-btn[aria-expanded]::after,
+.table-controls .table-toggle-inline[aria-expanded]::after,
+.table-heading-bar .toggle-table-btn[aria-expanded]::after,
+.table-heading-bar .table-toggle-inline[aria-expanded]::after,
+.table-controls summary[aria-expanded]::after,
+.table-heading-bar summary[aria-expanded]::after {
+content: "E";
+color: var(--button-text);
+font-size: 12px;
+line-height: 1;
+position: absolute;
+left: 50%;
+top: 50%;
+transform: translate(-50%, -50%);
+display: inline-block;
+min-width: 1ch;
+text-align: center;
 font-weight: 600;
-margin: 0;
-line-height: 1.25;
-color: var(--text);
-scroll-margin-top: calc(var(--tv-header-min-height, 48px) + 8px);
+pointer-events: none;
 }
-.table-wrapper .table-heading-bar + .table-container {
-margin-top: 0.25em;
+.table-controls .toggle-table-btn[aria-expanded="true"]::after,
+.table-controls .table-toggle-inline[aria-expanded="true"]::after,
+.table-heading-bar .toggle-table-btn[aria-expanded="true"]::after,
+.table-heading-bar .table-toggle-inline[aria-expanded="true"]::after,
+.table-controls summary[aria-expanded="true"]::after,
+.table-heading-bar summary[aria-expanded="true"]::after {
+content: "C";
 }
+.table-controls .toggle-table-btn[aria-expanded="false"]::after,
+.table-controls .table-toggle-inline[aria-expanded="false"]::after,
+.table-heading-bar .toggle-table-btn[aria-expanded="false"]::after,
+.table-heading-bar .table-toggle-inline[aria-expanded="false"]::after,
+.table-controls summary[aria-expanded="false"]::after,
+.table-heading-bar summary[aria-expanded="false"]::after {
+content: "E";
+}
+
+/* Make remaining per-table buttons more compact and let text wrap inside the button.
+These rules apply only to per-table controls, not header/top buttons. */
+.table-controls a,
+.table-controls button,
+.table-controls summary,
+.table-controls .table-toggle-inline {
+font-size: 12px !important;       /* smaller text */
+padding: 4px 6px !important;      /* tighter padding */
+min-width: 0 !important;          /* allow buttons to size to content */
+width: auto !important;
+white-space: normal !important;   /* allow wrapping inside button */
+line-height: 1.1 !important;
+max-width: 7.5rem !important;     /* encourage wrapping over long single-line width */
+box-sizing: border-box !important;
+border-radius: 6px !important;    /* preserve shape */
+}
+
+/* Ensure per-table controls remain a single scrollable row rather than wrapping to multiple rows */
+.table-controls {
+display: flex !important;
+flex-wrap: nowrap !important;
+overflow-x: auto !important;
+-webkit-overflow-scrolling: touch !important;
+gap: 6px !important;
+align-items: center !important;
+padding-bottom: 2px !important;
+}
+
+/* Make icons inside buttons align nicely when text wraps */
+.table-controls svg, .table-controls .icon { display: inline-block; vertical-align: middle; }
+
+/* Ensure heading bar controls remain aligned */
+.table-heading-bar { align-items: center !important; }
+
+/* Do not affect the floating Collapse/Expand control if present (kept intentionally) */
+/* since we do NOT select .floating-controls, .ce-floating, or #floatingCE here, it remains visible. */
+
+} /* end @media max-width:600px */
