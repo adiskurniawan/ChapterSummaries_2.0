@@ -748,213 +748,6 @@ thead th a, th a { color: inherit !important; }
 /* ========== Final guard rules (consolidated) ========== */
 a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
 
-/* End of merged core rules */
-
-/* ========== Optional/risky enhancements (commented) ==========
-
-Uncomment and test individually.
-
-*/
-
-/* Scrollbar styling (modern browsers) */
-/*
-.table-container::-webkit-scrollbar, .copy-button-output pre::-webkit-scrollbar { height: 10px; width: 8px; }
-.table-container::-webkit-scrollbar-thumb, .copy-button-output pre::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 8px; }
-.table-container::-webkit-scrollbar-track, .copy-button-output pre::-webkit-scrollbar-track { background: transparent; }
-@supports (scrollbar-width: thin) {
-  .table-container { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.08) transparent; }
-}
-*/
-
-/* Code-block header styling (filename / actions) */
-/*
-.code-block {
-  margin: 1em 0;
-  border-radius: 10px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  background: var(--panel);
-}
-.code-block-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  padding-block:8px;
-  padding-inline:12px;
-  background: linear-gradient(180deg, rgba(0,0,0,0.02), transparent);
-  border-bottom: 1px solid rgba(0,0,0,0.04);
-  font-size: 0.85rem;
-  color: var(--muted);
-}
-*/
-
-/* RTL logical properties alternative to left/inline handling */
-/*
-thead th:first-child{
-  position:sticky;
-  inset-inline-start:0;
-  z-index:5;
-  background:var(--panel);
-  top:var(--tv-header-min-height,48px);
-}
-td:first-child{
-  position:sticky;
-  inset-inline-start:0;
-  z-index:4;
-}
-*/
-
-/* Extended print rules from v3 */
-/*
-@media print {
-  body { font-size: 16px; }
-  thead { display: table-header-group; }
-  tr { page-break-inside: avoid; }
-  th, td { border: 1px solid #ccc !important; padding: 8px !important; }
-  pre, code { white-space: pre-wrap !important; word-break: break-word !important; }
-}
-*/
-
-/* ---------- TOPIC HEADING BAR: HORIZONTAL SINGLE ROW (forced override) ---------- */
-
-#mainContent .table-heading-bar,
-.content .table-heading-bar,
-.table-heading-bar {
-  display: flex !important;
-  flex-wrap: nowrap !important;
-  gap: 8px;
-  margin-bottom: 6px;
-  align-items: center;
-  overflow-x: auto !important;
-  -webkit-overflow-scrolling: touch;
-  position: relative;
-  padding: 6px 12px;
-  margin-left: -12px;
-  margin-right: -12px;
-  overscroll-behavior-x: contain;
-  white-space: nowrap !important;
-  box-sizing: border-box !important;
-}
-
-#mainContent .table-heading-bar::before,
-.content .table-heading-bar::before,
-.table-heading-bar::before,
-#mainContent .table-heading-bar::after,
-.content .table-heading-bar::after,
-.table-heading-bar::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 28px;
-  pointer-events: none;
-  z-index: 12;
-}
-
-/* Left fade */
-#mainContent .table-heading-bar::before,
-.content .table-heading-bar::before,
-.table-heading-bar::before {
-  left: 0;
-  background: linear-gradient(to right, var(--bg) 0%, rgba(0,0,0,0) 100%);
-}
-
-/* Right fade */
-#mainContent .table-heading-bar::after,
-.content .table-heading-bar::after,
-.table-heading-bar::after {
-  right: 0;
-  background: linear-gradient(to left, var(--bg) 0%, rgba(0,0,0,0) 100%);
-}
-
-[data-theme="dark"] #mainContent .table-heading-bar::before,
-[data-theme="dark"] .content .table-heading-bar::before,
-[data-theme="dark"] .table-heading-bar::before {
-  background: linear-gradient(to right, var(--bg) 0%, rgba(0,0,0,0) 100%);
-}
-[data-theme="dark"] #mainContent .table-heading-bar::after,
-[data-theme="dark"] .content .table-heading-bar::after,
-[data-theme="dark"] .table-heading-bar::after {
-  background: linear-gradient(to left, var(--bg) 0%, rgba(0,0,0,0) 100%);
-}
-
-.table-heading-bar > h3.table-heading,
-.table-heading-bar > a.table-heading,
-.table-heading-bar > .table-heading {
-  flex: 0 0 auto !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 6px;
-  text-align: center;
-  font-size: 0.95rem;
-  font-weight: 600;
-  padding: 6px 10px;
-  background: var(--panel);
-  border-radius: 6px;
-  cursor: pointer;
-  user-select: none;
-  transition: background 0.18s ease, color 0.18s ease, transform 120ms var(--easing);
-  min-height: 36px;
-  line-height: 1;
-  white-space: nowrap !important;
-  margin: 0 !important;
-}
-
-.table-heading-bar > h3.table-heading:active,
-.table-heading-bar > .table-heading:active { transform: translateY(1px); }
-.table-heading-bar > h3.table-heading:hover,
-.table-heading-bar > .table-heading:hover {
-  background: var(--toc-link-hover-bg);
-  color: var(--toc-link-hover-color);
-}
-
-.table-heading-bar > h3.table-heading:focus,
-.table-heading-bar > .table-heading:focus,
-.table-heading-bar > h3.table-heading:focus-visible,
-.table-heading-bar > .table-heading:focus-visible {
-  outline: 3px solid var(--focus-ring);
-  outline-offset: 2px;
-  border-radius: 6px;
-  background: var(--focus-bg);
-}
-
-/* Mobile adjustments with !important to override external frameworks */
-@media (max-width:600px){
-  #mainContent .table-heading-bar,
-  .content .table-heading-bar,
-  .table-heading-bar {
-    gap: 6px;
-    padding: 6px 8px;
-    margin-left: -8px;
-    margin-right: -8px;
-  }
-  .table-heading-bar > h3.table-heading,
-  .table-heading-bar > a.table-heading,
-  .table-heading-bar > .table-heading {
-    font-size: 0.88rem !important;
-    padding: 4px 8px !important;
-    min-height: 34px !important;
-  }
-}
-
-/* Extremely narrow phones */
-@media (max-width:420px) {
-  #mainContent .table-heading-bar,
-  .content .table-heading-bar,
-  .table-heading-bar { padding: 6px 6px; gap: 6px; }
-  .table-heading-bar > h3.table-heading,
-  .table-heading-bar > .table-heading {
-    padding: 4px 7px !important;
-    font-size: 0.85rem !important;
-    min-height: 32px !important;
-  }
-}
-
-/* ========== Final guard rules ========== */
-a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
-
 /* End of file */
 
 /* === Additional minimal override to tighten topic heading spacing (safe, non-breaking) === */
@@ -974,4 +767,50 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 }
 .table-wrapper .table-heading-bar + .table-container {
   margin-top: 0.25em;
+}
+
+/* ----------------- Mobile overrides: collapse toggle icon-only and hide page title ----------------- */
+/* These rules intentionally appear late in the file to override earlier mobile sizing.
+   Keeps aria labels for accessibility. */
+@media (max-width:600px){
+  /* Hide page title on narrow screens to increase visible table area */
+  #tv-header #pageTitle,
+  #tv-header .page-title,
+  .page-title { display:none !important; }
+
+  /* Force collapse toggle to be icon-only and match other icon button sizes */
+  .table-controls .toggle-table-btn {
+    padding: 4px !important;
+    font-size: 0 !important;            /* hide any inline text nodes visually */
+    min-width: 32px !important;
+    min-height: 32px !important;
+    width: 36px !important;
+    height: 36px !important;
+    line-height: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Hide textual label elements commonly used inside buttons */
+  .table-controls .toggle-table-btn span,
+  .table-controls .toggle-table-btn .label,
+  .table-controls .toggle-table-btn .btn-text,
+  .table-controls .toggle-table-btn::after { display:none !important; }
+
+  /* Ensure SVG or icon fonts remain visible and centered */
+  .table-controls .toggle-table-btn svg,
+  .table-controls .toggle-table-btn i,
+  .table-controls .toggle-table-btn .icon {
+    display: inline-block !important;
+    width: 18px !important;
+    height: 18px !important;
+    vertical-align: middle !important;
+    font-size: 16px !important;
+  }
+}
+
+/* Very narrow phones: ensure toggle remains visible even if header hides many buttons */
+@media (max-width:420px){
+  .table-controls .toggle-table-btn { display:inline-flex !important; }
 }
