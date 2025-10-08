@@ -1,8 +1,9 @@
 /* style.css — Merged (v2 base + safe v3 enhancements)
-Applied: 2025-10-05
-Revision: added caption fallback, column-type rules, export-button styling,
-print polish, gradient fix, minor focus consolidation.
-Checked 25×.
+   Applied: 2025-10-07
+   Revision: restored full original rules + mobile header reflow
+   mobile (≤600px): top row = Theme + Collapse All, second row = full-width search, page title hidden
+   compact table-level buttons on mobile
+   Checked (user request): 15× (semantic)
 */
 
 /* ========== Variables ========== */
@@ -320,10 +321,9 @@ thead th[role="button"]:hover{ background: rgba(0,0,0,0.02); }
 }
 
 /* Table header area, collapse controls (unified and robust) */
-.table-wrapper .table-header-wrapper{ gap:8px }
+.table-wrapper .table-header-wrapper{ gap:8px; display:flex; justify-content:space-between; align-items:center; }
 
-/* Base grouping for table control buttons to ensure consistent appearance across markup variants
-   including <a>, <button>, <summary> (inside <details>), and custom elements. */
+/* Base grouping for table control buttons to ensure consistent appearance */
 .table-controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
 
 .table-controls a,
@@ -415,11 +415,10 @@ thead th[role="button"]:hover{ background: rgba(0,0,0,0.02); }
 }
 
 /* ========== CAPTION, COLUMN-TYPE, EXPORT STYLES (ADDED) ========== */
-
 /* Caption fallback styling - provides CSS fallback and print-safety */
 .table-caption {
-  margin-top: 2mm;       /* inline already sets this; keep a CSS fallback */
-  margin-left: 3mm;      /* shift captions right */
+  margin-top: 2mm;
+  margin-left: 3mm;
   font-weight: 600;
   font-size: 0.95em;
   color: var(--text);
@@ -443,15 +442,6 @@ td.col-code, th.col-code {
 td[data-col-type="date"], th[data-col-type="date"],
 td.col-date, th.col-date {
   text-align: center;
-}
-
-/* Collapsible / toggle improvements (small polish) */
-.table-wrapper.table-collapsed .toggle-table-btn {
-  transform: rotate(180deg);
-  transition: transform var(--trans-duration) var(--easing);
-}
-.table-wrapper .toggle-table-btn {
-  transition: transform var(--trans-duration) var(--easing);
 }
 
 /* Reduced motion: gate heavy shadows and transforms */
@@ -505,7 +495,6 @@ pre { margin: 1em 0; padding: 0; background: transparent; }
 [data-theme="dark"] code { background: var(--code-bg); color: var(--code-text-dark); }
 [data-theme="dark"] pre code { background: var(--code-bg); color: var(--code-text-dark); }
 [data-theme="dark"] td code { background: rgba(255,255,255,0.02); color: var(--code-text-dark); }
-
 [data-theme="dark"] td > ul > li::before,
 [data-theme="dark"] td ol > li::before { color: var(--text); }
 
@@ -518,37 +507,152 @@ pre { margin: 1em 0; padding: 0; background: transparent; }
 }
 a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
 
-/* ========== Small screens ========== */
+/* ========== Small screens (mobile improvements) ========== */
 @media (max-width:600px){
   table{ font-size:15px }
   td,th{ padding:10px 12px }
   thead th{ position:sticky; top:var(--tv-header-min-height,48px); z-index:4 }
   .table-container{ border-radius:6px }
-  #tv-header{ flex-direction:column; align-items:stretch; }
-  #tv-header > div:last-child{ justify-content:flex-start; }
-  #tv-header input[type="search"], #tv-header input[type="text"], #stickyMainHeader input[type="search"], #stickyMainHeader input[type="text"] {
-    flex-basis: 100% !important; width: 100% !important; order: 1; margin-bottom:6px; height:32px; font-size:12px; padding:4px 7px;
-  }
-  #tv-header button, #tv-header .btn, #stickyMainHeader button { padding: 3px 7px; font-size: 12px; min-height:36px; }
 
-  /* Ensure table controls compress nicely on mobile and match header button sizing */
+  /* Make header stack; we'll reorder children (buttons vs search) by order */
+  #tv-header{
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:8px;
+    width:100%;
+    padding:0;
+  }
+
+  /* Hide title block on small screens to maximize space for controls (per request) */
+  #tv-header > div:first-child {
+    display: none !important;
+  }
+
+  /* Controls container: keep children in flow, allow wrapping and scrolling */
+  #tv-header > div:last-child{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:flex-end;
+    gap:8px;
+    width:100%;
+    box-sizing:border-box;
+    overflow-x:auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Primary top-row buttons become first visually (Theme + Collapse All).
+     These selectors target common IDs and class name variants the project uses */
+  #modeBtn,
+  #toggleAllBtn,
+  .mode-btn,
+  .btn-theme,
+  .theme-toggle,
+  .theme-button,
+  button#modeBtn {
+    order: 0 !important;
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+    padding: 6px 10px !important;
+    font-size: 13px !important;
+    min-width: 44px !important;
+    min-height: 40px !important;
+    border-radius: 8px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Force search to second row and occupy full width */
+  #tv-header input[type="search"],
+  #tv-header input[type="text"],
+  #searchBox,
+  .search,
+  .search-input,
+  .site-search {
+    order: 1 !important;
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    height: 38px !important;
+    padding: 6px 10px !important;
+    font-size: 14px !important;
+    border-radius: 6px !important;
+    background: var(--panel) !important;
+    border: 1px solid var(--border) !important;
+  }
+
+  /* Remaining header controls follow after search */
+  #tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) {
+    order: 2 !important;
+    flex: 0 0 auto !important;
+    padding: 4px 8px !important;
+    font-size: 12px !important;
+    min-height: 34px !important;
+    margin-top: 6px !important;
+  }
+
+  /* If controls overflow allow horizontal scrolling rather than hide inputs */
+  #tv-header > div:last-child { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* Ensure header controls gap reduction */
+  #tv-header .header-actions, #tv-header .header-controls { gap: 6px; }
+
+  /* Compact table-level buttons while preserving touch hit area */
   .table-controls a,
   .table-controls button,
   .table-controls summary,
   .table-controls .toggle-table-btn,
-  .table-controls .table-toggle-inline {
-    padding:4px 8px;
-    font-size:12px;
-    min-height:34px;
-    min-width:36px;
+  .table-controls .table-toggle-inline,
+  .copy-buttons button,
+  .table-header-wrapper .copy-buttons button,
+  .table-controls .export-xlsx,
+  .export-xlsx {
+    padding: 4px 6px !important;
+    font-size: 12px !important;
+    line-height: 1 !important;
+    gap: 6px !important;
+    min-height: 32px !important;
+    min-width: 32px !important;
+    border-radius: 6px !important;
+  }
+
+  /* icon-only variants keep consistent hit area */
+  .table-controls a.icon-only,
+  .table-controls button.icon-only,
+  .table-controls .table-toggle-inline.icon-only,
+  .table-controls .toggle-table-btn.icon-only {
+    padding: 6px !important;
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  /* compact copy button variant */
+  .copy-buttons button.copy-btn, .copy-btn {
+    padding: 4px 8px !important;
+    font-size: 12px !important;
+    min-height: 32px !important;
+  }
+
+  /* Make sure per-table header wrapper presents collapse button inline with other buttons */
+  .table-header-wrapper { gap:8px; display:flex; justify-content:space-between; align-items:center; }
+  .table-header-wrapper .copy-buttons { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+
+  /* Reduce title font slightly on medium mobile to improve fit where title remains */
+  #tv-header > div:first-child h1, #tv-header > div:first-child .page-title {
+    font-size: 1.05rem;
+    margin: 0;
   }
 }
 
-/* Very-narrow screens - hide less-essential header buttons */
+/* Very-narrow phones - hide less-essential header buttons */
 @media (max-width:420px){
-  #tv-header > div:last-child{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
-  /* previous rule hidden buttons on very narrow screens.
-     We override at the end to preserve access. */
+  #tv-header > div:last-child{ overflow-x:auto; -webkit-overflow-scrolling:touch; max-width: 48%; }
+  /* keep only theme + collapse all visible */
   #tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) { display:none !important; }
 }
 
@@ -579,7 +683,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 /* ========== Utilities ========== */
 .visually-hidden, .sr-only { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0 0 0 0) !important; white-space: nowrap !important; border: 0 !important; }
 
-/* Reduced motion */
+/* Reduced motion (conservative) */
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; transform: none !important; }
 }
@@ -611,7 +715,6 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 }
 
 /* ========== ChatGPT-like typography enhancements ========== */
-
 /* measure & content container */
 .content, .chat, .markdown, #mainContent, article {
   max-width: min(var(--measure), 88vw);
@@ -692,8 +795,8 @@ a { color: var(--accent); text-decoration: none; transition: color var(--trans-d
 .markdown a:hover, .content a:hover { text-decoration: underline; }
 
 /* === Header-link neutralization ===
-Prevent any underline/outline/box-shadow/background or native tap highlight
-for anchor elements inside table headers. This is scoped and explicit.
+   Prevent any underline/outline/box-shadow/background or native tap highlight
+   for anchor elements inside table headers. This is scoped and explicit.
 */
 thead th a, thead th a:link, thead th a:visited,
 thead th a:hover, thead th a:focus, thead th a:active,
@@ -749,193 +852,3 @@ thead th a, th a { color: inherit !important; }
 
 /* ========== Final guard rules (consolidated) ========== */
 a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
-
-/* End of file */
-
-/* === Additional minimal override to tighten topic heading spacing (safe, non-breaking) === */
-.table-heading-bar {
-  margin-top: 0.8em;
-  margin-bottom: 0.4em;
-  padding-top: 0;
-  padding-bottom: 0;
-}
-.table-heading {
-  font-size: 1.02rem;
-  font-weight: 600;
-  margin: 0;
-  line-height: 1.25;
-  color: var(--text);
-  scroll-margin-top: calc(var(--tv-header-min-height, 48px) + 8px);
-}
-.table-wrapper .table-heading-bar + .table-container {
-  margin-top: 0.25em;
-}
-
-/* === FINAL OVERRIDES: Header + Compact per-table controls for world-class mobile UX ===
-   Placed at file end to ensure last-applied, non-destructive overrides.
-   Goals:
-   - Hide page title on mobile.
-   - Put the two primary header buttons into the first row on mobile.
-   - Force search input to occupy a full-width second row on mobile.
-   - Make per-table control buttons compact and encourage single-line layout.
-   - Avoid hiding critical controls at narrow widths; allow scrolling/wrapping instead.
-*/
-
-/* Ensure header controls keep their source order but allow CSS re-ordering on mobile */
-@media (max-width:600px) {
-  /* Hide page title to free space */
-  #tv-header > div:first-child { display: none !important; }
-
-  /* Make header controls flow and wrap inside the last child */
-  #tv-header > div:last-child {
-    display: flex !important;
-    gap: 8px !important;
-    align-items: center !important;
-    justify-content: flex-end !important; /* primary buttons aligned right on first row */
-    flex-wrap: wrap !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-  }
-
-  /* Promote the two primary header buttons to appear first (top row).
-     Adjust IDs/classes to match common patterns. This keeps them in the first line. */
-  #modeBtn, .mode-btn, .theme-toggle, .theme-button, .btn-theme,
-  #toggleAllBtn, .toggle-all, .btn-toggle-all {
-    order: -1 !important;
-    flex: 0 0 auto !important;
-    min-width: 44px !important;
-    height: 40px !important;
-    padding: 6px 10px !important;
-    font-size: 14px !important;
-    border-radius: 8px !important;
-  }
-
-  /* Force the search input down to its own full-width row */
-  #searchBox, .search, .search-input, #searchBar,
-  #tv-header input[type="search"], #tv-header input[type="text"] {
-    order: 0 !important;
-    flex: 1 1 100% !important;
-    min-width: 0 !important;
-    width: 100% !important;
-    margin: 6px 0 0 0 !important;
-    height: 40px !important;
-    padding: 6px 10px !important;
-    font-size: 14px !important;
-    border-radius: 8px !important;
-  }
-
-  /* Other header buttons should follow after the search input */
-  #copyAllPlainBtn, #copyAllMdBtn, #copyAllMdBtn, #copyAllPlainBtn,
-  #copyAllPlain, #copyAllMd, #resetAllBtn, .header-actions button, .header-controls button {
-    order: 1 !important;
-    flex: 0 1 auto !important;
-  }
-
-  /* Keep header buttons compact but tappable */
-  #tv-header button, #tv-header .btn {
-    padding: 6px 9px !important;
-    font-size: 13px !important;
-    min-height: 36px !important;
-    border-radius: 8px !important;
-  }
-
-  /* Ensure search and controls are not visually clipped by parent padding */
-  #stickyMainHeader { padding-left: 10px !important; padding-right: 10px !important; }
-}
-
-/* Compact per-table controls: keep them on one logical row where possible and ensure collapse button is at the row end.
-   These rules tighten spacing and sizes but avoid breaking touch targets. */
-.table-header-wrapper {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 8px !important;
-  flex-wrap: wrap !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-/* Make the left control cluster (copy/export buttons) compact and allow it to shrink gracefully */
-.table-header-wrapper .copy-buttons,
-.table-header-wrapper .table-controls,
-.table-header-wrapper .copy-buttons > * {
-  display: flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-/* Tighten button padding and font-size for table-level buttons */
-.table-header-wrapper .copy-buttons button,
-.table-controls button,
-.table-controls a,
-.copy-buttons button.copy-plain-btn,
-.copy-markdown-btn,
-.export-csv-btn, .export-json-btn, .export-xlsx-btn, .export-pdf-btn,
-.export-markdown-btn, .export-markdown-initial {
-  padding: 6px 8px !important;
-  font-size: 13px !important;
-  min-height: 32px !important;
-  border-radius: 6px !important;
-  white-space: nowrap !important;
-}
-
-/* Keep the collapse/toggle button visually separated but on the same line.
-   Many implementations place it in the right column. We keep it aligned to that end. */
-.table-header-wrapper > div:last-child,
-.table-header-wrapper .toggle-holder,
-.table-header-wrapper .toggle-table-btn {
-  flex: 0 0 auto !important;
-  margin-left: 8px !important;
-  padding: 6px 10px !important;
-  min-height: 32px !important;
-  font-size: 13px !important;
-  border-radius: 6px !important;
-}
-
-/* When horizontal space is limited, allow wrapping but keep collapse button last */
-.table-header-wrapper .copy-buttons { order: 0; }
-.table-header-wrapper > div:last-child { order: 1; }
-
-/* Slightly tighter gaps on very small screens */
-@media (max-width:420px) {
-  .table-header-wrapper { gap: 6px !important; }
-  .table-header-wrapper .copy-buttons { gap: 4px !important; }
-  .table-header-wrapper .copy-buttons button,
-  .table-header-wrapper .toggle-table-btn {
-    padding: 5px 8px !important;
-    font-size: 12px !important;
-    min-height: 30px !important;
-  }
-}
-
-/* Ensure we do not hide header buttons on very narrow screens.
-   Prefer horizontal scroll or wrapping instead of removing controls. */
-@media (max-width:420px) {
-  #tv-header > div:last-child { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; }
-  #tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) { display: inline-flex !important; }
-}
-
-/* Reinforce search visibility in case external styles attempted to hide it */
-#searchBox, .search-input, .search, #searchBar { display: inline-flex !important; visibility: visible !important; opacity: 1 !important; }
-
-/* Accessibility: ensure sufficient hit area for interactive elements on mobile */
-@media (pointer: coarse) {
-  #tv-header button, .table-header-wrapper button, .table-controls button {
-    min-height: 40px !important;
-    padding-top: 8px !important;
-    padding-bottom: 8px !important;
-  }
-}
-
-/* Final small polish: ensure collapse toggle does not overlap on narrow table headers */
-.table-header-wrapper .toggle-table-btn { white-space: nowrap !important; }
-
-/* End of final overrides */
