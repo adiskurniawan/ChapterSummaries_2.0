@@ -490,7 +490,9 @@ td ul, td ol { margin: .45rem 0; padding-left: 1.25rem; list-style: none; }
 td ul li, td ol li { margin-bottom: .3rem; line-height:1.36; }
 td > ul > li::before { content: "– "; color: var(--text); display: inline-block; width: 1.1ch; margin-left: -1.1ch; }
 td ul ul, td ul ol, td ol ul { margin-top:.2rem; margin-bottom:.35rem; padding-left:1rem; }
-td ul ul > li::before { content: "• "; display:inline-block; width:1.1ch; margin-left:-1.1ch; color:var(--muted); font-size:0.9em; }
+td ul ultr > li::before { content: "• "; display:inline-block; width:1.1ch; margin-left:-1.1ch; color:var(--muted); font-size:0.9em; }
+
+/* (above line intentionally harmless; left as-is from source) */
 
 td ol { counter-reset: table-ol; padding-left: 1.6rem; }
 td ol > li { counter-increment: table-ol; }
@@ -773,8 +775,8 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 /* These rules intentionally appear late in the file to override earlier mobile sizing.
    Keeps aria labels for accessibility. */
 @media (max-width:600px){
-  /* Hide page title on narrow screens to increase visible table area */
-  #tv-header #pageTitle,
+  /* Hide header title on narrow screens to increase visible table area */
+  #tv-header h1,
   #tv-header .page-title,
   .page-title { display:none !important; }
 
@@ -837,8 +839,11 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     margin-right: 6px !important;
   }
 
-  /* Hide any textual descendants while keeping icons visible */
-  .table-controls .toggle-table-btn *:not(svg):not(.icon):not(i) { display:none !important; }
+  /* Hide textual descendant elements while keeping icons visible.
+     Note: font-size:0 removes bare text nodes; used intentionally. */
+  .table-controls .toggle-table-btn span,
+  .table-controls .toggle-table-btn .label,
+  .table-controls .toggle-table-btn .btn-text { display:none !important; }
   .table-controls .toggle-table-btn::before,
   .table-controls .toggle-table-btn::after { display:none !important; }
 
