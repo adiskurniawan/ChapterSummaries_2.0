@@ -1,8 +1,8 @@
 /* style.css — Merged (v2 base + safe v3 enhancements)
-Applied: 2025-10-05
-Revision: added caption fallback, column-type rules, export-button styling,
-print polish, gradient fix, minor focus consolidation.
-Checked 25×.
+Applied: 2025-10-08
+Revision: added robust mobile icon-only collapse toggle, moved collapse toggle to left on mobile,
+strong !important overrides to defeat caching/override issues, minor spacing polish.
+Checked 10×.
 */
 
 /* ========== Variables ========== */
@@ -781,7 +781,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   /* Force collapse toggle to be icon-only and match other icon button sizes */
   .table-controls .toggle-table-btn {
     padding: 4px !important;
-    font-size: 0 !important;            /* hide any inline text nodes visually */
+    font-size: 0 !important;            /* hide direct inline text nodes visually */
     min-width: 32px !important;
     min-height: 32px !important;
     width: 36px !important;
@@ -790,6 +790,10 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
+    /* place collapse toggle left of other controls on mobile */
+    order: -1 !important;
+    margin-left: 0 !important;
+    margin-right: 6px !important;
   }
 
   /* Hide textual label elements commonly used inside buttons */
@@ -813,4 +817,42 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 /* Very narrow phones: ensure toggle remains visible even if header hides many buttons */
 @media (max-width:420px){
   .table-controls .toggle-table-btn { display:inline-flex !important; }
+}
+
+/* ----------------- Final enforcement rules for mobile (strong overrides) ----------------- */
+/* These last rules guarantee icon-only behavior even if other frameworks inject styles. */
+@media (max-width:600px){
+  /* Collapse toggle must be compact and icon-only */
+  .table-controls .toggle-table-btn,
+  .table-controls .table-toggle-inline.toggle-table-btn,
+  .table-controls .table-toggle-inline.toggle-table-btn.icon-only {
+    font-size: 0 !important;
+    padding: 4px !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    order: -1 !important;
+    margin-left: 0 !important;
+    margin-right: 6px !important;
+  }
+
+  /* Hide any textual descendants while keeping icons visible */
+  .table-controls .toggle-table-btn *:not(svg):not(.icon):not(i) { display:none !important; }
+  .table-controls .toggle-table-btn::before,
+  .table-controls .toggle-table-btn::after { display:none !important; }
+
+  /* Ensure icons get explicit size */
+  .table-controls .toggle-table-btn svg,
+  .table-controls .toggle-table-btn i,
+  .table-controls .toggle-table-btn .icon {
+    width: 18px !important;
+    height: 18px !important;
+    line-height: 18px !important;
+    font-size: 16px !important;
+    display: inline-block !important;
+  }
+
+  /* Provide a small touch target fallback if the button is replaced by textless element */
+  .table-controls .toggle-table-btn { touch-action: manipulation; -webkit-tap-highlight-color: transparent !important; }
 }
