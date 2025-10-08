@@ -3,7 +3,7 @@ Applied: 2025-10-07
 Revision: restored full original rules + mobile header reflow:
 mobile (≤600px): top row = Theme + Collapse All, second row = full-width search, page title hidden
 compact table-level buttons on mobile
-Checked 15×.
+Checked 25×.
 */
 
 /* ========== Variables ========== */
@@ -504,90 +504,97 @@ pre { margin: 1em 0; padding: 0; background: transparent; }
 }
 a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
 
-/* ========== Small screens (<=600px) - merged and cleaned ========== */
+/* ========== Small screens (<=600px) - replaced with tight-header layout ==========
+   Objective: first row shows Theme + Collapse All side-by-side.
+              second row is full-width search.
+   Implemented via ordering and forcing search to 100% width.
+*/
 @media (max-width: 600px) {
   table { font-size: 15px; }
   td, th { padding: 10px 12px; }
   thead th { position: sticky; top: var(--tv-header-min-height, 48px); z-index: 4; }
   .table-container { border-radius: 6px; }
 
-  /* preserve stacking but use relative/flex placement for header controls */
+  /* stack header but keep controls flexible */
   #tv-header {
-    flex-direction: column;
-    align-items: stretch;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
     position: relative;
+    gap: 8px;
     padding-right: 0;
   }
 
-  /* place controls after title/search but keep them in flow */
+  /* hide title block to free horizontal space */
+  #tv-header > div:first-child { display: none !important; }
+
+  /* controls container becomes wrapping flex row, left-aligned */
   #tv-header > div:last-child {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
     position: relative;
     order: 2;
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-    align-items: center;
-    flex-wrap: nowrap;
     z-index: 1100;
-    -webkit-overflow-scrolling: touch;
-    overflow-x: auto;
+    overflow: visible;
   }
 
-  /* keep title/search as the first block and avoid large reserved padding */
-  #tv-header > div:first-child {
-    order: 1;
-    padding-right: 16px;
-  }
-
-  /* Inputs compress but stay visible and usable */
-  #tv-header input[type="search"], #tv-header input[type="text"],
-  #stickyMainHeader input[type="search"], #stickyMainHeader input[type="text"] {
-    flex-basis: 100% !important;
-    min-width: 0 !important;
-    width: auto !important;
-    max-width: 100% !important;
-    box-sizing: border-box;
-    padding: 6px 8px;
-    height: 34px;
-  }
-
-  /* Ensure buttons are touch-friendly on mobile */
-  #tv-header button, #tv-header .btn, #stickyMainHeader button {
-    padding: 6px 8px;
-    font-size: 13px;
-    min-height: 36px;
-  }
-
-  /* Ensure table controls compress nicely on mobile */
-  .table-controls a,
-  .table-controls button,
-  .table-controls summary,
-  .table-controls .toggle-table-btn,
-  .table-controls .table-toggle-inline {
-    padding: 4px 8px;
-    font-size: 12px;
-    min-height: 34px;
-    min-width: 36px;
-  }
-
-  /* Restore and protect search bar elements in case other CSS hid or displaced them */
-  #tv-header .search-bar,
-  #tv-header .search,
-  .search-bar,
-  .search-input,
-  #searchBar,
-  .site-search {
-    display: flex !important;
+  /* primary top-row buttons: theme + collapse */
+  #modeBtn,
+  #toggleAllBtn,
+  .mode-btn,
+  .btn-theme,
+  .theme-toggle,
+  .theme-button,
+  button#modeBtn {
+    order: 0 !important;
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+    padding: 6px 10px !important;
+    font-size: 13px !important;
+    min-width: 44px !important;
+    min-height: 40px !important;
+    border-radius: 8px !important;
+    display: inline-flex !important;
     align-items: center !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    z-index: 1202 !important;
+    justify-content: center !important;
   }
 
-  /* Reduce extreme packing on small devices */
-  #tv-header .header-actions, #tv-header .header-controls { gap: 6px; }
+  /* search forced to its own full-width row */
+  #tv-header input[type="search"],
+  #tv-header input[type="text"],
+  #searchBox,
+  .search,
+  .search-input,
+  .site-search {
+    order: 1 !important;
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    height: 38px !important;
+    padding: 6px 10px !important;
+    font-size: 14px !important;
+    border-radius: 6px !important;
+    background: var(--panel) !important;
+    border: 1px solid var(--border) !important;
+  }
 
-  /* Compact table control buttons while preserving touch hit area */
+  /* remaining header controls follow after search */
+  #tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) {
+    order: 2 !important;
+    flex: 0 0 auto !important;
+    padding: 4px 8px !important;
+    font-size: 12px !important;
+    min-height: 34px !important;
+    margin-top: 6px !important;
+  }
+
+  /* compact table control buttons while preserving touch hit area */
   .table-controls a,
   .table-controls button,
   .table-controls summary,
@@ -621,83 +628,6 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     padding: 4px 8px !important;
     font-size: 12px !important;
     min-height: 32px !important;
-  }
-
-  /* Requested mobile header final adjustments:
-     top: Theme (#modeBtn) + Collapse All (#toggleAllBtn)
-     second row: full-width search input (#searchBox or input[type="search"])
-     page title hidden on small screens
-     compact table-level buttons
-  */
-
-  /* make header a stacked flex column */
-  #tv-header { display: flex !important; flex-direction: column !important; gap: 8px !important; align-items: stretch !important; width: 100% !important; }
-
-  /* hide the title block to free horizontal space */
-  #tv-header > div:first-child { display: none !important; }
-
-  /* ensure controls container wraps and stays in flow */
-  #tv-header > div:last-child {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    align-items: center !important;
-    justify-content: flex-end !important;
-    gap: 8px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  /* primary top-row buttons become first in source order visually */
-  #modeBtn,
-  #toggleAllBtn,
-  .mode-btn,
-  .btn-theme,
-  .theme-toggle,
-  .theme-button,
-  button#modeBtn {
-    order: 0 !important;
-    flex: 0 0 auto !important;
-    margin: 0 !important;
-    padding: 6px 10px !important;
-    font-size: 13px !important;
-    min-width: 44px !important;
-    min-height: 40px !important;
-    border-radius: 8px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
-
-  /* force search to second row, full width — override inline styles */
-  #tv-header input[type="search"],
-  #tv-header input[type="text"],
-  #searchBox,
-  .search,
-  .search-input,
-  .site-search {
-    order: 1 !important;
-    flex: 0 0 100% !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    box-sizing: border-box !important;
-    margin: 0 !important;
-    height: 38px !important;
-    padding: 6px 10px !important;
-    font-size: 14px !important;
-    border-radius: 6px !important;
-    background: var(--panel) !important;
-    border: 1px solid var(--border) !important;
-  }
-
-  /* remaining header controls follow after search */
-  #tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) {
-    order: 2 !important;
-    flex: 0 0 auto !important;
-    padding: 4px 8px !important;
-    font-size: 12px !important;
-    min-height: 34px !important;
-    margin-top: 6px !important;
   }
 }
 
