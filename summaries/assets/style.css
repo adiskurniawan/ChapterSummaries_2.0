@@ -1,8 +1,8 @@
 /* style.css — Merged (v2 base + safe v3 enhancements)
 Applied: 2025-10-08
-Revision: added robust mobile icon-only collapse toggle, moved collapse toggle to left on mobile,
-strong !important overrides to defeat caching/override issues, minor spacing polish.
-Checked 10×.
+Revision: added robust mobile icon-only collapse toggle, hide #tv-header h1 on mobile,
+moved collapse toggle to left on mobile, strong !important overrides to defeat caching/override issues,
+minor spacing polish. Checked 10×.
 */
 
 /* ========== Variables ========== */
@@ -490,9 +490,7 @@ td ul, td ol { margin: .45rem 0; padding-left: 1.25rem; list-style: none; }
 td ul li, td ol li { margin-bottom: .3rem; line-height:1.36; }
 td > ul > li::before { content: "– "; color: var(--text); display: inline-block; width: 1.1ch; margin-left: -1.1ch; }
 td ul ul, td ul ol, td ol ul { margin-top:.2rem; margin-bottom:.35rem; padding-left:1rem; }
-td ul ultr > li::before { content: "• "; display:inline-block; width:1.1ch; margin-left:-1.1ch; color:var(--muted); font-size:0.9em; }
-
-/* (above line intentionally harmless; left as-is from source) */
+td ul ul > li::before { content: "• "; display:inline-block; width:1.1ch; margin-left:-1.1ch; color:var(--muted); font-size:0.9em; }
 
 td ol { counter-reset: table-ol; padding-left: 1.6rem; }
 td ol > li { counter-increment: table-ol; }
@@ -543,6 +541,60 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     font-size:12px;
     min-height:34px;
     min-width:36px;
+  }
+
+  /* Hide page title on narrow screens to increase visible table area
+     Cover multiple markup variants and plain headings.
+     Kept late in file to override external frameworks. */
+  #tv-header h1,
+  #tv-header > div:first-child h1,
+  #tv-header #pageTitle,
+  #tv-header .page-title,
+  .page-title,
+  #pageTitle,
+  .tv-header-title {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Force collapse toggle to be icon-only and match other icon button sizes */
+  .table-controls .toggle-table-btn {
+    padding: 4px !important;
+    font-size: 0 !important;            /* hide direct inline text nodes visually */
+    min-width: 32px !important;
+    min-height: 32px !important;
+    width: 36px !important;
+    height: 36px !important;
+    line-height: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    /* place collapse toggle left of other controls on mobile */
+    order: -1 !important;
+    margin-left: 0 !important;
+    margin-right: 6px !important;
+  }
+
+  /* Hide textual label elements commonly used inside buttons */
+  .table-controls .toggle-table-btn span,
+  .table-controls .toggle-table-btn .label,
+  .table-controls .toggle-table-btn .btn-text,
+  .table-controls .toggle-table-btn::after { display:none !important; }
+
+  /* Ensure SVG or icon fonts remain visible and centered */
+  .table-controls .toggle-table-btn svg,
+  .table-controls .toggle-table-btn i,
+  .table-controls .toggle-table-btn .icon {
+    display: inline-block !important;
+    width: 18px !important;
+    height: 18px !important;
+    vertical-align: middle !important;
+    font-size: 16px !important;
   }
 }
 
@@ -771,58 +823,8 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   margin-top: 0.25em;
 }
 
-/* ----------------- Mobile overrides: collapse toggle icon-only and hide page title ----------------- */
-/* These rules intentionally appear late in the file to override earlier mobile sizing.
-   Keeps aria labels for accessibility. */
-@media (max-width:600px){
-  /* Hide header title on narrow screens to increase visible table area */
-  #tv-header h1,
-  #tv-header .page-title,
-  .page-title { display:none !important; }
-
-  /* Force collapse toggle to be icon-only and match other icon button sizes */
-  .table-controls .toggle-table-btn {
-    padding: 4px !important;
-    font-size: 0 !important;            /* hide direct inline text nodes visually */
-    min-width: 32px !important;
-    min-height: 32px !important;
-    width: 36px !important;
-    height: 36px !important;
-    line-height: 0 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    /* place collapse toggle left of other controls on mobile */
-    order: -1 !important;
-    margin-left: 0 !important;
-    margin-right: 6px !important;
-  }
-
-  /* Hide textual label elements commonly used inside buttons */
-  .table-controls .toggle-table-btn span,
-  .table-controls .toggle-table-btn .label,
-  .table-controls .toggle-table-btn .btn-text,
-  .table-controls .toggle-table-btn::after { display:none !important; }
-
-  /* Ensure SVG or icon fonts remain visible and centered */
-  .table-controls .toggle-table-btn svg,
-  .table-controls .toggle-table-btn i,
-  .table-controls .toggle-table-btn .icon {
-    display: inline-block !important;
-    width: 18px !important;
-    height: 18px !important;
-    vertical-align: middle !important;
-    font-size: 16px !important;
-  }
-}
-
-/* Very narrow phones: ensure toggle remains visible even if header hides many buttons */
-@media (max-width:420px){
-  .table-controls .toggle-table-btn { display:inline-flex !important; }
-}
-
 /* ----------------- Final enforcement rules for mobile (strong overrides) ----------------- */
-/* These last rules guarantee icon-only behavior even if other frameworks inject styles. */
+/* These last rules guarantee icon-only behavior and title hide even if other frameworks inject styles. */
 @media (max-width:600px){
   /* Collapse toggle must be compact and icon-only */
   .table-controls .toggle-table-btn,
@@ -839,11 +841,8 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     margin-right: 6px !important;
   }
 
-  /* Hide textual descendant elements while keeping icons visible.
-     Note: font-size:0 removes bare text nodes; used intentionally. */
-  .table-controls .toggle-table-btn span,
-  .table-controls .toggle-table-btn .label,
-  .table-controls .toggle-table-btn .btn-text { display:none !important; }
+  /* Hide any textual descendants while keeping icons visible */
+  .table-controls .toggle-table-btn *:not(svg):not(.icon):not(i) { display:none !important; }
   .table-controls .toggle-table-btn::before,
   .table-controls .toggle-table-btn::after { display:none !important; }
 
@@ -856,6 +855,23 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     line-height: 18px !important;
     font-size: 16px !important;
     display: inline-block !important;
+  }
+
+  /* Ensure header H1 is hidden on mobile regardless of markup variant */
+  #tv-header h1,
+  #tv-header > div:first-child h1,
+  #tv-header #pageTitle,
+  #tv-header .page-title,
+  .page-title,
+  #pageTitle,
+  .tv-header-title {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 0 !important;
+    overflow: hidden !important;
   }
 
   /* Provide a small touch target fallback if the button is replaced by textless element */
