@@ -3,69 +3,13 @@
 <head>
 <meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
 <title>Tables Viewer v2.1</title>
-<style>
-:root{--main-header-height:56px;}
-.table-wrapper{opacity:0;min-height:24px;transition:opacity .12s linear}
-@media (max-width:600px){
-  /* hide page title on narrow screens (strong override) */
-  #tv-header h1,
-  #tv-header > div:first-child h1,
-  #tv-header #pageTitle,
-  #tv-header .page-title,
-  .page-title,
-  #pageTitle,
-  .tv-header-title {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    line-height: 0 !important;
-    overflow: hidden !important;
-  }
-
-  /* Force collapse toggle to be icon-only and compact on mobile */
-  .table-controls .toggle-table-btn {
-    font-size: 0 !important;
-    padding: 4px !important;
-    min-width: 32px !important;
-    min-height: 32px !important;
-    width: 36px !important;
-    height: 36px !important;
-    line-height: 0 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    order: -1 !important;
-    margin-left: 0 !important;
-    margin-right: 6px !important;
-  }
-
-  /* Hide any textual descendants while keeping icons visible */
-  .table-controls .toggle-table-btn *:not(svg):not(.icon):not(i) { display:none !important; }
-  .table-controls .toggle-table-btn::before,
-  .table-controls .toggle-table-btn::after { display:none !important; }
-
-  /* explicit icon sizing */
-  .table-controls .toggle-table-btn svg,
-  .table-controls .toggle-table-btn i,
-  .table-controls .toggle-table-btn .icon {
-    width: 18px !important;
-    height: 18px !important;
-    line-height: 18px !important;
-    font-size: 16px !important;
-    display: inline-block !important;
-  }
-
-  .table-controls .toggle-table-btn { touch-action: manipulation; -webkit-tap-highlight-color: transparent !important; }
-}
-</style>
-<link rel="stylesheet" href="assets/style.css?v=1759925496">
-<link rel="stylesheet" href="assets/overrides.css?v=1759940978">
+<style>:root{--main-header-height:56px;} .table-wrapper{opacity:0;min-height:24px;transition:opacity .12s linear}</style>
+<link rel="stylesheet" href="assets/style.css?v=1759763805">
+<link rel="stylesheet" href="assets/overrides.css?v=1759978535">
 </head><body>
 <div id="tables-viewer" role="region" aria-label="Tables viewer">
 <div id="stickyMainHeader">
-<div id="tv-header"><div><h1 id="pageTitle" class="page-title">Tables Viewer v2.1</h1></div><div style="display:flex;gap:8px;align-items:center;">
+<div id="tv-header"><div><h1>Tables Viewer v2.1</h1></div><div style="display:flex;gap:8px;align-items:center;">
 <input id="searchBox" type="search" placeholder="Search" aria-label="Search tables" style="min-width:420px; width:44ch;"/>
 <button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button>
 <button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button>
