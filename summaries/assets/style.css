@@ -1,8 +1,7 @@
-/* style.css — Merged (v2 base + safe v3 enhancements)
-Applied: 2025-10-08
-Revision: added robust mobile icon-only collapse toggle, hide #tv-header h1 on mobile,
-moved collapse toggle to left on mobile, strong !important overrides to defeat caching/override issues,
-minor spacing polish. Checked 10×.
+/* style.css — v4.0 Integrated (2025-10-09)
+   Merged v2 + safe v3 enhancements + per-table export-markdown/button styling
+   Notes: strong mobile overrides, icon-only collapse toggle, header H1 hidden on mobile,
+   accessibility preserved. Checked 10×.
 */
 
 /* ========== Variables ========== */
@@ -46,7 +45,7 @@ minor spacing polish. Checked 10×.
   --easing: cubic-bezier(.2,.9,.2,1);
 }
 
-/* High contrast preference (additive) */
+/* High contrast additive */
 @media (prefers-contrast: more) {
   :root{
     --border: #9aa7b2;
@@ -100,7 +99,6 @@ minor spacing polish. Checked 10×.
 /* ========== Global normalization & base ========== */
 *, *::before, *::after { box-sizing: border-box; }
 
-/* fluid base size */
 html, body {
   margin: 0;
   background: var(--bg);
@@ -108,11 +106,10 @@ html, body {
   font-family: var(--font-sans);
   font-size: clamp(15px, 0.9rem + 0.6vw, 16px);
   font-weight: 400;
-  line-height: 1.50;
+  line-height: 1.5;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-variant-ligatures: common-ligatures;
   -webkit-text-size-adjust: 100%;
   transition: background-color var(--trans-duration) var(--easing), color var(--trans-duration) var(--easing);
   min-height: 100vh;
@@ -142,7 +139,7 @@ button:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,0.
 button:active { transform: scale(.99); box-shadow: 0 3px 8px rgba(0,0,0,0.06); }
 button:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; background: var(--focus-bg); border-radius: 6px; }
 
-/* ========== Table container & default table ========== */
+/* ========== Table container & table ========== */
 .table-container{
   width:100%;
   overflow-x:auto;
@@ -226,16 +223,12 @@ table td, table th { border-color: rgba(0,0,0,0.06); }
   transition: color var(--trans-duration) var(--easing), background var(--trans-duration) var(--easing);
 }
 .th-with-sort, thead th[role="button"], .sort-btn{ cursor:pointer }
-
-/* focus-visible for sort buttons (accessibility) */
 .sort-btn:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
   background: var(--focus-bg);
   border-radius: 8px;
 }
-
-/* avoid strong blue tint on hover; keep subtle panel background */
 thead th[role="button"]:hover{ background: rgba(0,0,0,0.02); }
 
 /* ========== Header sticky area ========== */
@@ -319,11 +312,10 @@ thead th[role="button"]:hover{ background: rgba(0,0,0,0.02); }
   #mainContent{ padding:12px }
 }
 
-/* Table header area, collapse controls (unified and robust) */
+/* Table header area, collapse controls */
 .table-wrapper .table-header-wrapper{ gap:8px }
 
-/* Base grouping for table control buttons to ensure consistent appearance across markup variants
-   including <a>, <button>, <summary> (inside <details>), and custom elements. */
+/* Base grouping for table control buttons (covers <a>, <button>, <summary>, custom) */
 .table-controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
 
 .table-controls a,
@@ -349,7 +341,7 @@ thead th[role="button"]:hover{ background: rgba(0,0,0,0.02); }
   box-sizing:border-box;
 }
 
-/* Make <summary> behave like other controls when used as a collapse toggle */
+/* Make <summary> behave like other controls */
 .table-controls summary { list-style:none; cursor:pointer; padding:6px 12px; }
 .table-controls summary::-webkit-details-marker { display: none; }
 .table-controls summary::marker { display: none; }
@@ -366,7 +358,7 @@ thead th[role="button"]:hover{ background: rgba(0,0,0,0.02); }
   justify-content:center;
 }
 
-/* Export button styling: safe and consistent with other buttons */
+/* Export button styling */
 .table-controls .export-xlsx, .export-xlsx, .table-controls button.export-xlsx {
   margin-left: 8px;
   font-size: 0.85em;
@@ -402,6 +394,7 @@ thead th[role="button"]:hover{ background: rgba(0,0,0,0.02); }
   transition: transform var(--trans-duration) var(--easing);
 }
 
+/* Collapsed table body hidden */
 .table-wrapper.table-collapsed .table-container table tbody{ display:none }
 .table-wrapper.table-collapsed .copy-buttons button{ opacity:.65 }
 
@@ -414,12 +407,46 @@ thead th[role="button"]:hover{ background: rgba(0,0,0,0.02); }
   border-radius: 6px;
 }
 
-/* ========== CAPTION, COLUMN-TYPE, EXPORT STYLES (ADDED) ========== */
+/* ========== Export Markdown (per-table) integrated styling ========== */
+/* Provide consistent look for export-markdown controls. Use strong specificity so late script-injected early-hide can be overridden when desired. */
+.table-controls .export-markdown-btn,
+.table-controls .export-markdown,
+.table-controls .export-markdown-table,
+#exportMarkdownBtn,
+button[data-format="md"],
+a[data-format="md"],
+.export-markdown-btn,
+.export-markdown,
+.export-markdown-table {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: .45rem !important;
+  padding: 6px 10px !important;
+  font-size: 14px !important;
+  background: var(--button-bg) !important;
+  color: var(--button-text) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 6px !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  min-height: 34px !important;
+}
+.table-controls .export-markdown-btn:hover,
+.export-markdown-btn:hover { background: var(--panel) !important; transform: translateY(-1px); }
+.table-controls .export-markdown-btn.icon-only,
+.export-markdown-btn.icon-only { padding: 6px !important; width: 36px !important; height: 36px !important; font-size: 0 !important; }
 
-/* Caption fallback styling - provides CSS fallback and print-safety */
+/* Provide an attribute-based opt-out to forcibly hide markdown exports if needed */
+html[data-tv-hide-md="1"] .export-markdown-btn,
+html[data-tv-hide-md="1"] .export-markdown,
+html[data-tv-hide-md="1"] .export-markdown-table {
+  display: none !important;
+}
+
+/* ========== CAPTION, COLUMN-TYPE, EXPORT STYLES ========== */
 .table-caption {
-  margin-top: 2mm;       /* inline already sets this; keep a CSS fallback */
-  margin-left: 3mm;      /* shift captions right */
+  margin-top: 2mm;
+  margin-left: 3mm;
   font-weight: 600;
   font-size: 0.95em;
   color: var(--text);
@@ -428,7 +455,6 @@ thead th[role="button"]:hover{ background: rgba(0,0,0,0.02); }
 }
 .table-caption strong { font-weight: inherit; }
 
-/* Column-type styling: renderers should emit data-col-type or class names */
 td[data-col-type="numeric"], th[data-col-type="numeric"],
 td.col-numeric, th.col-numeric {
   text-align: right;
@@ -443,15 +469,6 @@ td.col-code, th.col-code {
 td[data-col-type="date"], th[data-col-type="date"],
 td.col-date, th.col-date {
   text-align: center;
-}
-
-/* Collapsible / toggle improvements (small polish) */
-.table-wrapper.table-collapsed .toggle-table-btn {
-  transform: rotate(180deg);
-  transition: transform var(--trans-duration) var(--easing);
-}
-.table-wrapper .toggle-table-btn {
-  transition: transform var(--trans-duration) var(--easing);
 }
 
 /* Reduced motion: gate heavy shadows and transforms */
@@ -509,7 +526,7 @@ pre { margin: 1em 0; padding: 0; background: transparent; }
 [data-theme="dark"] td > ul > li::before,
 [data-theme="dark"] td ol > li::before { color: var(--text); }
 
-/* ========== Accessibility focus enhancements (consolidated) ========== */
+/* ========== Accessibility focus enhancements ========== */
 :focus-visible, a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
@@ -543,9 +560,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     min-width:36px;
   }
 
-  /* Hide page title on narrow screens to increase visible table area
-     Cover multiple markup variants and plain headings.
-     Kept late in file to override external frameworks. */
+  /* Hide page title on narrow screens to increase visible table area */
   #tv-header h1,
   #tv-header > div:first-child h1,
   #tv-header #pageTitle,
@@ -565,7 +580,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   /* Force collapse toggle to be icon-only and match other icon button sizes */
   .table-controls .toggle-table-btn {
     padding: 4px !important;
-    font-size: 0 !important;            /* hide direct inline text nodes visually */
+    font-size: 0 !important;
     min-width: 32px !important;
     min-height: 32px !important;
     width: 36px !important;
@@ -646,7 +661,6 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   .copy-button-output, .copy-buttons, #tocBar, #tv-header { display: none !important; }
   table { page-break-inside: avoid; break-inside: avoid; }
 
-  /* make captions visible and safe for printing */
   .table-caption {
     display: block !important;
     margin-left: 0 !important;
@@ -657,14 +671,11 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     color: #000 !important;
   }
 
-  /* stronger table borders and white backgrounds for print clarity */
   th, td { border: 1px solid #999 !important; background: #fff !important; color: #000 !important; }
   pre, code { white-space: pre-wrap !important; word-break: break-word !important; }
 }
 
-/* ========== ChatGPT-like typography enhancements ========== */
-
-/* measure & content container */
+/* ========== Typography enhancements ========== */
 .content, .chat, .markdown, #mainContent, article {
   max-width: min(var(--measure), 88vw);
   margin-left: auto;
@@ -673,8 +684,6 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   -webkit-hyphens: auto;
   -ms-hyphens: auto;
 }
-
-/* Markdown headings scale + scroll anchor safety */
 .markdown h1, h1 { font-size: 1.40rem; margin: 0.75em 0 0.35em; font-weight:700; letter-spacing:-0.01em; line-height:1.25; scroll-margin-top: calc(var(--tv-header-min-height,48px) + 8px); }
 .markdown h2, h2 { font-size: 1.15rem; margin: 0.65em 0 0.3em; font-weight:700; line-height:1.28; scroll-margin-top: calc(var(--tv-header-min-height,48px) + 8px); }
 .markdown h3, h3 { font-size: 1.03rem; margin: 0.55em 0 0.25em; font-weight:600; line-height:1.28; scroll-margin-top: calc(var(--tv-header-min-height,48px) + 8px); }
@@ -730,23 +739,14 @@ kbd {
   border-color: rgba(255,255,255,0.06);
 }
 
-/* superscript / subscript */
-sup, sub { font-size: .75em; line-height: 0; }
-sup { vertical-align: super; }
-sub { vertical-align: sub; }
-
 /* small / footnotes */
 .small, .footnote { font-size: .85em; color: var(--muted); }
 
-/* links — stronger affordance for content */
 a { color: var(--accent); text-decoration: none; transition: color var(--trans-duration) var(--easing), background var(--trans-duration) var(--easing); }
 .markdown a, .content a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
 .markdown a:hover, .content a:hover { text-decoration: underline; }
 
-/* === Header-link neutralization ===
-Prevent any underline/outline/box-shadow/background or native tap highlight
-for anchor elements inside table headers. This is scoped and explicit.
-*/
+/* === Header-link neutralization for table headers === */
 thead th a, thead th a:link, thead th a:visited,
 thead th a:hover, thead th a:focus, thead th a:active,
 th a, th a:link, th a:visited, th a:hover, th a:focus, th a:active {
@@ -757,18 +757,8 @@ th a, th a:link, th a:visited, th a:hover, th a:focus, th a:active {
   background: transparent !important;
   -webkit-tap-highlight-color: transparent !important;
 }
-
-/* Prevent header cell hover background change that may look like a line */
 thead th:hover, th:hover { background: var(--panel) !important; }
-
-/* Keep header anchor color readable without hover tint */
 thead th a, th a { color: inherit !important; }
-
-/* Focus affordance preserved for non-header anchors and other controls */
-.markdown a:focus, a:focus {
-  outline: 3px solid var(--focus-ring);
-  border-radius: 6px;
-}
 
 /* selection */
 ::selection { background: rgba(37,99,235,0.25); color: var(--text); }
@@ -799,12 +789,10 @@ thead th a, th a { color: inherit !important; }
 }
 .math-inline { display:inline-block; vertical-align: -0.15em; }
 
-/* ========== Final guard rules (consolidated) ========== */
+/* ========== Final guard rules ========== */
 a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
 
-/* End of file */
-
-/* === Additional minimal override to tighten topic heading spacing (safe, non-breaking) === */
+/* === Additional minimal override to tighten topic heading spacing === */
 .table-heading-bar {
   margin-top: 0.8em;
   margin-bottom: 0.4em;
@@ -824,9 +812,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 }
 
 /* ----------------- Final enforcement rules for mobile (strong overrides) ----------------- */
-/* These last rules guarantee icon-only behavior and title hide even if other frameworks inject styles. */
 @media (max-width:600px){
-  /* Collapse toggle must be compact and icon-only */
   .table-controls .toggle-table-btn,
   .table-controls .table-toggle-inline.toggle-table-btn,
   .table-controls .table-toggle-inline.toggle-table-btn.icon-only {
@@ -877,3 +863,5 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   /* Provide a small touch target fallback if the button is replaced by textless element */
   .table-controls .toggle-table-btn { touch-action: manipulation; -webkit-tap-highlight-color: transparent !important; }
 }
+
+/* End of file */

@@ -1,10 +1,10 @@
 {
-  "generated": 1759939663,
+  "generated": 1759981861,
   "assets_written": true,
   "files": {
     "assets-info.json": {
       "size": 630,
-      "mtime": 1759939662
+      "mtime": 1759981860
     },
     "extra.js": {
       "size": 44418,
@@ -12,15 +12,15 @@
     },
     "overrides.css": {
       "size": 5957,
-      "mtime": 1759939662
+      "mtime": 1759981860
     },
     "script.js": {
-      "size": 78055,
-      "mtime": 1759748863
+      "size": 82157,
+      "mtime": 1759981157
     },
     "style.css": {
-      "size": 31599,
-      "mtime": 1759925496
+      "size": 30879,
+      "mtime": 1759981624
     },
     "worker.js": {
       "size": 9009,

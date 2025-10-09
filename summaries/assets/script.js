@@ -464,7 +464,6 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
       ta.readOnly = false;
       ta.style.width = '100%';
       ta.style.height = '320px';
-      ta.style.resize = 'vertical';
 /* removed inline whiteSpace to respect stylesheet; previously set by script */;
       ta.style.fontFamily = 'monospace, monospace';
       ta.style.fontSize = '13px';
@@ -1380,7 +1379,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
           header.style.overflowX = header.style.overflowX || 'auto';
           header.style.webkitOverflowScrolling = header.style.webkitOverflowScrolling || 'touch';
           header.style.display = header.style.display || 'flex';
-/* removed inline flexWrap to respect stylesheet; previously set by script */;
+/* removed inline flexWrap to respect stylesheet; previously set by script */>;
           header.style.justifyContent = header.style.justifyContent || 'space-between';
           header.style.gap = header.style.gap || '8px';
           header.style.alignItems = header.style.alignItems || 'center';
@@ -1864,4 +1863,98 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
 
   window.__tv_trigger_topic_fallback = function(){ minimalTopicFallback(); };
 
+})();
+
+/* =========================
+   Mobile: per-table ribbon auto-hide (instant, mobile-only)
+   - toggles per-table controls
+   - auto-hides after any action button pressed (mobile)
+   - uses inline display style for instant hide to avoid layout jitter
+   ========================= */
+(function(){
+  'use strict';
+  const MOBILE_MAX = 600;
+
+  function isMobile() {
+    try {
+      if (window.matchMedia) return window.matchMedia(`(max-width: ${MOBILE_MAX}px)`).matches;
+      return window.innerWidth <= MOBILE_MAX;
+    } catch (e) { return window.innerWidth <= MOBILE_MAX; }
+  }
+
+  function collapseControlsForWrapper(wrapper) {
+    try {
+      const controls = wrapper.querySelector('.table-controls');
+      if (!controls) return;
+      if (!controls.dataset.tvPrevDisplay) controls.dataset.tvPrevDisplay = controls.style.display || '';
+      controls.style.display = 'none';
+      controls.setAttribute('aria-hidden', 'true');
+      controls.dataset.tvCollapsed = '1';
+    } catch (e) { /* silent */ }
+  }
+
+  function expandControlsForWrapper(wrapper) {
+    try {
+      const controls = wrapper.querySelector('.table-controls');
+      if (!controls) return;
+      const prev = controls.dataset.tvPrevDisplay || '';
+      controls.style.display = prev;
+      controls.removeAttribute('aria-hidden');
+      delete controls.dataset.tvCollapsed;
+    } catch (e) { /* silent */ }
+  }
+
+  function initPerTableRibbon() {
+    try {
+      // delegated: toggle button clicked -> mirror collapse/expand for the specific table (mobile only)
+      document.addEventListener('click', function (e) {
+        try {
+          const btn = e.target && e.target.closest && e.target.closest('.toggle-table-btn, .table-toggle-inline, .toggle-table, .table-toggle');
+          if (!btn) return;
+          const wrapper = btn.closest && btn.closest('.table-wrapper');
+          if (!wrapper) return;
+          if (!isMobile()) return;
+          // prefer current wrapper.classList state (target handlers run first)
+          const isCollapsed = wrapper.classList.contains('table-collapsed');
+          if (isCollapsed) collapseControlsForWrapper(wrapper);
+          else expandControlsForWrapper(wrapper);
+        } catch (err) { /* silent */ }
+      }, { passive: true });
+
+      // delegated: any action inside .table-controls (except the toggle) -> auto-hide on mobile
+      document.addEventListener('click', function (e) {
+        try {
+          const action = e.target && e.target.closest && e.target.closest('.table-controls button, .table-controls a, .table-controls summary, .table-controls [role="button"]');
+          if (!action) return;
+          // ignore toggle buttons
+          if (action.classList.contains('toggle-table-btn') || action.classList.contains('table-toggle-inline') || action.classList.contains('toggle-table') || action.classList.contains('table-toggle')) return;
+          const wrapper = action.closest && action.closest('.table-wrapper');
+          if (!wrapper) return;
+          if (!isMobile()) return;
+          // delay slightly to allow action handlers (copy/export) to run
+          setTimeout(function(){ collapseControlsForWrapper(wrapper); }, 80);
+        } catch (err) { /* silent */ }
+      }, { passive: true });
+
+      // On resize to desktop, ensure controls are visible again if previously hidden by mobile auto-hide
+      window.addEventListener('resize', function () {
+        try {
+          if (isMobile()) return;
+          document.querySelectorAll('.table-controls').forEach(controls => {
+            try {
+              if (controls && controls.dataset && controls.dataset.tvPrevDisplay !== undefined) {
+                const prev = controls.dataset.tvPrevDisplay || '';
+                controls.style.display = prev;
+                controls.removeAttribute('aria-hidden');
+                delete controls.dataset.tvCollapsed;
+              }
+            } catch (_) {}
+          });
+        } catch (_) {}
+      });
+    } catch (e) { /* silent */ }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initPerTableRibbon);
+  else initPerTableRibbon();
 })();
