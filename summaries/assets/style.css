@@ -877,3 +877,139 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   /* Provide a small touch target fallback if the button is replaced by textless element */
   .table-controls .toggle-table-btn { touch-action: manipulation; -webkit-tap-highlight-color: transparent !important; }
 }
+
+/* ----------------- END OF ORIGINAL FILE ----------------- */
+
+/* =========================================================
+   Minimal targeted overrides to fix:
+   1) "Copy All Tables Markdown" button positioning at top header
+   2) Make the header search input smaller on desktop
+   These are intentionally scoped and use conservative !important rules.
+   Do not change other rules. Only appended overrides below.
+   ========================================================= */
+
+/* Target a variety of likely classes and IDs used for the "Copy All Tables Markdown" control.
+   Force it back into the header flow and prevent absolute/offset positioning collisions. */
+#tv-header .copy-all,
+#tv-header .copy-all-btn,
+#tv-header button.copy-all,
+#tv-header .copy-all-markdown,
+#tv-header .copy-all-tables,
+#tv-header .copy-all-tables-markdown,
+#stickyMainHeader .copy-all,
+#stickyMainHeader .copy-all-btn,
+#stickyMainHeader button.copy-all,
+#stickyMainHeader .copy-all-markdown,
+#stickyMainHeader .copy-all-tables,
+#copyAllBtn,
+.copy-all-btn,
+.copy-all,
+.copy-all-markdown,
+.copy-all-tables,
+.copy-all-tables-markdown {
+  /* restore normal flow and alignment */
+  position: static !important;
+  top: auto !important;
+  right: auto !important;
+  left: auto !important;
+  margin: 0 8px !important;
+  order: 0 !important;
+  align-self: center !important;
+  z-index: 1002 !important; /* slightly above header but below overlays */
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+  /* prevent accidental transforms or rotations from other frameworks */
+  transform: none !important;
+}
+
+/* If the copy control is inside a .copy-buttons container that was floated,
+   ensure the container participates in header flex flow on horizontal headers. */
+#tv-header .copy-buttons,
+#stickyMainHeader .copy-buttons {
+  display: inline-flex !important;
+  gap: 8px !important;
+  align-items: center !important;
+  margin: 0 !important;
+}
+
+/* If any stray absolute positioning exists for copy ui inside header, neutralize it */
+#tv-header [style*="position: absolute"] .copy-all,
+#tv-header [style*="position:absolute"] .copy-all,
+#stickyMainHeader [style*="position: absolute"] .copy-all,
+#stickyMainHeader [style*="position:absolute"] .copy-all {
+  position: static !important;
+}
+
+/* Make sure the button is visually accessible and not clipped by overflow rules */
+#tv-header, #stickyMainHeader {
+  overflow: visible !important;
+}
+
+/* Reduce header search width on desktop and medium screens.
+   Keep mobile behavior unchanged (mobile already uses full width). */
+#tv-header input[type="search"],
+#tv-header input[type="text"],
+#stickyMainHeader input[type="search"],
+#stickyMainHeader input[type="text"] {
+  /* smaller default width on desktop */
+  flex: 0 1 160px !important;
+  min-width: 80px !important;
+  width: 160px !important;
+  max-width: 40% !important;
+  box-sizing: border-box !important;
+}
+
+/* Medium breakpoint tweak */
+@media (max-width:900px){
+  #tv-header input[type="search"],
+  #tv-header input[type="text"],
+  #stickyMainHeader input[type="search"],
+  #stickyMainHeader input[type="text"] {
+    width: 150px !important;
+    min-width: 90px !important;
+    flex: 0 1 150px !important;
+  }
+}
+
+/* Keep the small-screen full-width rules intact for touch devices */
+@media (max-width:600px){
+  /* preserve earlier mobile full-width rule but ensure height & padding remain consistent */
+  #tv-header input[type="search"], #tv-header input[type="text"], #stickyMainHeader input[type="search"], #stickyMainHeader input[type="text"] {
+    flex-basis: 100% !important;
+    width: 100% !important;
+    order: 1 !important;
+    margin-bottom: 6px !important;
+    height: 32px !important;
+    font-size: 12px !important;
+    padding: 4px 7px !important;
+  }
+
+  /* Ensure copy button remains icon-sized on mobile and doesn't overlap the search input */
+  #tv-header .copy-all,
+  #tv-header .copy-all-btn,
+  #stickyMainHeader .copy-all,
+  #stickyMainHeader .copy-all-btn,
+  .copy-all,
+  .copy-all-btn {
+    order: -1 !important;
+    margin-right: 6px !important;
+    padding: 4px !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    font-size: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+}
+
+/* Extra defensive rule: if frameworks inject transform/translate to move header controls,
+   make our copy button immune to that within header context. */
+#tv-header .copy-all,
+#stickyMainHeader .copy-all {
+  transform: none !important;
+}
+
+/* === End of targeted overrides === */
