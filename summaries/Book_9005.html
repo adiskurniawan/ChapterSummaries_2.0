@@ -5,18 +5,58 @@
 <title>Tables Viewer v2.1</title>
 <style>:root{--main-header-height:56px;} .table-wrapper{opacity:0;min-height:24px;transition:opacity .12s linear}</style>
 <link rel="stylesheet" href="assets/style.css?v=1759925496">
-<link rel="stylesheet" href="assets/overrides.css?v=1760088328">
+<link rel="stylesheet" href="assets/overrides.css?v=1760110357">
 </head><body>
 <div id="tables-viewer" role="region" aria-label="Tables viewer">
 <div id="stickyMainHeader">
-<div id="tv-header"><div><h1>Tables Viewer v2.1</h1></div><div style="display:flex;gap:8px;align-items:center;">
-<input id="searchBox" type="search" placeholder="Search" aria-label="Search tables" style="min-width:420px; width:44ch;"/>
+<div id="tv-header">
+<div><h1>Tables Viewer v2.1</h1></div>
+<div style="display:flex;gap:8px;align-items:center;">
+<input id="searchBox" class="tv-search" type="search" placeholder="Search" aria-label="Search tables" />
 <button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button>
 <button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button>
-<button id="copyAllPlainBtn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button>
-<button id="copyAllMdBtn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy All Tables (Markdown)"></button>
+<button id="copyAllPlainBtn" class="copy-btn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button>
+<button id="copyAllTablesBtn" class="copy-all-btn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy All Tables (Markdown)">Copy All Tables (Markdown)</button>
+<button id="copyAllMdBtn" style="display:none" aria-hidden="true"></button>
 <button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset All Tables">Reset All Tables</button>
 </div></div>
+<script>
+(function(){
+  function ensureDelegation(){
+    try {
+      var vis = document.getElementById('copyAllTablesBtn');
+      var alias = document.getElementById('copyAllMdBtn');
+      if(!vis || !alias) return;
+      // Delegate addEventListener/removeEventListener to visible button
+      alias.addEventListener = function(type, listener, options){
+        vis.addEventListener(type, listener, options);
+      };
+      alias.removeEventListener = function(type, listener, options){
+        vis.removeEventListener(type, listener, options);
+      };
+      // Delegate onclick assignments
+      Object.defineProperty(alias, 'onclick', {
+        set: function(fn){ vis.onclick = fn; },
+        get: function(){ return vis.onclick; },
+        configurable: true
+      });
+      // Delegate focus/blur
+      alias.focus = function(){ vis.focus(); };
+      alias.blur = function(){ vis.blur(); };
+      // If legacy code used direct addEventListener earlier than this script, listeners would already exist
+      // on alias element; attempt to re-dispatch those by cloning them to visible button is non-trivial.
+      // This approach covers the common case where legacy scripts query the alias and bind after DOM ready.
+    } catch(e) {
+      try{ console && console.warn && console.warn('alias delegation failed', e); }catch(_){} 
+    }
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', ensureDelegation);
+  } else {
+    ensureDelegation();
+  }
+})();
+</script>
 <noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
 <div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1">Table 1</a></li></ul></div></div>
 <div class="table-caption" id="Table1" data-table="Book_9005_01" style="margin-top:2mm;margin-left:3mm;"><strong>Chapter 1 — Deferred Tax Liabilities Table</strong></div>
