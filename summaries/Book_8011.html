@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Tables Viewer v2.1</title>
+<style>:root{--main-header-height:56px;} .table-wrapper{opacity:0;min-height:24px;transition:opacity .12s linear}</style>
+<link rel="stylesheet" href="assets/style.css?v=1759925496">
+<link rel="stylesheet" href="assets/overrides.css?v=1760263239">
+</head><body>
+<div id="tables-viewer" role="region" aria-label="Tables viewer">
+<div id="stickyMainHeader">
+<div id="tv-header">
+<div><h1>Tables Viewer v2.1</h1></div>
+<div style="display:flex;gap:8px;align-items:center;">
+<input id="searchBox" class="tv-search" type="search" placeholder="Search" aria-label="Search tables" />
+<button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button>
+<button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button>
+<button id="copyAllPlainBtn" class="copy-btn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button>
+<button id="copyAllTablesBtn" class="copy-all-btn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy All Tables (Markdown)">Copy All Tables (Markdown)</button>
+<button id="copyAllMdBtn" style="display:none" aria-hidden="true"></button>
+<button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset All Tables">Reset All Tables</button>
+</div></div>
+<script>
+(function(){
+  function ensureDelegation(){
+    try {
+      var vis = document.getElementById('copyAllTablesBtn');
+      var alias = document.getElementById('copyAllMdBtn');
+      if(!vis || !alias) return;
+      // Delegate addEventListener/removeEventListener to visible button
+      alias.addEventListener = function(type, listener, options){
+        vis.addEventListener(type, listener, options);
+      };
+      alias.removeEventListener = function(type, listener, options){
+        vis.removeEventListener(type, listener, options);
+      };
+      // Delegate onclick assignments
+      Object.defineProperty(alias, 'onclick', {
+        set: function(fn){ vis.onclick = fn; },
+        get: function(){ return vis.onclick; },
+        configurable: true
+      });
+      // Delegate focus/blur
+      alias.focus = function(){ vis.focus(); };
+      alias.blur = function(){ vis.blur(); };
+      // If legacy code used direct addEventListener earlier than this script, listeners would already exist
+      // on alias element; attempt to re-dispatch those by cloning them to visible button is non-trivial.
+      // This approach covers the common case where legacy scripts query the alias and bind after DOM ready.
+    } catch(e) {
+      try{ console && console.warn && console.warn('alias delegation failed', e); }catch(_){} 
+    }
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', ensureDelegation);
+  } else {
+    ensureDelegation();
+  }
+})();
+</script>
+<noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
+<div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1">Table 1</a></li>
+<li class="toc-item"><a class="toc-link" href="#Table2">Table 2</a></li>
+<li class="toc-item"><a class="toc-link" href="#Table3">Table 3</a></li></ul></div></div>
+<div class="table-caption" id="Table1" data-table="Book_8011_01" style="margin-top:2mm;margin-left:3mm;"><strong>Table 1</strong></div>
+<div class="table-wrapper" data-table-id="table-1"><div class="table-heading-bar" aria-label="Table heading"></div><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button type="button" class="copy-plain-btn" data-action="copy-plain" onclick="copyTablePlain(this)">Copy Plain Table</button><button type="button" class="copy-markdown-btn" data-action="copy-markdown" onclick="copyTableMarkdown(this)">Copy Markdown Table</button><button type="button" class="export-csv-btn" data-action="export-csv" onclick="exportTableCSV(this)">Export CSV</button><button type="button" class="export-json-btn" data-action="export-json" onclick="exportTableJSON(this)">Export JSON</button><button type="button" class="export-xlsx-btn" data-action="export-xlsx" onclick="exportTableXLSX(this)">Export XLSX</button><button type="button" class="export-pdf-btn" data-action="export-pdf" onclick="exportTablePDF(this)">Export PDF</button><button type="button" class="export-markdown-btn export-markdown-initial" data-action="export-markdown" onclick="exportTableMarkdown(this)" style="display:none" data-initial-hidden="1">Export Markdown</button></div><div style="display:flex; align-items:center;"><button type="button" class="toggle-table-btn" data-action="toggle-collapse" onclick="toggleTable(this)">Collapse Table</button></div></div><table class="tv-table" role="table"><thead><tr><th class="tv-col-left" role="button" aria-label="Sort by **Tables Viewer file**"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Tables Viewer file</strong></div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th><th class="tv-col" role="button" aria-label="Sort by Mapping / recommendation for PasteToTable"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Mapping / recommendation for PasteToTable</div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th></tr></thead><tbody><tr><td data-label="Tables Viewer file"> <strong>render/core_assets.py</strong>              </td><td data-label="Mapping / recommendation for PasteToTable"> Add. Centralize asset discovery, embedding, copy logic. Replace ad-hoc <code>_get_css_inline/_get_js_inline</code> in <code>core.py</code> with calls into this module. Improves caching, SRI, and asset copying for <code>embed_assets=True</code>. </td></tr><tr><td data-label="Tables Viewer file"> <strong>render/core_renderer.py</strong>            </td><td data-label="Mapping / recommendation for PasteToTable"> Optional. <code>core.py</code> currently orchestrates rendering. If you want clearer separation, extract orchestration to <code>core_renderer.py</code> and keep <code>core.py</code> as defensive shim. Not required now.                           </td></tr><tr><td data-label="Tables Viewer file"> <strong>render/core_io.py</strong>                  </td><td data-label="Mapping / recommendation for PasteToTable"> Add. Provide atomic write, tmp-dir, and path checks. Complement <code>render/io_utils.py</code> with OS-safe atomic file writes used by CLI and web exports.                                                                   </td></tr><tr><td data-label="Tables Viewer file"> <strong>render/core_table.py</strong>               </td><td data-label="Mapping / recommendation for PasteToTable"> Added. Keep. This is the canonical table renderer. Remove duplicate logic from <code>core.render_table_compat</code> once <code>core_table.render_table</code> is present and stable.                                                     </td></tr><tr><td data-label="Tables Viewer file"> <strong>render/core_fragments.py</strong>           </td><td data-label="Mapping / recommendation for PasteToTable"> Optional later. For concurrency and fragment streaming when rendering very large pages or virtualized fragments.                                                                                                    </td></tr><tr><td data-label="Tables Viewer file"> <strong>render/core_utils.py</strong>               </td><td data-label="Mapping / recommendation for PasteToTable"> Add. Move small helpers (sanitize wrappers, sri_attr, streaming helpers) from <code>core.py</code> into this module for reuse.                                                                                                 </td></tr><tr><td data-label="Tables Viewer file"> <strong>assets/worker.js, output_combined/</strong> </td><td data-label="Mapping / recommendation for PasteToTable"> Optional. Add <code>worker.js</code> and <code>output_combined/</code> when adding client-side virtualization, search indexing, or bundling outputs. <code>xlsx.full.min.js</code> only if Excel export needed.                                      </td></tr><tr><td data-label="Tables Viewer file"> <strong>Overall structure</strong>                  </td><td data-label="Mapping / recommendation for PasteToTable"> Keep <code>core_compat.py</code> as the re-export shim. Ensure all new modules maintain stable public signatures used by <code>html_renderer.py</code>, CLI, and server.                                                                  </td></tr></tbody></table></div><div class="row-count">Rows: 8</div></div><div class="table-caption" id="Table2" data-table="Book_8011_02" style="margin-top:2mm;margin-left:3mm;"><strong>Table 2</strong></div>
+<div class="table-wrapper" data-table-id="table-2"><div class="table-heading-bar" aria-label="Table heading"></div><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button type="button" class="copy-plain-btn" data-action="copy-plain" onclick="copyTablePlain(this)">Copy Plain Table</button><button type="button" class="copy-markdown-btn" data-action="copy-markdown" onclick="copyTableMarkdown(this)">Copy Markdown Table</button><button type="button" class="export-csv-btn" data-action="export-csv" onclick="exportTableCSV(this)">Export CSV</button><button type="button" class="export-json-btn" data-action="export-json" onclick="exportTableJSON(this)">Export JSON</button><button type="button" class="export-xlsx-btn" data-action="export-xlsx" onclick="exportTableXLSX(this)">Export XLSX</button><button type="button" class="export-pdf-btn" data-action="export-pdf" onclick="exportTablePDF(this)">Export PDF</button><button type="button" class="export-markdown-btn export-markdown-initial" data-action="export-markdown" onclick="exportTableMarkdown(this)" style="display:none" data-initial-hidden="1">Export Markdown</button></div><div style="display:flex; align-items:center;"><button type="button" class="toggle-table-btn" data-action="toggle-collapse" onclick="toggleTable(this)">Collapse Table</button></div></div><table class="tv-table" role="table"><thead><tr><th class="tv-col-left" role="button" aria-label="Sort by **Priority**"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Priority</strong></div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th><th class="tv-col" role="button" aria-label="Sort by Action"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Action</div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th></tr></thead><tbody><tr><td data-label="Priority">        <strong>1</strong> </td><td data-label="Action"> Create <code>render/core_assets.py</code> (high leverage for safe asset embedding and consistent behavior).          </td></tr><tr><td data-label="Priority">        <strong>2</strong> </td><td data-label="Action"> Keep <code>render/core_table.py</code> (already added). Harden tests and replace fallbacks in <code>core.py</code> to delegate. </td></tr><tr><td data-label="Priority">        <strong>3</strong> </td><td data-label="Action"> Add <code>render/core_io.py</code> for atomic writes and robust file operations.                                     </td></tr><tr><td data-label="Priority">        <strong>4</strong> </td><td data-label="Action"> Add <code>render/core_utils.py</code> for small reusable helpers and sanitization wrappers.                          </td></tr><tr><td data-label="Priority">        <strong>5</strong> </td><td data-label="Action"> Optional: <code>core_renderer.py</code> and <code>core_fragments.py</code> for clearer orchestration and streaming at scale.    </td></tr></tbody></table></div><div class="row-count">Rows: 5</div></div><div class="table-caption" id="Table3" data-table="Book_8011_03" style="margin-top:2mm;margin-left:3mm;"><strong>Table 3</strong></div>
+<div class="table-wrapper" data-table-id="table-3"><div class="table-heading-bar" aria-label="Table heading"></div><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button type="button" class="copy-plain-btn" data-action="copy-plain" onclick="copyTablePlain(this)">Copy Plain Table</button><button type="button" class="copy-markdown-btn" data-action="copy-markdown" onclick="copyTableMarkdown(this)">Copy Markdown Table</button><button type="button" class="export-csv-btn" data-action="export-csv" onclick="exportTableCSV(this)">Export CSV</button><button type="button" class="export-json-btn" data-action="export-json" onclick="exportTableJSON(this)">Export JSON</button><button type="button" class="export-xlsx-btn" data-action="export-xlsx" onclick="exportTableXLSX(this)">Export XLSX</button><button type="button" class="export-pdf-btn" data-action="export-pdf" onclick="exportTablePDF(this)">Export PDF</button><button type="button" class="export-markdown-btn export-markdown-initial" data-action="export-markdown" onclick="exportTableMarkdown(this)" style="display:none" data-initial-hidden="1">Export Markdown</button></div><div style="display:flex; align-items:center;"><button type="button" class="toggle-table-btn" data-action="toggle-collapse" onclick="toggleTable(this)">Collapse Table</button></div></div><table class="tv-table" role="table"><thead><tr><th class="tv-col-left" role="button" aria-label="Sort by **Risk / Compatibility**"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Risk / Compatibility</strong></div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th><th class="tv-col" role="button" aria-label="Sort by Notes"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Notes</div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th></tr></thead><tbody><tr><td data-label="Risk / Compatibility"> <strong>Breaking imports</strong>     </td><td data-label="Notes"> New modules must not change existing public function signatures. Use <code>core_compat.py</code> to preserve legacy API.                                                 </td></tr><tr><td data-label="Risk / Compatibility"> <strong>Duplication</strong>          </td><td data-label="Notes"> Before deleting fallback code in <code>core.py</code>, ensure <code>core_table.render_table</code> and <code>core_assets</code> fully cover needed behaviors and have tests.                   </td></tr><tr><td data-label="Risk / Compatibility"> <strong>Assets</strong>               </td><td data-label="Notes"> Adding <code>core_assets</code> lets you centralize worker.js, overrides.css, and large libs (SheetJS) behind explicit opt-in to avoid shipping big binaries by default. </td></tr></tbody></table></div><div class="row-count">Rows: 3</div></div><script src="assets/xlsx.full.min.js?v=1758605028" defer></script>
+<script src="assets/script.js?v=1759748863" defer></script>
+<script src="assets/worker.js?v=1758331710" defer></script>
+<script>
+(function(){
+  const template = "{table}_{date}";
+  const userVal = "";
+  const hrefPrefix = "assets";
+  function formatName(tableName) {
+    const date = (new Date()).toISOString().slice(0,10);
+    return template.replace('{table}', tableName).replace('{date}', date).replace('{user}', userVal);
+  }
+  const btn = document.getElementById('exportBtn');
+  if(btn) {
+    btn.addEventListener('click', async function() {
+      try {
+        const html = document.documentElement.outerHTML;
+        if(html.length > 2000000) { alert('Export refused: html too large'); return; }
+        if(window.Worker) {
+          const workerUrl = (function(){ try{ return hrefPrefix + '/worker.js'; }catch(e){ return null; } })();
+          if(workerUrl) {
+            try {
+              const worker = new Worker(workerUrl);
+              worker.postMessage({html: html, format: 'pdf'});
+              worker.onmessage = function(e) { console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+            } catch(err) { console.warn('Worker create failed', err); alert('Worker not available'); }
+          } else { alert('Worker not available'); }
+        } else { alert('Export worker not supported in this environment.'); }
+      } catch(err) { console.warn('Export failed', err); alert('Export worker not available. See console for details.'); }
+    });
+  }
+})();
+window.addEventListener('load', function(){ try{ document.querySelectorAll('.table-wrapper').forEach(function(e){ e.style.opacity='1'; }); }catch(e){} });
+</script>
+</div>
+</body>
+</html>
