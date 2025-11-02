@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Tables Viewer v2.1</title>
+<style>:root{--main-header-height:56px;} .table-wrapper{opacity:0;min-height:24px;transition:opacity .12s linear}</style>
+<link rel="stylesheet" href="assets/style.css?v=1759925496">
+<link rel="stylesheet" href="assets/overrides.css?v=1762082202">
+</head><body>
+<div id="tables-viewer" role="region" aria-label="Tables viewer">
+<div id="stickyMainHeader">
+<div id="tv-header">
+<div><h1>Tables Viewer v2.1</h1></div>
+<div style="display:flex;gap:8px;align-items:center;">
+<input id="searchBox" class="tv-search" type="search" placeholder="Search" aria-label="Search tables" />
+<button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button>
+<button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button>
+<button id="copyAllPlainBtn" class="copy-btn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button>
+<button id="copyAllTablesBtn" class="copy-all-btn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy All Tables (Markdown)">Copy All Tables (Markdown)</button>
+<button id="copyAllMdBtn" style="display:none" aria-hidden="true"></button>
+<button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset All Tables">Reset All Tables</button>
+</div></div>
+<script>
+(function(){
+  function ensureDelegation(){
+    try {
+      var vis = document.getElementById('copyAllTablesBtn');
+      var alias = document.getElementById('copyAllMdBtn');
+      if(!vis || !alias) return;
+      // Delegate addEventListener/removeEventListener to visible button
+      alias.addEventListener = function(type, listener, options){
+        vis.addEventListener(type, listener, options);
+      };
+      alias.removeEventListener = function(type, listener, options){
+        vis.removeEventListener(type, listener, options);
+      };
+      // Delegate onclick assignments
+      Object.defineProperty(alias, 'onclick', {
+        set: function(fn){ vis.onclick = fn; },
+        get: function(){ return vis.onclick; },
+        configurable: true
+      });
+      // Delegate focus/blur
+      alias.focus = function(){ vis.focus(); };
+      alias.blur = function(){ vis.blur(); };
+      // If legacy code used direct addEventListener earlier than this script, listeners would already exist
+      // on alias element; attempt to re-dispatch those by cloning them to visible button is non-trivial.
+      // This approach covers the common case where legacy scripts query the alias and bind after DOM ready.
+    } catch(e) {
+      try{ console && console.warn && console.warn('alias delegation failed', e); }catch(_){} 
+    }
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', ensureDelegation);
+  } else {
+    ensureDelegation();
+  }
+})();
+</script>
+<noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
+<div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1">Table 1</a></li></ul></div></div>
+<div class="table-caption" id="Table1" data-table="Docu_9994_01" style="margin-top:2mm;margin-left:3mm;"><strong>Table 1</strong></div>
+<div class="table-wrapper" data-table-id="table-1"><div class="table-heading-bar" aria-label="Table heading"></div><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button type="button" class="copy-plain-btn" data-action="copy-plain" onclick="copyTablePlain(this)">Copy Plain Table</button><button type="button" class="copy-markdown-btn" data-action="copy-markdown" onclick="copyTableMarkdown(this)">Copy Markdown Table</button><button type="button" class="export-csv-btn" data-action="export-csv" onclick="exportTableCSV(this)">Export CSV</button><button type="button" class="export-json-btn" data-action="export-json" onclick="exportTableJSON(this)">Export JSON</button><button type="button" class="export-xlsx-btn" data-action="export-xlsx" onclick="exportTableXLSX(this)">Export XLSX</button><button type="button" class="export-pdf-btn" data-action="export-pdf" onclick="exportTablePDF(this)">Export PDF</button><button type="button" class="export-markdown-btn export-markdown-initial" data-action="export-markdown" onclick="exportTableMarkdown(this)" style="display:none" data-initial-hidden="1">Export Markdown</button></div><div style="display:flex; align-items:center;"><button type="button" class="toggle-table-btn" data-action="toggle-collapse" onclick="toggleTable(this)">Collapse Table</button></div></div><table class="tv-table" role="table"><thead><tr><th class="tv-col-left" role="button" aria-label="Sort by **Summary**"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Summary</strong></div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th><th class="tv-col" role="button" aria-label="Sort by **Notes (with unclear content highlighted ⚠️)**"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Notes (with unclear content highlighted ⚠️)</strong></div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th></tr></thead><tbody><tr><td data-label="Summary"> <strong>1.0 BACKGROUND AND DEFINITIONS</strong>                                              </td><td data-label="Notes (with unclear content highlighted ⚠️)"> Clear.                                                                                                                                                                                                                                                                                                                                                    </td></tr><tr><td data-label="Summary"> <strong>2.0 PURPOSE</strong>                                                                 </td><td data-label="Notes (with unclear content highlighted ⚠️)"> Sentence is incomplete: <em>“An example of is a one-off …”</em> ⚠️ (“of” should probably be removed or clarified).                                                                                                                                                                                                                                               </td></tr><tr><td data-label="Summary"> <strong>3.0 RESPONSIBILITY</strong>                                                          </td><td data-label="Notes (with unclear content highlighted ⚠️)"> Clear.                                                                                                                                                                                                                                                                                                                                                    </td></tr><tr><td data-label="Summary"> <strong>4.0 PROCEDURE – 4.1 APPROVAL, PAYMENT AND RECORDING TRANSACTIONS (1st Unit)</strong> </td><td data-label="Notes (with unclear content highlighted ⚠️)"> #1–#4 all have <strong>“Due date: ???”</strong> ⚠️ → missing expected deadlines.<br><br>#3 Supporting docs: <em>“Completed details of the transaction including, but not limited to GL Extraction information”</em> — ⚠️ may need clearer definition of “GL Extraction information.”                                                                                          </td></tr><tr><td data-label="Summary"> <strong>4.0 PROCEDURE – For the 2nd Unit</strong>                                            </td><td data-label="Notes (with unclear content highlighted ⚠️)"> #1: Text seems cut: <em>“After receiving”</em> ⚠️ incomplete.<br>#1–#3 all have <strong>“Due date: ???”</strong> ⚠️ missing deadlines.<br>#2 Guidance says: <em>“(GL journals to be posed – Section 4.2)”</em> ⚠️ Typo in “posed” (probably “posted”).                                                                                                                               </td></tr><tr><td data-label="Summary"> <strong>4.0 PROCEDURE – For the 2nd Unit (continued)</strong>                                </td><td data-label="Notes (with unclear content highlighted ⚠️)"> #4: <em>“Ensuring the set of supporting document is sufficiently …”</em> ⚠️ sounds repeated (maybe boilerplate, needs clarification).<br>#4 also has <strong>“Due date: ???”</strong> ⚠️ missing deadline.<br>#5 is clear.                                                                                                                                                    </td></tr><tr><td data-label="Summary"> <strong>4.2 ACCOUNTING ENTRIES – Case study 1</strong>                                       </td><td data-label="Notes (with unclear content highlighted ⚠️)"> Some unclear elements:<br>- Journal 2: Currency conversions inconsistent (VND / USD / GBP lines don’t align well). ⚠️<br>- “Dr. Oxford Advance (AROX)” entry lists 230 twice ⚠️ — unclear whether typo or different currencies.<br>- Footnote [2]: <em>“Extra ex-change rates between IDR-VND will need to be set up.”</em> ⚠️ Ambiguous (no details provided). </td></tr><tr><td data-label="Summary"> <strong>4.2 ACCOUNTING ENTRIES – Case study 2</strong>                                       </td><td data-label="Notes (with unclear content highlighted ⚠️)"> Clear.                                                                                                                                                                                                                                                                                                                                                    </td></tr><tr><td data-label="Summary"> <strong>5. ANNEXURES AND FORMS</strong>                                                      </td><td data-label="Notes (with unclear content highlighted ⚠️)"> Placeholders: <em>“Document name Document name”</em> ⚠️ — actual annexures missing.                                                                                                                                                                                                                                                                              </td></tr><tr><td data-label="Summary"> <strong>6. Related Documents</strong>                                                        </td><td data-label="Notes (with unclear content highlighted ⚠️)"> Placeholders: <em>“Document name Document code”</em> ⚠️ — actual documents missing.                                                                                                                                                                                                                                                                              </td></tr><tr><td data-label="Summary"> <strong>7. Document History</strong>                                                         </td><td data-label="Notes (with unclear content highlighted ⚠️)"> Placeholders: <em>“Revision no Effective date Details of Amendment”</em> ⚠️ — table structure exists but no entries.                                                                                                                                                                                                                                             </td></tr></tbody></table></div><div class="row-count">Rows: 11</div></div><script src="assets/xlsx.full.min.js?v=1758605028" defer></script>
+<script src="assets/script.js?v=1759748863" defer></script>
+<script src="assets/worker.js?v=1758331710" defer></script>
+<script>
+(function(){
+  const template = "{table}_{date}";
+  const userVal = "";
+  const hrefPrefix = "assets";
+  function formatName(tableName) {
+    const date = (new Date()).toISOString().slice(0,10);
+    return template.replace('{table}', tableName).replace('{date}', date).replace('{user}', userVal);
+  }
+  const btn = document.getElementById('exportBtn');
+  if(btn) {
+    btn.addEventListener('click', async function() {
+      try {
+        const html = document.documentElement.outerHTML;
+        if(html.length > 2000000) { alert('Export refused: html too large'); return; }
+        if(window.Worker) {
+          const workerUrl = (function(){ try{ return hrefPrefix + '/worker.js'; }catch(e){ return null; } })();
+          if(workerUrl) {
+            try {
+              const worker = new Worker(workerUrl);
+              worker.postMessage({html: html, format: 'pdf'});
+              worker.onmessage = function(e) { console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+            } catch(err) { console.warn('Worker create failed', err); alert('Worker not available'); }
+          } else { alert('Worker not available'); }
+        } else { alert('Export worker not supported in this environment.'); }
+      } catch(err) { console.warn('Export failed', err); alert('Export worker not available. See console for details.'); }
+    });
+  }
+})();
+window.addEventListener('load', function(){ try{ document.querySelectorAll('.table-wrapper').forEach(function(e){ e.style.opacity='1'; }); }catch(e){} });
+</script>
+</div>
+</body>
+</html>
