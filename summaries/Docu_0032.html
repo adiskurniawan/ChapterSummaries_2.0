@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Tables Viewer v2.1</title>
+<style>:root{--main-header-height:56px;} .table-wrapper{opacity:0;min-height:24px;transition:opacity .12s linear}</style>
+<link rel="stylesheet" href="assets/style.css?v=1759925496">
+<link rel="stylesheet" href="assets/overrides.css?v=1762082192">
+</head><body>
+<div id="tables-viewer" role="region" aria-label="Tables viewer">
+<div id="stickyMainHeader">
+<div id="tv-header">
+<div><h1>Tables Viewer v2.1</h1></div>
+<div style="display:flex;gap:8px;align-items:center;">
+<input id="searchBox" class="tv-search" type="search" placeholder="Search" aria-label="Search tables" />
+<button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button>
+<button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button>
+<button id="copyAllPlainBtn" class="copy-btn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button>
+<button id="copyAllTablesBtn" class="copy-all-btn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy All Tables (Markdown)">Copy All Tables (Markdown)</button>
+<button id="copyAllMdBtn" style="display:none" aria-hidden="true"></button>
+<button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset All Tables">Reset All Tables</button>
+</div></div>
+<script>
+(function(){
+  function ensureDelegation(){
+    try {
+      var vis = document.getElementById('copyAllTablesBtn');
+      var alias = document.getElementById('copyAllMdBtn');
+      if(!vis || !alias) return;
+      // Delegate addEventListener/removeEventListener to visible button
+      alias.addEventListener = function(type, listener, options){
+        vis.addEventListener(type, listener, options);
+      };
+      alias.removeEventListener = function(type, listener, options){
+        vis.removeEventListener(type, listener, options);
+      };
+      // Delegate onclick assignments
+      Object.defineProperty(alias, 'onclick', {
+        set: function(fn){ vis.onclick = fn; },
+        get: function(){ return vis.onclick; },
+        configurable: true
+      });
+      // Delegate focus/blur
+      alias.focus = function(){ vis.focus(); };
+      alias.blur = function(){ vis.blur(); };
+      // If legacy code used direct addEventListener earlier than this script, listeners would already exist
+      // on alias element; attempt to re-dispatch those by cloning them to visible button is non-trivial.
+      // This approach covers the common case where legacy scripts query the alias and bind after DOM ready.
+    } catch(e) {
+      try{ console && console.warn && console.warn('alias delegation failed', e); }catch(_){} 
+    }
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', ensureDelegation);
+  } else {
+    ensureDelegation();
+  }
+})();
+</script>
+<noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
+<div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1">Table 1</a></li>
+<li class="toc-item"><a class="toc-link" href="#Table2">Table 2</a></li></ul></div></div>
+<div class="table-caption" id="Table1" data-table="Docu_0032_01" style="margin-top:2mm;margin-left:3mm;"><strong>Table 1</strong></div>
+<div class="table-wrapper" data-table-id="table-1"><div class="table-heading-bar" aria-label="Table heading"></div><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button type="button" class="copy-plain-btn" data-action="copy-plain" onclick="copyTablePlain(this)">Copy Plain Table</button><button type="button" class="copy-markdown-btn" data-action="copy-markdown" onclick="copyTableMarkdown(this)">Copy Markdown Table</button><button type="button" class="export-csv-btn" data-action="export-csv" onclick="exportTableCSV(this)">Export CSV</button><button type="button" class="export-json-btn" data-action="export-json" onclick="exportTableJSON(this)">Export JSON</button><button type="button" class="export-xlsx-btn" data-action="export-xlsx" onclick="exportTableXLSX(this)">Export XLSX</button><button type="button" class="export-pdf-btn" data-action="export-pdf" onclick="exportTablePDF(this)">Export PDF</button><button type="button" class="export-markdown-btn export-markdown-initial" data-action="export-markdown" onclick="exportTableMarkdown(this)" style="display:none" data-initial-hidden="1">Export Markdown</button></div><div style="display:flex; align-items:center;"><button type="button" class="toggle-table-btn" data-action="toggle-collapse" onclick="toggleTable(this)">Collapse Table</button></div></div><table class="tv-table" role="table"><thead><tr><th class="tv-col-left" role="button" aria-label="Sort by Step"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Step</div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th><th class="tv-col" role="button" aria-label="Sort by Target File"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Target File</div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th><th class="tv-col" role="button" aria-label="Sort by Purpose"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Purpose</div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th><th class="tv-col" role="button" aria-label="Sort by Notes"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Notes</div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th></tr></thead><tbody><tr><td data-label="Step">1</td><td data-label="Target File"> <code>templates/index.html</code> </td><td data-label="Purpose"> Add a visible <strong>“Save HTML”</strong> button in the toolbar or header.                               </td><td data-label="Notes"> Use minimal markup consistent with Table Viewer 2.1 typography.                 </td></tr><tr><td data-label="Step">2</td><td data-label="Target File"> <code>assets/script.js</code>     </td><td data-label="Purpose"> Capture click event → request rendered HTML from <code>/api/render</code> or current document.          </td><td data-label="Notes"> Implement <code>fetch(&#x27;/api/render&#x27;, { method: &#x27;POST&#x27;, body: ... })</code> if server-side. </td></tr><tr><td data-label="Step">3</td><td data-label="Target File"> <code>server.py</code>            </td><td data-label="Purpose"> Add <code>/api/save_html</code> endpoint. Saves final rendered HTML to <code>/saved_tables/&lt;filename&gt;.html</code>. </td><td data-label="Notes"> Atomic write via <code>utils.safe_write_html</code>.                                       </td></tr><tr><td data-label="Step">4</td><td data-label="Target File"> <code>utils.py</code>             </td><td data-label="Purpose"> Implement <code>safe_write_html(path, content)</code> using <code>tempfile</code> for atomic writes.               </td><td data-label="Notes"> Protects against partial save or concurrency issues.                            </td></tr><tr><td data-label="Step">5</td><td data-label="Target File"> <code>html_renderer.py</code>     </td><td data-label="Purpose"> Expose helper <code>render_html_from_text()</code> if not already.                                      </td><td data-label="Notes"> Allows backend save endpoint to reuse rendering logic.                          </td></tr><tr><td data-label="Step">6</td><td data-label="Target File"> <code>assets/script.js</code>     </td><td data-label="Purpose"> After successful save, show status: “HTML saved to saved_tables/…”.                          </td><td data-label="Notes"> Non-intrusive toast message.                                                    </td></tr></tbody></table></div><div class="row-count">Rows: 6</div></div><div class="table-caption" id="Table2" data-table="Docu_0032_02" style="margin-top:2mm;margin-left:3mm;"><strong>Table 2</strong></div>
+<div class="table-wrapper" data-table-id="table-2"><div class="table-heading-bar" aria-label="Table heading"></div><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button type="button" class="copy-plain-btn" data-action="copy-plain" onclick="copyTablePlain(this)">Copy Plain Table</button><button type="button" class="copy-markdown-btn" data-action="copy-markdown" onclick="copyTableMarkdown(this)">Copy Markdown Table</button><button type="button" class="export-csv-btn" data-action="export-csv" onclick="exportTableCSV(this)">Export CSV</button><button type="button" class="export-json-btn" data-action="export-json" onclick="exportTableJSON(this)">Export JSON</button><button type="button" class="export-xlsx-btn" data-action="export-xlsx" onclick="exportTableXLSX(this)">Export XLSX</button><button type="button" class="export-pdf-btn" data-action="export-pdf" onclick="exportTablePDF(this)">Export PDF</button><button type="button" class="export-markdown-btn export-markdown-initial" data-action="export-markdown" onclick="exportTableMarkdown(this)" style="display:none" data-initial-hidden="1">Export Markdown</button></div><div style="display:flex; align-items:center;"><button type="button" class="toggle-table-btn" data-action="toggle-collapse" onclick="toggleTable(this)">Collapse Table</button></div></div><table class="tv-table" role="table"><thead><tr><th class="tv-col-left" role="button" aria-label="Sort by Step"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Step</div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th><th class="tv-col" role="button" aria-label="Sort by Target File"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Target File</div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th><th class="tv-col" role="button" aria-label="Sort by Purpose"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Purpose</div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th><th class="tv-col" role="button" aria-label="Sort by Notes"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Notes</div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th></tr></thead><tbody><tr><td data-label="Step">1</td><td data-label="Target File"> <code>templates/index.html</code>    </td><td data-label="Purpose"> Add two buttons: <strong>“Save HTML”</strong> and <strong>“Reset Session”</strong> (or <strong>“New Conversion”</strong>). </td><td data-label="Notes"> Styled identically to existing toolbar elements.                                </td></tr><tr><td data-label="Step">2</td><td data-label="Target File"> <code>assets/script.js</code>        </td><td data-label="Purpose"> Maintain session mode: <code>accumulate = true/false</code>.                                   </td><td data-label="Notes"> If “Reset” clicked, send <code>/api/reset_session</code>.                                  </td></tr><tr><td data-label="Step">3</td><td data-label="Target File"> <code>server.py</code>               </td><td data-label="Purpose"> Implement two endpoints: <code>/api/save_html</code> and <code>/api/reset_session</code>.                 </td><td data-label="Notes"> Save writes current accumulated tables; reset clears in-memory or temp storage. </td></tr><tr><td data-label="Step">4</td><td data-label="Target File"> <code>server.py</code> or <code>utils.py</code> </td><td data-label="Purpose"> Keep internal list of rendered tables during a session.                             </td><td data-label="Notes"> On reset, clear the list; on accumulate, append new tables.                     </td></tr><tr><td data-label="Step">5</td><td data-label="Target File"> <code>html_renderer.py</code>        </td><td data-label="Purpose"> Modify <code>render_html_from_text()</code> to accept <code>accumulate=True/False</code>.                 </td><td data-label="Notes"> If accumulate, merge new output with previous; if false, overwrite.             </td></tr></tbody></table></div><div class="row-count">Rows: 5</div></div><script src="assets/xlsx.full.min.js?v=1758605028" defer></script>
+<script src="assets/script.js?v=1759748863" defer></script>
+<script src="assets/worker.js?v=1758331710" defer></script>
+<script>
+(function(){
+  const template = "{table}_{date}";
+  const userVal = "";
+  const hrefPrefix = "assets";
+  function formatName(tableName) {
+    const date = (new Date()).toISOString().slice(0,10);
+    return template.replace('{table}', tableName).replace('{date}', date).replace('{user}', userVal);
+  }
+  const btn = document.getElementById('exportBtn');
+  if(btn) {
+    btn.addEventListener('click', async function() {
+      try {
+        const html = document.documentElement.outerHTML;
+        if(html.length > 2000000) { alert('Export refused: html too large'); return; }
+        if(window.Worker) {
+          const workerUrl = (function(){ try{ return hrefPrefix + '/worker.js'; }catch(e){ return null; } })();
+          if(workerUrl) {
+            try {
+              const worker = new Worker(workerUrl);
+              worker.postMessage({html: html, format: 'pdf'});
+              worker.onmessage = function(e) { console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+            } catch(err) { console.warn('Worker create failed', err); alert('Worker not available'); }
+          } else { alert('Worker not available'); }
+        } else { alert('Export worker not supported in this environment.'); }
+      } catch(err) { console.warn('Export failed', err); alert('Export worker not available. See console for details.'); }
+    });
+  }
+})();
+window.addEventListener('load', function(){ try{ document.querySelectorAll('.table-wrapper').forEach(function(e){ e.style.opacity='1'; }); }catch(e){} });
+</script>
+</div>
+</body>
+</html>
