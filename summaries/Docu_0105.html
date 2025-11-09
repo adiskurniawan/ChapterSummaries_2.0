@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Tables Viewer v2.1</title>
+<style>:root{--main-header-height:56px;} .table-wrapper{opacity:0;min-height:24px;transition:opacity .12s linear}</style>
+<link rel="stylesheet" href="assets/style.css?v=1759925496">
+<link rel="stylesheet" href="assets/overrides.css?v=1762688791">
+</head><body>
+<div id="tables-viewer" role="region" aria-label="Tables viewer">
+<div id="stickyMainHeader">
+<div id="tv-header">
+<div><h1>Tables Viewer v2.1</h1></div>
+<div style="display:flex;gap:8px;align-items:center;">
+<input id="searchBox" class="tv-search" type="search" placeholder="Search" aria-label="Search tables" />
+<button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button>
+<button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button>
+<button id="copyAllPlainBtn" class="copy-btn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button>
+<button id="copyAllTablesBtn" class="copy-all-btn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy All Tables (Markdown)">Copy All Tables (Markdown)</button>
+<button id="copyAllMdBtn" style="display:none" aria-hidden="true"></button>
+<button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset All Tables">Reset All Tables</button>
+</div></div>
+<script>
+(function(){
+  function ensureDelegation(){
+    try {
+      var vis = document.getElementById('copyAllTablesBtn');
+      var alias = document.getElementById('copyAllMdBtn');
+      if(!vis || !alias) return;
+      // Delegate addEventListener/removeEventListener to visible button
+      alias.addEventListener = function(type, listener, options){
+        vis.addEventListener(type, listener, options);
+      };
+      alias.removeEventListener = function(type, listener, options){
+        vis.removeEventListener(type, listener, options);
+      };
+      // Delegate onclick assignments
+      Object.defineProperty(alias, 'onclick', {
+        set: function(fn){ vis.onclick = fn; },
+        get: function(){ return vis.onclick; },
+        configurable: true
+      });
+      // Delegate focus/blur
+      alias.focus = function(){ vis.focus(); };
+      alias.blur = function(){ vis.blur(); };
+      // If legacy code used direct addEventListener earlier than this script, listeners would already exist
+      // on alias element; attempt to re-dispatch those by cloning them to visible button is non-trivial.
+      // This approach covers the common case where legacy scripts query the alias and bind after DOM ready.
+    } catch(e) {
+      try{ console && console.warn && console.warn('alias delegation failed', e); }catch(_){} 
+    }
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', ensureDelegation);
+  } else {
+    ensureDelegation();
+  }
+})();
+</script>
+<noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
+<div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1">Table 1</a></li>
+<li class="toc-item"><a class="toc-link" href="#Table2">Table 2</a></li></ul></div></div>
+<div class="table-caption" id="Table1" data-table="Docu_0105_01" style="margin-top:2mm;margin-left:3mm;"><strong>Table 1</strong></div>
+<div class="table-wrapper" data-table-id="table-1"><div class="table-heading-bar" aria-label="Table heading"></div><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button type="button" class="copy-plain-btn" data-action="copy-plain" onclick="copyTablePlain(this)">Copy Plain Table</button><button type="button" class="copy-markdown-btn" data-action="copy-markdown" onclick="copyTableMarkdown(this)">Copy Markdown Table</button><button type="button" class="export-csv-btn" data-action="export-csv" onclick="exportTableCSV(this)">Export CSV</button><button type="button" class="export-json-btn" data-action="export-json" onclick="exportTableJSON(this)">Export JSON</button><button type="button" class="export-xlsx-btn" data-action="export-xlsx" onclick="exportTableXLSX(this)">Export XLSX</button><button type="button" class="export-pdf-btn" data-action="export-pdf" onclick="exportTablePDF(this)">Export PDF</button><button type="button" class="export-markdown-btn export-markdown-initial" data-action="export-markdown" onclick="exportTableMarkdown(this)" style="display:none" data-initial-hidden="1">Export Markdown</button></div><div style="display:flex; align-items:center;"><button type="button" class="toggle-table-btn" data-action="toggle-collapse" onclick="toggleTable(this)">Collapse Table</button></div></div><table class="tv-table" role="table"><thead><tr><th class="tv-col-left" role="button" aria-label="Sort by **Comprehensive Caption Injection Integration Playbook for PasteToTable**"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>Comprehensive Caption Injection Integration Playbook for PasteToTable</strong></div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th></tr></thead><tbody><tr><td data-label="Comprehensive Caption Injection Integration Playbook for PasteToTable"> <strong>1. Preparation & Setup</strong> <br> - <strong>Baseline Sync</strong>: Pull the latest repository revision and confirm clean working tree. <br> - <strong>Backup</strong>: Create <code>.bak</code> copies of all affected render files (<code>core_utils.py</code>, <code>core_table.py</code>, etc.). <br> - <strong>Dependency Verification</strong>: Ensure sanitizer, markdown, and renderer modules import cleanly with no circular dependencies. <br> - <strong>Accessibility Audit</strong>: Identify ARIA and caption insertion points within tables, figures, and export layers. <br> - <strong>Testing Baseline</strong>: Run current test suite to confirm zero regressions before modification. </td></tr><tr><td data-label="Comprehensive Caption Injection Integration Playbook for PasteToTable"> <strong>2. Design & Planning</strong> <br> - <strong>Caption Data Model</strong>: Define lightweight caption object (<code>caption_text</code>, <code>caption_html</code>, <code>is_safe_html</code>). <br> - <strong>Security Policy</strong>: Default to sanitized plain text; allow safe inline HTML only when <code>allow_caption_html=True</code>. <br> - <strong>Compatibility</strong>: Ensure backward compatibility for legacy data lacking caption metadata. <br> - <strong>Accessibility Goal</strong>: Every caption rendered as <code>&lt;figcaption role=&quot;note&quot; aria-describedby=&quot;...&quot;&gt;</code>. <br> - <strong>Testing Scope</strong>: Plan for unit, integration, accessibility, and fuzz tests. </td></tr><tr><td data-label="Comprehensive Caption Injection Integration Playbook for PasteToTable"> <strong>3. Implementation Roadmap</strong> <br> 1. <strong>render/core_utils.py</strong> → Add <code>sanitize_caption_html()</code> helper; define global flag <code>allow_caption_html</code>. <br> 2. <strong>render/sanitize.py</strong> → Extend sanitizer allowlist with safe inline tags (<code>a[href]</code>, <code>em</code>, <code>strong</code>, <code>code</code>, <code>br</code>, <code>small</code>). <br> 3. <strong>render/markdown.py</strong> → Implement <code>render_caption_markdown()</code> for Markdown → HTML conversion. <br> 4. <strong>render/core_table.py</strong> → Add <code>attach_caption(entity, caption_obj)</code> and persist caption metadata. <br> 5. <strong>render/core_renderer.py</strong> → Inject <code>&lt;figcaption&gt;</code> below tables/figures with proper ARIA linkage; sanitize caption HTML or fallback to escaped text. <br> 6. <strong>html_renderer.py</strong> → Integrate caption markup in exports while maintaining backward compatibility. <br> 7. <strong>server.py</strong> → Add optional route/handler for caption injection in server-side rendering. <br> 8. <strong>utils.py</strong> → Add caption text normalizer and unsafe character stripping. <br> 9. <strong>render/convert.py</strong> → Include <code>caption_text</code> in export formats (plain text default, HTML if opted-in). <br> 10. <strong>assets/style.css</strong> → Append <code>.figure-caption</code> style rules for consistent layout. <br> 11. <strong>tests/test_caption_pipeline.py</strong> → Add pipeline tests covering sanitization, markdown conversion, and renderer integration. <br> 12. <strong>tests/test_security_caption.py</strong> → Create fuzz, XSS, and injection resilience tests for captions. <br> 13. <strong>.github/workflows/ci.yml</strong> → Extend CI to include caption test suites and coverage checks. </td></tr><tr><td data-label="Comprehensive Caption Injection Integration Playbook for PasteToTable"> <strong>4. Risk Assessment & Mitigation</strong> <br> - <strong>Security</strong>: Ensure sanitizer strips all scriptable attributes. <br> - <strong>Backward Compatibility</strong>: Preserve rendering for older entries without caption data. <br> - <strong>Performance</strong>: Benchmark to confirm <5% regression after caption rendering. <br> - <strong>Accessibility</strong>: Verify <code>aria-describedby</code> linkage works with screen readers. <br> - <strong>Failure Isolation</strong>: Each module change is atomic and individually reversible. <br> - <strong>Testing Fallbacks</strong>: Provide plain text fallback for malformed or unsafe HTML captions. </td></tr><tr><td data-label="Comprehensive Caption Injection Integration Playbook for PasteToTable"> <strong>5. Testing & Verification</strong> <br> - <strong>Unit Tests</strong>: Validate sanitizer, Markdown conversion, and safe HTML escaping. <br> - <strong>Integration Tests</strong>: Render end-to-end table/figure with caption injection and verify structure. <br> - <strong>Security Tests</strong>: Fuzz HTML captions and confirm no XSS vulnerabilities. <br> - <strong>Accessibility Tests</strong>: Screen reader compatibility and ARIA attribute validation. <br> - <strong>Performance Tests</strong>: Measure rendering latency pre- and post-injection. <br> - <strong>Rollback Verification</strong>: Confirm each file can revert independently via backup restoration. </td></tr><tr><td data-label="Comprehensive Caption Injection Integration Playbook for PasteToTable"> <strong>6. Deployment & CI Integration</strong> <br> - <strong>Branch Workflow</strong>: Merge caption features in isolated branches (<code>feature/captions</code>). <br> - <strong>CI Updates</strong>: Extend GitHub Actions test matrix for caption-related tests. <br> - <strong>Smoke Tests</strong>: Verify render output, accessibility, and sanitizer integrity in staging. <br> - <strong>Performance Logging</strong>: Add lightweight timing hooks to detect slowdowns. <br> - <strong>Rollback Readiness</strong>: Maintain per-file restoration and changelog entries. </td></tr><tr><td data-label="Comprehensive Caption Injection Integration Playbook for PasteToTable"> <strong>7. Maintenance & Future Enhancements</strong> <br> - <strong>Modular Expansion</strong>: Extend caption logic to images or embedded visual elements. <br> - <strong>Dynamic Captions</strong>: Explore live editing and server re-rendering. <br> - <strong>Localization</strong>: Add caption translation hooks for multi-language deployments. <br> - <strong>Monitoring</strong>: Add caption rendering metrics to error logs. <br> - <strong>Documentation</strong>: Update developer guides and changelogs for all new functions. <br> - <strong>Continuous Security Review</strong>: Periodically test sanitizer rules for emerging HTML edge cases. </td></tr><tr><td data-label="Comprehensive Caption Injection Integration Playbook for PasteToTable"> <strong>8. Confidence & Evaluation</strong> <br> <strong>High confidence.</strong> The plan is internally consistent, technically feasible, and follows safe progressive integration. Each file change is atomic, testable, and reversible. API contracts remain stable, sanitization is explicit, and the accessibility and export requirements are covered. <br><br> <strong>Risk is low</strong> if tests and CI integration are implemented as written. The only medium-risk areas are: <br> - Sanitizer correctness (must be fuzz-tested). <br> - Performance regressions on very large tables (monitor render timing). <br> - Backward compatibility for old data missing caption fields (ensure null-safe defaults). <br><br> Otherwise, the roadmap is sound for production integration. </td></tr></tbody></table></div><div class="row-count">Rows: 8</div></div><div class="table-caption" id="Table2" data-table="Docu_0105_02" style="margin-top:2mm;margin-left:3mm;"><strong>Table 2</strong></div>
+<div class="table-wrapper" data-table-id="table-2"><div class="table-heading-bar" aria-label="Table heading"></div><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button type="button" class="copy-plain-btn" data-action="copy-plain" onclick="copyTablePlain(this)">Copy Plain Table</button><button type="button" class="copy-markdown-btn" data-action="copy-markdown" onclick="copyTableMarkdown(this)">Copy Markdown Table</button><button type="button" class="export-csv-btn" data-action="export-csv" onclick="exportTableCSV(this)">Export CSV</button><button type="button" class="export-json-btn" data-action="export-json" onclick="exportTableJSON(this)">Export JSON</button><button type="button" class="export-xlsx-btn" data-action="export-xlsx" onclick="exportTableXLSX(this)">Export XLSX</button><button type="button" class="export-pdf-btn" data-action="export-pdf" onclick="exportTablePDF(this)">Export PDF</button><button type="button" class="export-markdown-btn export-markdown-initial" data-action="export-markdown" onclick="exportTableMarkdown(this)" style="display:none" data-initial-hidden="1">Export Markdown</button></div><div style="display:flex; align-items:center;"><button type="button" class="toggle-table-btn" data-action="toggle-collapse" onclick="toggleTable(this)">Collapse Table</button></div></div><table class="tv-table" role="table"><thead><tr><th class="tv-col-left" role="button" aria-label="Sort by **3. Implementation Roadmap**"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>3. Implementation Roadmap</strong></div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th></tr></thead><tbody><tr><td data-label="3. Implementation Roadmap"> <strong>File-Level Execution Plan</strong> <br> <strong>(Each edit isolated, reversible, and tested)</strong> <br><br> <strong>1. <code>render/core_utils.py</code></strong> <br> - Add <code>sanitize_caption_html()</code> helper to centralize caption sanitization. <br> - Introduce global flag <code>allow_caption_html</code> (default <code>False</code>). <br><br> <strong>2. <code>render/sanitize.py</code></strong> <br> - Extend sanitizer allowlist with inline-safe tags: <code>a[href]</code>, <code>em</code>, <code>strong</code>, <code>code</code>, <code>br</code>, <code>small</code>. <br> - Verify no unsafe attributes remain. <br><br> <strong>3. <code>render/markdown.py</code></strong> <br> - Implement <code>render_caption_markdown()</code> for Markdown → HTML conversion. <br> - Pipe result through caption sanitizer. <br><br> <strong>4. <code>render/core_table.py</code></strong> <br> - Add <code>attach_caption(entity, caption_obj)</code> and maintain caption metadata throughout render calls. <br> - Guarantee backward compatibility for tables without caption fields. <br><br> <strong>5. <code>render/core_renderer.py</code></strong> <br> - Inject <code>&lt;figcaption role=&quot;note&quot;&gt;</code> below each <code>&lt;figure&gt;</code> or table container. <br> - Use sanitized HTML if allowed, otherwise escaped plain text. <br><br> <strong>6. <code>html_renderer.py</code></strong> <br> - Ensure exported HTML retains caption markup while preserving existing structure. <br> - Validate plain-text exports remain unaffected. <br><br> <strong>7. <code>server.py</code></strong> <br> - Add optional route or handler for server-side caption injection. <br> - Maintain request validation and content-length safeguards. <br><br> <strong>8. <code>utils.py</code></strong> <br> - Introduce caption normalization utility to strip unsafe characters and trim whitespace. <br> - Reuse across all renderers to ensure consistency. <br><br> <strong>9. <code>render/convert.py</code></strong> <br> - Include <code>caption_text</code> in exportable formats (CSV, JSON, XLSX). <br> - Default to plain text; include HTML only if explicitly enabled via export flag. <br><br> <strong>10. <code>assets/style.css</code></strong> <br> - Append <code>.figure-caption</code> style class to control spacing, font size, and alignment. <br> - Avoid overriding existing layout rules. <br><br> <strong>11. <code>tests/test_caption_pipeline.py</code></strong> <br> - Develop end-to-end pipeline tests for sanitizer, markdown conversion, and rendered output validation. <br> - Include table/figure HTML snapshot comparisons. <br><br> <strong>12. <code>tests/test_security_caption.py</code></strong> <br> - Implement fuzz and injection tests targeting caption sanitizer. <br> - Validate protection against XSS, malformed HTML, and nested tag exploits. <br><br> <strong>13. <code>.github/workflows/ci.yml</code></strong> <br> - Extend GitHub Actions matrix to include caption-related tests. <br> - Add coverage thresholds and static analysis for render modules. </td></tr></tbody></table></div><div class="row-count">Rows: 1</div></div><script src="assets/xlsx.full.min.js?v=1758605028" defer></script>
+<script src="assets/script.js?v=1759748863" defer></script>
+<script src="assets/worker.js?v=1758331710" defer></script>
+<script>
+(function(){
+  const template = "{table}_{date}";
+  const userVal = "";
+  const hrefPrefix = "assets";
+  function formatName(tableName) {
+    const date = (new Date()).toISOString().slice(0,10);
+    return template.replace('{table}', tableName).replace('{date}', date).replace('{user}', userVal);
+  }
+  const btn = document.getElementById('exportBtn');
+  if(btn) {
+    btn.addEventListener('click', async function() {
+      try {
+        const html = document.documentElement.outerHTML;
+        if(html.length > 2000000) { alert('Export refused: html too large'); return; }
+        if(window.Worker) {
+          const workerUrl = (function(){ try{ return hrefPrefix + '/worker.js'; }catch(e){ return null; } })();
+          if(workerUrl) {
+            try {
+              const worker = new Worker(workerUrl);
+              worker.postMessage({html: html, format: 'pdf'});
+              worker.onmessage = function(e) { console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+            } catch(err) { console.warn('Worker create failed', err); alert('Worker not available'); }
+          } else { alert('Worker not available'); }
+        } else { alert('Export worker not supported in this environment.'); }
+      } catch(err) { console.warn('Export failed', err); alert('Export worker not available. See console for details.'); }
+    });
+  }
+})();
+window.addEventListener('load', function(){ try{ document.querySelectorAll('.table-wrapper').forEach(function(e){ e.style.opacity='1'; }); }catch(e){} });
+</script>
+</div>
+</body>
+</html>
