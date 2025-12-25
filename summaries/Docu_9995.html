@@ -5,7 +5,7 @@
 <title>Tables Viewer v2.1</title>
 <style>:root{--main-header-height:56px;} .table-wrapper{opacity:0;min-height:24px;transition:opacity .12s linear}</style>
 <link rel="stylesheet" href="assets/style.css?v=1759925496">
-<link rel="stylesheet" href="assets/overrides.css?v=1765644817">
+<link rel="stylesheet" href="assets/overrides.css?v=1766663247">
 </head><body>
 <div id="tables-viewer" role="region" aria-label="Tables viewer">
 <div id="stickyMainHeader">
@@ -27,25 +27,19 @@
       var vis = document.getElementById('copyAllTablesBtn');
       var alias = document.getElementById('copyAllMdBtn');
       if(!vis || !alias) return;
-      // Delegate addEventListener/removeEventListener to visible button
       alias.addEventListener = function(type, listener, options){
         vis.addEventListener(type, listener, options);
       };
       alias.removeEventListener = function(type, listener, options){
         vis.removeEventListener(type, listener, options);
       };
-      // Delegate onclick assignments
       Object.defineProperty(alias, 'onclick', {
         set: function(fn){ vis.onclick = fn; },
         get: function(){ return vis.onclick; },
         configurable: true
       });
-      // Delegate focus/blur
       alias.focus = function(){ vis.focus(); };
       alias.blur = function(){ vis.blur(); };
-      // If legacy code used direct addEventListener earlier than this script, listeners would already exist
-      // on alias element; attempt to re-dispatch those by cloning them to visible button is non-trivial.
-      // This approach covers the common case where legacy scripts query the alias and bind after DOM ready.
     } catch(e) {
       try{ console && console.warn && console.warn('alias delegation failed', e); }catch(_){} 
     }
@@ -59,10 +53,9 @@
 </script>
 <noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
 <div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1">Table 1</a></li></ul></div></div>
-<div class="table-caption" id="Table1" data-table="Docu_9995_01" style="margin-top:2mm;margin-left:3mm;"><strong>Table 1</strong></div>
 <div class="table-wrapper" data-table-id="table-1"><div class="table-heading-bar" aria-label="Table heading"></div><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button type="button" class="copy-plain-btn" data-action="copy-plain" onclick="copyTablePlain(this)">Copy Plain Table</button><button type="button" class="copy-markdown-btn" data-action="copy-markdown" onclick="copyTableMarkdown(this)">Copy Markdown Table</button><button type="button" class="export-csv-btn" data-action="export-csv" onclick="exportTableCSV(this)">Export CSV</button><button type="button" class="export-json-btn" data-action="export-json" onclick="exportTableJSON(this)">Export JSON</button><button type="button" class="export-xlsx-btn" data-action="export-xlsx" onclick="exportTableXLSX(this)">Export XLSX</button><button type="button" class="export-pdf-btn" data-action="export-pdf" onclick="exportTablePDF(this)">Export PDF</button><button type="button" class="export-markdown-btn export-markdown-initial" data-action="export-markdown" onclick="exportTableMarkdown(this)" style="display:none" data-initial-hidden="1">Export Markdown</button></div><div style="display:flex; align-items:center;"><button type="button" class="toggle-table-btn" data-action="toggle-collapse" onclick="toggleTable(this)">Collapse Table</button></div></div><table class="tv-table" role="table"><thead><tr><th class="tv-col-left" role="button" aria-label="Sort by Cluster Focus"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Cluster Focus</div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th><th class="tv-col" role="button" aria-label="Sort by Book 1"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Book 1</div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th><th class="tv-col" role="button" aria-label="Sort by Book 2"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Book 2</div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th><th class="tv-col" role="button" aria-label="Sort by Book 3"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Book 3</div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th><th class="tv-col" role="button" aria-label="Sort by Book 4"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Book 4</div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th></tr></thead><tbody><tr><td data-label="Cluster Focus">Foundations: Decision / Thinking</td><td data-label="Book 1">Thinking, Fast and Slow</td><td data-label="Book 2">Clear Thinking</td><td data-label="Book 3">Decisive</td><td data-label="Book 4">Smart Choices</td></tr><tr><td data-label="Cluster Focus">Cognitive Science / AI</td><td data-label="Book 1">How to Create a Mind</td><td data-label="Book 2">The Master Algorithm</td><td data-label="Book 3">Mindset</td><td data-label="Book 4">The Organized Mind</td></tr><tr><td data-label="Cluster Focus">Creativity / Innovation</td><td data-label="Book 1">Grit</td><td data-label="Book 2">Steal Like an Artist</td><td data-label="Book 3">Show Your Work!</td><td data-label="Book 4">Creative Confidence</td></tr><tr><td data-label="Cluster Focus">Creativity / Innovation / Cross-Reference</td><td data-label="Book 1">Originals</td><td data-label="Book 2">Good to Great</td><td data-label="Book 3">Built to Last</td><td data-label="Book 4">The Lean Startup</td></tr><tr><td data-label="Cluster Focus">Programming / Technology</td><td data-label="Book 1">Refactoring</td><td data-label="Book 2">Clean Code</td><td data-label="Book 3">Code Complete</td><td data-label="Book 4">Design Patterns</td></tr><tr><td data-label="Cluster Focus">Programming / Technology / Cross-Reference</td><td data-label="Book 1">Effective Python</td><td data-label="Book 2">The Pragmatic Programmer</td><td data-label="Book 3">Superforecasting</td><td data-label="Book 4">Thinking in Bets</td></tr><tr><td data-label="Cluster Focus">Personal Growth / Productivity</td><td data-label="Book 1">Digital Minimalism</td><td data-label="Book 2">Essentialism</td><td data-label="Book 3">The One Thing</td><td data-label="Book 4">Getting Things Done</td></tr><tr><td data-label="Cluster Focus">Cluster Reinforcement: Foundations + Cognitive Science</td><td data-label="Book 1">Thinking, Fast and Slow (review)</td><td data-label="Book 2">Blink (review)</td><td data-label="Book 3">Mindset (review)</td><td data-label="Book 4">Predictably Irrational (review)</td></tr><tr><td data-label="Cluster Focus">Cluster Reinforcement: Creativity & Business</td><td data-label="Book 1">Originals (review)</td><td data-label="Book 2">Range (review)</td><td data-label="Book 3">Grit (review)</td><td data-label="Book 4">The Medici Effect (review)</td></tr><tr><td data-label="Cluster Focus">Cluster Reinforcement: Programming / Technology</td><td data-label="Book 1">Refactoring (review)</td><td data-label="Book 2">Clean Code (review)</td><td data-label="Book 3">Code Complete (review)</td><td data-label="Book 4">Design Patterns (review)</td></tr><tr><td data-label="Cluster Focus">Cluster Reinforcement: Personal Growth</td><td data-label="Book 1">Atomic Habits (review)</td><td data-label="Book 2">Deep Work (review)</td><td data-label="Book 3">Digital Minimalism (review)</td><td data-label="Book 4">Essentialism (review)</td></tr><tr><td data-label="Cluster Focus">Integration / Synthesis</td><td data-label="Book 1">Cross-Cluster Synthesis</td><td data-label="Book 2">Note consolidation</td><td data-label="Book 3">Thematic connections</td><td data-label="Book 4">Memory map creation</td></tr></tbody></table></div><div class="row-count">Rows: 12</div></div><script src="assets/xlsx.full.min.js?v=1758605028" defer></script>
-<script src="assets/script.js?v=1759748863" defer></script>
 <script src="assets/worker.js?v=1758331710" defer></script>
+<script>(function(){ /* inline shim omitted - worker path: "assets/worker.js" */ })();</script>
 <script>
 (function(){
   const template = "{table}_{date}";
@@ -94,6 +87,8 @@
 })();
 window.addEventListener('load', function(){ try{ document.querySelectorAll('.table-wrapper').forEach(function(e){ e.style.opacity='1'; }); }catch(e){} });
 </script>
+<script data-caption-payload type="application/json" data-payload-version="1.0">{"version": "1.0", "captions": [{"table_id": "table-1", "data_table_id": "Docu_9995_01", "caption_html": "Table 1", "caption_plain": "Table 1", "caption_ids": ["table-1"], "order": 1}]}</script>
+<script>window.PTT = window.PTT || {}; window.PTT._serverCaptionPayload = [{"table_id": "table-1", "data_table_id": "Docu_9995_01", "caption_html": "Table 1", "caption_plain": "Table 1", "caption_ids": ["table-1"], "order": 1}]; if(window.PTT.injectCaptions){ try{ window.PTT.injectCaptions(window.PTT._serverCaptionPayload); }catch(e){console && console.warn && console.warn("injectCaptions failed", e);} }</script>
 </div>
 </body>
 </html>
