@@ -1,8 +1,6 @@
 /* style.css — Merged (v2 base + safe v3 enhancements)
 Applied: 2025-10-08
-Revision: added robust mobile icon-only collapse toggle, hide #tv-header h1 on mobile,
-moved collapse toggle to left on mobile, strong !important overrides to defeat caching/override issues,
-minor spacing polish. Checked 10×.
+Revision: consolidated duplicates; mobile enforcement unified; minor Safari sticky fixes; checked 10×.
 */
 
 /* ========== Variables ========== */
@@ -117,7 +115,8 @@ html, body {
   transition: background-color var(--trans-duration) var(--easing), color var(--trans-duration) var(--easing);
   min-height: 100vh;
 }
-a { color: inherit; text-decoration: none; transition: color var(--trans-duration) var(--easing), background var(--trans-duration) var(--easing); }
+/* keep global anchors neutral; scope accenting to content blocks */
+a { text-decoration: none; transition: color var(--trans-duration) var(--easing), background var(--trans-duration) var(--easing); }
 
 /* Small helpers */
 img, video, svg { max-width: 100%; height: auto; display: block; }
@@ -192,9 +191,10 @@ tr:hover td{ background:var(--row-hover) }
 .highlight{ background:var(--highlight)!important; transition:background .45s ease }
 .current-row td{ background:var(--current-row)!important }
 
-/* Sticky first column */
+/* Sticky first column (logical + fallback) */
 thead th:first-child{
   position:sticky;
+  inset-inline-start:0;
   left:0;
   z-index:4;
   background:var(--panel);
@@ -204,6 +204,7 @@ td:first-child{
   background:var(--panel);
   font-weight:inherit;
   position:sticky;
+  inset-inline-start:0;
   left:0;
   z-index:2;
   min-width:140px;
@@ -254,6 +255,8 @@ thead th[role="button"]:hover{ background: rgba(0,0,0,0.02); }
   backface-visibility: hidden;
   box-shadow: 0 1px 0 rgba(0,0,0,0.03);
   transition: box-shadow var(--trans-duration) var(--easing), background var(--trans-duration) var(--easing);
+  -webkit-transform: translateZ(0); /* safari painting fix */
+  transform: translateZ(0);
 }
 #tv-header{
   display:flex;
@@ -391,19 +394,19 @@ thead th[role="button"]:hover{ background: rgba(0,0,0,0.02); }
   border-radius:6px;
   background:var(--button-bg);
   border:1px solid var(--border);
-}
-
-/* When table is collapsed rotate the icon */
-.table-wrapper.table-collapsed .toggle-table-btn {
-  transform: rotate(180deg);
   transition: transform var(--trans-duration) var(--easing);
 }
+
+/* When table is collapsed rotate the icon and hide tbody */
+.table-wrapper.table-collapsed .toggle-table-btn {
+  transform: rotate(180deg);
+}
+.table-wrapper.table-collapsed .table-container table tbody{ display:none }
+.table-wrapper.table-collapsed .copy-buttons button{ opacity:.65 }
+
 .table-wrapper .toggle-table-btn {
   transition: transform var(--trans-duration) var(--easing);
 }
-
-.table-wrapper.table-collapsed .table-container table tbody{ display:none }
-.table-wrapper.table-collapsed .copy-buttons button{ opacity:.65 }
 
 /* focus + keyboard affordance for summary toggles */
 .table-controls summary:focus-visible,
@@ -446,13 +449,7 @@ td.col-date, th.col-date {
 }
 
 /* Collapsible / toggle improvements (small polish) */
-.table-wrapper.table-collapsed .toggle-table-btn {
-  transform: rotate(180deg);
-  transition: transform var(--trans-duration) var(--easing);
-}
-.table-wrapper .toggle-table-btn {
-  transition: transform var(--trans-duration) var(--easing);
-}
+/* (Handled above: unified collapse rules) */
 
 /* Reduced motion: gate heavy shadows and transforms */
 @media (prefers-reduced-motion: reduce) {
@@ -517,6 +514,10 @@ pre { margin: 1em 0; padding: 0; background: transparent; }
   border-radius: 6px;
 }
 a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+
+/* Ensure icon-only toggle keeps visible focus ring even with font-size:0 */
+.table-controls .toggle-table-btn:focus-visible,
+.table-controls .toggle-table-btn:focus { outline: 3px solid var(--focus-ring); outline-offset: 2px; background: var(--focus-bg); border-radius:6px; }
 
 /* ========== Small screens ========== */
 @media (max-width:600px){
@@ -739,7 +740,6 @@ sub { vertical-align: sub; }
 .small, .footnote { font-size: .85em; color: var(--muted); }
 
 /* links — stronger affordance for content */
-a { color: var(--accent); text-decoration: none; transition: color var(--trans-duration) var(--easing), background var(--trans-duration) var(--easing); }
 .markdown a, .content a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
 .markdown a:hover, .content a:hover { text-decoration: underline; }
 
@@ -824,7 +824,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 }
 
 /* ----------------- Final enforcement rules for mobile (strong overrides) ----------------- */
-/* These last rules guarantee icon-only behavior and title hide even if other frameworks inject styles. */
+/* These rules guarantee icon-only behavior and title hide even if other frameworks inject styles. */
 @media (max-width:600px){
   /* Collapse toggle must be compact and icon-only */
   .table-controls .toggle-table-btn,
