@@ -605,6 +605,66 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   #tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) { display:none !important; }
 }
 
+/* Mobile: inline-code legibility fixes (inserted & reviewed) */
+/* Purpose: keep desktop unchanged; make inline code/backtick tokens readable, touch-friendly and wrap safely on phones. */
+@media (max-width:720px) {
+  /* Increase size and touch padding for inline code inside tables & content */
+  table code,
+  td code,
+  th code,
+  code.inline-code,
+  .markdown code,
+  .content code,
+  td[data-col-type="code"],
+  td.col-code,
+  th[data-col-type="code"],
+  th.col-code {
+    font-family: var(--font-mono) !important;
+    /* Large enough to match surrounding text on small devices */
+    font-size: clamp(0.98rem, 3.2vw, 1.05rem) !important;
+    line-height: 1.28 !important;
+    padding: 0.16em 0.44em !important;
+    border-radius: var(--code-radius) !important;
+    background: var(--code-bg-alt) !important;
+    display: inline-block !important;      /* preserves padding and tap area */
+    white-space: normal !important;        /* allow soft wrapping on narrow screens */
+    overflow-wrap: anywhere !important;    /* break long tokens if necessary */
+    word-break: break-word !important;
+    min-height: 1.6em !important;
+    vertical-align: baseline !important;
+    box-sizing: border-box !important;
+    font-variant-numeric: tabular-nums !important;
+    font-weight: 500 !important;
+    -webkit-font-smoothing: antialiased !important;
+  }
+
+  /* Keep block/pre code readable but not oversized */
+  pre code {
+    font-size: 0.95rem !important;
+    line-height: 1.45 !important;
+    padding: 10px 12px !important;
+  }
+
+  /* If a code column was intentionally nowrap on desktop, allow wrapping on mobile */
+  td[data-col-type="code"][data-no-wrap="true"],
+  td.col-code.no-wrap {
+    white-space: normal !important;
+  }
+}
+
+/* Very-small screen tweaks for inline code */
+@media (max-width:360px) {
+  table code,
+  td code,
+  code.inline-code,
+  .markdown code {
+    font-size: 0.98rem !important;
+    padding-left: 0.12em !important;
+    padding-right: 0.28em !important;
+    border-radius: 6px !important;
+  }
+}
+
 /* Keep viewer visible */
 #tables-viewer, #mainContent { overflow: visible; }
 
