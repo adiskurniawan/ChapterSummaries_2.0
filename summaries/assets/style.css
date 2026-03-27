@@ -36,7 +36,7 @@ Revision: consolidated duplicates; mobile enforcement unified; minor Safari stic
   /* typography additions */
   --measure:65ch;
   --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  --font-mono: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "Roboto Mono", "Courier New", monospace;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Roboto Mono", "Courier New", monospace;
   --emoji-fonts: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla","EmojiSymbols";
   --accent: #2563eb;
 
@@ -626,15 +626,14 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   th[data-col-type="code"],
   th.col-code {
     font-family: var(--font-mono) !important;
-    /* Large enough to match surrounding text on small devices */
     font-size: clamp(0.98rem, 3.2vw, 1.05rem) !important;
     line-height: 1.28 !important;
     padding: 0.16em 0.44em !important;
     border-radius: var(--code-radius) !important;
     background: var(--code-bg-alt) !important;
-    display: inline-block !important;      /* preserves padding and tap area */
-    white-space: normal !important;        /* allow soft wrapping on narrow screens */
-    overflow-wrap: anywhere !important;    /* break long tokens if necessary */
+    display: inline-block !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
     word-break: break-word !important;
     min-height: 1.6em !important;
     vertical-align: baseline !important;
@@ -642,6 +641,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     font-variant-numeric: tabular-nums !important;
     font-weight: 500 !important;
     -webkit-font-smoothing: antialiased !important;
+    color: var(--text) !important;
   }
 
   /* Keep block/pre code readable but not oversized */
@@ -667,27 +667,30 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   .markdown pre code,
   .copy-button-output pre,
   .copy-button-table pre {
-    background: #1f2430 !important;
-    color: #f4f7fb !important;
-    border-color: rgba(255,255,255,0.10) !important;
+    background: #0f172a !important;
+    color: #f8fafc !important;
+    border: 1px solid #334155 !important;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02) !important;
   }
 
   pre code,
   .markdown pre code,
   .copy-button-output pre,
   .copy-button-table pre {
-    font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "Roboto Mono", "Courier New", monospace !important;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Roboto Mono", "Courier New", monospace !important;
     font-size: 0.94rem !important;
-    line-height: 1.55 !important;
+    line-height: 1.58 !important;
     letter-spacing: 0.01em !important;
+    color: #f8fafc !important;
+    background: #0f172a !important;
   }
 
   code,
   td code,
   .markdown code,
   code.inline-code {
-    background: rgba(255,255,255,0.06) !important;
-    color: #f4f7fb !important;
+    background: #1e293b !important;
+    color: #f8fafc !important;
   }
 }
 
@@ -698,20 +701,31 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 [data-theme="dark"] .markdown pre code,
 [data-theme="dark"] .copy-button-output pre,
 [data-theme="dark"] .copy-button-table pre {
-  background: #1f2430 !important;
-  color: #f4f7fb !important;
-  border-color: rgba(255,255,255,0.10) !important;
+  background: #0f172a !important;
+  color: #f8fafc !important;
+  border: 1px solid #334155 !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02) !important;
 }
 
 [data-theme="dark"] pre code,
 [data-theme="dark"] .markdown pre code,
 [data-theme="dark"] .copy-button-output pre,
 [data-theme="dark"] .copy-button-table pre {
-  font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "Roboto Mono", "Courier New", monospace !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Roboto Mono", "Courier New", monospace !important;
   font-size: 0.95em !important;
-  line-height: 1.55 !important;
+  line-height: 1.58 !important;
   letter-spacing: 0.01em !important;
-  color: #f4f7fb !important;
+  color: #f8fafc !important;
+  background: #0f172a !important;
+}
+
+[data-theme="dark"] code,
+[data-theme="dark"] td code,
+[data-theme="dark"] .markdown code,
+[data-theme="dark"] code.inline-code {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(148,163,184,0.18) !important;
 }
 
 /* Very-small screen tweaks for inline code */
@@ -1087,7 +1101,7 @@ pre code,
 .markdown pre code,
 .copy-button-output pre,
 .copy-button-table pre {
-  font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "Roboto Mono", "Courier New", monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Roboto Mono", "Courier New", monospace;
   font-variant-ligatures: none;
   font-feature-settings: "liga" 0, "calt" 0;
   font-optical-sizing: auto;
@@ -1105,7 +1119,7 @@ pre code,
   .markdown pre code,
   .copy-button-output pre,
   .copy-button-table pre {
-    font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "Roboto Mono", "Courier New", monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Roboto Mono", "Courier New", monospace;
     font-size: 0.93rem;
     line-height: 1.5;
   }
