@@ -26,6 +26,7 @@ Revision: consolidated duplicates; mobile enforcement unified; minor Safari stic
   --code-bg-alt: #f3f4f6;
   --code-text-dark: #e6e6e6;
   --code-radius: 6px;
+  --code-border: rgba(0,0,0,0.08);
 
   /* UI helpers */
   --focus-ring: rgba(37,99,235,0.18);
@@ -35,7 +36,7 @@ Revision: consolidated duplicates; mobile enforcement unified; minor Safari stic
   /* typography additions */
   --measure:65ch;
   --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Roboto Mono", "Courier New", monospace;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "Roboto Mono", "Courier New", monospace;
   --emoji-fonts: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla","EmojiSymbols";
   --accent: #2563eb;
 
@@ -72,8 +73,10 @@ Revision: consolidated duplicates; mobile enforcement unified; minor Safari stic
     --toc-link:#93c5fd;
     --toc-link-hover-bg:#1e3a8a;
     --toc-link-hover-color:#ffffff;
-    --code-bg: #2d2d2d;
-    --code-text-dark: #e6e6e6;
+    --code-bg: #242836;
+    --code-bg-alt: #2b3040;
+    --code-text-dark: #f4f7fb;
+    --code-border: rgba(255,255,255,0.10);
   }
 }
 
@@ -92,7 +95,10 @@ Revision: consolidated duplicates; mobile enforcement unified; minor Safari stic
   --toc-link:#93c5fd;
   --toc-link-hover-bg:#1e3a8a;
   --toc-link-hover-color:#ffffff;
-  --code-bg: #2d2d2d;
+  --code-bg: #242836;
+  --code-bg-alt: #2b3040;
+  --code-text-dark: #f4f7fb;
+  --code-border: rgba(255,255,255,0.10);
 }
 
 /* ========== Global normalization & base ========== */
@@ -495,13 +501,13 @@ td ol > li::before { content: counter(table-ol) "."; color: var(--text); display
 
 /* ========== Code styling ========== */
 code { background: var(--code-bg); padding: 2px 6px; border-radius: var(--code-radius); font-family: var(--font-mono); font-size: 0.92em; line-height: 1; color: inherit; font-variant-numeric: tabular-nums; }
-pre code { background: var(--code-bg); display: block; padding: 10px 14px; border-radius: calc(var(--code-radius)); overflow-x: auto; line-height: 1.45; font-size: 0.92em; white-space: pre; tab-size: 4; font-variant-numeric: tabular-nums; }
+pre code { background: var(--code-bg); display: block; padding: 10px 14px; border-radius: calc(var(--code-radius)); overflow-x: auto; line-height: 1.45; font-size: 0.92em; white-space: pre; tab-size: 4; font-variant-numeric: tabular-nums; border: 1px solid var(--code-border); }
 td code{ background: var(--code-bg-alt); padding: 2px 6px; border-radius: 6px; font-family: var(--font-mono); font-size:.9em; line-height:1; font-variant-numeric: tabular-nums; }
 pre { margin: 1em 0; padding: 0; background: transparent; }
 
 [data-theme="dark"] code { background: var(--code-bg); color: var(--code-text-dark); }
-[data-theme="dark"] pre code { background: var(--code-bg); color: var(--code-text-dark); }
-[data-theme="dark"] td code { background: rgba(255,255,255,0.02); color: var(--code-text-dark); }
+[data-theme="dark"] pre code { background: var(--code-bg); color: var(--code-text-dark); border-color: var(--code-border); }
+[data-theme="dark"] td code { background: rgba(255,255,255,0.04); color: var(--code-text-dark); }
 
 [data-theme="dark"] td > ul > li::before,
 [data-theme="dark"] td ol > li::before { color: var(--text); }
@@ -641,8 +647,9 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   /* Keep block/pre code readable but not oversized */
   pre code {
     font-size: 0.95rem !important;
-    line-height: 1.45 !important;
+    line-height: 1.5 !important;
     padding: 10px 12px !important;
+    border: 1px solid var(--code-border) !important;
   }
 
   /* If a code column was intentionally nowrap on desktop, allow wrapping on mobile */
@@ -650,6 +657,61 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   td.col-code.no-wrap {
     white-space: normal !important;
   }
+}
+
+/* Better dark-mode code block appearance on mobile */
+@media (max-width:720px) and (prefers-color-scheme: dark) {
+  pre,
+  .markdown pre,
+  pre code,
+  .markdown pre code,
+  .copy-button-output pre,
+  .copy-button-table pre {
+    background: #1f2430 !important;
+    color: #f4f7fb !important;
+    border-color: rgba(255,255,255,0.10) !important;
+  }
+
+  pre code,
+  .markdown pre code,
+  .copy-button-output pre,
+  .copy-button-table pre {
+    font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "Roboto Mono", "Courier New", monospace !important;
+    font-size: 0.94rem !important;
+    line-height: 1.55 !important;
+    letter-spacing: 0.01em !important;
+  }
+
+  code,
+  td code,
+  .markdown code,
+  code.inline-code {
+    background: rgba(255,255,255,0.06) !important;
+    color: #f4f7fb !important;
+  }
+}
+
+/* Better dark-mode code block appearance when data-theme is dark */
+[data-theme="dark"] pre,
+[data-theme="dark"] .markdown pre,
+[data-theme="dark"] pre code,
+[data-theme="dark"] .markdown pre code,
+[data-theme="dark"] .copy-button-output pre,
+[data-theme="dark"] .copy-button-table pre {
+  background: #1f2430 !important;
+  color: #f4f7fb !important;
+  border-color: rgba(255,255,255,0.10) !important;
+}
+
+[data-theme="dark"] pre code,
+[data-theme="dark"] .markdown pre code,
+[data-theme="dark"] .copy-button-output pre,
+[data-theme="dark"] .copy-button-table pre {
+  font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "Roboto Mono", "Courier New", monospace !important;
+  font-size: 0.95em !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0.01em !important;
+  color: #f4f7fb !important;
 }
 
 /* Very-small screen tweaks for inline code */
