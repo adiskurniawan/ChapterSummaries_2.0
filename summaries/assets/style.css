@@ -937,3 +937,114 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   /* Provide a small touch target fallback if the button is replaced by textless element */
   .table-controls .toggle-table-btn { touch-action: manipulation; -webkit-tap-highlight-color: transparent !important; }
 }
+
+/* =========================
+   Added overrides requested:
+   better links in dark mode
+   better font for code blocks
+   keep all other styling unchanged
+   ========================= */
+
+/* Better links in dark mode desktop + mobile */
+@media (prefers-color-scheme: dark) {
+  .markdown a,
+  .content a,
+  article a,
+  #mainContent a {
+    color: #8ab4f8;
+    text-decoration: underline;
+    text-decoration-thickness: 0.09em;
+    text-underline-offset: 0.18em;
+    text-decoration-skip-ink: auto;
+    -webkit-tap-highlight-color: transparent;
+    border-radius: 4px;
+  }
+
+  .markdown a:hover,
+  .content a:hover,
+  article a:hover,
+  #mainContent a:hover {
+    color: #b6d4ff;
+    text-decoration-color: currentColor;
+    background: rgba(138, 180, 248, 0.10);
+  }
+
+  .markdown a:focus-visible,
+  .content a:focus-visible,
+  article a:focus-visible,
+  #mainContent a:focus-visible {
+    outline: 2px solid rgba(138, 180, 248, 0.55);
+    outline-offset: 2px;
+    background: rgba(138, 180, 248, 0.12);
+  }
+}
+
+[data-theme="dark"] .markdown a,
+[data-theme="dark"] .content a,
+[data-theme="dark"] article a,
+[data-theme="dark"] #mainContent a {
+  color: #8ab4f8;
+  text-decoration: underline;
+  text-decoration-thickness: 0.09em;
+  text-underline-offset: 0.18em;
+  text-decoration-skip-ink: auto;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: 4px;
+}
+
+[data-theme="dark"] .markdown a:hover,
+[data-theme="dark"] .content a:hover,
+[data-theme="dark"] article a:hover,
+[data-theme="dark"] #mainContent a:hover {
+  color: #b6d4ff;
+  text-decoration-color: currentColor;
+  background: rgba(138, 180, 248, 0.10);
+}
+
+[data-theme="dark"] .markdown a:focus-visible,
+[data-theme="dark"] .content a:focus-visible,
+[data-theme="dark"] article a:focus-visible,
+[data-theme="dark"] #mainContent a:focus-visible {
+  outline: 2px solid rgba(138, 180, 248, 0.55);
+  outline-offset: 2px;
+  background: rgba(138, 180, 248, 0.12);
+}
+
+@media (max-width: 720px) {
+  .markdown a,
+  .content a,
+  article a,
+  #mainContent a {
+    text-decoration-thickness: 0.11em;
+    text-underline-offset: 0.16em;
+  }
+}
+
+/* Better code block font */
+pre code,
+.markdown pre code,
+.copy-button-output pre,
+.copy-button-table pre {
+  font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "Roboto Mono", "Courier New", monospace;
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "calt" 0;
+  font-optical-sizing: auto;
+}
+
+pre code,
+.markdown pre code {
+  font-size: 0.95em;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+}
+
+@media (max-width: 720px) {
+  pre code,
+  .markdown pre code,
+  .copy-button-output pre,
+  .copy-button-table pre {
+    font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "Roboto Mono", "Courier New", monospace;
+    font-size: 0.93rem;
+    line-height: 1.5;
+  }
+}
