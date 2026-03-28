@@ -46,7 +46,7 @@ Revision: consolidated duplicates; mobile enforcement unified; minor Safari stic
 
   /* code block font */
   --code-block-font: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Courier New", monospace;
-  --code-block-font-mobile: "IBM Plex Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Courier New", monospace;
+  --code-block-font-mobile: "Roboto Mono", "Droid Sans Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 /* High contrast preference (additive) */
