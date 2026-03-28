@@ -24,6 +24,7 @@ Revision: consolidated duplicates; mobile enforcement unified; minor Safari stic
   /* code styling vars */
   --code-bg: #f6f8fa;
   --code-bg-alt: #f3f4f6;
+  --code-text-light: #000000;
   --code-text-dark: #e6e6e6;
   --code-radius: 6px;
   --code-border: rgba(0,0,0,0.08);
@@ -504,10 +505,48 @@ td ol > li { counter-increment: table-ol; }
 td ol > li::before { content: counter(table-ol) "."; color: var(--text); display: inline-block; width: 2.2ch; margin-left: -2.2ch; }
 
 /* ========== Code styling ========== */
-code { background: var(--code-bg); padding: 2px 6px; border-radius: var(--code-radius); font-family: var(--font-mono); font-size: 0.92em; line-height: 1; color: inherit; font-variant-numeric: tabular-nums; }
-pre code { background: var(--code-bg); display: block; padding: 10px 14px; border-radius: calc(var(--code-radius)); overflow-x: auto; line-height: 1.45; font-size: 0.92em; white-space: pre; tab-size: 4; font-variant-numeric: tabular-nums; border: 1px solid var(--code-border); }
-td code{ background: var(--code-bg-alt); padding: 2px 6px; border-radius: 6px; font-family: var(--font-mono); font-size:.9em; line-height:1; font-variant-numeric: tabular-nums; }
-pre { margin: 1em 0; padding: 0; background: transparent; }
+code {
+  background: var(--code-bg);
+  padding: 3px 7px;
+  border-radius: var(--code-radius);
+  font-family: var(--font-mono);
+  font-size: 0.96em;
+  line-height: 1.1;
+  color: var(--code-text-light);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+pre code {
+  background: var(--code-bg);
+  display: block;
+  padding: 11px 15px;
+  border-radius: calc(var(--code-radius));
+  overflow-x: auto;
+  line-height: 1.5;
+  font-size: 0.95em;
+  white-space: pre;
+  tab-size: 4;
+  font-variant-numeric: tabular-nums;
+  border: 1px solid var(--code-border);
+  color: var(--code-text-light);
+  font-weight: 600;
+}
+td code{
+  background: var(--code-bg-alt);
+  padding: 3px 7px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size:.94em;
+  line-height:1.1;
+  font-variant-numeric: tabular-nums;
+  color: var(--code-text-light);
+  font-weight: 600;
+}
+pre {
+  margin: 1em 0;
+  padding: 0;
+  background: transparent;
+}
 
 [data-theme="dark"] code { background: var(--code-bg); color: var(--code-text-dark); }
 [data-theme="dark"] pre code { background: var(--code-bg); color: var(--code-text-dark); border-color: var(--code-border); }
@@ -626,9 +665,9 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   .markdown code,
   .content code {
     font-family: var(--font-mono) !important;
-    font-size: clamp(0.98rem, 3.2vw, 1.05rem) !important;
-    line-height: 1.28 !important;
-    padding: 0.16em 0.44em !important;
+    font-size: clamp(1.00rem, 3.25vw, 1.08rem) !important;
+    line-height: 1.30 !important;
+    padding: 0.18em 0.48em !important;
     border-radius: var(--code-radius) !important;
     background: var(--code-bg-alt) !important;
     display: inline-block !important;
@@ -639,9 +678,9 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     vertical-align: baseline !important;
     box-sizing: border-box !important;
     font-variant-numeric: tabular-nums !important;
-    font-weight: 500 !important;
+    font-weight: 700 !important;
     -webkit-font-smoothing: antialiased !important;
-    color: var(--text) !important;
+    color: #000000 !important;
   }
 
   /* Real code blocks, including code blocks placed inside table cells */
@@ -663,14 +702,14 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     white-space: pre !important;
     overflow-x: auto !important;
     font-family: var(--code-block-font-mobile) !important;
-    font-size: 0.93rem !important;
-    line-height: 1.55 !important;
+    font-size: 0.96rem !important;
+    line-height: 1.58 !important;
     letter-spacing: 0.01em !important;
-    padding: 10px 12px !important;
+    padding: 11px 13px !important;
     border: 1px solid var(--code-border) !important;
     border-radius: var(--code-radius) !important;
     background: var(--code-bg) !important;
-    color: #0b0f19 !important;
+    color: #000000 !important;
     font-weight: 700 !important;
     tab-size: 4 !important;
   }
@@ -703,8 +742,8 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   .copy-button-table pre,
   td pre {
     font-family: var(--code-block-font-mobile) !important;
-    font-size: 0.94rem !important;
-    line-height: 1.58 !important;
+    font-size: 0.97rem !important;
+    line-height: 1.60 !important;
     letter-spacing: 0.01em !important;
     color: #ffffff !important;
     background: #0f172a !important;
@@ -740,8 +779,8 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 [data-theme="dark"] .copy-button-table pre,
 [data-theme="dark"] td pre {
   font-family: var(--code-block-font-mobile) !important;
-  font-size: 0.95em !important;
-  line-height: 1.58 !important;
+  font-size: 0.97em !important;
+  line-height: 1.60 !important;
   letter-spacing: 0.01em !important;
   color: #f8fafc !important;
   background: #0f172a !important;
@@ -763,9 +802,9 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   td code,
   code.inline-code,
   .markdown code {
-    font-size: 0.98rem !important;
-    padding-left: 0.12em !important;
-    padding-right: 0.28em !important;
+    font-size: 1.00rem !important;
+    padding-left: 0.14em !important;
+    padding-right: 0.30em !important;
     border-radius: 6px !important;
   }
 
@@ -774,8 +813,8 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   .copy-button-output pre,
   .copy-button-table pre,
   td pre {
-    font-size: 0.9rem !important;
-    line-height: 1.5 !important;
+    font-size: 0.92rem !important;
+    line-height: 1.52 !important;
   }
 }
 
@@ -873,11 +912,13 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 /* inline vs block code */
 .markdown code, code.inline-code {
   background: rgba(27,31,35,0.04);
-  padding: .15em .4em;
+  padding: .16em .46em;
   border-radius: 6px;
   font-family: var(--font-mono);
-  font-size: .95em;
+  font-size: .97em;
   white-space: pre-wrap;
+  color: #000000;
+  font-weight: 600;
 }
 .markdown pre, pre {
   background: var(--code-bg);
@@ -886,8 +927,10 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   overflow-x: auto;
   font-family: var(--font-mono);
   font-size: .95em;
-  line-height: 1.45;
+  line-height: 1.48;
   tab-size: 4;
+  color: #000000;
+  font-weight: 600;
 }
 
 /* keyboard keys */
@@ -1147,9 +1190,11 @@ pre code,
 
 pre code,
 .markdown pre code {
-  font-size: 0.95em;
-  line-height: 1.55;
+  font-size: 0.96em;
+  line-height: 1.58;
   letter-spacing: 0.01em;
+  font-weight: 700;
+  color: #000000;
 }
 
 @media (max-width: 720px) {
@@ -1159,8 +1204,9 @@ pre code,
   .copy-button-table pre,
   td pre {
     font-family: var(--code-block-font-mobile);
-    font-size: 0.93rem;
-    line-height: 1.5;
+    font-size: 0.95rem;
+    line-height: 1.55;
     font-weight: 700;
+    color: #000000;
   }
 }
