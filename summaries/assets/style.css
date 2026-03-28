@@ -46,6 +46,7 @@ Revision: consolidated duplicates; mobile enforcement unified; minor Safari stic
 
   /* code block font */
   --code-block-font: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Courier New", monospace;
+  --code-block-font-mobile: "IBM Plex Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 /* High contrast preference (additive) */
@@ -661,7 +662,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     display: block !important;
     white-space: pre !important;
     overflow-x: auto !important;
-    font-family: var(--code-block-font) !important;
+    font-family: var(--code-block-font-mobile) !important;
     font-size: 0.93rem !important;
     line-height: 1.55 !important;
     letter-spacing: 0.01em !important;
@@ -669,7 +670,8 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     border: 1px solid var(--code-border) !important;
     border-radius: var(--code-radius) !important;
     background: var(--code-bg) !important;
-    color: var(--text) !important;
+    color: #0b0f19 !important;
+    font-weight: 700 !important;
     tab-size: 4 !important;
   }
 
@@ -700,12 +702,13 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   .copy-button-output pre,
   .copy-button-table pre,
   td pre {
-    font-family: var(--code-block-font) !important;
+    font-family: var(--code-block-font-mobile) !important;
     font-size: 0.94rem !important;
     line-height: 1.58 !important;
     letter-spacing: 0.01em !important;
-    color: #f8fafc !important;
+    color: #ffffff !important;
     background: #0f172a !important;
+    font-weight: 700 !important;
   }
 
   code,
@@ -736,12 +739,13 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 [data-theme="dark"] .copy-button-output pre,
 [data-theme="dark"] .copy-button-table pre,
 [data-theme="dark"] td pre {
-  font-family: var(--code-block-font) !important;
+  font-family: var(--code-block-font-mobile) !important;
   font-size: 0.95em !important;
   line-height: 1.58 !important;
   letter-spacing: 0.01em !important;
   color: #f8fafc !important;
   background: #0f172a !important;
+  font-weight: 700 !important;
 }
 
 [data-theme="dark"] code,
@@ -1154,8 +1158,9 @@ pre code,
   .copy-button-output pre,
   .copy-button-table pre,
   td pre {
-    font-family: var(--code-block-font);
+    font-family: var(--code-block-font-mobile);
     font-size: 0.93rem;
     line-height: 1.5;
+    font-weight: 700;
   }
 }
