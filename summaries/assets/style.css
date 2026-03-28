@@ -43,6 +43,9 @@ Revision: consolidated duplicates; mobile enforcement unified; minor Safari stic
   /* motion & transitions */
   --trans-duration: 150ms;
   --easing: cubic-bezier(.2,.9,.2,1);
+
+  /* code block font */
+  --code-block-font: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 /* High contrast preference (additive) */
@@ -611,20 +614,16 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   #tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) { display:none !important; }
 }
 
-/* Mobile: inline-code legibility fixes (inserted & reviewed) */
-/* Purpose: keep desktop unchanged; make inline code/backtick tokens readable, touch-friendly and wrap safely on phones. */
+/* Mobile: inline-code legibility fixes (revised)
+   Purpose: keep desktop unchanged; make inline code and real code blocks readable, touch-friendly and wrap safely on phones. */
 @media (max-width:720px) {
-  /* Increase size and touch padding for inline code inside tables & content */
-  table code,
+  /* Inline code only. Do not target block code containers here. */
+  code,
   td code,
   th code,
   code.inline-code,
   .markdown code,
-  .content code,
-  td[data-col-type="code"],
-  td.col-code,
-  th[data-col-type="code"],
-  th.col-code {
+  .content code {
     font-family: var(--font-mono) !important;
     font-size: clamp(0.98rem, 3.2vw, 1.05rem) !important;
     line-height: 1.28 !important;
@@ -644,15 +643,37 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     color: var(--text) !important;
   }
 
-  /* Keep block/pre code readable but not oversized */
-  pre code {
-    font-size: 0.95rem !important;
-    line-height: 1.5 !important;
-    padding: 10px 12px !important;
-    border: 1px solid var(--code-border) !important;
+  /* Real code blocks, including code blocks placed inside table cells */
+  pre,
+  .markdown pre,
+  .copy-button-output pre,
+  .copy-button-table pre,
+  td pre {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
   }
 
-  /* If a code column was intentionally nowrap on desktop, allow wrapping on mobile */
+  pre code,
+  .markdown pre code,
+  .copy-button-output pre,
+  .copy-button-table pre,
+  td pre {
+    display: block !important;
+    white-space: pre !important;
+    overflow-x: auto !important;
+    font-family: var(--code-block-font) !important;
+    font-size: 0.93rem !important;
+    line-height: 1.55 !important;
+    letter-spacing: 0.01em !important;
+    padding: 10px 12px !important;
+    border: 1px solid var(--code-border) !important;
+    border-radius: var(--code-radius) !important;
+    background: var(--code-bg) !important;
+    color: var(--text) !important;
+    tab-size: 4 !important;
+  }
+
+  /* Preserve wrapping for code columns when explicitly requested */
   td[data-col-type="code"][data-no-wrap="true"],
   td.col-code.no-wrap {
     white-space: normal !important;
@@ -666,7 +687,8 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   pre code,
   .markdown pre code,
   .copy-button-output pre,
-  .copy-button-table pre {
+  .copy-button-table pre,
+  td pre {
     background: #0f172a !important;
     color: #f8fafc !important;
     border: 1px solid #334155 !important;
@@ -676,8 +698,9 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   pre code,
   .markdown pre code,
   .copy-button-output pre,
-  .copy-button-table pre {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Roboto Mono", "Courier New", monospace !important;
+  .copy-button-table pre,
+  td pre {
+    font-family: var(--code-block-font) !important;
     font-size: 0.94rem !important;
     line-height: 1.58 !important;
     letter-spacing: 0.01em !important;
@@ -700,7 +723,8 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 [data-theme="dark"] pre code,
 [data-theme="dark"] .markdown pre code,
 [data-theme="dark"] .copy-button-output pre,
-[data-theme="dark"] .copy-button-table pre {
+[data-theme="dark"] .copy-button-table pre,
+[data-theme="dark"] td pre {
   background: #0f172a !important;
   color: #f8fafc !important;
   border: 1px solid #334155 !important;
@@ -710,8 +734,9 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 [data-theme="dark"] pre code,
 [data-theme="dark"] .markdown pre code,
 [data-theme="dark"] .copy-button-output pre,
-[data-theme="dark"] .copy-button-table pre {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Roboto Mono", "Courier New", monospace !important;
+[data-theme="dark"] .copy-button-table pre,
+[data-theme="dark"] td pre {
+  font-family: var(--code-block-font) !important;
   font-size: 0.95em !important;
   line-height: 1.58 !important;
   letter-spacing: 0.01em !important;
@@ -730,7 +755,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 
 /* Very-small screen tweaks for inline code */
 @media (max-width:360px) {
-  table code,
+  code,
   td code,
   code.inline-code,
   .markdown code {
@@ -738,6 +763,15 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     padding-left: 0.12em !important;
     padding-right: 0.28em !important;
     border-radius: 6px !important;
+  }
+
+  pre code,
+  .markdown pre code,
+  .copy-button-output pre,
+  .copy-button-table pre,
+  td pre {
+    font-size: 0.9rem !important;
+    line-height: 1.5 !important;
   }
 }
 
@@ -1101,7 +1135,7 @@ pre code,
 .markdown pre code,
 .copy-button-output pre,
 .copy-button-table pre {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Roboto Mono", "Courier New", monospace;
+  font-family: var(--code-block-font);
   font-variant-ligatures: none;
   font-feature-settings: "liga" 0, "calt" 0;
   font-optical-sizing: auto;
@@ -1118,8 +1152,9 @@ pre code,
   pre code,
   .markdown pre code,
   .copy-button-output pre,
-  .copy-button-table pre {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Roboto Mono", "Courier New", monospace;
+  .copy-button-table pre,
+  td pre {
+    font-family: var(--code-block-font);
     font-size: 0.93rem;
     line-height: 1.5;
   }
