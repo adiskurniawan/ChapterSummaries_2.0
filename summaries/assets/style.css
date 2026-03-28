@@ -24,7 +24,7 @@ Revision: consolidated duplicates; mobile enforcement unified; minor Safari stic
   /* code styling vars */
   --code-bg: #f6f8fa;
   --code-bg-alt: #f3f4f6;
-  --code-text-light: #111827;
+  --code-text-light: #1f2937;
   --code-text-dark: #e6e6e6;
   --code-radius: 6px;
   --code-border: rgba(0,0,0,0.08);
@@ -507,7 +507,7 @@ code {
   padding: 2px 6px;
   border-radius: var(--code-radius);
   font-family: var(--font-mono);
-  font-size: 0.94em;
+  font-size: 0.93em;
   line-height: 1.08;
   color: var(--code-text-light);
   font-variant-numeric: tabular-nums;
@@ -519,8 +519,8 @@ pre code {
   padding: 10px 14px;
   border-radius: calc(var(--code-radius));
   overflow-x: auto;
-  line-height: 1.49;
-  font-size: 0.945em;
+  line-height: 1.48;
+  font-size: 0.94em;
   white-space: pre;
   tab-size: 4;
   font-variant-numeric: tabular-nums;
@@ -533,7 +533,7 @@ td code{
   padding: 2px 6px;
   border-radius: 6px;
   font-family: var(--font-mono);
-  font-size:.91em;
+  font-size:.9em;
   line-height:1.08;
   font-variant-numeric: tabular-nums;
   color: var(--code-text-light);
@@ -590,7 +590,9 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     min-width:36px;
   }
 
-  /* Hide page title on narrow screens to increase visible table area */
+  /* Hide page title on narrow screens to increase visible table area
+     Cover multiple markup variants and plain headings.
+     Kept late in file to override external frameworks. */
   #tv-header h1,
   #tv-header > div:first-child h1,
   #tv-header #pageTitle,
@@ -624,11 +626,13 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     margin-right: 6px !important;
   }
 
+  /* Hide textual label elements commonly used inside buttons */
   .table-controls .toggle-table-btn span,
   .table-controls .toggle-table-btn .label,
   .table-controls .toggle-table-btn .btn-text,
   .table-controls .toggle-table-btn::after { display:none !important; }
 
+  /* Ensure SVG or icon fonts remain visible and centered */
   .table-controls .toggle-table-btn svg,
   .table-controls .toggle-table-btn i,
   .table-controls .toggle-table-btn .icon {
@@ -646,8 +650,10 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   #tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) { display:none !important; }
 }
 
-/* Mobile: inline-code legibility fixes */
+/* Mobile: inline-code legibility fixes (revised)
+   Purpose: keep desktop unchanged; make inline code and real code blocks readable, touch-friendly and wrap safely on phones. */
 @media (max-width:720px) {
+  /* Inline code only. Do not target block code containers here. */
   code,
   td code,
   th code,
@@ -655,7 +661,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   .markdown code,
   .content code {
     font-family: var(--font-mono) !important;
-    font-size: clamp(0.95rem, 3.05vw, 1rem) !important;
+    font-size: clamp(0.94rem, 3vw, 1rem) !important;
     line-height: 1.26 !important;
     padding: 0.14em 0.40em !important;
     border-radius: var(--code-radius) !important;
@@ -673,6 +679,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     color: var(--code-text-light) !important;
   }
 
+  /* Real code blocks, including code blocks placed inside table cells */
   pre,
   .markdown pre,
   .copy-button-output pre,
@@ -691,7 +698,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     white-space: pre !important;
     overflow-x: auto !important;
     font-family: var(--code-block-font-mobile) !important;
-    font-size: 0.93rem !important;
+    font-size: 0.92rem !important;
     line-height: 1.50 !important;
     letter-spacing: 0.01em !important;
     padding: 10px 12px !important;
@@ -703,6 +710,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     tab-size: 4 !important;
   }
 
+  /* Preserve wrapping for code columns when explicitly requested */
   td[data-col-type="code"][data-no-wrap="true"],
   td.col-code.no-wrap {
     white-space: normal !important;
@@ -848,6 +856,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   .copy-button-output, .copy-buttons, #tocBar, #tv-header { display: none !important; }
   table { page-break-inside: avoid; break-inside: avoid; }
 
+  /* make captions visible and safe for printing */
   .table-caption {
     display: block !important;
     margin-left: 0 !important;
@@ -858,6 +867,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     color: #000 !important;
   }
 
+  /* stronger table borders and white backgrounds for print clarity */
   th, td { border: 1px solid #999 !important; background: #fff !important; color: #000 !important; }
   pre, code { white-space: pre-wrap !important; word-break: break-word !important; }
 }
@@ -901,7 +911,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   padding: .14em .38em;
   border-radius: 6px;
   font-family: var(--font-mono);
-  font-size: .95em;
+  font-size: .94em;
   white-space: pre-wrap;
   color: var(--code-text-light);
   font-weight: 500;
@@ -1162,7 +1172,7 @@ pre code,
 
 pre code,
 .markdown pre code {
-  font-size: 0.95em;
+  font-size: 0.94em;
   line-height: 1.50;
   letter-spacing: 0.01em;
   font-weight: 600;
@@ -1176,7 +1186,7 @@ pre code,
   .copy-button-table pre,
   td pre {
     font-family: var(--code-block-font-mobile);
-    font-size: 0.94rem;
+    font-size: 0.93rem;
     line-height: 1.52;
     font-weight: 600;
     color: var(--code-text-light);
