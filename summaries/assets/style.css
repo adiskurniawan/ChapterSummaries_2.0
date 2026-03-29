@@ -683,7 +683,8 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   td code,
   td code.inline-code,
   td .markdown code {
-    font-size: clamp(0.94rem, 2.8vw, 1.00rem) !important;
+    font-family: Inter, var(--font-sans) !important;
+    font-size: clamp(1.00rem, 3.1vw, 1.08rem) !important;
     line-height: 1.28 !important;
     padding: 0.15em 0.42em !important;
     color: #020617 !important;
@@ -726,8 +727,8 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     display: block !important;
     white-space: pre !important;
     overflow-x: auto !important;
-    font-family: var(--code-block-font-mobile) !important;
-    font-size: 0.94rem !important;
+    font-family: Inter, var(--font-sans) !important;
+    font-size: 0.98rem !important;
     line-height: 1.48 !important;
     letter-spacing: 0.01em !important;
     padding: 10px 12px !important;
@@ -786,6 +787,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   td code,
   td code.inline-code,
   td .markdown code {
+    font-family: Inter, var(--font-sans) !important;
     color: #f8fafc !important;
     font-weight: 700 !important;
   }
@@ -793,8 +795,8 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   /* Table cell code blocks slightly smaller on dark mobile */
   td pre,
   td pre code {
-    font-family: var(--code-block-font-mobile) !important;
-    font-size: 0.92rem !important;
+    font-family: Inter, var(--font-sans) !important;
+    font-size: 0.96rem !important;
     line-height: 1.55 !important;
     letter-spacing: 0.01em !important;
     color: #f8fafc !important;
@@ -864,7 +866,8 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   /* Slightly smaller table-cell block code on very small screens */
   td pre,
   td pre code {
-    font-size: 0.90rem !important;
+    font-family: Inter, var(--font-sans) !important;
+    font-size: 0.95rem !important;
     line-height: 1.46 !important;
   }
 }
