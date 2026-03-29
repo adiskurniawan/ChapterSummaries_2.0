@@ -699,18 +699,15 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   #tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) { display:none !important; }
 }
 
-/* Mobile: inline-code legibility fixes (revised)
-   Purpose: keep desktop unchanged; make inline code and real code blocks readable, touch-friendly and wrap safely on phones. */
+/* Mobile: table-cell code legibility fixes only.
+   Purpose: keep desktop unchanged; make code inside table cells readable, touch-friendly and safe on phones. */
 @media (max-width:720px) {
-  /* Inline code only. Do not target block code containers here. */
-  code,
+  /* Inline code only inside tables */
   td code,
-  th code,
-  code.inline-code,
-  .markdown code,
-  .content code {
+  td code.inline-code,
+  td .markdown code {
     font-family: var(--font-mono) !important;
-    font-size: clamp(0.96rem, 3vw, 1.03rem) !important;
+    font-size: clamp(0.90rem, 2.8vw, 0.98rem) !important;
     line-height: 1.26 !important;
     padding: 0.14em 0.40em !important;
     border-radius: var(--code-radius) !important;
@@ -723,60 +720,19 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     vertical-align: baseline !important;
     box-sizing: border-box !important;
     font-variant-numeric: tabular-nums !important;
-    font-weight: 600 !important;
+    font-weight: 400 !important;
     -webkit-font-smoothing: antialiased !important;
     color: #050816 !important;
   }
 
-  /* Make code inside table cells a little smaller for mobile readability */
-  td code,
-  td code.inline-code,
-  td .markdown code {
-    font-family: "Aptos", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-    font-size: clamp(0.90rem, 2.8vw, 0.98rem) !important;
-    line-height: 1.28 !important;
-    padding: 0.15em 0.42em !important;
-    color: #020617 !important;
-    font-weight: 400 !important;
-  }
-
-  /* Real code blocks, including code blocks placed inside table cells */
-  pre,
-  .markdown pre,
-  .copy-button-output pre,
-  .copy-button-table pre,
-  td pre {
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  pre code,
-  .markdown pre code,
-  .copy-button-output pre,
-  .copy-button-table pre {
-    display: block !important;
-    white-space: pre !important;
-    overflow-x: auto !important;
-    font-family: var(--code-block-font-mobile) !important;
-    font-size: 0.98rem !important;
-    line-height: 1.50 !important;
-    letter-spacing: 0.01em !important;
-    padding: 10px 12px !important;
-    border: 1px solid var(--code-border) !important;
-    border-radius: var(--code-radius) !important;
-    background: #eef2f6 !important;
-    color: #020617 !important;
-    font-weight: 600 !important;
-    tab-size: 4 !important;
-  }
-
-  /* Table cell code blocks slightly smaller on mobile */
+  /* Real code blocks inside table cells */
   td pre,
   td pre code {
     display: block !important;
     white-space: pre !important;
     overflow-x: auto !important;
-    font-family: "Aptos", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    -webkit-overflow-scrolling: touch !important;
+    font-family: var(--code-block-font-mobile) !important;
     font-size: 0.94rem !important;
     line-height: 1.48 !important;
     letter-spacing: 0.01em !important;
@@ -796,128 +752,72 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   }
 }
 
-/* Better dark-mode code block appearance on mobile */
+/* Better dark-mode table-cell code appearance on mobile */
 @media (max-width:720px) and (prefers-color-scheme: dark) {
-  pre,
-  .markdown pre,
-  pre code,
-  .markdown pre code,
-  .copy-button-output pre,
-  .copy-button-table pre,
-  td pre {
+  td code,
+  td code.inline-code,
+  td .markdown code {
+    background: #1e293b !important;
+    color: #f8fafc !important;
+    font-family: var(--code-block-font-mobile) !important;
+    font-size: clamp(0.90rem, 2.8vw, 0.98rem) !important;
+    line-height: 1.28 !important;
+    font-weight: 400 !important;
+  }
+
+  td pre,
+  td pre code {
     background: #0f172a !important;
     color: #f8fafc !important;
     border: 1px solid #334155 !important;
     box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02) !important;
-  }
-
-  pre code,
-  .markdown pre code,
-  .copy-button-output pre,
-  .copy-button-table pre {
     font-family: var(--code-block-font-mobile) !important;
-    font-size: 0.95rem !important;
-    line-height: 1.55 !important;
-    letter-spacing: 0.01em !important;
-    color: #f8fafc !important;
-    background: #0f172a !important;
-    font-weight: 600 !important;
-  }
-
-  code,
-  td code,
-  .markdown code,
-  code.inline-code {
-    background: #1e293b !important;
-    color: #f8fafc !important;
-  }
-
-  /* Slightly brighter table-cell code on dark mobile for readability */
-  td code,
-  td code.inline-code,
-  td .markdown code {
-    font-family: "Aptos", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-    color: #f8fafc !important;
-    font-weight: 400 !important;
-  }
-
-  /* Table cell code blocks slightly smaller on dark mobile */
-  td pre,
-  td pre code {
-    font-family: "Aptos", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     font-size: 0.94rem !important;
     line-height: 1.55 !important;
     letter-spacing: 0.01em !important;
-    color: #f8fafc !important;
-    background: #0f172a !important;
     font-weight: 400 !important;
   }
 }
 
-/* Better dark-mode code block appearance when data-theme is dark */
-[data-theme="dark"] pre,
-[data-theme="dark"] .markdown pre,
-[data-theme="dark"] pre code,
-[data-theme="dark"] .markdown pre code,
-[data-theme="dark"] .copy-button-output pre,
-[data-theme="dark"] .copy-button-table pre,
-[data-theme="dark"] td pre {
+/* Better dark-mode table-cell code appearance when data-theme is dark */
+[data-theme="dark"] td code,
+[data-theme="dark"] td code.inline-code,
+[data-theme="dark"] td .markdown code {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(148,163,184,0.18) !important;
+  font-family: var(--code-block-font-mobile) !important;
+}
+
+[data-theme="dark"] td pre,
+[data-theme="dark"] td pre code {
   background: #0f172a !important;
   color: #f8fafc !important;
   border: 1px solid #334155 !important;
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02) !important;
-}
-
-[data-theme="dark"] pre code,
-[data-theme="dark"] .markdown pre code,
-[data-theme="dark"] .copy-button-output pre,
-[data-theme="dark"] .copy-button-table pre,
-[data-theme="dark"] td pre {
   font-family: var(--code-block-font-mobile) !important;
   font-size: 0.94em !important;
   line-height: 1.55 !important;
   letter-spacing: 0.01em !important;
-  color: #f8fafc !important;
-  background: #0f172a !important;
-  font-weight: 600 !important;
+  font-weight: 400 !important;
 }
 
-[data-theme="dark"] code,
-[data-theme="dark"] td code,
-[data-theme="dark"] .markdown code,
-[data-theme="dark"] code.inline-code {
-  background: #1e293b !important;
-  color: #f8fafc !important;
-  border: 1px solid rgba(148,163,184,0.18) !important;
-}
-
-/* Very-small screen tweaks for inline code */
+/* Very-small screen tweaks for table-cell code */
 @media (max-width:360px) {
-  code,
   td code,
-  code.inline-code,
-  .markdown code {
+  td code.inline-code,
+  td .markdown code {
     font-size: 0.97rem !important;
     padding-left: 0.12em !important;
     padding-right: 0.26em !important;
     border-radius: 6px !important;
   }
 
-  pre code,
-  .markdown pre code,
-  .copy-button-output pre,
-  .copy-button-table pre,
-  td pre {
-    font-size: 0.92rem !important;
-    line-height: 1.48 !important;
-  }
-
-  /* Slightly smaller table-cell block code on very small screens */
   td pre,
   td pre code {
-    font-family: "Aptos", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     font-size: 0.92rem !important;
     line-height: 1.46 !important;
+    font-family: var(--code-block-font-mobile) !important;
   }
 }
 
@@ -1351,19 +1251,6 @@ pre code,
 }
 
 @media (max-width: 720px) {
-  pre code,
-  .markdown pre code,
-  .copy-button-output pre,
-  .copy-button-table pre,
-  td pre {
-    font-family: var(--code-block-font-mobile);
-    font-size: 0.96rem;
-    line-height: 1.52;
-    font-weight: 600;
-    color: #050816;
-  }
-
-  /* Mobile override for table code blocks: smaller and not bold */
   td code,
   td code.inline-code,
   td .markdown code {
