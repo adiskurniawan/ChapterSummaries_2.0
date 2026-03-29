@@ -676,7 +676,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     font-variant-numeric: tabular-nums !important;
     font-weight: 600 !important;
     -webkit-font-smoothing: antialiased !important;
-    color: #111827 !important;
+    color: #0f172a !important;
   }
 
   /* Real code blocks, including code blocks placed inside table cells */
@@ -705,7 +705,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     border: 1px solid var(--code-border) !important;
     border-radius: var(--code-radius) !important;
     background: #eef2f6 !important;
-    color: #111827 !important;
+    color: #0f172a !important;
     font-weight: 600 !important;
     tab-size: 4 !important;
   }
@@ -1189,6 +1189,6 @@ pre code,
     font-size: 0.93rem;
     line-height: 1.52;
     font-weight: 600;
-    color: #111827;
+    color: #0f172a;
   }
 }
