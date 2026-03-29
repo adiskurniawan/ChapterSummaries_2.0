@@ -1099,13 +1099,6 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     border-radius: 4px;
   }
 
-  .markdown a:visited,
-  .content a:visited,
-  article a:visited,
-  #mainContent a:visited {
-    color: #c4b5fd;
-  }
-
   .markdown a:hover,
   .content a:hover,
   article a:hover,
@@ -1123,6 +1116,31 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     outline-offset: 2px;
     background: rgba(138, 180, 248, 0.12);
   }
+
+  /* Dark mode table links */
+  table a,
+  .markdown table a,
+  .content table a,
+  article table a,
+  #mainContent table a {
+    color: #8ab4f8;
+  }
+
+  table a:visited,
+  .markdown table a:visited,
+  .content table a:visited,
+  article table a:visited,
+  #mainContent table a:visited {
+    color: #c58af9;
+  }
+
+  table a:hover,
+  .markdown table a:hover,
+  .content table a:hover,
+  article table a:hover,
+  #mainContent table a:hover {
+    color: #b6d4ff;
+  }
 }
 
 [data-theme="dark"] .markdown a,
@@ -1136,13 +1154,6 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   text-decoration-skip-ink: auto;
   -webkit-tap-highlight-color: transparent;
   border-radius: 4px;
-}
-
-[data-theme="dark"] .markdown a:visited,
-[data-theme="dark"] .content a:visited,
-[data-theme="dark"] article a:visited,
-[data-theme="dark"] #mainContent a:visited {
-  color: #c4b5fd;
 }
 
 [data-theme="dark"] .markdown a:hover,
@@ -1161,6 +1172,31 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   outline: 2px solid rgba(138, 180, 248, 0.55);
   outline-offset: 2px;
   background: rgba(138, 180, 248, 0.12);
+}
+
+/* Dark mode table links */
+[data-theme="dark"] table a,
+[data-theme="dark"] .markdown table a,
+[data-theme="dark"] .content table a,
+[data-theme="dark"] article table a,
+[data-theme="dark"] #mainContent table a {
+  color: #8ab4f8;
+}
+
+[data-theme="dark"] table a:visited,
+[data-theme="dark"] .markdown table a:visited,
+[data-theme="dark"] .content table a:visited,
+[data-theme="dark"] article table a:visited,
+[data-theme="dark"] #mainContent table a:visited {
+  color: #c58af9;
+}
+
+[data-theme="dark"] table a:hover,
+[data-theme="dark"] .markdown table a:hover,
+[data-theme="dark"] .content table a:hover,
+[data-theme="dark"] article table a:hover,
+[data-theme="dark"] #mainContent table a:hover {
+  color: #b6d4ff;
 }
 
 @media (max-width: 720px) {
