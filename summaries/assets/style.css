@@ -129,6 +129,55 @@ html, body {
 /* keep global anchors neutral; scope accenting to content blocks */
 a { text-decoration: none; transition: color var(--trans-duration) var(--easing), background var(--trans-duration) var(--easing); }
 
+/* Theme transition smoothing */
+html, body,
+#stickyMainHeader,
+#tv-header,
+#tocBar,
+#mainContent,
+.table-container,
+table,
+thead th,
+tbody td,
+th,
+td,
+button,
+input,
+select,
+textarea,
+a,
+code,
+pre,
+kbd,
+blockquote,
+#backToTop,
+.copy-buttons button.copy-btn,
+.copy-btn,
+.copy-button-output pre,
+.copy-button-table pre,
+.table-controls a,
+.table-controls button,
+.table-controls summary,
+.table-controls .toggle-table-btn,
+.table-controls .table-toggle-inline,
+.table-caption,
+.row-count,
+.markdown a,
+.content a,
+article a,
+#mainContent a {
+  transition:
+    background-color var(--trans-duration) var(--easing),
+    color var(--trans-duration) var(--easing),
+    border-color var(--trans-duration) var(--easing),
+    box-shadow var(--trans-duration) var(--easing),
+    text-decoration-color var(--trans-duration) var(--easing),
+    fill var(--trans-duration) var(--easing),
+    stroke var(--trans-duration) var(--easing),
+    opacity var(--trans-duration) var(--easing),
+    transform var(--trans-duration) var(--easing);
+}
+
 /* Small helpers */
 img, video, svg { max-width: 100%; height: auto; display: block; }
 code, pre, kbd { font-family: var(--font-mono); }
@@ -683,7 +732,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   td code,
   td code.inline-code,
   td .markdown code {
-    font-family: Inter, var(--font-sans) !important;
+    font-family: "Aptos", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     font-size: clamp(0.90rem, 2.8vw, 0.98rem) !important;
     line-height: 1.28 !important;
     padding: 0.15em 0.42em !important;
@@ -727,7 +776,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     display: block !important;
     white-space: pre !important;
     overflow-x: auto !important;
-    font-family: Inter, var(--font-sans) !important;
+    font-family: "Aptos", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     font-size: 0.94rem !important;
     line-height: 1.48 !important;
     letter-spacing: 0.01em !important;
@@ -787,7 +836,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   td code,
   td code.inline-code,
   td .markdown code {
-    font-family: Inter, var(--font-sans) !important;
+    font-family: "Aptos", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     color: #f8fafc !important;
     font-weight: 400 !important;
   }
@@ -795,7 +844,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   /* Table cell code blocks slightly smaller on dark mobile */
   td pre,
   td pre code {
-    font-family: Inter, var(--font-sans) !important;
+    font-family: "Aptos", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     font-size: 0.94rem !important;
     line-height: 1.55 !important;
     letter-spacing: 0.01em !important;
@@ -866,7 +915,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   /* Slightly smaller table-cell block code on very small screens */
   td pre,
   td pre code {
-    font-family: Inter, var(--font-sans) !important;
+    font-family: "Aptos", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     font-size: 0.92rem !important;
     line-height: 1.46 !important;
   }
@@ -1265,6 +1314,20 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     text-decoration-thickness: 0.11em;
     text-underline-offset: 0.16em;
   }
+
+  /* Mobile-only table code text: smaller and not bold */
+  td code,
+  td code.inline-code,
+  td .markdown code {
+    font-size: 0.88rem !important;
+    font-weight: 400 !important;
+  }
+
+  td pre,
+  td pre code {
+    font-size: 0.90rem !important;
+    font-weight: 400 !important;
+  }
 }
 
 /* Better code block font */
@@ -1298,5 +1361,19 @@ pre code,
     line-height: 1.52;
     font-weight: 600;
     color: #050816;
+  }
+
+  /* Mobile override for table code blocks: smaller and not bold */
+  td code,
+  td code.inline-code,
+  td .markdown code {
+    font-size: 0.88rem !important;
+    font-weight: 400 !important;
+  }
+
+  td pre,
+  td pre code {
+    font-size: 0.90rem !important;
+    font-weight: 400 !important;
   }
 }
