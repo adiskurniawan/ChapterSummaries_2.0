@@ -679,13 +679,13 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     color: #050816 !important;
   }
 
-  /* Make code inside table cells a little larger and darker for readability */
+  /* Make code inside table cells a little smaller for mobile readability */
   td code,
   td code.inline-code,
   td .markdown code {
-    font-size: clamp(1.00rem, 3.1vw, 1.06rem) !important;
+    font-size: clamp(0.94rem, 2.8vw, 1.00rem) !important;
     line-height: 1.28 !important;
-    padding: 0.16em 0.44em !important;
+    padding: 0.15em 0.42em !important;
     color: #020617 !important;
     font-weight: 700 !important;
   }
@@ -703,14 +703,32 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   pre code,
   .markdown pre code,
   .copy-button-output pre,
-  .copy-button-table pre,
-  td pre {
+  .copy-button-table pre {
     display: block !important;
     white-space: pre !important;
     overflow-x: auto !important;
     font-family: var(--code-block-font-mobile) !important;
     font-size: 0.98rem !important;
     line-height: 1.50 !important;
+    letter-spacing: 0.01em !important;
+    padding: 10px 12px !important;
+    border: 1px solid var(--code-border) !important;
+    border-radius: var(--code-radius) !important;
+    background: #eef2f6 !important;
+    color: #020617 !important;
+    font-weight: 600 !important;
+    tab-size: 4 !important;
+  }
+
+  /* Table cell code blocks slightly smaller on mobile */
+  td pre,
+  td pre code {
+    display: block !important;
+    white-space: pre !important;
+    overflow-x: auto !important;
+    font-family: var(--code-block-font-mobile) !important;
+    font-size: 0.94rem !important;
+    line-height: 1.48 !important;
     letter-spacing: 0.01em !important;
     padding: 10px 12px !important;
     border: 1px solid var(--code-border) !important;
@@ -746,8 +764,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   pre code,
   .markdown pre code,
   .copy-button-output pre,
-  .copy-button-table pre,
-  td pre {
+  .copy-button-table pre {
     font-family: var(--code-block-font-mobile) !important;
     font-size: 0.95rem !important;
     line-height: 1.55 !important;
@@ -771,6 +788,18 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   td .markdown code {
     color: #f8fafc !important;
     font-weight: 700 !important;
+  }
+
+  /* Table cell code blocks slightly smaller on dark mobile */
+  td pre,
+  td pre code {
+    font-family: var(--code-block-font-mobile) !important;
+    font-size: 0.92rem !important;
+    line-height: 1.55 !important;
+    letter-spacing: 0.01em !important;
+    color: #f8fafc !important;
+    background: #0f172a !important;
+    font-weight: 600 !important;
   }
 }
 
@@ -830,6 +859,13 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   td pre {
     font-size: 0.92rem !important;
     line-height: 1.48 !important;
+  }
+
+  /* Slightly smaller table-cell block code on very small screens */
+  td pre,
+  td pre code {
+    font-size: 0.90rem !important;
+    line-height: 1.46 !important;
   }
 }
 
