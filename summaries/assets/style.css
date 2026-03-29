@@ -679,6 +679,17 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     color: #050816 !important;
   }
 
+  /* Make code inside table cells a little larger and darker for readability */
+  td code,
+  td code.inline-code,
+  td .markdown code {
+    font-size: clamp(1.00rem, 3.1vw, 1.06rem) !important;
+    line-height: 1.28 !important;
+    padding: 0.16em 0.44em !important;
+    color: #020617 !important;
+    font-weight: 700 !important;
+  }
+
   /* Real code blocks, including code blocks placed inside table cells */
   pre,
   .markdown pre,
@@ -698,14 +709,14 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     white-space: pre !important;
     overflow-x: auto !important;
     font-family: var(--code-block-font-mobile) !important;
-    font-size: 0.96rem !important;
+    font-size: 0.98rem !important;
     line-height: 1.50 !important;
     letter-spacing: 0.01em !important;
     padding: 10px 12px !important;
     border: 1px solid var(--code-border) !important;
     border-radius: var(--code-radius) !important;
     background: #eef2f6 !important;
-    color: #050816 !important;
+    color: #020617 !important;
     font-weight: 600 !important;
     tab-size: 4 !important;
   }
@@ -738,7 +749,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   .copy-button-table pre,
   td pre {
     font-family: var(--code-block-font-mobile) !important;
-    font-size: 0.93rem !important;
+    font-size: 0.95rem !important;
     line-height: 1.55 !important;
     letter-spacing: 0.01em !important;
     color: #f8fafc !important;
@@ -752,6 +763,14 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   code.inline-code {
     background: #1e293b !important;
     color: #f8fafc !important;
+  }
+
+  /* Slightly brighter table-cell code on dark mobile for readability */
+  td code,
+  td code.inline-code,
+  td .markdown code {
+    color: #f8fafc !important;
+    font-weight: 700 !important;
   }
 }
 
