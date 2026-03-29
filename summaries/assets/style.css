@@ -684,11 +684,11 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   td code.inline-code,
   td .markdown code {
     font-family: Inter, var(--font-sans) !important;
-    font-size: clamp(1.00rem, 3.1vw, 1.08rem) !important;
+    font-size: clamp(0.90rem, 2.8vw, 0.98rem) !important;
     line-height: 1.28 !important;
     padding: 0.15em 0.42em !important;
     color: #020617 !important;
-    font-weight: 700 !important;
+    font-weight: 400 !important;
   }
 
   /* Real code blocks, including code blocks placed inside table cells */
@@ -728,7 +728,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     white-space: pre !important;
     overflow-x: auto !important;
     font-family: Inter, var(--font-sans) !important;
-    font-size: 0.98rem !important;
+    font-size: 0.94rem !important;
     line-height: 1.48 !important;
     letter-spacing: 0.01em !important;
     padding: 10px 12px !important;
@@ -736,7 +736,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     border-radius: var(--code-radius) !important;
     background: #eef2f6 !important;
     color: #020617 !important;
-    font-weight: 600 !important;
+    font-weight: 400 !important;
     tab-size: 4 !important;
   }
 
@@ -789,19 +789,19 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   td .markdown code {
     font-family: Inter, var(--font-sans) !important;
     color: #f8fafc !important;
-    font-weight: 700 !important;
+    font-weight: 400 !important;
   }
 
   /* Table cell code blocks slightly smaller on dark mobile */
   td pre,
   td pre code {
     font-family: Inter, var(--font-sans) !important;
-    font-size: 0.96rem !important;
+    font-size: 0.94rem !important;
     line-height: 1.55 !important;
     letter-spacing: 0.01em !important;
     color: #f8fafc !important;
     background: #0f172a !important;
-    font-weight: 600 !important;
+    font-weight: 400 !important;
   }
 }
 
@@ -867,7 +867,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   td pre,
   td pre code {
     font-family: Inter, var(--font-sans) !important;
-    font-size: 0.95rem !important;
+    font-size: 0.92rem !important;
     line-height: 1.46 !important;
   }
 }
