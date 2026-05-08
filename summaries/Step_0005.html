@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Tables Viewer v2.1</title>
+<style>:root{--main-header-height:56px;} .table-wrapper{opacity:0;min-height:24px;transition:opacity .12s linear}</style>
+<link rel="stylesheet" href="assets/style.css?v=1774776061">
+<link rel="stylesheet" href="assets/overrides.css?v=1778259045">
+</head><body>
+<div id="tables-viewer" role="region" aria-label="Tables viewer">
+<div id="stickyMainHeader">
+<div id="tv-header">
+<div><h1>Tables Viewer v2.1</h1></div>
+<div style="display:flex;gap:8px;align-items:center;">
+<input id="searchBox" class="tv-search" type="search" placeholder="Search" aria-label="Search tables" />
+<button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button>
+<button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button>
+<button id="copyAllPlainBtn" class="copy-btn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button>
+<button id="copyAllTablesBtn" class="copy-all-btn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy All Tables (Markdown)">Copy All Tables (Markdown)</button>
+<button id="copyAllMdBtn" style="display:none" aria-hidden="true"></button>
+<button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset All Tables">Reset All Tables</button>
+</div></div>
+<script>
+(function(){
+  function ensureDelegation(){
+    try {
+      var vis = document.getElementById('copyAllTablesBtn');
+      var alias = document.getElementById('copyAllMdBtn');
+      if(!vis || !alias) return;
+      alias.addEventListener = function(type, listener, options){
+        vis.addEventListener(type, listener, options);
+      };
+      alias.removeEventListener = function(type, listener, options){
+        vis.removeEventListener(type, listener, options);
+      };
+      Object.defineProperty(alias, 'onclick', {
+        set: function(fn){ vis.onclick = fn; },
+        get: function(){ return vis.onclick; },
+        configurable: true
+      });
+      alias.focus = function(){ vis.focus(); };
+      alias.blur = function(){ vis.blur(); };
+    } catch(e) {
+      try{ console && console.warn && console.warn('alias delegation failed', e); }catch(_){} 
+    }
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', ensureDelegation);
+  } else {
+    ensureDelegation();
+  }
+})();
+</script>
+<noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
+<div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1">Table 1</a></li>
+<li class="toc-item"><a class="toc-link" href="#Table2">Table 2</a></li></ul></div></div>
+<div class="table-caption" id="Table1" data-table="Step_0005_01" style="margin-top:2mm;margin-left:3mm;"><strong>Table 1</strong></div>
+<div class="table-wrapper" data-table-id="table-1"><div class="table-heading-bar" aria-label="Table heading"></div><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button type="button" class="copy-plain-btn" data-action="copy-plain" onclick="copyTablePlain(this)">Copy Plain Table</button><button type="button" class="copy-markdown-btn" data-action="copy-markdown" onclick="copyTableMarkdown(this)">Copy Markdown Table</button><button type="button" class="export-csv-btn" data-action="export-csv" onclick="exportTableCSV(this)">Export CSV</button><button type="button" class="export-json-btn" data-action="export-json" onclick="exportTableJSON(this)">Export JSON</button><button type="button" class="export-xlsx-btn" data-action="export-xlsx" onclick="exportTableXLSX(this)">Export XLSX</button><button type="button" class="export-pdf-btn" data-action="export-pdf" onclick="exportTablePDF(this)">Export PDF</button><button type="button" class="export-markdown-btn export-markdown-initial" data-action="export-markdown" onclick="exportTableMarkdown(this)" style="display:none" data-initial-hidden="1">Export Markdown</button></div><div style="display:flex; align-items:center;"><button type="button" class="toggle-table-btn" data-action="toggle-collapse" onclick="toggleTable(this)">Collapse Table</button></div></div><table class="tv-table" role="table"><thead><tr><th class="tv-col-left" role="button" aria-label="Sort by Step 1"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Step 1</div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th></tr></thead><tbody><tr><td data-label="Step 1"> <strong>1. Make a copy of the May workbook and rename it</strong><br>Copy <code>Salaries YJKN 2026 MAY Please adjust.xlsm</code> and rename the copy to <code>Salaries YJKN 2026 MAR Final.xlsm</code>.<br><strong>2. Open both workbooks</strong><br>Open <code>Salaries YJKN 2026 MAR Final.xlsm</code> and the March target workbook. Keep both files open.<br><strong>3. Switch to the March final workbook</strong><br>Activate <code>Salaries YJKN 2026 MAR Final.xlsm</code>.<br><strong>4. Copy columns A to L from the March workbook</strong><br>Select columns <strong>A to L</strong> and copy them.<br><strong>5. Return to the target workbook</strong><br>Switch back to the workbook being updated.<br><strong>6. Paste the copied data starting at A1</strong><br>Select cell <strong>A1</strong> and paste the copied content into the active sheet.<br><strong>7. Freeze the top rows</strong><br>Select cell <strong>A5</strong>, scroll slightly upward, and freeze panes so the top rows stay visible.<br><strong>8. Rename the summary sheet</strong><br>Change <code>Summary_MAY</code> to <code>Summary_MAR</code>.<br><strong>9. Rename the first monthly sheet</strong><br>Change <code>MAY_1</code> to <code>MAR_1</code>.<br><strong>10. Update the period label</strong><br>Go to cell <strong>J3</strong> and type <code>PERIODE MARET 2026</code>.<br><strong>11. Copy the same period label to the second monthly sheet</strong><br>Copy cell <strong>J3</strong>, paste it into <code>MAY_2</code>, then rename that sheet to <code>MAR_2</code>.<br><strong>12. Duplicate the second March sheet</strong><br>Copy <code>MAR_2</code>, place the copy after the third sheet, and rename the copied sheet to <code>MAR_3</code>.<br><strong>13. Save the workbook</strong><br>Save the file to keep all changes. </td></tr></tbody></table></div><div class="row-count">Rows: 1</div></div><div class="table-caption" id="Table2" data-table="Step_0005_02" style="margin-top:2mm;margin-left:3mm;"><strong>Table 2</strong></div>
+<div class="table-wrapper" data-table-id="table-2"><div class="table-heading-bar" aria-label="Table heading"></div><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button type="button" class="copy-plain-btn" data-action="copy-plain" onclick="copyTablePlain(this)">Copy Plain Table</button><button type="button" class="copy-markdown-btn" data-action="copy-markdown" onclick="copyTableMarkdown(this)">Copy Markdown Table</button><button type="button" class="export-csv-btn" data-action="export-csv" onclick="exportTableCSV(this)">Export CSV</button><button type="button" class="export-json-btn" data-action="export-json" onclick="exportTableJSON(this)">Export JSON</button><button type="button" class="export-xlsx-btn" data-action="export-xlsx" onclick="exportTableXLSX(this)">Export XLSX</button><button type="button" class="export-pdf-btn" data-action="export-pdf" onclick="exportTablePDF(this)">Export PDF</button><button type="button" class="export-markdown-btn export-markdown-initial" data-action="export-markdown" onclick="exportTableMarkdown(this)" style="display:none" data-initial-hidden="1">Export Markdown</button></div><div style="display:flex; align-items:center;"><button type="button" class="toggle-table-btn" data-action="toggle-collapse" onclick="toggleTable(this)">Collapse Table</button></div></div><table class="tv-table" role="table"><thead><tr><th class="tv-col-left" role="button" aria-label="Sort by Step 2"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Step 2</div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th></tr></thead><tbody><tr><td data-label="Step 2"> <strong>1. Open the destination workbook</strong><br>Open <code>Salaries YJKN 2026 MAR Final.xlsm</code>. This is the workbook that receives the updated data.<br><br><strong>2. Open the source workbook</strong><br>Open <code>Salaries YJKN 2026.xlsm</code>. This workbook provides the data to copy.<br><br><strong>3. Go to the MAR sheet</strong><br>Select the <code>MAR</code> worksheet in <code>Salaries YJKN 2026.xlsm</code>.<br><br><strong>4. Unprotect the MAR sheet</strong><br>Remove sheet protection from <code>MAR</code> so changes can be made.<br><br><strong>5. Set the outline view on the MAR sheet</strong><br>Show no row levels and show 2 column levels to control the visible grouped data.<br><br><strong>6. Filter the MAR sheet</strong><br>Apply an in-place advanced filter on <code>J5:BI245</code> using the criteria range <code>Salaries YJKN 2026 MAR Final.xlsm Summary_MAR!B4:B189</code>. This keeps only the rows that match the summary criteria.<br><br><strong>7. Go to the MAR_1 sheet in Salaries YJKN 2026 MAR Final.xlsm</strong><br>Select the <code>MAR_1</code> worksheet. This sheet receives copied values and formatting.<br><br><strong>8. Copy values from the source MAR sheet into MAR_1</strong><br>Copy the values from <code>J5:V245</code> in the source workbook’s <code>MAR</code> sheet into <code>J5:V245</code> in <code>MAR_1</code>.<br><br><strong>9. Copy formats for the same range</strong><br>Copy <code>J5:V245</code> from the source <code>MAR</code> sheet and paste only the formatting into <code>MAR_1</code> starting at <code>J5</code>.<br><br><strong>10. Repeat the same process for the next range</strong><br>Copy the values from <code>AA5:AE245</code> in the source <code>MAR</code> sheet into <code>AA5:AE245</code> in <code>MAR_1</code>, then paste only the formats for that range.<br><br><strong>11. Repeat the same process for the last range</strong><br>Copy the values from <code>AN5:AT245</code> in the source <code>MAR</code> sheet into <code>AN5:AT245</code> in <code>MAR_1</code>, then paste only the formats for that range.<br><br><strong>12. Copy the range W6:Z6</strong><br>Copy the top row of that block so it can be filled down to the last row.<br><br><strong>13. Fill W6:Z down to the last row</strong><br>Paste the copied <code>W6:Z6</code> range down through the full data area ending at the last used row in column W.<br><br><strong>14. Copy the range AF6:AJ6</strong><br>Take the first row of the AF:AJ block for duplication.<br><br><strong>15. Fill AF6:AJ down to the last row</strong><br>Paste the copied <code>AF6:AJ6</code> range down through the matching rows in the sheet.<br><br><strong>16. Copy the range AU6:AY6</strong><br>Take the first row of the AU:AY block for duplication.<br><br><strong>17. Fill AU6:AY down to the last row</strong><br>Paste the copied <code>AU6:AY6</code> range down through the matching rows in the sheet.<br><br><strong>18. Copy to MAR_2 and MAR_3</strong><br>Select all cells in the active sheet and copy the data.<br>Switch to <code>MAR_2</code>, select all cells, and paste the copied data.<br>Switch to <code>MAR_3</code>, select all cells, and paste the same copied data. </td></tr></tbody></table></div><div class="row-count">Rows: 1</div></div><script src="assets/xlsx.full.min.js?v=1758605028" defer></script>
+<script src="assets/script.js?v=1759748863" defer></script>
+<script src="assets/worker.js?v=1758331710" defer></script>
+<script>
+(function(){
+  const template = "{table}_{date}";
+  const userVal = "";
+  const hrefPrefix = "assets";
+  function formatName(tableName) {
+    const date = (new Date()).toISOString().slice(0,10);
+    return template.replace('{table}', tableName).replace('{date}', date).replace('{user}', userVal);
+  }
+  const btn = document.getElementById('exportBtn');
+  if(btn) {
+    btn.addEventListener('click', async function() {
+      try {
+        const html = document.documentElement.outerHTML;
+        if(html.length > 2000000) { alert('Export refused: html too large'); return; }
+        if(window.Worker) {
+          const workerUrl = (function(){ try{ return hrefPrefix + '/worker.js'; }catch(e){ return null; } })();
+          if(workerUrl) {
+            try {
+              const worker = new Worker(workerUrl);
+              worker.postMessage({html: html, format: 'pdf'});
+              worker.onmessage = function(e) { console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+            } catch(err) { console.warn('Worker create failed', err); alert('Worker not available'); }
+          } else { alert('Worker not available'); }
+        } else { alert('Export worker not supported in this environment.'); }
+      } catch(err) { console.warn('Export failed', err); alert('Export worker not available. See console for details.'); }
+    });
+  }
+})();
+window.addEventListener('load', function(){ try{ document.querySelectorAll('.table-wrapper').forEach(function(e){ e.style.opacity='1'; }); }catch(e){} });
+</script>
+</div>
+</body>
+</html>
