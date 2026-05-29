@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Tables Viewer v2.1</title>
+<style>:root{--main-header-height:56px;} .table-wrapper{opacity:0;min-height:24px;transition:opacity .12s linear}</style>
+<link rel="stylesheet" href="assets/style.css?v=1774776061">
+<link rel="stylesheet" href="assets/overrides.css?v=1780034253">
+</head><body>
+<div id="tables-viewer" role="region" aria-label="Tables viewer">
+<div id="stickyMainHeader">
+<div id="tv-header">
+<div><h1>Tables Viewer v2.1</h1></div>
+<div style="display:flex;gap:8px;align-items:center;">
+<input id="searchBox" class="tv-search" type="search" placeholder="Search" aria-label="Search tables" />
+<button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button>
+<button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button>
+<button id="copyAllPlainBtn" class="copy-btn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button>
+<button id="copyAllTablesBtn" class="copy-all-btn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy All Tables (Markdown)">Copy All Tables (Markdown)</button>
+<button id="copyAllMdBtn" style="display:none" aria-hidden="true"></button>
+<button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset All Tables">Reset All Tables</button>
+</div></div>
+<script>
+(function(){
+  function ensureDelegation(){
+    try {
+      var vis = document.getElementById('copyAllTablesBtn');
+      var alias = document.getElementById('copyAllMdBtn');
+      if(!vis || !alias) return;
+      alias.addEventListener = function(type, listener, options){
+        vis.addEventListener(type, listener, options);
+      };
+      alias.removeEventListener = function(type, listener, options){
+        vis.removeEventListener(type, listener, options);
+      };
+      Object.defineProperty(alias, 'onclick', {
+        set: function(fn){ vis.onclick = fn; },
+        get: function(){ return vis.onclick; },
+        configurable: true
+      });
+      alias.focus = function(){ vis.focus(); };
+      alias.blur = function(){ vis.blur(); };
+    } catch(e) {
+      try{ console && console.warn && console.warn('alias delegation failed', e); }catch(_){} 
+    }
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', ensureDelegation);
+  } else {
+    ensureDelegation();
+  }
+})();
+</script>
+<noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
+<div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1">Table 1</a></li>
+<li class="toc-item"><a class="toc-link" href="#Table2">Table 2</a></li></ul></div></div>
+<div class="table-caption" id="Table1" data-table="YJKN_0027_01" style="margin-top:2mm;margin-left:3mm;"><strong>Table 1</strong></div>
+<div class="table-wrapper" data-table-id="table-1"><div class="table-heading-bar" aria-label="Table heading"></div><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button type="button" class="copy-plain-btn" data-action="copy-plain" onclick="copyTablePlain(this)">Copy Plain Table</button><button type="button" class="copy-markdown-btn" data-action="copy-markdown" onclick="copyTableMarkdown(this)">Copy Markdown Table</button><button type="button" class="export-csv-btn" data-action="export-csv" onclick="exportTableCSV(this)">Export CSV</button><button type="button" class="export-json-btn" data-action="export-json" onclick="exportTableJSON(this)">Export JSON</button><button type="button" class="export-xlsx-btn" data-action="export-xlsx" onclick="exportTableXLSX(this)">Export XLSX</button><button type="button" class="export-pdf-btn" data-action="export-pdf" onclick="exportTablePDF(this)">Export PDF</button><button type="button" class="export-markdown-btn export-markdown-initial" data-action="export-markdown" onclick="exportTableMarkdown(this)" style="display:none" data-initial-hidden="1">Export Markdown</button></div><div style="display:flex; align-items:center;"><button type="button" class="toggle-table-btn" data-action="toggle-collapse" onclick="toggleTable(this)">Collapse Table</button></div></div><table class="tv-table" role="table"><thead><tr><th class="tv-col-left" role="button" aria-label="Sort by Consolidated comments"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Consolidated comments</div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th></tr></thead><tbody><tr><td data-label="Consolidated comments"> 1. The policy is sound in concept and the full manual is much stronger operationally, but both documents still need clearer terminology, defined ownership, and a simpler distinction between policy, procedure, and system design. </td></tr><tr><td data-label="Consolidated comments"> 2. The accounting treatment is broadly correct: monthly accrual, settlement at payment, and no leave accrual. The main policy gap is whether Option 1 and Option 2 are both allowed by default or one must be fixed as the standard treatment by unit. </td></tr><tr><td data-label="Consolidated comments"> 3. The strongest improvement area is clarity in the calculation logic and examples. Appendix 1 and Appendix 2 should be rewritten so the assumptions, calculation method, and journal outcomes are easier to follow and consistent in format. </td></tr><tr><td data-label="Consolidated comments"> 4. The full manual is well designed around RequestID and AccrualRegister, but it needs a clearer minimum mandatory pack: which fields, documents, and approvals are compulsory for every case, and which are optional or conditional. </td></tr><tr><td data-label="Consolidated comments"> 5. The validation framework is useful, but the hard blockers, override conditions, and recommended checks should be separated more clearly so users do not treat every control as equally mandatory. </td></tr><tr><td data-label="Consolidated comments"> 6. Journal mapping, FX, and payment variance treatment are practical, but the policy should state cleaner precedence rules for functional currency, donor reporting currency, payment currency, and exchange-rate source hierarchy. </td></tr><tr><td data-label="Consolidated comments"> 7. The tax, payroll, aggregation, dispute, and restatement sections are sensible, but they need a more usable decision tree or escalation matrix for local teams, especially where jurisdictional treatment differs. </td></tr><tr><td data-label="Consolidated comments"> 8. The automation design is strong and implementation-ready, but operational ownership is still not fully explicit. The policy should say who owns failure response, sequence service recovery, exception handling, and evidence pack completeness. </td></tr><tr><td data-label="Consolidated comments"> 9. The controls, sampling, retention, and security sections are audit-friendly, but they would be stronger if each control linked directly to a test, evidence requirement, retention rule, and responsible owner. </td></tr><tr><td data-label="Consolidated comments"> 10. Overall, the documents are strong as a master operating model. The main next step is simplification and normalization: reduce ambiguity, define the minimum mandatory standard, and make the policy easier for Finance teams to apply consistently without interpretation differences. </td></tr></tbody></table></div><div class="row-count">Rows: 10</div></div><div class="table-caption" id="Table2" data-table="YJKN_0027_02" style="margin-top:2mm;margin-left:3mm;"><strong>Table 2</strong></div>
+<div class="table-wrapper" data-table-id="table-2"><div class="table-heading-bar" aria-label="Table heading"></div><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button type="button" class="copy-plain-btn" data-action="copy-plain" onclick="copyTablePlain(this)">Copy Plain Table</button><button type="button" class="copy-markdown-btn" data-action="copy-markdown" onclick="copyTableMarkdown(this)">Copy Markdown Table</button><button type="button" class="export-csv-btn" data-action="export-csv" onclick="exportTableCSV(this)">Export CSV</button><button type="button" class="export-json-btn" data-action="export-json" onclick="exportTableJSON(this)">Export JSON</button><button type="button" class="export-xlsx-btn" data-action="export-xlsx" onclick="exportTableXLSX(this)">Export XLSX</button><button type="button" class="export-pdf-btn" data-action="export-pdf" onclick="exportTablePDF(this)">Export PDF</button><button type="button" class="export-markdown-btn export-markdown-initial" data-action="export-markdown" onclick="exportTableMarkdown(this)" style="display:none" data-initial-hidden="1">Export Markdown</button></div><div style="display:flex; align-items:center;"><button type="button" class="toggle-table-btn" data-action="toggle-collapse" onclick="toggleTable(this)">Collapse Table</button></div></div><table class="tv-table" role="table"><thead><tr><th class="tv-col-left" role="button" aria-label="Sort by Section"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Section</div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th><th class="tv-col" role="button" aria-label="Sort by Recommended refinement"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Recommended refinement</div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th></tr></thead><tbody><tr><td data-label="Section"> Title and purpose </td><td data-label="Recommended refinement"> Rename the note to make it clear this is a policy instruction, not only guidance. For example: <strong>OUCRU Finance Processes – Bonus Accrual Policy</strong>. Add a short purpose statement saying the policy sets the minimum mandatory treatment for all units. </td></tr><tr><td data-label="Section"> Definitions and scope </td><td data-label="Recommended refinement"> Define key terms at the start: <strong>Approval Code</strong>, <strong>Head of Finance</strong>, <strong>bonus accrual</strong>, <strong>functional currency</strong>, <strong>payment period</strong>, <strong>local unit</strong>, and <strong>variance</strong>. State whether the policy applies to all OUCRU entities and whether any local add-ons are allowed only if they do not conflict with the policy. </td></tr><tr><td data-label="Section"> Recognition principle </td><td data-label="Recommended refinement"> Strengthen the opening paragraph by stating the core rule more directly: bonus expense must be accrued monthly in the period service is rendered, based on the best estimate of the amount expected to be paid. Keep the reference to service already rendered, but make the accounting rule explicit and concise. </td></tr><tr><td data-label="Section"> Allocation by Approval Code </td><td data-label="Recommended refinement"> Clarify that the bonus accrual follows the employee’s Approval Code in the month the service is rendered, not the payment date. Add one sentence stating that if an employee moves between Approval Codes during the year, accruals must be split by service period. </td></tr><tr><td data-label="Section"> Payment treatment </td><td data-label="Recommended refinement"> Replace the current “Option 1 / Option 2” wording with a clearer policy choice. State whether OUCRU requires one standard method, or whether each unit may choose either method subject to consistent application and approval. If both are allowed, specify who approves the chosen method and that the choice must be documented and applied consistently. </td></tr><tr><td data-label="Section"> FX and residual balances </td><td data-label="Recommended refinement"> Tighten the FX wording. State the source of exchange rates, when translation is performed, and how exchange differences are recognised. The note should also specify that residual balances from rounding or FX must be reconciled regularly and cleared only to the appropriate realised FX gain/loss account or other approved account. </td></tr><tr><td data-label="Section"> Payroll sheet modifications </td><td data-label="Recommended refinement"> Add the formula or calculation logic for the two new fields. Define whether <strong>Bonus Accrual – Monthly</strong> is based on the current month’s salary, a pro-rata annual bonus amount, or another basis. Define how <strong>Cumulative Balance</strong> is rolled forward, reversed, or cleared at payment. </td></tr><tr><td data-label="Section"> Appendix 1 </td><td data-label="Recommended refinement"> Simplify and separate the logic. The current appendix mixes assumptions, materiality assessment, and examples. Rewrite it into three parts: 1) factors included, 2) factors excluded, 3) examples of how the monthly accrual is calculated. Remove any ambiguity around salary increases, probation, promotion, and exchange rate effects by stating clearly which are included in the monthly estimate and which are only adjusted at payment. </td></tr><tr><td data-label="Section"> Control and auditability </td><td data-label="Recommended refinement"> Add a short section on evidence and approval. State who prepares the accrual, who reviews it, what supporting documents are required, and where the calculation workbook is retained. This will align the note with the full manual’s control expectations. </td></tr><tr><td data-label="Section"> Suggested policy simplification </td><td data-label="Recommended refinement"> The note would be stronger if the main body contained only the mandatory rule set, while the appendices contained worked examples. That will reduce interpretation differences across units and make implementation more consistent. </td></tr><tr><td data-label="Section"> Suggested wording for the key rule </td><td data-label="Recommended refinement"> <strong>Monthly bonus expense must be recognised in the accounting period in which employee services are rendered. The accrual must follow the Approval Code to which the service relates in that month. Any difference between accrued and actual payment must be recognised in the payment period in accordance with the approved settlement method and posted consistently across periods.</strong> </td></tr></tbody></table></div><div class="row-count">Rows: 11</div></div><script src="assets/xlsx.full.min.js?v=1758605028" defer></script>
+<script src="assets/script.js?v=1759748863" defer></script>
+<script src="assets/worker.js?v=1758331710" defer></script>
+<script>
+(function(){
+  const template = "{table}_{date}";
+  const userVal = "";
+  const hrefPrefix = "assets";
+  function formatName(tableName) {
+    const date = (new Date()).toISOString().slice(0,10);
+    return template.replace('{table}', tableName).replace('{date}', date).replace('{user}', userVal);
+  }
+  const btn = document.getElementById('exportBtn');
+  if(btn) {
+    btn.addEventListener('click', async function() {
+      try {
+        const html = document.documentElement.outerHTML;
+        if(html.length > 2000000) { alert('Export refused: html too large'); return; }
+        if(window.Worker) {
+          const workerUrl = (function(){ try{ return hrefPrefix + '/worker.js'; }catch(e){ return null; } })();
+          if(workerUrl) {
+            try {
+              const worker = new Worker(workerUrl);
+              worker.postMessage({html: html, format: 'pdf'});
+              worker.onmessage = function(e) { console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+            } catch(err) { console.warn('Worker create failed', err); alert('Worker not available'); }
+          } else { alert('Worker not available'); }
+        } else { alert('Export worker not supported in this environment.'); }
+      } catch(err) { console.warn('Export failed', err); alert('Export worker not available. See console for details.'); }
+    });
+  }
+})();
+window.addEventListener('load', function(){ try{ document.querySelectorAll('.table-wrapper').forEach(function(e){ e.style.opacity='1'; }); }catch(e){} });
+</script>
+</div>
+</body>
+</html>
