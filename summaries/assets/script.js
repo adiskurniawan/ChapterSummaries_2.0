@@ -5,6 +5,7 @@
 // - Avoid clearing tbody.innerHTML during reorder to reduce flicker; append existing nodes to reorder.
 // - Early-hide Export Markdown UI with a CSS injection to reduce flicker, while keeping existing hide functions.
 // - Defensive, careful changes; reviewed for edge-cases and id-preservation.
+// - NEW: Scroll spy for TOC highlighting with auto-scroll for horizontal TOC bars.
 
 (function () {
   'use strict';
@@ -176,6 +177,33 @@
     ensureIndexAndWorkerAttrs(TV_BASE);
     startExtraLoader();
   }
+
+  // -----------------------------
+  // TOC Active Highlight CSS
+  // -----------------------------
+  try {
+    const tocCss = `
+/* tv toc active highlight */
+#tocBar { overflow-x: auto; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+#tocBar a.toc-active {
+  background-color: var(--accent, #2563eb) !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+#tocBar a.toc-active:hover {
+  background-color: var(--accent-hover, #1d4ed8) !important;
+}
+`;
+    if (document.head) {
+      const se = document.createElement('style');
+      se.setAttribute('data-tv-toc-css', '1');
+      se.appendChild(document.createTextNode(tocCss));
+      document.head.appendChild(se);
+    }
+  } catch (e) { /* silent */ }
 
   // -----------------------------
   // Early-hide Export Markdown CSS (reduces flicker)
@@ -584,11 +612,70 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
       const existingUl = tocBar.querySelector('ul');
       if (existingUl) existingUl.remove();
       tocBar.appendChild(ul);
+      try { updateActiveTocItem(); } catch(e){}
     } catch (err) {
       try { console.warn('buildSingleTableToc error', err); } catch (_) {}
     }
   }
   window.buildSingleTableToc = buildSingleTableToc;
+
+  let _tocTicking = false;
+  function updateActiveTocItem() {
+    if (_tocTicking) return;
+    _tocTicking = true;
+    requestAnimationFrame(() => {
+      _tocTicking = false;
+      try {
+        const tocBar = document.getElementById('tocBar');
+        if (!tocBar) return;
+        const links = tocBar.querySelectorAll('a[href^="#"]');
+        if (!links.length) return;
+
+        const headerHeight = document.getElementById('stickyMainHeader')?.offsetHeight || 0;
+        const scrollPos = window.scrollY + headerHeight + 20; 
+
+        let activeId = null;
+        let maxTop = -Infinity;
+        for (let i = 0; i < links.length; i++) {
+          const id = links[i].getAttribute('href').substring(1);
+          const target = document.getElementById(id);
+          if (target) {
+            if (target.style.display === 'none') continue;
+            const rect = target.getBoundingClientRect();
+            if (rect.height === 0 && rect.width === 0) continue; // Hidden by parent or display:none
+            const top = rect.top + window.scrollY;
+            if (top <= scrollPos && top > maxTop) {
+              maxTop = top;
+              activeId = id;
+            }
+          }
+        }
+
+        let activeLink = null;
+        links.forEach(link => {
+          const id = link.getAttribute('href').substring(1);
+          if (id === activeId) {
+            link.classList.add('toc-active');
+            link.setAttribute('aria-current', 'true');
+            activeLink = link;
+          } else {
+            link.classList.remove('toc-active');
+            link.removeAttribute('aria-current');
+          }
+        });
+
+        if (activeLink && tocBar.scrollWidth > tocBar.clientWidth) {
+          const linkRect = activeLink.getBoundingClientRect();
+          const barRect = tocBar.getBoundingClientRect();
+          if (linkRect.left < barRect.left || linkRect.right > barRect.right) {
+            try {
+              activeLink.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            } catch(e){}
+          }
+        }
+      } catch (e) { /* silent */ }
+    });
+  }
 
   // storage: original row orders (per-table list of UIDs), sort states
   let originalRowOrders = []; // e.g. [ ['uid1','uid2',...], ... ]
@@ -727,6 +814,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
 
       updateHeaderSortUI(tableIdx);
       try { updateRowCounts(); } catch (e) {}
+      try { updateActiveTocItem(); } catch (e) {}
     } catch (e) { /* silent */ }
   }
 
@@ -745,6 +833,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
       const toggleAllBtn = document.getElementById('toggleAllBtn');
       if (toggleAllBtn) toggleAllBtn.textContent = anyExpanded ? "Collapse All Tables" : "Expand All Tables";
       try { updateRowCounts(); } catch (e) {}
+      try { updateActiveTocItem(); } catch (e) {}
     } catch (e) { /* silent */ }
   }
 
@@ -763,6 +852,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
         if (toggleAllBtn) toggleAllBtn.textContent = "Collapse All Tables";
       }
       try { updateRowCounts(); } catch (e) {}
+      try { updateActiveTocItem(); } catch (e) {}
     } catch (e) { /* silent */ }
   }
 
@@ -1363,6 +1453,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
         window.scrollTo({ top: scrollTop + rect.top - headerHeight - 5, behavior: 'smooth' });
       }
       try { updateRowCounts(); } catch (_) {}
+      try { updateActiveTocItem(); } catch (_) {}
     } catch (_) {}
   }
 
@@ -1610,6 +1701,7 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
 
       // Initial row counts
       try { updateRowCounts(); } catch (e) {}
+      try { updateActiveTocItem(); } catch (e) {}
     } catch (e) { /* silent */ }
   });
 
@@ -1664,11 +1756,13 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
   window.addEventListener("scroll", function () {
     try {
       const btn = document.getElementById("backToTop");
-      if (!btn) return;
-      if (document.documentElement.scrollTop > 200 || window.scrollY > 200) btn.style.display = "block";
-      else btn.style.display = "none";
+      if (btn) {
+        if (document.documentElement.scrollTop > 200 || window.scrollY > 200) btn.style.display = "block";
+        else btn.style.display = "none";
+      }
     } catch (e) { /* silent */ }
-  });
+    try { updateActiveTocItem(); } catch (e) { /* silent */ }
+  }, { passive: true });
 
   function backToTop() { try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) {} }
 
