@@ -252,9 +252,9 @@ code:not(pre code) {
   color: var(--inline-code-text);
   padding: 0.15em 0.4em;
   border-radius: 6px;
-  font-size: 0.88em;
+  font-size: 0.95em;
   font-weight: 500;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   word-break: break-word;
 }
 
@@ -300,8 +300,9 @@ td code:not(pre code) {
   color: var(--inline-code-text);
   padding: 2px 6px;
   border-radius: 6px;
-  font-size: 0.88em;
+  font-size: 0.95em;
   font-weight: 500;
+  font-family: var(--font-sans);
 }
 td pre {
   margin: 0;
@@ -369,11 +370,12 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 @media (max-width: 720px) {
   /* Inline code on mobile */
   code:not(pre code), td code:not(pre code) {
-    font-size: 0.85em !important;
+    font-size: 0.93em !important;
     padding: 0.15em 0.4em !important;
     background: var(--inline-code-bg) !important;
     color: var(--inline-code-text) !important;
     font-weight: 500 !important;
+    font-family: var(--font-sans) !important;
     white-space: normal !important;
     overflow-wrap: anywhere !important;
   }
@@ -462,7 +464,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 }
 
 @media (max-width: 360px) {
-  code:not(pre code), td code:not(pre code) { font-size: 0.82rem !important; padding-left: 0.12em !important; padding-right: 0.26em !important; }
+  code:not(pre code), td code:not(pre code) { font-size: 0.90rem !important; padding-left: 0.12em !important; padding-right: 0.26em !important; }
   pre code, .markdown pre code, td pre code { font-size: 0.80rem !important; line-height: 1.55 !important; }
 }
 
