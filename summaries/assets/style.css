@@ -1,4 +1,4 @@
-/* style.css — Qwen-Style Blue Theme & Mobile Optimized (Full Revised) */
+/* style.css — Qwen-Style Blue Theme, Mobile Optimized & VBA/Code Neatness */
 
 /* ========== Variables ========== */
 :root {
@@ -47,7 +47,7 @@
   --easing: cubic-bezier(.2, .9, .2, 1);
 
   /* code block font */
-  --code-block-font: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Courier New", monospace;
+  --code-block-font: "JetBrains Mono", "IBM Plex Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Courier New", monospace;
   --code-block-font-mobile: "Roboto Mono", "Droid Sans Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
@@ -245,7 +245,7 @@ td ol { counter-reset: table-ol; padding-left: 1.6rem; }
 td ol > li { counter-increment: table-ol; }
 td ol > li::before { content: counter(table-ol) "."; color: var(--text); display: inline-block; width: 2.2ch; margin-left: -2.2ch; }
 
-/* ========== QWEN-STYLE CODE STYLING ========== */
+/* ========== QWEN-STYLE CODE STYLING (NEAT & ALIGNED) ========== */
 /* Standard Inline Code */
 code:not(pre code) {
   background: var(--inline-code-bg);
@@ -264,6 +264,7 @@ pre {
   padding: 0;
   background: transparent;
 }
+
 pre code {
   background: var(--code-bg);
   display: block;
@@ -272,10 +273,19 @@ pre code {
   border: 1px solid var(--code-border);
   border-left: 4px solid var(--code-accent); /* The Qwen Blue Accent */
   overflow-x: auto;
+  
+  /* --- STRICT CODE NEATNESS RULES (VBA/Python/JS) --- */
+  tab-size: 4;
+  -moz-tab-size: 4;
+  white-space: pre;           /* Preserve exact tabs and spaces */
+  word-break: normal;         /* Never break words mid-line */
+  word-wrap: normal;          /* Never wrap long lines */
+  overflow-wrap: normal;      /* Hard override for modern browsers */
+  letter-spacing: 0.015em;    /* Tiny horizontal breathing room for neatness */
+  /* ------------------------------------------------------ */
+
   line-height: 1.6;
   font-size: 0.92rem;
-  white-space: pre;
-  tab-size: 4;
   font-variant-numeric: tabular-nums;
   color: var(--code-text-light);
   font-weight: 400;
@@ -308,6 +318,15 @@ td pre code {
   color: var(--code-text-light);
   font-size: 0.9rem;
   line-height: 1.55;
+  
+  /* Apply neatness rules inside tables too */
+  tab-size: 4;
+  -moz-tab-size: 4;
+  white-space: pre;
+  word-break: normal;
+  word-wrap: normal;
+  overflow-wrap: normal;
+  letter-spacing: 0.015em;
 }
 
 /* Dark mode code adjustments */
@@ -375,8 +394,15 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     line-height: 1.65 !important;
     color: var(--code-text-light) !important;
     font-weight: 400 !important;
+    
+    /* Strict neatness on mobile */
+    tab-size: 4 !important;
+    -moz-tab-size: 4 !important;
     white-space: pre !important;
-    letter-spacing: 0.01em !important;
+    word-break: normal !important;
+    word-wrap: normal !important;
+    overflow-wrap: normal !important;
+    letter-spacing: 0.015em !important;
   }
 
   /* Block code inside tables */
@@ -391,9 +417,17 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     line-height: 1.6 !important;
     color: var(--code-text-light) !important;
     font-weight: 400 !important;
-    white-space: pre !important;
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch;
+    
+    /* Strict neatness inside tables on mobile */
+    tab-size: 4 !important;
+    -moz-tab-size: 4 !important;
+    white-space: pre !important;
+    word-break: normal !important;
+    word-wrap: normal !important;
+    overflow-wrap: normal !important;
+    letter-spacing: 0.015em !important;
   }
 
   /* Custom Blue Scrollbar for Code Blocks */
