@@ -464,7 +464,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 }
 
 @media (max-width: 360px) {
-  code:not(pre code), td code:not(pre code) { font-size: 0.90rem !important; padding-left: 0.12em !important; padding-right: 0.26em !important; }
+  code:not(pre code), td code:not(pre code) { font-size: 0.90rem !important; padding-left: 0.12em !important; padding-right: 0.26em !important; font-family: var(--font-sans) !important; }
   pre code, .markdown pre code, td pre code { font-size: 0.80rem !important; line-height: 1.55 !important; }
 }
 
