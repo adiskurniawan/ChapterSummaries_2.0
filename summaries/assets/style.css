@@ -304,6 +304,40 @@ td code:not(pre code) {
   font-weight: 500;
   font-family: var(--font-sans);
 }
+
+/* ========== FIX: Unify disjointed inline code into a single code block ========== */
+/* Targets table cells containing multiple inline code elements (like the VBA block in row 1) */
+td:has(code:not(pre code) ~ code:not(pre code)) {
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  border-left: 4px solid var(--code-accent);
+  border-radius: var(--code-radius);
+  padding: 16px;
+  font-family: var(--code-block-font);
+  color: var(--code-text-light);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  tab-size: 4;
+  -moz-tab-size: 4;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+/* Remove individual inline styling for code elements inside the unified block */
+td:has(code:not(pre code) ~ code:not(pre code)) code:not(pre code) {
+  background: transparent !important;
+  color: inherit !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  white-space: pre !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  display: inline !important;
+}
+
 td pre {
   margin: 0;
   background: transparent;
@@ -335,6 +369,13 @@ td pre code {
 [data-theme="dark"] pre code { background: var(--code-bg); color: var(--code-text-dark); border-color: var(--code-border); }
 [data-theme="dark"] td pre code { background: var(--code-bg); color: var(--code-text-dark); border-color: var(--code-border); }
 [data-theme="dark"] td > ul > li::before, [data-theme="dark"] td ol > li::before { color: var(--text); }
+
+/* Dark mode adjustments for the unified block */
+[data-theme="dark"] td:has(code:not(pre code) ~ code:not(pre code)) {
+  background: var(--code-bg) !important;
+  color: var(--code-text-dark) !important;
+  border-color: var(--code-border) !important;
+}
 
 /* ========== Accessibility focus enhancements ========== */
 :focus-visible, a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; background: var(--focus-bg); border-radius: 6px; }
@@ -378,6 +419,34 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     font-family: var(--font-sans) !important;
     white-space: normal !important;
     overflow-wrap: anywhere !important;
+  }
+
+  /* Unified code block on mobile */
+  td:has(code:not(pre code) ~ code:not(pre code)) {
+    background: var(--code-bg) !important;
+    border: 1px solid var(--code-border) !important;
+    border-left: 3px solid var(--code-accent) !important;
+    border-radius: var(--code-radius) !important;
+    padding: 12px 10px !important;
+    font-family: var(--code-block-font-mobile) !important;
+    font-size: 0.84rem !important;
+    line-height: 1.6 !important;
+    color: var(--code-text-light) !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  td:has(code:not(pre code) ~ code:not(pre code)) code:not(pre code) {
+    background: transparent !important;
+    color: inherit !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    font-family: inherit !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    white-space: pre !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
   }
 
   /* Block code outside tables */
@@ -451,6 +520,11 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     background: var(--inline-code-bg) !important;
     color: var(--inline-code-text) !important;
   }
+  td:has(code:not(pre code) ~ code:not(pre code)) {
+    background: var(--code-bg) !important;
+    color: var(--code-text-dark) !important;
+    border-color: var(--code-border) !important;
+  }
 }
 
 [data-theme="dark"] pre code, [data-theme="dark"] .markdown pre code, [data-theme="dark"] td pre code, [data-theme="dark"] .copy-button-output pre code, [data-theme="dark"] .copy-button-table pre code {
@@ -461,6 +535,11 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 [data-theme="dark"] code:not(pre code), [data-theme="dark"] td code:not(pre code) {
   background: var(--inline-code-bg) !important;
   color: var(--inline-code-text) !important;
+}
+[data-theme="dark"] td:has(code:not(pre code) ~ code:not(pre code)) {
+  background: var(--code-bg) !important;
+  color: var(--code-text-dark) !important;
+  border-color: var(--code-border) !important;
 }
 
 @media (max-width: 360px) {
