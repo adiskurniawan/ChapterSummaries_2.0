@@ -2,6 +2,7 @@
 Applied: 2025-10-08
 Revision: consolidated duplicates; mobile enforcement unified; minor Safari sticky fixes; checked 10×.
 Updated: Code block font color and weight adjusted to match standard AI chat interface (GitHub-style).
+Fixed: Grey code blocks inside table cells (inline code is now transparent, block code is unified).
 */
 
 /* ========== Variables ========== */
@@ -582,17 +583,44 @@ pre code {
   color: var(--code-text-light);
   font-weight: 400; /* Normal weight to match AI UI */
 }
-td code{
-  background: var(--code-bg-alt);
-  padding: 2px 6px;
-  border-radius: 6px;
+
+/* FIX: Remove grey boxes from inline code inside tables */
+td code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
   font-family: var(--font-mono);
-  font-size:.9em;
-  line-height:1.08;
+  font-size: .9em;
+  line-height: 1.4;
   font-variant-numeric: tabular-nums;
   color: var(--code-text-light);
-  font-weight: 400; /* Normal weight to match AI UI */
+  font-weight: 400;
+  white-space: pre-wrap;
 }
+
+/* FIX: Unified code block styling inside table cells (for HTML <pre> usage) */
+td pre {
+  background: var(--code-bg);
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid var(--code-border);
+  margin: 8px 0;
+  overflow-x: auto;
+  white-space: pre;
+}
+td pre code {
+  background: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: .9em;
+  white-space: pre;
+  color: inherit;
+  font-weight: 400;
+}
+
 pre {
   margin: 1em 0;
   padding: 0;
@@ -601,7 +629,7 @@ pre {
 
 [data-theme="dark"] code { background: var(--code-bg); color: var(--code-text-dark); }
 [data-theme="dark"] pre code { background: var(--code-bg); color: var(--code-text-dark); border-color: var(--code-border); }
-[data-theme="dark"] td code { background: rgba(255,255,255,0.04); color: var(--code-text-dark); }
+[data-theme="dark"] td code { background: transparent; color: var(--code-text-dark); }
 
 [data-theme="dark"] td > ul > li::before,
 [data-theme="dark"] td ol > li::before { color: var(--text); }
@@ -644,9 +672,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     min-width:36px;
   }
 
-  /* Hide page title on narrow screens to increase visible table area
-     Cover multiple markup variants and plain headings.
-     Kept late in file to override external frameworks. */
+  /* Hide page title on narrow screens to increase visible table area */
   #tv-header h1,
   #tv-header > div:first-child h1,
   #tv-header #pageTitle,
@@ -704,8 +730,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   #tv-header > div:last-child button:not(#modeBtn):not(#toggleAllBtn) { display:none !important; }
 }
 
-/* Mobile: inline-code legibility fixes (revised)
-   Purpose: keep desktop unchanged; make inline code and real code blocks readable, touch-friendly and wrap safely on phones. */
+/* Mobile: inline-code legibility fixes (revised) */
 @media (max-width:720px) {
   /* Inline code only. Do not target block code containers here. */
   code,
@@ -728,20 +753,23 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     vertical-align: baseline !important;
     box-sizing: border-box !important;
     font-variant-numeric: tabular-nums !important;
-    font-weight: 400 !important; /* Normal weight */
+    font-weight: 400 !important;
     -webkit-font-smoothing: antialiased !important;
-    color: var(--code-text-light) !important; /* Standard color */
+    color: var(--code-text-light) !important;
   }
 
-  /* Make code inside table cells a little smaller for mobile readability */
+  /* FIX: Make code inside table cells transparent and clean on mobile */
   td code,
   td code.inline-code,
   td .markdown code {
     font-family: "Aptos", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     font-size: clamp(0.90rem, 2.8vw, 0.98rem) !important;
     line-height: 1.28 !important;
-    padding: 0.15em 0.42em !important;
-    color: var(--code-text-light) !important; /* Standard color */
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    color: var(--code-text-light) !important;
     font-weight: 400 !important;
   }
 
@@ -770,14 +798,13 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     border: 1px solid var(--code-border) !important;
     border-radius: var(--code-radius) !important;
     background: var(--code-bg) !important;
-    color: var(--code-text-light) !important; /* Standard color */
-    font-weight: 400 !important; /* Normal weight */
+    color: var(--code-text-light) !important;
+    font-weight: 400 !important;
     tab-size: 4 !important;
   }
 
-  /* Table cell code blocks slightly smaller on mobile */
-  td pre,
-  td pre code {
+  /* FIX: Unified table cell code blocks on mobile */
+  td pre {
     display: block !important;
     white-space: pre !important;
     overflow-x: auto !important;
@@ -789,9 +816,19 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     border: 1px solid var(--code-border) !important;
     border-radius: var(--code-radius) !important;
     background: var(--code-bg) !important;
-    color: var(--code-text-light) !important; /* Standard color */
+    color: var(--code-text-light) !important;
     font-weight: 400 !important;
     tab-size: 4 !important;
+    margin: 8px 0 !important;
+  }
+  td pre code {
+    background: transparent !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    color: inherit !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
   }
 
   /* Preserve wrapping for code columns when explicitly requested */
@@ -811,7 +848,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   .copy-button-table pre,
   td pre {
     background: var(--code-bg) !important;
-    color: var(--code-text-dark) !important; /* Standard dark color */
+    color: var(--code-text-dark) !important;
     border: 1px solid var(--code-border) !important;
     box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02) !important;
   }
@@ -824,9 +861,9 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     font-size: 0.95rem !important;
     line-height: 1.55 !important;
     letter-spacing: 0.01em !important;
-    color: var(--code-text-dark) !important; /* Standard dark color */
+    color: var(--code-text-dark) !important;
     background: var(--code-bg) !important;
-    font-weight: 400 !important; /* Normal weight */
+    font-weight: 400 !important;
   }
 
   code,
@@ -834,28 +871,32 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   .markdown code,
   code.inline-code {
     background: var(--code-bg) !important;
-    color: var(--code-text-dark) !important; /* Standard dark color */
+    color: var(--code-text-dark) !important;
   }
 
-  /* Slightly brighter table-cell code on dark mobile for readability */
+  /* FIX: Slightly brighter table-cell code on dark mobile for readability */
   td code,
   td code.inline-code,
   td .markdown code {
     font-family: "Aptos", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-    color: var(--code-text-dark) !important; /* Standard dark color */
+    background: transparent !important;
+    color: var(--code-text-dark) !important;
     font-weight: 400 !important;
   }
 
-  /* Table cell code blocks slightly smaller on dark mobile */
-  td pre,
-  td pre code {
+  /* FIX: Unified table cell code blocks on dark mobile */
+  td pre {
     font-family: "Aptos", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     font-size: 0.94rem !important;
     line-height: 1.55 !important;
     letter-spacing: 0.01em !important;
-    color: var(--code-text-dark) !important; /* Standard dark color */
+    color: var(--code-text-dark) !important;
     background: var(--code-bg) !important;
     font-weight: 400 !important;
+  }
+  td pre code {
+    background: transparent !important;
+    color: inherit !important;
   }
 }
 
@@ -868,7 +909,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 [data-theme="dark"] .copy-button-table pre,
 [data-theme="dark"] td pre {
   background: var(--code-bg) !important;
-  color: var(--code-text-dark) !important; /* Standard dark color */
+  color: var(--code-text-dark) !important;
   border: 1px solid var(--code-border) !important;
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02) !important;
 }
@@ -877,23 +918,37 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 [data-theme="dark"] .markdown pre code,
 [data-theme="dark"] .copy-button-output pre,
 [data-theme="dark"] .copy-button-table pre,
-[data-theme="dark"] td pre {
+[data-theme="dark"] td pre code {
   font-family: var(--code-block-font-mobile) !important;
   font-size: 0.94em !important;
   line-height: 1.55 !important;
   letter-spacing: 0.01em !important;
-  color: var(--code-text-dark) !important; /* Standard dark color */
+  color: var(--code-text-dark) !important;
+  background: transparent !important;
+  font-weight: 400 !important;
+  padding: 0 !important;
+  border: none !important;
+}
+[data-theme="dark"] td pre {
   background: var(--code-bg) !important;
-  font-weight: 400 !important; /* Normal weight */
+  color: var(--code-text-dark) !important;
+  border: 1px solid var(--code-border) !important;
+  padding: 12px !important;
+  border-radius: 6px !important;
+  margin: 8px 0 !important;
 }
 
 [data-theme="dark"] code,
-[data-theme="dark"] td code,
 [data-theme="dark"] .markdown code,
 [data-theme="dark"] code.inline-code {
   background: var(--code-bg) !important;
-  color: var(--code-text-dark) !important; /* Standard dark color */
+  color: var(--code-text-dark) !important;
   border: 1px solid var(--code-border) !important;
+}
+[data-theme="dark"] td code {
+  background: transparent !important;
+  color: var(--code-text-dark) !important;
+  border: none !important;
 }
 
 /* Very-small screen tweaks for inline code */
@@ -918,11 +973,15 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
   }
 
   /* Slightly smaller table-cell block code on very small screens */
-  td pre,
-  td pre code {
+  td pre {
     font-family: "Aptos", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     font-size: 0.92rem !important;
     line-height: 1.46 !important;
+  }
+  td pre code {
+    font-family: inherit !important;
+    font-size: inherit !important;
+    line-height: inherit !important;
   }
 }
 
