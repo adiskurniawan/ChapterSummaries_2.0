@@ -179,33 +179,6 @@
   }
 
   // -----------------------------
-  // TOC Active Highlight CSS
-  // -----------------------------
-  try {
-    const tocCss = `
-/* tv toc active highlight */
-#tocBar { overflow-x: auto; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
-#tocBar a.toc-active {
-  background-color: var(--accent, #2563eb) !important;
-  color: #fff !important;
-  font-weight: 600 !important;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-#tocBar a.toc-active:hover {
-  background-color: var(--accent-hover, #1d4ed8) !important;
-}
-`;
-    if (document.head) {
-      const se = document.createElement('style');
-      se.setAttribute('data-tv-toc-css', '1');
-      se.appendChild(document.createTextNode(tocCss));
-      document.head.appendChild(se);
-    }
-  } catch (e) { /* silent */ }
-
-  // -----------------------------
   // Early-hide Export Markdown CSS (reduces flicker)
   // -----------------------------
   try {

@@ -185,10 +185,43 @@ thead th[role="button"]:hover { background: rgba(0,0,0,0.02); }
 #tv-header input[type="search"]:focus, #tv-header input[type="text"]:focus { box-shadow: 0 6px 18px rgba(0,0,0,0.04); border-color: var(--accent); }
 
 /* ========== TOC ========== */
-#tocBar { display: flex; align-items: center; gap: 12px; width: 100%; overflow-x: auto; padding: 6px 4px; background: transparent; -webkit-overflow-scrolling: touch; }
+#tocBar { 
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+  width: 100%; 
+  overflow-x: auto; 
+  padding: 6px 4px; 
+  background: transparent; 
+  -webkit-overflow-scrolling: touch; 
+  scrollbar-width: thin; /* Clean scrollbar for Firefox */
+}
+
+/* Custom Blue Scrollbar for TOC Bar (matches your code blocks) */
+#tocBar::-webkit-scrollbar { height: 6px; }
+#tocBar::-webkit-scrollbar-track { background: transparent; }
+#tocBar::-webkit-scrollbar-thumb { background: var(--accent, #2563eb); border-radius: 3px; opacity: 0.6; }
+
 #tocBar ul { display: flex; gap: 8px; list-style: none; margin: 0; padding: 0; align-items: center; }
-#tocBar a { white-space: nowrap; display: inline-block; padding: 6px 10px; color: var(--toc-link); border-radius: 6px; transition: background .18s ease, color .18s ease; }
+#tocBar a { white-space: nowrap; display: inline-block; padding: 6px 10px; color: var(--toc-link); border-radius: 6px; transition: background .18s ease, color .18s ease, box-shadow .18s ease; }
 #tocBar a:hover { background: var(--toc-link-hover-bg); color: var(--toc-link-hover-color); }
+
+/* Active TOC Link (Scroll Spy Highlight) - Uses CSS variables for seamless Dark Mode support */
+#tocBar a.toc-active {
+  background-color: var(--accent, #2563eb) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+#tocBar a.toc-active:hover {
+  background-color: var(--accent, #2563eb) !important;
+  filter: brightness(0.92); /* Subtle darken effect without needing a new variable */
+}
+
+/* Ensure table rows targeted by TOC anchors don't get hidden behind the sticky header */
+tr[id] {
+  scroll-margin-top: calc(var(--tv-header-min-height, 48px) + 12px);
+}
 
 #mainContent { padding: 20px; }
 .th-with-sort { display: flex; align-items: center; gap: 8px; }
