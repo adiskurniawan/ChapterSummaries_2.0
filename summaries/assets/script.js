@@ -595,15 +595,11 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
             a.setAttribute('aria-label', rowText);
             a.title = rowText;
           }
-          a.addEventListener('click', function (ev) {
-            ev.preventDefault();
-            const target = document.getElementById(id);
-            if (target) {
-              target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              try { history.replaceState(null, '', `#${id}`); } catch (e) { }
-              try { target.focus && target.focus({ preventScroll: true }); } catch (e) { }
-            }
-          });
+          
+          // REMOVED: Direct click event listener here to prevent conflicts with the delegated click handler.
+          // The delegated handler properly accounts for the sticky header offset during smooth scrolling.
+          // Highlighting is now strictly driven by the scroll event via updateActiveTocItem().
+          
           li.appendChild(a);
           ul.appendChild(li);
         } catch (e) { /* ignore single row error */ }
