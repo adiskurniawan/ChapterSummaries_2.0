@@ -19,16 +19,16 @@
   --tv-header-min-height: 48px;
 
   /* QWEN-STYLE BLUE CODE VARIABLES */
-  --code-bg: #f4f7fb;         /* Soft blue-gray background */
+  --code-bg: #f4f7fb;         
   --code-bg-alt: #eef2ff;     
-  --code-border: #dbeafe;     /* Soft blue border */
-  --code-accent: #2563eb;     /* Qwen blue accent (left border) */
-  --code-text-light: #0f172a; /* Dark slate text */
-  --code-text-dark: #f8fafc;  /* Light slate text */
+  --code-border: #dbeafe;     
+  --code-accent: #2563eb;     
+  --code-text-light: #0f172a; 
+  --code-text-dark: #f8fafc;  
   --code-radius: 8px;
 
-  --inline-code-bg: #e0e7ff;  /* Indigo-100 for inline code */
-  --inline-code-text: #3730a3; /* Indigo-800 for inline code */
+  --inline-code-bg: #e0e7ff;  
+  --inline-code-text: #3730a3; 
 
   /* UI helpers */
   --focus-ring: rgba(37, 99, 235, 0.25);
@@ -80,15 +80,14 @@
     --toc-link-hover-bg: #1e3a8a;
     --toc-link-hover-color: #ffffff;
 
-    /* QWEN DARK MODE CODE VARIABLES */
-    --code-bg: #1e293b;       /* Slate-800 (blue-tinted dark) */
+    --code-bg: #1e293b;       
     --code-bg-alt: #0f172a;
     --code-border: #334155;
-    --code-accent: #3b82f6;   /* Blue-500 */
+    --code-accent: #3b82f6;   
     --code-text-dark: #f8fafc;
 
-    --inline-code-bg: #312e81; /* Indigo-900 */
-    --inline-code-text: #c7d2fe; /* Indigo-200 */
+    --inline-code-bg: #312e81; 
+    --inline-code-text: #c7d2fe; 
   }
 }
 
@@ -194,17 +193,32 @@ thead th[role="button"]:hover { background: rgba(0,0,0,0.02); }
   padding: 6px 4px; 
   background: transparent; 
   -webkit-overflow-scrolling: touch; 
-  scrollbar-width: thin; /* Clean scrollbar for Firefox */
+  scrollbar-width: thin; 
 }
 
-/* Custom Blue Scrollbar for TOC Bar (matches your code blocks) */
+/* Custom Blue Scrollbar for TOC Bar */
 #tocBar::-webkit-scrollbar { height: 6px; }
 #tocBar::-webkit-scrollbar-track { background: transparent; }
 #tocBar::-webkit-scrollbar-thumb { background: var(--accent, #2563eb); border-radius: 3px; opacity: 0.6; }
 
 #tocBar ul { display: flex; gap: 8px; list-style: none; margin: 0; padding: 0; align-items: center; }
-#tocBar a { white-space: nowrap; display: inline-block; padding: 6px 10px; color: var(--toc-link); border-radius: 6px; transition: background .18s ease, color .18s ease, box-shadow .18s ease; }
-#tocBar a:hover { background: var(--toc-link-hover-bg); color: var(--toc-link-hover-color); }
+
+/* Base TOC Link - Mobile Optimized */
+#tocBar a { 
+  white-space: nowrap; 
+  display: inline-block; 
+  padding: 6px 10px; 
+  color: var(--toc-link); 
+  border-radius: 6px; 
+  transition: background .18s ease, color .18s ease, box-shadow .18s ease; 
+  -webkit-tap-highlight-color: transparent; /* Kills native iOS/Android tap flash */
+  touch-action: manipulation; /* Removes 300ms tap delay, improves mobile feel */
+}
+
+/* ONLY apply hover styles on devices with a real mouse/trackpad to prevent "sticky hover" on touch screens */
+@media (hover: hover) and (pointer: fine) {
+  #tocBar a:hover { background: var(--toc-link-hover-bg); color: var(--toc-link-hover-color); }
+}
 
 /* --- Remove click/focus background on TOC links (rely on scroll spy instead) --- */
 #tocBar a:not(.toc-active):focus,
@@ -213,19 +227,21 @@ thead th[role="button"]:hover { background: rgba(0,0,0,0.02); }
   background: transparent !important;
   outline: none !important;
   box-shadow: none !important;
-  -webkit-tap-highlight-color: transparent; /* Removes mobile tap highlight */
 }
 
-/* Active TOC Link (Scroll Spy Highlight) - Uses CSS variables for seamless Dark Mode support */
+/* Active TOC Link (Scroll Spy Highlight) */
 #tocBar a.toc-active {
   background-color: var(--accent, #2563eb) !important;
   color: #ffffff !important;
   font-weight: 600 !important;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-#tocBar a.toc-active:hover {
-  background-color: var(--accent, #2563eb) !important;
-  filter: brightness(0.92); /* Subtle darken effect without needing a new variable */
+
+@media (hover: hover) and (pointer: fine) {
+  #tocBar a.toc-active:hover {
+    background-color: var(--accent, #2563eb) !important;
+    filter: brightness(0.92); 
+  }
 }
 
 /* Ensure table rows targeted by TOC anchors don't get hidden behind the sticky header */
@@ -314,18 +330,16 @@ pre code {
   padding: 16px;
   border-radius: var(--code-radius);
   border: 1px solid var(--code-border);
-  border-left: 4px solid var(--code-accent); /* The Qwen Blue Accent */
+  border-left: 4px solid var(--code-accent); 
   overflow-x: auto;
   
-  /* --- STRICT CODE NEATNESS RULES (VBA/Python/JS) --- */
   tab-size: 4;
   -moz-tab-size: 4;
-  white-space: pre;           /* Preserve exact tabs and spaces */
-  word-break: normal;         /* Never break words mid-line */
-  word-wrap: normal;          /* Never wrap long lines */
-  overflow-wrap: normal;      /* Hard override for modern browsers */
-  letter-spacing: 0.015em;    /* Tiny horizontal breathing room for neatness */
-  /* ------------------------------------------------------ */
+  white-space: pre;           
+  word-break: normal;         
+  word-wrap: normal;          
+  overflow-wrap: normal;      
+  letter-spacing: 0.015em;    
 
   line-height: 1.6;
   font-size: 0.92rem;
@@ -363,7 +377,6 @@ td pre code {
   font-size: 0.9rem;
   line-height: 1.55;
   
-  /* Apply neatness rules inside tables too */
   tab-size: 4;
   -moz-tab-size: 4;
   white-space: pre;
@@ -411,7 +424,6 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
 
 /* ========== MOBILE QWEN-BLUE CODE OPTIMIZATIONS ========== */
 @media (max-width: 720px) {
-  /* Inline code on mobile */
   code:not(pre code), td code:not(pre code) {
     font-size: 0.93em !important;
     padding: 0.15em 0.4em !important;
@@ -423,7 +435,6 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     overflow-wrap: anywhere !important;
   }
 
-  /* Block code outside tables */
   pre, .markdown pre, .copy-button-output pre, .copy-button-table pre {
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch;
@@ -440,7 +451,6 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     color: var(--code-text-light) !important;
     font-weight: 400 !important;
     
-    /* Strict neatness on mobile */
     tab-size: 4 !important;
     -moz-tab-size: 4 !important;
     white-space: pre !important;
@@ -450,7 +460,6 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     letter-spacing: 0.015em !important;
   }
 
-  /* Block code inside tables */
   td pre, td pre code {
     background: var(--code-bg) !important;
     border: 1px solid var(--code-border) !important;
@@ -465,7 +474,6 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch;
     
-    /* Strict neatness inside tables on mobile */
     tab-size: 4 !important;
     -moz-tab-size: 4 !important;
     white-space: pre !important;
@@ -475,7 +483,6 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     letter-spacing: 0.015em !important;
   }
 
-  /* Custom Blue Scrollbar for Code Blocks */
   pre::-webkit-scrollbar, td pre::-webkit-scrollbar { height: 6px; }
   pre::-webkit-scrollbar-track, td pre::-webkit-scrollbar-track { background: transparent; }
   pre::-webkit-scrollbar-thumb, td pre::-webkit-scrollbar-thumb { background: var(--code-accent); border-radius: 3px; opacity: 0.6; }
