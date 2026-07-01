@@ -206,6 +206,16 @@ thead th[role="button"]:hover { background: rgba(0,0,0,0.02); }
 #tocBar a { white-space: nowrap; display: inline-block; padding: 6px 10px; color: var(--toc-link); border-radius: 6px; transition: background .18s ease, color .18s ease, box-shadow .18s ease; }
 #tocBar a:hover { background: var(--toc-link-hover-bg); color: var(--toc-link-hover-color); }
 
+/* --- Remove click/focus background on TOC links (rely on scroll spy instead) --- */
+#tocBar a:not(.toc-active):focus,
+#tocBar a:not(.toc-active):focus-visible,
+#tocBar a:not(.toc-active):active {
+  background: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent; /* Removes mobile tap highlight */
+}
+
 /* Active TOC Link (Scroll Spy Highlight) - Uses CSS variables for seamless Dark Mode support */
 #tocBar a.toc-active {
   background-color: var(--accent, #2563eb) !important;

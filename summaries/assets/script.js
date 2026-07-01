@@ -6,6 +6,7 @@
 // - Early-hide Export Markdown UI with a CSS injection to reduce flicker, while keeping existing hide functions.
 // - Defensive, careful changes; reviewed for edge-cases and id-preservation.
 // - NEW: Scroll spy for TOC highlighting with auto-scroll for horizontal TOC bars.
+// - FIX: Remove focus/tap background styles on TOC click since scroll behavior handles highlighting.
 
 (function () {
   'use strict';
@@ -563,6 +564,10 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
           a.className = 'toc-link';
           a.href = `#${id}`;
           a.textContent = `Topic ${idx+1}`;
+          
+          // FIX: Prevent mobile tap highlight background on click
+          a.style.webkitTapHighlightColor = 'transparent'; 
+          
           const rowText = (row.textContent || '').trim();
           if (rowText) {
             a.setAttribute('aria-label', rowText);
@@ -1711,6 +1716,10 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
         window.scrollTo({ top: Math.max(0, top - headerHeight - 5), behavior: 'smooth' });
         try { history.replaceState(null, '', '#' + id); } catch (err) {}
         try { target.focus && target.focus({ preventScroll: true }); } catch (err) {}
+        
+        // FIX: Blur the clicked link to remove focus/active background styles
+        try { if (document.activeElement === a) a.blur(); } catch (err) {}
+        
         return;
       }
 
@@ -1719,6 +1728,9 @@ button[data-format="md"], a[data-format="md"] { display: none !important; }
       const containerTop = container.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop || 0);
       window.scrollTo({ top: Math.max(0, containerTop - headerHeight - 5), behavior: 'smooth' });
       try { history.replaceState(null, '', '#' + id); } catch (err) {}
+      
+      // FIX: Blur the clicked link to remove focus/active background styles
+      try { if (document.activeElement === a) a.blur(); } catch (err) {}
     } catch (err) { /* silent */ }
   });
 
