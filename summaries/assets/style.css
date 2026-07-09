@@ -603,3 +603,13 @@ thead th a, th a { color: inherit !important; }
 @media (max-width: 720px) {
   .markdown a, .content a, article a, #mainContent a { text-decoration-thickness: 0.11em; text-underline-offset: 0.16em; }
 }
+
+/* Hide "Collapse all tables" and "Collapse Table" controls */
+#toggleAllBtn,
+#collapseAllBtn,
+.toggle-table-btn,
+.table-toggle-inline,
+.collapse-all-btn,
+.collapse-btn {
+  display: none !important;
+}
