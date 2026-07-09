@@ -604,12 +604,77 @@ thead th a, th a { color: inherit !important; }
   .markdown a, .content a, article a, #mainContent a { text-decoration-thickness: 0.11em; text-underline-offset: 0.16em; }
 }
 
-/* Hide "Collapse all tables" and "Collapse Table" controls */
+/* ========== AGGRESSIVE HIDING FOR COLLAPSE/EXPAND CONTROLS (INCLUDING DYNAMIC "C" / "E" MOBILE BUTTONS) ========== */
 #toggleAllBtn,
 #collapseAllBtn,
+#expandAllBtn,
 .toggle-table-btn,
 .table-toggle-inline,
+.expand-table-btn,
+.table-expand-inline,
 .collapse-all-btn,
-.collapse-btn {
+.expand-all-btn,
+.collapse-btn,
+.expand-btn,
+.table-controls .toggle-table-btn,
+.table-controls .table-toggle-inline,
+.table-controls .expand-table-btn,
+.table-controls .table-expand-inline,
+.table-controls a[class*="toggle"],
+.table-controls button[class*="toggle"],
+.table-controls a[class*="ollapse"],
+.table-controls button[class*="ollapse"],
+.table-controls a[class*="xpand"],
+.table-controls button[class*="xpand"],
+[class*="toggle-table"],
+[class*="collapse-table"],
+[class*="expand-table"],
+.tv-mobile-toggle,
+.tv-icon-only,
+[data-tv-mobile-toggle],
+[data-tv-mobile-enabled] .tv-mobile-toggle,
+.table-wrapper .tv-mobile-toggle {
   display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  outline: 0 !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  box-shadow: none !important;
+  z-index: -9999 !important;
+}
+
+/* Destroy any pseudo-elements generating "C" or "E" */
+#toggleAllBtn::before, #toggleAllBtn::after,
+#collapseAllBtn::before, #collapseAllBtn::after,
+#expandAllBtn::before, #expandAllBtn::after,
+.toggle-table-btn::before, .toggle-table-btn::after,
+.table-toggle-inline::before, .table-toggle-inline::after,
+.expand-table-btn::before, .expand-table-btn::after,
+.collapse-all-btn::before, .collapse-all-btn::after,
+.tv-mobile-toggle::before, .tv-mobile-toggle::after,
+[class*="toggle-table"]::before, [class*="toggle-table"]::after,
+[class*="collapse-table"]::before, [class*="collapse-table"]::after,
+[class*="expand-table"]::before, [class*="expand-table"]::after {
+  display: none !important;
+  content: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
