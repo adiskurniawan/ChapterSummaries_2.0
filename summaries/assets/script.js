@@ -1,1011 +1,1942 @@
-// script.js — Fully theme-integrated, robust loader & table utilities
+// script.js — fully revised, robust loader + table utilities (single-file)
+// Revisions:
+// - Preserve row IDs and TOC anchors when sorting/reseting by reordering existing nodes (no cloning).
+// - Snapshot original row order using stable per-row UIDs (data-tv-uid) taken after TOC build so IDs survive.
+// - Avoid clearing tbody.innerHTML during reorder to reduce flicker; append existing nodes to reorder.
+// - Early-hide Export Markdown UI with a CSS injection to reduce flicker, while keeping existing hide functions.
+// - Defensive, careful changes; reviewed for edge-cases and id-preservation.
+// - NEW: Scroll spy for TOC highlighting with auto-scroll for horizontal TOC bars.
+// - FIX: Remove focus/tap background styles on TOC click since scroll behavior handles highlighting.
+
 (function () {
   'use strict';
 
   // -----------------------------
-  // 1. Configuration & State
+  // Public config and API
   // -----------------------------
-  const CONFIG = {
-    highlight: true,
-    debounceMs: 150,
-    chunkSize: 300
-  };
+  const defaultConfig = { highlight: true, debounceMs: 150, chunkSize: 300 };
+  window.tvConfig = window.tvConfig || {};
+  Object.assign(window.tvConfig, defaultConfig);
 
-  const STATE = {
-    originalRowOrders: [],
-    sortStates: [],
-    uidCounter: 1,
-    toastQueue: [],
-    activeToast: null,
-    toastIdCounter: 0,
-    tocLinks: [],
-    tocTargets: [],
-    tocTicking: false
-  };
-
-  window.tvConfig = Object.assign({}, CONFIG, window.tvConfig || {});
   window.setTvSearchConfig = function (cfg) {
-    if (!cfg || typeof cfg !== 'object') return;
-    if (typeof cfg.highlight === 'boolean') window.tvConfig.highlight = cfg.highlight;
-    if (typeof cfg.debounceMs === 'number') window.tvConfig.debounceMs = Math.max(0, cfg.debounceMs);
-    if (typeof cfg.chunkSize === 'number') window.tvConfig.chunkSize = Math.max(50, cfg.chunkSize);
+    try {
+      if (!cfg || typeof cfg !== 'object') return;
+      if (typeof cfg.highlight === 'boolean') window.tvConfig.highlight = cfg.highlight;
+      if (typeof cfg.debounceMs === 'number') window.tvConfig.debounceMs = Math.max(0, cfg.debounceMs);
+      if (typeof cfg.chunkSize === 'number') window.tvConfig.chunkSize = Math.max(50, cfg.chunkSize);
+    } catch (e) { /* silent */ }
   };
 
   // -----------------------------
-  // 2. CSS Injection (Theme-Aligned)
+  // Small cross-cutting helpers
   // -----------------------------
-  const STYLES = `
-    /* Toast System (Adopts theme's panel/text/border vars automatically) */
-    #tv-toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 1300; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; pointer-events: none; max-width: calc(100% - 48px); }
-    .tv-toast { 
-      background: var(--panel, #f8fafc); color: var(--text, #111827); border: 1px solid var(--border, #e5e7eb);
-      padding: 10px 14px; border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-      opacity: 0; transform: translateY(6px); transition: opacity .18s ease, transform .18s ease;
-      pointer-events: auto; max-width: 360px; display: flex; align-items: center; gap: 8px; font-size: 14px; 
+  function safe(fn) { try { return fn(); } catch (e) { return undefined; } }
+  function isString(x) { return typeof x === 'string'; }
+  function joinUrl(base, rel) {
+    try {
+      if (!base) return rel;
+      return new URL(rel, base).href;
+    } catch (e) {
+      if (!base) return rel;
+      return (base.replace(/\/?$/, '/') + rel.replace(/^\//, ''));
     }
-    [data-theme="dark"] .tv-toast { box-shadow: 0 6px 18px rgba(0,0,0,0.35); }
-    .tv-toast.success { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
-    .tv-toast.warn { background: #fef3c7; color: #92400e; border-color: #fde68a; }
-    .tv-toast.error { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
-    [data-theme="dark"] .tv-toast.success { background: #14532d; color: #dcfce7; border-color: #166534; }
-    [data-theme="dark"] .tv-toast.warn { background: #78350f; color: #fef3c7; border-color: #92400e; }
-    [data-theme="dark"] .tv-toast.error { background: #7f1d1d; color: #fee2e2; border-color: #991b1b; }
-    .tv-toast-text { flex: 1 1 auto; min-width: 0; word-break: normal; white-space: pre-wrap; line-height: 1.4; }
-    .tv-toast-close { border: none; background: transparent; color: inherit; cursor: pointer; font-size: 16px; line-height: 1; padding: 4px; margin: -2px -2px 0 4px; opacity: 0.6; }
-    .tv-toast-close:hover { opacity: 1; background: transparent; transform: none; box-shadow: none; outline: none; }
-
-    /* Search Highlighting (Adopts --highlight & --current-row from Qwen-Style Theme) */
-    mark.search-hl { 
-      background: var(--highlight, #fff3a2); color: inherit; 
-      padding: 1px 3px; border-radius: 4px; 
-      box-shadow: 0 0 0 1px var(--current-row, #ffeaa2); 
-      font-weight: 600; word-break: break-word; 
-    }
-    .current-row td { background: var(--current-row, #ffeaa2) !important; transition: background .35s ease; }
-
-    /* Copy Modal */
-    #tv-copy-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 1400; display: flex; align-items: center; justify-content: center; padding: 20px; }
-    .tv-modal-panel { background: var(--panel, #fff); color: var(--text, #111); border: 1px solid var(--border, #e5e7eb); border-radius: 12px; box-shadow: 0 16px 48px rgba(0,0,0,0.25); max-width: min(90%, 1000px); width: 100%; max-height: 85vh; overflow: hidden; display: flex; flex-direction: column; }
-    .tv-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border, #e5e7eb); }
-    .tv-modal-textarea { width: 100%; height: 400px; flex: 1 1 auto; resize: none; font-family: var(--font-mono, monospace); font-size: 13px; background: var(--bg, #fff); color: var(--text); border: none; padding: 20px; line-height: 1.5; }
-    .tv-modal-textarea:focus { outline: none; box-shadow: inset 0 0 0 3px var(--focus-ring, rgba(37, 99, 235, 0.25)); }
-    .tv-modal-controls { display: flex; gap: 8px; padding: 16px 20px; border-top: 1px solid var(--border, #e5e7eb); background: var(--bg); }
-    
-    /* Early Hide (Reduces flicker before extra.js loads) */
-    .export-markdown-btn, .export-markdown, .export-markdown-table,
-    #exportMarkdownBtn, [data-action="export-markdown"],
-    button[data-format="md"], a[data-format="md"] { display: none !important; }
-    
-    /* Ensure single-table TOC list layout wraps safely on smaller viewports */
-    #tocBar ul.single-toc-list { display: flex; gap: 8px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; align-items: center; }
-  `;
-
-  function injectStyles() {
-    if (document.getElementById('tv-theme-styles')) return;
-    const style = document.createElement('style');
-    style.id = 'tv-theme-styles';
-    style.textContent = STYLES;
-    document.head.appendChild(style);
   }
-  injectStyles();
+  function once(fn) {
+    let called = false;
+    return function () { if (called) return; called = true; try { fn(); } catch (e) {} };
+  }
 
   // -----------------------------
-  // 3. Utilities & Helpers
+  // Robust base-path detection
   // -----------------------------
-  function getScriptBase() {
-    const current = document.currentScript?.src;
-    if (current) return current.replace(/[^/]*$/, '');
-    const scripts = document.getElementsByTagName('script');
-    for (let i = scripts.length - 1; i >= 0; i--) {
-      const src = scripts[i].src || '';
-      if (/script\.js(\?.*)?$/.test(src)) return src.replace(/[^/]*$/, '');
+  function detectScriptBase() {
+    let src = safe(() => document.currentScript && document.currentScript.src) || '';
+    if (isString(src) && src) {
+      return src.replace(/[^\/]*$/, '');
     }
-    return location.origin + location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1 || '/');
+    try {
+      const scripts = document.getElementsByTagName('script');
+      for (let i = scripts.length - 1; i >= 0; i--) {
+        const s = scripts[i];
+        const ssrc = s.src || '';
+        if (!ssrc) continue;
+        if (ssrc.indexOf('/assets/script.js') !== -1 || /(^|\/)script\.js(\?.*)?$/.test(ssrc)) {
+          return ssrc.replace(/[^\/]*$/, '');
+        }
+      }
+    } catch (e) { /* ignore */ }
+    try {
+      const loc = location;
+      return loc.origin + loc.pathname.substring(0, loc.pathname.lastIndexOf('/') + 1 || '/');
+    } catch (e) { return '/'; }
   }
-  
-  const TV_BASE = getScriptBase();
+
+  const TV_BASE = detectScriptBase();
   window.__tv_base = window.__tv_base || TV_BASE;
-  window.__tv_extra_loader_patched = window.__tv_extra_loader_patched || true;
+
+  // -----------------------------
+  // Ensure index / worker URLs are available (for extra.js)
+  // -----------------------------
+  function ensureIndexAndWorkerAttrs(base) {
+    try {
+      if (!document.body) {
+        document.addEventListener('DOMContentLoaded', function bound() {
+          document.removeEventListener('DOMContentLoaded', bound);
+          ensureIndexAndWorkerAttrs(base);
+        });
+        return;
+      }
+      const existingIndex = document.body.getAttribute('data-index-url');
+      const existingWorker = document.body.getAttribute('data-worker-url');
+
+      const defaultIndex = joinUrl(base, 'tables_index.json');
+      const defaultWorker = joinUrl(base, 'worker.js');
+
+      if (!existingIndex || existingIndex.trim() === '') {
+        try { document.body.setAttribute('data-index-url', defaultIndex); } catch (e) {}
+      }
+      if (!existingWorker || existingWorker.trim() === '') {
+        try { document.body.setAttribute('data-worker-url', defaultWorker); } catch (e) {}
+      }
+
+      window.tvIndexUrl = window.tvIndexUrl || document.body.getAttribute('data-index-url') || defaultIndex;
+      window.tvWorkerUrl = window.tvWorkerUrl || document.body.getAttribute('data-worker-url') || defaultWorker;
+    } catch (e) { /* silent */ }
+  }
+
+  ensureIndexAndWorkerAttrs(TV_BASE);
+
+  // -----------------------------
+  // Extra.js loader — sequential, robust
+  // -----------------------------
+  function createScriptElement(src, opts) {
+    opts = opts || {};
+    const s = document.createElement('script');
+    s.src = src;
+    s.async = !!opts.async;
+    s.defer = !!opts.defer;
+    if (opts.type) s.type = opts.type;
+    if (opts.crossorigin) s.crossOrigin = opts.crossorigin;
+    return s;
+  }
+
+  function loadExtraSequentially(possiblePaths, onDone, onAllFailed) {
+    if (!possiblePaths || possiblePaths.length === 0) { if (onAllFailed) onAllFailed(); return; }
+    const parent = document.head || document.getElementsByTagName('head')[0] || document.documentElement || document.body;
+    let idx = 0;
+
+    function tryNext() {
+      if (idx >= possiblePaths.length) {
+        if (onAllFailed) onAllFailed();
+        return;
+      }
+      const path = possiblePaths[idx++];
+      try {
+        const s = createScriptElement(path, { async: false });
+        s.onload = once(function () {
+          try { if (console && console.info) console.info('tv:extra loaded ->', path); } catch (_) {}
+          if (onDone) onDone(path);
+        });
+        s.onerror = function () {
+          try { s.remove(); } catch (_) {}
+          setTimeout(tryNext, 20);
+        };
+        parent.appendChild(s);
+      } catch (e) {
+        setTimeout(tryNext, 20);
+      }
+    }
+    tryNext();
+  }
+
+  const extraCandidates = [
+    joinUrl(TV_BASE, 'extra.js'),
+    joinUrl(TV_BASE, 'assets/extra.js'),
+    'assets/extra.js',
+    '/assets/extra.js',
+    'extra.js'
+  ];
+
+  function startExtraLoader() {
+    try {
+      if (window._tv_extra_loader_attached || window.tvExtra || document.querySelector('script[src*="extra.js"]')) {
+        try { if (console && console.info) console.info('tv:extra already present or loader attached; skipping'); } catch (_) {}
+        return;
+      }
+      window._tv_extra_loader_attached = true;
+      loadExtraSequentially(extraCandidates, function (path) {
+        // success - nothing else required
+      }, function () {
+        try { if (console && console.warn) console.warn('tv:extra loader: all candidate paths failed.'); } catch (_) {}
+      });
+    } catch (e) { /* silent */ }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { ensureIndexAndWorkerAttrs(TV_BASE); startExtraLoader(); });
+  } else {
+    ensureIndexAndWorkerAttrs(TV_BASE);
+    startExtraLoader();
+  }
+
+  // -----------------------------
+  // Early-hide Export Markdown CSS (reduces flicker)
+  // -----------------------------
+  try {
+    const hideMdCss = `
+/* tv early-hide export markdown */
+.export-markdown-btn, .export-markdown, .export-markdown-table,
+#exportMarkdownBtn, [data-action="export-markdown"],
+button[data-format="md"], a[data-format="md"] { display: none !important; }
+`;
+    if (document.head) {
+      const se = document.createElement('style');
+      se.setAttribute('data-tv-early-hide-md', '1');
+      se.appendChild(document.createTextNode(hideMdCss));
+      document.head.appendChild(se);
+    }
+  } catch (e) { /* silent */ }
+
+  // -----------------------------
+  // Begin main UI logic
+  // -----------------------------
+  function normalizeForSearchLocal(s) {
+    try {
+      return (s || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^\p{L}\p{N}\s]/gu, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    } catch (e) {
+      return (s || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^\w\s]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+  }
 
   function debounce(fn, wait) {
     let t;
     return function (...args) {
       clearTimeout(t);
-      t = setTimeout(() => fn.apply(this, args), wait);
+      t = setTimeout(() => {
+        try { fn.apply(this, args); } catch (e) { /* silent */ }
+      }, wait);
     };
   }
 
+  function copyToClipboard(text) {
+    return new Promise((resolve, reject) => {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(resolve).catch(() => {
+          tryLegacyCopy(text).then(resolve).catch(reject);
+        });
+        return;
+      }
+      tryLegacyCopy(text).then(resolve).catch(reject);
+    });
+  }
+  function tryLegacyCopy(t) {
+    return new Promise((resolve, reject) => {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = t;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (ok) resolve();
+        else reject(new Error('execCommand failed'));
+      } catch (err) {
+        try { console.warn('tv:copyToClipboard:legacy failed', err); } catch (_) {}
+        reject(err);
+      }
+    });
+  }
+
   function sanitizeFileName(name) {
-    return String(name || 'download').trim().replace(/[\/\\:*?"<>|]/g, '_').replace(/\s+/g, '_').slice(0, 200) || 'download';
+    try {
+      if (!name) return 'download';
+      return String(name).trim().replace(/[\/\\:*?"<>|]/g, '_').replace(/\s+/g, '_').slice(0, 200) || 'download';
+    } catch (e) { return 'download'; }
   }
 
   function downloadBlob(blob, filename) {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = sanitizeFileName(filename);
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {
+    try {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = sanitizeFileName(filename);
+      document.body.appendChild(a);
+      a.click();
       a.remove();
       URL.revokeObjectURL(url);
-    }, 100);
-  }
-
-  async function copyToClipboard(text) {
-    if (navigator.clipboard?.writeText) {
-      try { await navigator.clipboard.writeText(text); return; } catch {}
+      return true;
+    } catch (e) {
+      try { console.error('downloadBlob failed', e); } catch (_) {}
+      return false;
     }
-    // Fallback
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    ta.style.cssText = 'position:fixed;left:-9999px;top:0;';
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
   }
 
-  // -----------------------------
-  // 4. Toast & Modal System
-  // -----------------------------
-  function ensureToastContainer() {
-    let c = document.getElementById('tv-toast-container');
-    if (!c) {
+  // Toast system (unchanged)
+  let _toastQueue = [];
+  let _activeToast = null;
+  let _toastIdCounter = 0;
+
+  function _ensureToastContainer() {
+    try {
+      let c = document.getElementById('tv-toast-container');
+      if (c) return c;
       c = document.createElement('div');
       c.id = 'tv-toast-container';
       c.setAttribute('role', 'status');
       c.setAttribute('aria-live', 'polite');
+      c.setAttribute('aria-atomic', 'true');
+      Object.assign(c.style, {
+        position: 'fixed',
+        bottom: '24px',
+        right: '24px',
+        zIndex: 1300,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+        alignItems: 'flex-end',
+        pointerEvents: 'none',
+        maxWidth: 'calc(100% - 48px)'
+      });
       document.body.appendChild(c);
-    }
-    return c;
+      return c;
+    } catch (e) { return null; }
+  }
+
+  function _computeToastDuration(msg, type, optDuration) {
+    try {
+      if (typeof optDuration === 'number' && isFinite(optDuration) && optDuration >= 200) return Math.max(200, Math.floor(optDuration));
+      const len = (msg || '').length || 0;
+      let base = 1600;
+      if (type === 'success') base = 1400;
+      else if (type === 'warn') base = 2000;
+      else if (type === 'error') base = 3600;
+      const perChar = 40;
+      let dur = base + Math.min(6000, len * perChar);
+      dur = Math.max(900, Math.min(8000, dur));
+      return dur;
+    } catch (e) { return 2500; }
   }
 
   function showToast(msg, { duration = null, type = 'info' } = {}) {
-    const id = ++STATE.toastIdCounter;
-    STATE.toastQueue.push({ id, msg: String(msg || ''), duration, type });
-    processToastQueue();
-    return { id, dismiss: () => dismissToastById(id) };
+    try {
+      const id = ++_toastIdCounter;
+      _toastQueue.push({ id, msg: String(msg || ''), duration, type });
+      setTimeout(_processToastQueue, 0);
+      return { id, dismiss: () => _dismissToastById(id) };
+    } catch (e) { try { alert(String(msg || '')); } catch (_) {} return null; }
   }
 
-  function processToastQueue() {
-    if (STATE.activeToast || STATE.toastQueue.length === 0) return;
-    const item = STATE.toastQueue.shift();
-    const container = ensureToastContainer();
-    
-    const el = document.createElement('div');
-    el.className = `tv-toast ${item.type}`;
-    el.setAttribute('role', 'status');
-    el.setAttribute('aria-live', 'polite');
-    el.setAttribute('tabindex', '-1');
-    
-    el.innerHTML = `
-      <div class="tv-toast-text"></div>
-      <button type="button" class="tv-toast-close" aria-label="Dismiss notification">✕</button>
-    `;
-    el.querySelector('.tv-toast-text').textContent = item.msg;
-    
-    const hide = () => {
-      clearTimeout(to);
-      el.style.opacity = '0';
-      el.style.transform = 'translateY(8px)';
-      setTimeout(() => {
-        el.remove();
-        STATE.activeToast = null;
-        processToastQueue();
-      }, 180);
-    };
-
-    el.querySelector('.tv-toast-close').onclick = hide;
-    el.onclick = (e) => { if (e.target === el) hide(); };
-    container.appendChild(el);
-    
-    requestAnimationFrame(() => {
+  function _processToastQueue() {
+    try {
+      if (_activeToast) return;
+      if (_toastQueue.length === 0) return;
+      const item = _toastQueue.shift();
+      const container = _ensureToastContainer();
+      if (!container) { try { alert(item.msg); } catch (_) {} setTimeout(_processToastQueue, 0); return; }
+      const el = document.createElement('div');
+      el.className = 'tv-toast';
+      el.setAttribute('data-toast-id', item.id);
+      el.setAttribute('role', 'status');
+      el.setAttribute('aria-live', 'polite');
+      el.tabIndex = -1;
+      Object.assign(el.style, {
+        background: (getComputedStyle(document.documentElement).getPropertyValue('--panel') || '#fff').trim(),
+        color: (getComputedStyle(document.documentElement).getPropertyValue('--text') || '#111').trim(),
+        padding: '8px 12px',
+        borderRadius: '8px',
+        boxShadow: '0 6px 18px rgba(0,0,0,0.12)',
+        opacity: '0',
+        transform: 'translateY(6px)',
+        transition: 'opacity .18s ease, transform .18s ease',
+        pointerEvents: 'auto',
+        maxWidth: '360px',
+        wordBreak: 'normal',
+        whiteSpace: 'pre-wrap',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px'
+      });
+      if (item.type === 'success') { el.style.background = '#16a34a'; el.style.color = '#fff'; }
+      else if (item.type === 'warn') { el.style.background = '#f59e0b'; el.style.color = '#fff'; }
+      else if (item.type === 'error') { el.style.background = '#dc2626'; el.style.color = '#fff'; }
+      const textWrap = document.createElement('div');
+      textWrap.style.flex = '1 1 auto';
+      textWrap.style.minWidth = '0';
+      textWrap.textContent = item.msg;
+      const closeBtn = document.createElement('button');
+      closeBtn.type = 'button';
+      closeBtn.ariaLabel = 'Dismiss notification';
+      closeBtn.title = 'Dismiss';
+      closeBtn.innerHTML = '✖';
+      Object.assign(closeBtn.style, { border: 'none', background: 'transparent', color: 'inherit', cursor: 'pointer', fontSize: '14px', lineHeight: '1', padding: '4px', margin: '0' });
+      closeBtn.addEventListener('click', function (ev) { try { ev.stopPropagation(); } catch (_) {} _hideActiveToast(el, true); }, { passive: true });
+      el.addEventListener('click', function () { _hideActiveToast(el, true); }, { passive: true });
+      el.appendChild(textWrap);
+      el.appendChild(closeBtn);
+      container.appendChild(el);
+      void el.offsetHeight;
       el.style.opacity = '1';
       el.style.transform = 'translateY(0)';
-    });
-
-    const timeoutMs = item.duration || Math.max(2500, Math.min(6000, item.msg.length * 50));
-    const to = setTimeout(hide, timeoutMs);
-    STATE.activeToast = { id: item.id, el, timeoutId: to };
+      const timeoutMs = _computeToastDuration(item.msg, item.type, item.duration);
+      const to = setTimeout(() => { _hideActiveToast(el, false); }, timeoutMs);
+      _activeToast = { id: item.id, el, timeoutId: to };
+      try {
+        const prevActive = document.activeElement;
+        if (container && typeof container.focus === 'function') {
+          container.tabIndex = -1;
+          container.focus({ preventScroll: true });
+          setTimeout(() => { try { if (prevActive && typeof prevActive.focus === 'function') prevActive.focus({ preventScroll: true }); } catch (_) {} }, 60);
+        }
+      } catch (_) {}
+    } catch (e) { /* silent */ }
   }
 
-  function dismissToastById(id) {
-    if (STATE.activeToast?.id === id) {
-      clearTimeout(STATE.activeToast.timeoutId);
-      STATE.activeToast.el.click();
-    } else {
-      STATE.toastQueue = STATE.toastQueue.filter(i => i.id !== id);
-    }
-  }
-
-  function showCopyModal(text, { title = 'Copy text' } = {}) {
-    document.getElementById('tv-copy-modal')?.remove();
-    const overlay = document.createElement('div');
-    overlay.id = 'tv-copy-modal';
-    overlay.setAttribute('role', 'dialog');
-    overlay.setAttribute('aria-modal', 'true');
-    
-    overlay.innerHTML = `
-      <div class="tv-modal-panel">
-        <div class="tv-modal-header">
-          <strong style="font-size:1rem">${title}</strong>
-          <button type="button" class="modal-close">✕</button>
-        </div>
-        <textarea class="tv-modal-textarea" spellcheck="false"></textarea>
-        <div class="tv-modal-controls">
-          <button type="button" class="select-all" aria-label="Select all">Select All</button>
-          <button type="button" class="copy-btn" aria-label="Copy to clipboard">Copy</button>
-          <button type="button" class="download-btn" aria-label="Download as file">Download</button>
-        </div>
-      </div>
-    `;
-    
-    const ta = overlay.querySelector('textarea');
-    ta.value = text || '';
-    
-    overlay.querySelector('.modal-close').onclick = () => overlay.remove();
-    overlay.querySelector('.select-all').onclick = () => { ta.focus(); ta.select(); };
-    overlay.querySelector('.copy-btn').onclick = async () => {
-      try { 
-        await copyToClipboard(ta.value); 
-        showToast('Copied to clipboard!', { type: 'success' }); 
-        overlay.remove(); 
-      } catch { 
-        showToast('Copy failed', { type: 'warn' }); 
+  function _hideActiveToast(el, manual) {
+    try {
+      if (!_activeToast || !_activeToast.el) {
+        if (el && el.parentNode) el.remove();
+        setTimeout(_processToastQueue, 100);
+        return;
       }
-    };
-    overlay.querySelector('.download-btn').onclick = () => {
-      downloadBlob(new Blob([ta.value], { type: 'text/plain' }), `${sanitizeFileName(title)}.txt`);
-      showToast('Downloaded successfully!', { type: 'success' });
-      overlay.remove();
-    };
-
-    document.body.appendChild(overlay);
-    ta.focus();
-    ta.select();
+      try { clearTimeout(_activeToast.timeoutId); } catch (_) {}
+      try { el.style.opacity = '0'; el.style.transform = 'translateY(6px)'; } catch (_) {}
+      setTimeout(() => {
+        try { if (el && el.parentNode) el.parentNode.removeChild(el); } catch (_) {}
+        _activeToast = null;
+        setTimeout(_processToastQueue, 80);
+      }, 220);
+    } catch (e) { _activeToast = null; setTimeout(_processToastQueue, 80); }
   }
 
-  // -----------------------------
-  // 5. Table State, Sorting, TOC
-  // -----------------------------
+  function _dismissToastById(id) {
+    try {
+      if (_activeToast && _activeToast.id === id && _activeToast.el) { _hideActiveToast(_activeToast.el, true); return; }
+      for (let i = 0; i < _toastQueue.length; i++) {
+        if (_toastQueue[i].id === id) { _toastQueue.splice(i, 1); return; }
+      }
+    } catch (e) { /* silent */ }
+  }
+
+  // Copy modal (unchanged)
+  function showCopyModal(text, { title = 'Copy text' } = {}) {
+    try {
+      const existing = document.getElementById('tv-copy-modal');
+      if (existing) existing.remove();
+      const overlay = document.createElement('div');
+      overlay.id = 'tv-copy-modal';
+      Object.assign(overlay.style, { position: 'fixed', inset: '0', background: 'rgba(0,0,0,0.45)', zIndex: 1400, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' });
+      const panel = document.createElement('div');
+      panel.setAttribute('role', 'dialog');
+      panel.setAttribute('aria-modal', 'true');
+      panel.tabIndex = -1;
+      const rootStyles = getComputedStyle(document.documentElement);
+      const panelBg = rootStyles.getPropertyValue('--panel') || '#fff';
+      const textColor = rootStyles.getPropertyValue('--text') || '#111';
+      Object.assign(panel.style, { background: panelBg.trim(), color: textColor.trim(), borderRadius: '8px', boxShadow: '0 12px 40px rgba(0,0,0,0.35)', maxWidth: 'min(90%,1000px)', width: '100%', maxHeight: '80vh', overflow: 'auto', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' });
+      const hdr = document.createElement('div');
+      hdr.style.display = 'flex';
+      hdr.style.justifyContent = 'space-between';
+      hdr.style.alignItems = 'center';
+      const h = document.createElement('strong');
+      h.textContent = title || 'Copy';
+      const closeBtn = document.createElement('button');
+      closeBtn.type = 'button';
+      closeBtn.textContent = 'Close';
+      Object.assign(closeBtn.style, { marginLeft: '8px' });
+      closeBtn.addEventListener('click', () => overlay.remove());
+      hdr.appendChild(h);
+      hdr.appendChild(closeBtn);
+      const ta = document.createElement('textarea');
+      ta.value = text || '';
+      ta.readOnly = false;
+      ta.style.width = '100%';
+      ta.style.height = '320px';
+      ta.style.resize = 'vertical';
+/* removed inline whiteSpace to respect stylesheet; previously set by script */;
+      ta.style.fontFamily = 'monospace, monospace';
+      ta.style.fontSize = '13px';
+      ta.setAttribute('aria-label', 'Copy text area');
+      const controls = document.createElement('div');
+      controls.style.display = 'flex';
+      controls.style.gap = '8px';
+      controls.style.justifyContent = 'flex-end';
+      const selectBtn = document.createElement('button');
+      selectBtn.type = 'button';
+      selectBtn.textContent = 'Select All';
+      selectBtn.addEventListener('click', () => { try { ta.focus(); ta.select(); } catch (_) {} });
+      const copyBtn = document.createElement('button');
+      copyBtn.type = 'button';
+      copyBtn.textContent = 'Copy';
+      copyBtn.addEventListener('click', () => {
+        copyToClipboard(ta.value).then(() => {
+          showToast('Copied to clipboard', { type: 'success' });
+          overlay.remove();
+        }).catch(() => {
+          showToast('Copy failed', { type: 'warn' });
+        });
+      });
+      const downloadBtn = document.createElement('button');
+      downloadBtn.type = 'button';
+      downloadBtn.textContent = 'Download';
+      downloadBtn.addEventListener('click', () => {
+        try {
+          const blob = new Blob([ta.value], { type: 'text/plain;charset=utf-8' });
+          downloadBlob(blob, (title || 'export') + '.txt');
+          showToast('Downloaded', { type: 'success' });
+          overlay.remove();
+        } catch (e) { showToast('Download failed', { type: 'warn' }); }
+      });
+      controls.appendChild(selectBtn);
+      controls.appendChild(copyBtn);
+      controls.appendChild(downloadBtn);
+      panel.appendChild(hdr);
+      panel.appendChild(ta);
+      panel.appendChild(controls);
+      overlay.appendChild(panel);
+      document.body.appendChild(overlay);
+      try { ta.focus(); ta.select(); } catch (_) {}
+      return overlay;
+    } catch (e) { try { alert(String(text || '')); } catch (_) {} return null; }
+  }
+
+  // Utilities
   function getSearchEl() {
     return document.getElementById('searchBox') || document.getElementById('searchInput') || document.getElementById('search');
   }
 
   function getTableFromButton(btn) {
-    return btn?.closest('.table-wrapper')?.querySelector('table');
+    try {
+      const wrapper = btn && (btn.closest('.table-wrapper') || btn.closest('.table-container') || btn.closest('[data-table-id]'));
+      return wrapper ? wrapper.querySelector('table') : null;
+    } catch (e) { return null; }
   }
+
+  function buildSingleTableToc() {
+    try {
+      const wrappers = document.querySelectorAll('.table-wrapper');
+      if (!wrappers || wrappers.length !== 1) return;
+      const tocBar = document.getElementById('tocBar');
+      if (!tocBar) return;
+      const table = wrappers[0].querySelector('.table-container table') || wrappers[0].querySelector('table');
+      if (!table) return;
+
+      const tbody = safeGetTBody(table) || table;
+      const rows = Array.from((tbody && tbody.rows && tbody.rows.length) ? tbody.rows : (table.rows || []));
+      if (!rows || rows.length === 0) return;
+
+      const ul = document.createElement('ul');
+      ul.className = 'single-toc-list';
+      ul.style.listStyle = 'none';
+      ul.style.display = 'flex';
+      ul.style.gap = '8px';
+      ul.style.margin = '0';
+      ul.style.padding = '0';
+/* removed inline flexWrap to respect stylesheet; previously set by script */;
+
+      rows.forEach((row, idx) => {
+        try {
+          let id = row.id && String(row.id).trim() ? row.id : `tv-row-${idx+1}`;
+          if (document.getElementById(id) && document.getElementById(id) !== row) {
+            let suffix = 1;
+            while (document.getElementById(id + '-' + suffix)) suffix++;
+            id = id + '-' + suffix;
+          }
+          row.id = id;
+
+          const li = document.createElement('li');
+          li.className = 'toc-item';
+          const a = document.createElement('a');
+          a.className = 'toc-link';
+          a.href = `#${id}`;
+          a.textContent = `Topic ${idx+1}`;
+          
+          // FIX: Prevent mobile tap highlight background on click
+          a.style.webkitTapHighlightColor = 'transparent'; 
+          
+          const rowText = (row.textContent || '').trim();
+          if (rowText) {
+            a.setAttribute('aria-label', rowText);
+            a.title = rowText;
+          }
+          
+          // REMOVED: Direct click event listener here to prevent conflicts with the delegated click handler.
+          // The delegated handler properly accounts for the sticky header offset during smooth scrolling.
+          // Highlighting is now strictly driven by the scroll event via updateActiveTocItem().
+          
+          li.appendChild(a);
+          ul.appendChild(li);
+        } catch (e) { /* ignore single row error */ }
+      });
+
+      const existingUl = tocBar.querySelector('ul');
+      if (existingUl) existingUl.remove();
+      tocBar.appendChild(ul);
+      try { updateActiveTocItem(); } catch(e){}
+    } catch (err) {
+      try { console.warn('buildSingleTableToc error', err); } catch (_) {}
+    }
+  }
+  window.buildSingleTableToc = buildSingleTableToc;
+
+  let _tocTicking = false;
+  function updateActiveTocItem() {
+    if (_tocTicking) return;
+    _tocTicking = true;
+    requestAnimationFrame(() => {
+      _tocTicking = false;
+      try {
+        const tocBar = document.getElementById('tocBar');
+        if (!tocBar) return;
+        const links = tocBar.querySelectorAll('a[href^="#"]');
+        if (!links.length) return;
+
+        const headerHeight = document.getElementById('stickyMainHeader')?.offsetHeight || 0;
+        const scrollPos = window.scrollY + headerHeight + 20; 
+
+        let activeId = null;
+        let maxTop = -Infinity;
+        for (let i = 0; i < links.length; i++) {
+          const id = links[i].getAttribute('href').substring(1);
+          const target = document.getElementById(id);
+          if (target) {
+            if (target.style.display === 'none') continue;
+            const rect = target.getBoundingClientRect();
+            if (rect.height === 0 && rect.width === 0) continue; // Hidden by parent or display:none
+            const top = rect.top + window.scrollY;
+            if (top <= scrollPos && top > maxTop) {
+              maxTop = top;
+              activeId = id;
+            }
+          }
+        }
+
+        let activeLink = null;
+        links.forEach(link => {
+          const id = link.getAttribute('href').substring(1);
+          if (id === activeId) {
+            link.classList.add('toc-active');
+            link.setAttribute('aria-current', 'true');
+            activeLink = link;
+          } else {
+            link.classList.remove('toc-active');
+            link.removeAttribute('aria-current');
+          }
+        });
+
+        if (activeLink && tocBar.scrollWidth > tocBar.clientWidth) {
+          const linkRect = activeLink.getBoundingClientRect();
+          const barRect = tocBar.getBoundingClientRect();
+          if (linkRect.left < barRect.left || linkRect.right > barRect.right) {
+            try {
+              activeLink.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            } catch(e){}
+          }
+        }
+      } catch (e) { /* silent */ }
+    });
+  }
+
+  // storage: original row orders (per-table list of UIDs), sort states
+  let originalRowOrders = []; // e.g. [ ['uid1','uid2',...], ... ]
+  let _tv_row_uid_counter = 1;
+  let sortStates = [];
 
   function safeGetTBody(table) {
-    return table?.tBodies?.[0] || table;
+    if (!table) return null;
+    return (table.tBodies && table.tBodies[0]) || null;
   }
 
-  function ensureRowUidsAndSnapshot(table, tableIdx) {
-    const tbody = safeGetTBody(table);
-    if (!tbody) return;
-    const order = [];
-    Array.from(tbody.rows).forEach(r => {
-      if (!r.dataset.tvUid) r.dataset.tvUid = `tvuid-${STATE.uidCounter++}`;
-      order.push(r.dataset.tvUid);
-    });
-    STATE.originalRowOrders[tableIdx] = order;
-  }
-
-  function initTocCache() {
-    const tocBar = document.getElementById('tocBar');
-    if (!tocBar) return;
-    STATE.tocLinks = Array.from(tocBar.querySelectorAll('a[href^="#"]'));
-    STATE.tocTargets = STATE.tocLinks.map(link => document.getElementById(link.getAttribute('href').substring(1)));
-  }
-
-  function updateActiveTocItem() {
-    if (STATE.tocTicking || !STATE.tocLinks.length) return;
-    STATE.tocTicking = true;
-    
-    requestAnimationFrame(() => {
-      STATE.tocTicking = false;
-      const scrollPos = window.scrollY + 80; // Safe offset below the 48px+ header
-
-      let activeIdx = -1;
-      let maxTop = -Infinity;
-      
-      for (let i = 0; i < STATE.tocTargets.length; i++) {
-        const target = STATE.tocTargets[i];
-        if (!target || window.getComputedStyle(target).display === 'none' || target.offsetParent === null) continue;
-        
-        const top = target.getBoundingClientRect().top + window.scrollY;
-        if (top <= scrollPos && top > maxTop) {
-          maxTop = top;
-          activeIdx = i;
+  function _ensureRowUidsAndSnapshot(table, tableIdx) {
+    try {
+      const tbody = safeGetTBody(table) || table;
+      if (!tbody) return;
+      const rows = Array.from(tbody.rows || []);
+      const order = [];
+      rows.forEach((r) => {
+        if (!r.dataset.tvUid) {
+          // keep existing id attributes intact; tvUid is internal stable identifier
+          r.dataset.tvUid = 'tvuid-' + (_tv_row_uid_counter++);
         }
-      }
-      
-      STATE.tocLinks.forEach((link, i) => {
-        const isActive = i === activeIdx;
-        link.classList.toggle('toc-active', isActive);
-        if (isActive) link.setAttribute('aria-current', 'true');
-        else link.removeAttribute('aria-current');
+        order.push(r.dataset.tvUid);
       });
-    });
-  }
-
-  function updateToggleButtonState(wrapper) {
-    const btn = wrapper.querySelector('.toggle-table-btn');
-    if (!btn) return;
-    const collapsed = wrapper.classList.contains('table-collapsed');
-    const text = collapsed ? "Expand Table" : "Collapse Table";
-    
-    const explicitTextEl = btn.querySelector('.label, .btn-text, span');
-    if (explicitTextEl) {
-      explicitTextEl.textContent = text;
-    }
-    btn.setAttribute('aria-label', text);
-    btn.setAttribute('title', text);
+      originalRowOrders[tableIdx] = order;
+    } catch (e) { /* silent */ }
   }
 
   function updateHeaderSortUI(tableIdx) {
-    const table = document.querySelectorAll(".table-container table")[tableIdx];
-    if (!table?.tHead) return;
-    
-    Array.from(table.tHead.rows[0].cells).forEach((th, c) => {
-      const btn = th.querySelector('.sort-btn');
-      if (!btn) return;
-      
-      const state = STATE.sortStates[tableIdx]?.[c] || 0;
-      btn.classList.remove('sort-state-0', 'sort-state-1', 'sort-state-2');
-      btn.classList.add(`sort-state-${state}`);
-      
-      th.setAttribute('aria-sort', state === 1 ? 'ascending' : state === 2 ? 'descending' : 'none');
-      
-      const iconSpan = btn.querySelector('.sort-icon');
-      if (iconSpan) {
-        const svgs = {
-          0: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 15l4 4 4-4"/><path d="M8 9l4-4 4 4"/></svg>`,
-          1: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M6 11l6-6 6 6"/></svg>`,
-          2: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg>`
-        };
-        iconSpan.innerHTML = svgs[state];
+    try {
+      const table = document.querySelectorAll(".table-container table")[tableIdx];
+      if (!table || !table.tHead) return;
+      const ths = table.tHead.rows[0].cells;
+      for (let c = 0; c < ths.length; c++) {
+        const btn = ths[c].querySelector('.sort-btn');
+        if (!btn) continue;
+        btn.classList.remove('sort-state-0', 'sort-state-1', 'sort-state-2');
+        const state = (sortStates[tableIdx] && sortStates[tableIdx][c]) || 0;
+        btn.classList.add('sort-state-' + state);
+        if (state === 1) ths[c].setAttribute('aria-sort', 'ascending');
+        else if (state === 2) ths[c].setAttribute('aria-sort', 'descending');
+        else ths[c].setAttribute('aria-sort', 'none');
+        const iconSpan = btn.querySelector('.sort-icon');
+        if (iconSpan) {
+          if (state === 0) {
+            iconSpan.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 14l5-5 5 5"></path><path d="M7 10l5 5 5-5"></path></svg>';
+          } else if (state === 1) {
+            iconSpan.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6"></path><path d="M5 12l7-7 7 7"></path></svg>';
+          } else {
+            iconSpan.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v13"></path><path d="M19 12l-7 7-7-7"></path></svg>';
+          }
+        }
       }
-    });
+    } catch (e) { /* silent */ }
   }
 
+  // Sorting and toggles — robust reordering without cloning to preserve IDs
   function sortTableByColumn(tableIdx, colIdx) {
-    const table = document.querySelectorAll(".table-container table")[tableIdx];
-    const tbody = safeGetTBody(table);
-    if (!tbody) return;
+    try {
+      const table = document.querySelectorAll(".table-container table")[tableIdx];
+      if (!table) return;
+      const tbody = safeGetTBody(table);
+      if (!tbody) return;
+      sortStates[tableIdx] = sortStates[tableIdx] || [];
+      let state = (sortStates[tableIdx][colIdx]) || 0;
+      let rows = Array.from(tbody.rows);
 
-    STATE.sortStates[tableIdx] = STATE.sortStates[tableIdx] || [];
-    let state = STATE.sortStates[tableIdx][colIdx] || 0;
-    let rows = Array.from(tbody.rows);
-
-    const getVal = (row, idx) => (row.cells[idx]?.textContent || '').trim();
-    const parseNum = (v) => parseFloat(String(v).replace(/,/g, '').replace(/\s+/g, ''));
-
-    const compare = (a, b, asc) => {
-      const vA = getVal(a, colIdx), vB = getVal(b, colIdx);
-      const nA = parseNum(vA), nB = parseNum(vB);
-      if (!isNaN(nA) && !isNaN(nB)) return asc ? nA - nB : nB - nA;
-      return asc ? vA.localeCompare(vB) : vB.localeCompare(vA);
-    };
-
-    if (state === 0) { rows.sort((a, b) => compare(a, b, true)); STATE.sortStates[tableIdx][colIdx] = 1; } 
-    else if (state === 1) { rows.sort((a, b) => compare(a, b, false)); STATE.sortStates[tableIdx][colIdx] = 2; } 
-    else {
-      const order = STATE.originalRowOrders[tableIdx];
-      if (order?.length) {
-        const arranged = order.map(uid => tbody.querySelector(`tr[data-tv-uid="${uid}"]`)).filter(Boolean);
-        rows.forEach(r => { if (!arranged.includes(r)) arranged.push(r); });
-        rows = arranged;
+      function cellValue(row, idx) {
+        try {
+          return (row.cells[idx]?.textContent || '').trim();
+        } catch (e) { return ''; }
       }
-      STATE.sortStates[tableIdx][colIdx] = 0;
-    }
 
-    STATE.sortStates[tableIdx].forEach((_, i) => { if (i !== colIdx) STATE.sortStates[tableIdx][i] = 0; });
+      if (state === 0) {
+        rows.sort((a, b) => {
+          let valA = cellValue(a, colIdx);
+          let valB = cellValue(b, colIdx);
+          const numA = parseFloat(String(valA).replace(/,/g, '').replace(/\s+/g, ''));
+          const numB = parseFloat(String(valB).replace(/,/g, '').replace(/\s+/g, ''));
+          if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+          return valA.localeCompare(valB);
+        });
+        sortStates[tableIdx][colIdx] = 1;
+      } else if (state === 1) {
+        rows.sort((a, b) => {
+          let valA = cellValue(a, colIdx);
+          let valB = cellValue(b, colIdx);
+          const numA = parseFloat(String(valA).replace(/,/g, '').replace(/\s+/g, ''));
+          const numB = parseFloat(String(valB).replace(/,/g, '').replace(/\s+/g, ''));
+          if (!isNaN(numA) && !isNaN(numB)) return numB - numA;
+          return valB.localeCompare(valA);
+        });
+        sortStates[tableIdx][colIdx] = 2;
+      } else {
+        // Reset to original order using stable UIDs snapshot if available
+        const order = originalRowOrders[tableIdx];
+        if (order && order.length) {
+          const arranged = [];
+          for (let i = 0; i < order.length; i++) {
+            const uid = order[i];
+            try {
+              const r = tbody.querySelector(`tr[data-tv-uid="${uid}"]`);
+              if (r) arranged.push(r);
+            } catch (e) { /* continue */ }
+          }
+          // Append any rows that might be new or missing from snapshot  (preserve them)
+          Array.from(tbody.rows).forEach(r => {
+            if (arranged.indexOf(r) === -1) arranged.push(r);
+          });
+          rows = arranged;
+          sortStates[tableIdx][colIdx] = 0;
+        } else {
+          // No snapshot; treat as "no-op reset"
+          sortStates[tableIdx][colIdx] = 0;
+        }
+      }
 
-    rows.forEach(r => tbody.appendChild(r));
-    updateHeaderSortUI(tableIdx);
-    updateRowCounts();
-    updateActiveTocItem();
+      // reset other columns' states
+      for (let i = 0; i < (sortStates[tableIdx] || []).length; i++) {
+        if (i !== colIdx) sortStates[tableIdx][i] = 0;
+      }
+
+      // Reorder by appending existing nodes in desired order (this moves them in-place, preserves ids)
+      try {
+        rows.forEach(r => {
+          try { tbody.appendChild(r); } catch (e) {}
+        });
+      } catch (e) { /* silent */ }
+
+      // Ensure per-cell original HTML snapshot exists for highlight restoration
+      Array.from(tbody.rows).forEach(r => {
+        Array.from(r.cells).forEach(c => {
+          if (!c.dataset.origHtml) c.dataset.origHtml = c.innerHTML;
+        });
+      });
+
+      updateHeaderSortUI(tableIdx);
+      try { updateRowCounts(); } catch (e) {}
+      try { updateActiveTocItem(); } catch (e) {}
+    } catch (e) { /* silent */ }
   }
 
   function headerSortButtonClicked(tableIdx, colIdx, btnEl) {
     sortTableByColumn(tableIdx, colIdx);
-    btnEl?.focus();
+    try { btnEl && btnEl.focus(); } catch (e) {}
   }
 
   function toggleTable(btn) {
-    const wrapper = btn.closest('.table-wrapper');
-    if (!wrapper) return;
-    
-    wrapper.classList.toggle('table-collapsed');
-    updateToggleButtonState(wrapper);
-
-    const anyExpanded = document.querySelectorAll('.table-wrapper:not(.table-collapsed)').length > 0;
-    const toggleAllBtn = document.getElementById('toggleAllBtn');
-    if (toggleAllBtn) {
-      const txt = anyExpanded ? "Collapse All Tables" : "Expand All Tables";
-      toggleAllBtn.setAttribute('aria-label', txt);
-      if (!toggleAllBtn.querySelector('svg, i')) toggleAllBtn.textContent = txt;
-    }
-    updateRowCounts();
-    updateActiveTocItem();
+    try {
+      const wrapper = btn.closest('.table-wrapper');
+      if (!wrapper) return;
+      const collapsed = wrapper.classList.toggle('table-collapsed');
+      btn.textContent = collapsed ? "Expand Table" : "Collapse Table";
+      const anyExpanded = document.querySelectorAll('.table-wrapper:not(.table-collapsed)').length > 0;
+      const toggleAllBtn = document.getElementById('toggleAllBtn');
+      if (toggleAllBtn) toggleAllBtn.textContent = anyExpanded ? "Collapse All Tables" : "Expand All Tables";
+      try { updateRowCounts(); } catch (e) {}
+      try { updateActiveTocItem(); } catch (e) {}
+    } catch (e) { /* silent */ }
   }
 
   function toggleAllTables() {
-    const wrappers = Array.from(document.querySelectorAll('.table-wrapper'));
-    if (!wrappers.length) return;
-    const anyExpanded = wrappers.some(w => !w.classList.contains('table-collapsed'));
-    
-    wrappers.forEach(w => {
-      if (anyExpanded && !w.classList.contains('table-collapsed')) w.classList.add('table-collapsed');
-      else if (!anyExpanded && w.classList.contains('table-collapsed')) w.classList.remove('table-collapsed');
-      updateToggleButtonState(w);
-    });
-
-    const toggleAllBtn = document.getElementById('toggleAllBtn');
-    if (toggleAllBtn) {
-      const txt = anyExpanded ? "Expand All Tables" : "Collapse All Tables";
-      toggleAllBtn.setAttribute('aria-label', txt);
-      if (!toggleAllBtn.querySelector('svg, i')) toggleAllBtn.textContent = txt;
-    }
-
-    updateRowCounts();
-    updateActiveTocItem();
+    try {
+      const wrappers = Array.from(document.querySelectorAll('.table-wrapper'));
+      if (wrappers.length === 0) return;
+      const anyExpanded = wrappers.some(w => !w.classList.contains('table-collapsed'));
+      if (anyExpanded) {
+        wrappers.forEach(w => { w.classList.add('table-collapsed'); const btn = w.querySelector('.toggle-table-btn'); if (btn) btn.textContent = "Expand Table"; });
+        const toggleAllBtn = document.getElementById('toggleAllBtn');
+        if (toggleAllBtn) toggleAllBtn.textContent = "Expand All Tables";
+      } else {
+        wrappers.forEach(w => { w.classList.remove('table-collapsed'); const btn = w.querySelector('.toggle-table-btn'); if (btn) btn.textContent = "Collapse Table"; });
+        const toggleAllBtn = document.getElementById('toggleAllBtn');
+        if (toggleAllBtn) toggleAllBtn.textContent = "Collapse All Tables";
+      }
+      try { updateRowCounts(); } catch (e) {}
+      try { updateActiveTocItem(); } catch (e) {}
+    } catch (e) { /* silent */ }
   }
 
   function updateRowCounts() {
-    document.querySelectorAll(".table-wrapper").forEach(wrapper => {
+    document.querySelectorAll(".table-wrapper").forEach((wrapper, idx) => {
       const table = wrapper.querySelector("table");
       const countDiv = wrapper.querySelector(".row-count");
       if (!table || !countDiv) return;
-      
       const tbody = safeGetTBody(table);
       if (!tbody) { countDiv.textContent = "Showing 0 rows"; return; }
-      
       const rows = tbody.rows;
       const total = rows.length;
-      const visible = Array.from(rows).filter(r => window.getComputedStyle(r).display !== "none").length;
-      
-      countDiv.textContent = total === 0 ? "Showing 0 rows" : 
-                             visible === total ? `Showing ${total} rows` : 
-                             `Showing ${visible} of ${total} rows`;
+      const visible = Array.from(rows).filter(r => r.style.display !== "none").length;
+      if (total === 0) countDiv.textContent = "Showing 0 rows";
+      else if (visible === total) countDiv.textContent = `Showing ${total} rows`;
+      else countDiv.textContent = `Showing ${visible} of ${total} rows`;
     });
   }
 
-  function normalizeForSearch(s) {
+  function formatCellForMarkdown(cell) {
     try {
-      return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\p{L}\p{N}\s]/gu, '').replace(/\s+/g, ' ').trim();
-    } catch {
-      return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
+      let txt = (cell.textContent || '').trim();
+      txt = txt.replace(/\|/g, '\\|');
+      if (txt.indexOf('\n') !== -1 || txt.indexOf('\r') !== -1) {
+        return txt.replace(/\r\n|\r|\n/g, '<br>');
+      }
+      return txt;
+    } catch (e) { return (cell.textContent || '').trim().replace(/\|/g, '\\|'); }
+  }
+
+  function tableToMarkdownLines(table, title) {
+    const lines = [];
+    try {
+      const rows = Array.from(table.rows);
+      if (!rows || rows.length === 0) return lines;
+      if (title) {
+        lines.push('**' + (title || '') + '**');
+        lines.push('');
+      }
+      const headCells = Array.from(rows[0].cells).map(c => (c.textContent || '').trim().replace(/\|/g, '\\|'));
+      lines.push('| ' + headCells.join(' | ') + ' |');
+      lines.push('| ' + headCells.map(() => '---').join(' | ') + ' |');
+      for (let i = 1; i < rows.length; i++) {
+        const rowCells = Array.from(rows[i].cells).map(c => formatCellForMarkdown(c));
+        lines.push('| ' + rowCells.join(' | ') + ' |');
+      }
+    } catch (e) { /* ignore per-table errors */ }
+    return lines;
+  }
+
+  function copyTablePlain(btn) {
+    try {
+      const table = getTableFromButton(btn);
+      if (!table) { showToast('No table found to copy', { type: 'warn' }); return; }
+      const tbody = safeGetTBody(table) || table;
+      let title = table.closest('.table-wrapper')?.querySelector('h3')?.textContent || '';
+      let text = title + "\n" + Array.from(table.rows).map(r => Array.from(r.cells).map(c => c.textContent.trim()).join("\t")).join("\n");
+      copyToClipboard(text).then(() => showToast('Table copied as plain text!', { type: 'success' })).catch(() => {
+        try { showCopyModal(text, { title: 'Copy table text' }); } catch (e) { showToast('Copy failed', { type: 'warn' }); }
+      });
+    } catch (e) { showToast('Copy failed', { type: 'warn' }); }
+  }
+
+  function copyTableMarkdown(btn) {
+    try {
+      const table = getTableFromButton(btn);
+      if (!table) { showToast('No table found to copy', { type: 'warn' }); return; }
+      let title = table.closest('.table-wrapper')?.querySelector('h3')?.textContent || '';
+      const lines = tableToMarkdownLines(table, title);
+      if (!lines || lines.length === 0) { showToast('Table empty', { type: 'warn' }); return; }
+      const md = lines.join('\n');
+      copyToClipboard(md).then(() => showToast('Table copied in Markdown format!', { type: 'success' })).catch(() => {
+        try { showCopyModal(md, { title: 'Copy table markdown' }); } catch (e) { showToast('Copy failed', { type: 'warn' }); }
+      });
+    } catch (e) { showToast('Copy failed', { type: 'warn' }); }
+  }
+
+  function copyAllTablesPlain() {
+    try {
+      let textPieces = [];
+      document.querySelectorAll(".table-wrapper").forEach(wrapper => {
+        try {
+          let title = wrapper.querySelector('h3')?.textContent || '';
+          let table = wrapper.querySelector('table');
+          if (!table) return;
+          textPieces.push(title);
+          textPieces.push(Array.from(table.rows).map(r => Array.from(r.cells).map(c => c.textContent.trim()).join("\t")).join("\n"));
+        } catch (e) { /* ignore single table error */ }
+      });
+      const text = textPieces.join("\n\n");
+      if (!text) { showToast('No tables to copy', { type: 'warn' }); return; }
+      copyToClipboard(text).then(() => showToast("All tables copied as plain text!", { type: 'success' })).catch(() => {
+        try { showCopyModal(text, { title: 'Copy all tables' }); } catch (e) { showToast('Copy failed', { type: 'warn' }); }
+      });
+    } catch (e) { showToast('Copy failed', { type: 'warn' }); }
+  }
+
+  function copyAllTablesMarkdown() {
+    try {
+      let pieces = [];
+      document.querySelectorAll(".table-wrapper").forEach((wrapper) => {
+        try {
+          const table = wrapper.querySelector('table');
+          if (!table) return;
+          const title = wrapper.querySelector('h3')?.textContent || '';
+          const lines = tableToMarkdownLines(table, title);
+          if (lines && lines.length) {
+            if (pieces.length) pieces.push('');
+            pieces.push(...lines);
+          }
+        } catch (e) { /* ignore single table error */ }
+      });
+      if (pieces.length === 0) { showToast('No tables to export', { type: 'warn' }); return; }
+      const md = pieces.join('\n');
+      copyToClipboard(md).then(() => showToast("All tables copied in Markdown format!", { type: 'success' })).catch(() => {
+        try { showCopyModal(md, { title: 'Copy all tables markdown' }); } catch (e) { showToast('Copy failed', { type: 'warn' }); }
+      });
+    } catch (e) { showToast('Copy failed', { type: 'warn' }); }
+  }
+
+  // Export helpers preserved (CSV, Markdown, JSON, XLSX, PDF)
+  function exportTableCSV(btn, { filename } = {}) {
+    try {
+      const table = getTableFromButton(btn);
+      if (!table) { showToast('No table found to export', { type: 'warn' }); return; }
+      const rows = Array.from(table.rows);
+      if (rows.length === 0) { showToast('Table empty', { type: 'warn' }); return; }
+      const csv = rows.map(r => Array.from(r.cells).map(c => {
+        const v = c.textContent || '';
+        if (v.indexOf('"') !== -1 || v.indexOf(',') !== -1 || v.indexOf('\n') !== -1) {
+          return '"' + v.replace(/"/g, '""') + '"';
+        }
+        return v;
+      }).join(',')).join('\r\n');
+      const safeName = sanitizeFileName((filename || table.closest('.table-wrapper')?.querySelector('h3')?.textContent || 'table')) + '.csv';
+      const blob = new Blob(["\uFEFF", csv], { type: 'text/csv;charset=utf-8;' });
+      downloadBlob(blob, safeName);
+      showToast('CSV exported', { type: 'success' });
+    } catch (e) { showToast('CSV export failed', { type: 'warn' }); }
+  }
+
+  function exportTableMarkdown(btn, { filename } = {}) {
+    try {
+      const table = getTableFromButton(btn);
+      if (!table) { showToast('No table found to export', { type: 'warn' }); return; }
+      const title = table.closest('.table-wrapper')?.querySelector('h3')?.textContent || '';
+      const lines = tableToMarkdownLines(table, title);
+      if (!lines || lines.length === 0) { showToast('Table empty', { type: 'warn' }); return; }
+      const md = lines.join('\n');
+      const safeName = sanitizeFileName((filename || title || 'table')) + '.md';
+      const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+      downloadBlob(blob, safeName);
+      showToast('Markdown exported', { type: 'success' });
+    } catch (e) {
+      console.error('exportTableMarkdown failed', e);
+      showToast('Export Markdown failed', { type: 'warn' });
     }
   }
 
+  function exportAllTablesMarkdown({ filename } = {}) {
+    try {
+      const pieces = [];
+      document.querySelectorAll(".table-wrapper").forEach((wrapper) => {
+        try {
+          const table = wrapper.querySelector('table');
+          if (!table) return;
+          const title = wrapper.querySelector('h3')?.textContent || '';
+          const lines = tableToMarkdownLines(table, title);
+          if (!lines || lines.length === 0) return;
+          if (pieces.length) pieces.push('');
+          pieces.push(...lines);
+        } catch (e) { /* ignore single table error */ }
+      });
+      if (pieces.length === 0) { showToast('No tables to export', { type: 'warn' }); return; }
+      const md = pieces.join('\n');
+      const safeName = sanitizeFileName((filename || 'all_tables')) + '.md';
+      const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+      downloadBlob(blob, safeName);
+      showToast('All tables exported', { type: 'success' });
+    } catch (e) {
+      console.error('exportAllTablesMarkdown failed', e);
+      showToast('Export failed', { type: 'warn' });
+    }
+  }
+
+  function exportTableJSON(btn, { filename } = {}) {
+    try {
+      const table = getTableFromButton(btn);
+      if (!table) { showToast('No table found to export', { type: 'warn' }); return; }
+      const thead = table.tHead;
+      let headers = [];
+      if (thead && thead.rows.length > 0) {
+        headers = Array.from(thead.rows[0].cells).map(c => c.textContent.trim());
+      } else {
+        const firstRow = table.rows[0];
+        if (firstRow) headers = Array.from(firstRow.cells).map((c, i) => `Col${i+1}`);
+      }
+      const tbody = safeGetTBody(table) || table;
+      const dataRows = Array.from(tbody.rows);
+      const rows = dataRows.map(r => {
+        const cells = Array.from(r.cells);
+        const obj = {};
+        cells.forEach((td, i) => {
+          const key = headers[i] || `Col${i+1}`;
+          obj[key] = td.textContent.trim();
+        });
+        return obj;
+      });
+      const jsonStr = JSON.stringify(rows, null, 2);
+      const safeName = sanitizeFileName((filename || table.closest('.table-wrapper')?.querySelector('h3')?.textContent || 'table')) + '.json';
+      const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
+      downloadBlob(blob, safeName);
+      showToast('JSON exported', { type: 'success' });
+    } catch (e) { console.error(e); showToast('Export JSON failed', { type: 'warn' }); }
+  }
+
+  function exportTableXLSX(btn, { filename } = {}) {
+    try {
+      const table = getTableFromButton(btn);
+      if (!table) { showToast('No table found to export', { type: 'warn' }); return; }
+
+      const aoa = [];
+      Array.from(table.querySelectorAll('tr')).forEach(tr => {
+        const row = Array.from(tr.querySelectorAll('th,td')).map(td => (td.textContent || '').trim());
+        aoa.push(row);
+      });
+
+      if (aoa.length === 0) {
+        showToast('Table empty', { type: 'warn' });
+        return;
+      }
+
+      const baseName = sanitizeFileName((filename || table.closest('.table-wrapper')?.querySelector('h3')?.textContent || 'table'));
+      const safeName = baseName + '.xlsx';
+
+      if (window.XLSX && window.XLSX.utils) {
+        try {
+          const wb = (typeof window.XLSX.utils.book_new === 'function') ? window.XLSX.utils.book_new() : { SheetNames: [], Sheets: {} };
+          const ws = window.XLSX.utils.aoa_to_sheet(aoa);
+          if (typeof window.XLSX.utils.book_append_sheet === 'function') {
+            window.XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+          } else {
+            wb.SheetNames.push('Sheet1');
+            wb.Sheets['Sheet1'] = ws;
+          }
+
+          if (typeof window.XLSX.writeFile === 'function') {
+            window.XLSX.writeFile(wb, safeName);
+            showToast('XLSX exported', { type: 'success' });
+            return;
+          }
+
+          if (typeof window.XLSX.write === 'function') {
+            const wbout = window.XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+            const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            downloadBlob(blob, safeName);
+            showToast('XLSX exported', { type: 'success' });
+            return;
+          }
+        } catch (err) {
+          console.error('SheetJS export failed', err);
+        }
+      }
+
+      try {
+        const rows = aoa.map(r => r.map(v => '"' + (String(v || '').replace(/"/g, '""')) + '"').join('\t'));
+        const tsv = rows.join('\n');
+        const blob = new Blob(["\uFEFF", tsv], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        downloadBlob(blob, safeName);
+        showToast('XLSX exported (fallback TSV). Install assets/xlsx.full.min.js for true .xlsx support.', { type: 'warn' });
+        return;
+      } catch (err2) {
+        console.error('xlsx fallback failed', err2);
+        showToast('Export XLSX failed', { type: 'warn' });
+      }
+    } catch (e) {
+      console.error(e);
+      showToast('Export XLSX failed', { type: 'warn' });
+    }
+  }
+
+  function exportTablePDF(btn, { filename } = {}) {
+    try {
+      const table = getTableFromButton(btn);
+      if (!table) { showToast('No table found to export', { type: 'warn' }); return; }
+      const title = table.closest('.table-wrapper')?.querySelector('h3')?.textContent || 'Table';
+      const htmlDoc = `
+        <!doctype html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <title>${title}</title>
+            <style>
+              body { font-family: Arial, Helvetica, sans-serif; padding: 12px; color: #111; }
+              table { border-collapse: collapse; width: 100%; }
+              th, td { border: 1px solid #333; padding: 6px; text-align: left; }
+              h1 { font-size: 18px; margin-bottom: 8px; }
+            </style>
+          </head>
+          <body>
+            <h1>${title}</h1>
+            ${table.outerHTML}
+          </body>
+        </html>`;
+      const w = window.open('', '_blank');
+      if (!w) { showToast('Unable to open print window', { type: 'warn' }); return; }
+      w.document.open();
+      w.document.write(htmlDoc);
+      w.document.close();
+      setTimeout(() => {
+        try {
+          w.focus();
+          w.print();
+          showToast('Print dialog opened for PDF export', { type: 'success' });
+        } catch (e) {
+          showToast('Print failed', { type: 'warn' });
+        }
+      }, 300);
+    } catch (e) { console.error(e); showToast('Export PDF failed', { type: 'warn' }); }
+  }
+
+  function resetAllTables() {
+    try {
+      const tables = Array.from(document.querySelectorAll(".table-container table"));
+      tables.forEach((table, idx) => {
+        try {
+          const tbody = safeGetTBody(table);
+          if (!tbody) return;
+
+          // Reorder existing nodes to original order if snapshot exists
+          const order = originalRowOrders[idx];
+          if (order && order.length) {
+            const arranged = [];
+            for (let i = 0; i < order.length; i++) {
+              const uid = order[i];
+              try {
+                const r = tbody.querySelector(`tr[data-tv-uid="${uid}"]`);
+                if (r) arranged.push(r);
+              } catch (e) { /* continue */ }
+            }
+            // append any rows not in arranged
+            Array.from(tbody.rows).forEach(r => {
+              if (arranged.indexOf(r) === -1) arranged.push(r);
+            });
+            arranged.forEach(r => { try { tbody.appendChild(r); } catch (_) {} });
+          } else {
+            // fallback: do nothing (no snapshot available)
+          }
+
+          // Ensure per-cell original HTML snapshot used to restore highlights safely
+          Array.from(tbody.rows).forEach(r => {
+            Array.from(r.cells).forEach(c => { c.dataset.origHtml = c.innerHTML; });
+          });
+
+          sortStates[idx] = Array(table.rows[0]?.cells.length || 0).fill(0);
+          updateHeaderSortUI(idx);
+        } catch (e) { /* continue */ }
+      });
+      document.querySelectorAll('.table-wrapper').forEach(w => { w.classList.remove('table-collapsed'); const btn = w.querySelector('.toggle-table-btn'); if (btn) btn.textContent = "Collapse Table"; });
+      const toggleAllBtn = document.getElementById('toggleAllBtn');
+      if (toggleAllBtn) toggleAllBtn.textContent = "Collapse All Tables";
+      const sb = getSearchEl(); if (sb) sb.value = "";
+      searchTable();
+      try { updateRowCounts(); } catch (e) {}
+      showToast("All tables reset!", { type: 'success' });
+    } catch (e) { showToast('Reset failed', { type: 'warn' }); }
+  }
+
+  // Hide-only logic functions kept (they simply hide UI elements)
+  function hideResetAllTablesOption() {
+    try {
+      const selectors = ['.reset-all-btn', '.reset-btn', '#resetAllBtn', '[data-action="reset-all"]'];
+      selectors.forEach(s => {
+        try { document.querySelectorAll(s).forEach(el => { if (el && el.style) el.style.display = 'none'; }); } catch (_) {}
+      });
+      const needle = 'reset all tables';
+      const shortNeedle = 'reset all';
+      document.querySelectorAll('button, a, input').forEach(el => {
+        try {
+          const txt = ((el.textContent || '') + ' ' + (el.title || '')).toLowerCase();
+          if (txt.indexOf(needle) !== -1 || txt.indexOf(shortNeedle) !== -1) {
+            if (el && el.style) el.style.display = 'none';
+          }
+        } catch (_) {}
+      });
+      try {
+        document.querySelectorAll('#toolbar, .toolbar, .menu, .dropdown-menu').forEach(menu => {
+          menu.querySelectorAll('button, a, li').forEach(item => {
+            try {
+              const txt = ((item.textContent || '') + ' ' + (item.title || '')).toLowerCase();
+              if (txt.indexOf(needle) !== -1 || txt.indexOf(shortNeedle) !== -1) {
+                if (item && item.style) item.style.display = 'none';
+              }
+            } catch (_) {}
+          });
+        });
+      } catch (_) {}
+    } catch (e) { /* silent */ }
+  }
+
+  function hideExportMarkdownOption() {
+    try {
+      const selectors = [
+        '.export-markdown-btn', '.export-markdown', '.export-markdown-table',
+        '#exportMarkdownBtn', '[data-action="export-markdown"]',
+        'button[data-format="md"]', 'a[data-format="md"]'
+      ];
+      selectors.forEach(s => {
+        try { document.querySelectorAll(s).forEach(el => { if (el && el.style) el.style.display = 'none'; }); } catch (_) {}
+      });
+
+      const needles = ['export markdown', 'export md', 'markdown export', 'export as markdown'];
+      document.querySelectorAll('button, a, input, li, span').forEach(el => {
+        try {
+          const txt = ((el.textContent || '') + ' ' + (el.title || '')).toLowerCase();
+          for (let n of needles) {
+            if (txt.indexOf(n) !== -1) {
+              if (el && el.style) el.style.display = 'none';
+              break;
+            }
+          }
+        } catch (_) {}
+      });
+
+      try {
+        document.querySelectorAll('#toolbar, .toolbar, .menu, .dropdown-menu').forEach(menu => {
+          menu.querySelectorAll('button, a, li').forEach(item => {
+            try {
+              const txt = ((item.textContent || '') + ' ' + (item.title || '')).toLowerCase();
+              for (let n of needles) {
+                if (txt.indexOf(n) !== -1) {
+                  if (item && item.style) item.style.display = 'none';
+                  break;
+                }
+              }
+            } catch (_) {}
+          });
+        });
+      } catch (_) {}
+    } catch (e) { /* silent */ }
+  }
+
+  // Search & highlight functions preserved (unchanged)
   function clearHighlights(cell) {
     if (!cell) return;
-    if (cell.dataset.origHtml) { cell.innerHTML = cell.dataset.origHtml; return; }
-    cell.querySelectorAll('mark').forEach(m => {
+    if (cell.dataset && cell.dataset.origHtml) {
+      cell.innerHTML = cell.dataset.origHtml;
+      return;
+    }
+    const marks = Array.from(cell.querySelectorAll('mark'));
+    marks.forEach(m => {
       const textNode = document.createTextNode(m.textContent);
       if (m.parentNode) m.parentNode.replaceChild(textNode, m);
     });
   }
 
-  function highlightMatches(cell, filterNorm) {
-    if (!cell || !filterNorm || !filterNorm.trim()) return;
-    
+  function buildNormalizedMapForCell(cell) {
     const nodes = [];
-    const walker = document.createTreeWalker(cell, NodeFilter.SHOW_TEXT, null);
+    const walker = document.createTreeWalker(cell, NodeFilter.SHOW_TEXT, null, false);
     while (walker.nextNode()) {
-      if (walker.currentNode.nodeValue?.trim() && walker.currentNode.nodeValue !== '\u00A0') {
-        nodes.push(walker.currentNode);
+      const tn = walker.currentNode;
+      if (!tn.nodeValue || tn.nodeValue.length === 0) continue;
+      if (tn.nodeValue.trim() === '') continue;
+      nodes.push(tn);
+    }
+    let normStr = '';
+    const map = [];
+    for (let ni = 0; ni < nodes.length; ni++) {
+      const raw = nodes[ni].nodeValue;
+      for (let i = 0; i < raw.length;) {
+        const cp = raw.codePointAt(i);
+        const ch = String.fromCodePoint(cp);
+        const charLen = cp > 0xFFFF ? 2 : 1;
+        const decomposed = ch.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        let filtered;
+        try { filtered = decomposed.replace(/[^\p{L}\p{N}\s]/gu, ''); }
+        catch (e) { filtered = decomposed.replace(/[^\w\s]/g, ''); }
+        if (filtered.length > 0) {
+          for (let k = 0; k < filtered.length; k++) {
+            normStr += filtered[k];
+            map.push({ nodeIndex: ni, offsetInNode: i });
+          }
+        }
+        i += charLen;
       }
     }
+    return { normStr, map, nodes };
+  }
 
+  function highlightMatches(cell, filterNorm) {
+    if (!cell || !filterNorm) return;
+    if (cell.dataset && cell.dataset.origHtml) cell.innerHTML = cell.dataset.origHtml;
+    let built;
+    try { built = buildNormalizedMapForCell(cell); } catch (e) { return; }
+    const normStr = built.normStr.toLowerCase();
+    if (!normStr || normStr.length === 0) return;
+    const map = built.map;
+    const nodes = built.nodes;
     const needle = filterNorm.toLowerCase();
-
-    for (const tn of nodes) {
-      const original = tn.nodeValue;
-      const lowerOriginal = original.toLowerCase().replace(/\u00a0/g, ' ').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').trim();
-      if (!normalizeForSearch(lowerOriginal).includes(needle)) continue;
-
-      const frag = document.createDocumentFragment();
-      const normalizedOriginal = normalizeForSearch(lowerOriginal);
-      
-      let i = 0; let lastMatch = -1;
-      let normalizedIndexMap = [];
-      
-      for (let j=0; j<lowerOriginal.length; j++){
-        normalizedIndexMap.push(normalizedIndexMap.length);
-        normalizedOriginal;
-      }
-      
-      // Simple fallback highlight strategy (Safe & Fast): 
-      // Since complex Unicode normalization on exact boundaries can fragment nodes excessively on complex HTML (tables), 
-      // we fallback to a basic case-insensitive exact substring wrap on standard strings to avoid layout shifts on complex rich-table HTMLs.
-      const basicMatchIndex = original.toLowerCase().indexOf(needle);
-      if (basicMatchIndex === -1) continue;
-
-      let startIdx = 0;
-      let searchFrom = 0;
-      while (searchFrom < original.length) {
-        const idx = original.toLowerCase().indexOf(needle, searchFrom);
-        if (idx === -1) break;
-        
-        if (idx > startIdx) {
-          frag.appendChild(document.createTextNode(original.substring(startIdx, idx)));
+    const matches = [];
+    let pos = 0;
+    while (true) {
+      const idx = normStr.indexOf(needle, pos);
+      if (idx === -1) break;
+      matches.push(idx);
+      pos = idx + needle.length;
+    }
+    if (matches.length === 0) return;
+    for (let mi = matches.length - 1; mi >= 0; mi--) {
+      const startNorm = matches[mi];
+      const endNormExclusive = startNorm + needle.length;
+      const startMap = map[startNorm];
+      const endMap = map[endNormExclusive - 1];
+      if (!startMap || !endMap) continue;
+      const startNodeIndex = startMap.nodeIndex;
+      const startOffset = Math.max(0, Math.min((startMap.offsetInNode || 0), nodes[startNodeIndex].nodeValue.length));
+      const endNodeIndex = endMap.nodeIndex;
+      let endOffsetExclusive = Math.max(0, Math.min((endMap.offsetInNode || 0), nodes[endNodeIndex].nodeValue.length));
+      try {
+        const endNodeRaw = nodes[endNodeIndex].nodeValue;
+        const cp = endNodeRaw.codePointAt(endOffsetExclusive);
+        const charLen = cp > 0xFFFF ? 2 : 1;
+        endOffsetExclusive = Math.min(endOffsetExclusive + charLen, endNodeRaw.length);
+      } catch (e) { endOffsetExclusive = Math.min(endOffsetExclusive + 1, nodes[endNodeIndex].nodeValue.length); }
+      try {
+        if (startNodeIndex === endNodeIndex) {
+          const tn = nodes[startNodeIndex];
+          const rawLen = tn.nodeValue.length;
+          const s = Math.max(0, Math.min(startOffset, rawLen));
+          const e = Math.max(0, Math.min(endOffsetExclusive, rawLen));
+          if (s >= e) continue;
+          const after = tn.splitText(e);
+          const middle = tn.splitText(s);
+          const mark = document.createElement('mark');
+          mark.appendChild(document.createTextNode(middle.data));
+          middle.parentNode.replaceChild(mark, middle);
+        } else {
+          const startNode = nodes[startNodeIndex];
+          const endNode = nodes[endNodeIndex];
+          const rawStartLen = startNode.nodeValue.length;
+          const rawEndLen = endNode.nodeValue.length;
+          const sOff = Math.max(0, Math.min(startOffset, rawStartLen));
+          const eOff = Math.max(0, Math.min(endOffsetExclusive, rawEndLen));
+          const afterEnd = endNode.splitText(eOff);
+          const middleStart = startNode.splitText(sOff);
+          const wrapNodes = [];
+          let cur = middleStart;
+          while (cur) {
+            wrapNodes.push(cur);
+            if (cur === endNode) break;
+            cur = cur.nextSibling;
+            if (!cur) break;
+          }
+          if (wrapNodes.length === 0) continue;
+          const parent = wrapNodes[0].parentNode;
+          if (!parent) continue;
+          const mark = document.createElement('mark');
+          parent.insertBefore(mark, wrapNodes[0]);
+          wrapNodes.forEach(n => { try { mark.appendChild(n); } catch (e) {} });
         }
-        
-        const mark = document.createElement('mark');
-        mark.className = 'search-hl';
-        mark.appendChild(document.createTextNode(original.substring(idx, idx + needle.length)));
-        frag.appendChild(mark);
-        
-        startIdx = idx + needle.length;
-        searchFrom = startIdx;
-      }
-
-      if (startIdx < original.length) {
-        frag.appendChild(document.createTextNode(original.substring(startIdx)));
-      }
-      tn.parentNode.replaceChild(frag, tn);
+      } catch (e) { continue; }
     }
   }
 
   function searchTable() {
-    const searchVal = getSearchEl()?.value || '';
-    const filterNorm = normalizeForSearch(searchVal);
-    let firstMatch = null;
-    
-    document.querySelectorAll('.table-container table').forEach(table => {
-      const tbody = safeGetTBody(table);
-      if (!tbody) return;
-      
-      Array.from(tbody.rows).forEach(row => {
-        let rowMatches = false;
-        
-        Array.from(row.cells).forEach(cell => {
-          clearHighlights(cell);
-          if (filterNorm && normalizeForSearch(cell.textContent || '').includes(filterNorm)) {
-            rowMatches = true;
+    try {
+      const searchEl = getSearchEl();
+      const filterRaw = searchEl?.value || '';
+      const filterNorm = normalizeForSearchLocal(filterRaw);
+      let firstMatch = null;
+      document.querySelectorAll('.table-container table').forEach(table => {
+        const tbody = safeGetTBody(table);
+        if (!tbody) return;
+        Array.from(tbody.rows).forEach(row => {
+          let rowMatches = false;
+          Array.from(row.cells).forEach(cell => {
+            clearHighlights(cell);
+            const txt = cell.textContent || '';
+            if (filterNorm && normalizeForSearchLocal(txt).includes(filterNorm)) {
+              rowMatches = true;
+            }
+          });
+          row.style.display = (!filterNorm || rowMatches) ? '' : 'none';
+          if (rowMatches) {
+            if (window.tvConfig && window.tvConfig.highlight) Array.from(row.cells).forEach(cell => highlightMatches(cell, filterNorm));
+            if (!firstMatch) firstMatch = row;
           }
         });
-
-        const isVisible = !filterNorm || rowMatches;
-        row.style.display = isVisible ? '' : 'none';
-        
-        if (rowMatches && !row.classList.contains('current-row')) {
-           // We'll use `mark.search-hl` rather than forcing `current-row` on all matching to avoid layout shifts on rich HTML tables.
-        }
-
-        if (isVisible && window.tvConfig.highlight && rowMatches) {
-           Array.from(row.cells).forEach(cell => highlightMatches(cell, filterNorm));
-        }
-        
-        if (rowMatches && !firstMatch) firstMatch = row;
       });
-    });
-
-    if (firstMatch && window.matchMedia('(min-width: 600px)').matches) {
-       // Scroll into view only on larger viewports to avoid janky layout shifts during active typing
       try {
-        firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
-      } catch {}
-    }
-    
-    updateRowCounts();
-    updateActiveTocItem();
-  }
-
-  // -----------------------------
-  // 6. Export Functions (Safe & Robust)
-  // -----------------------------
-  function tableToMarkdownLines(table, title) {
-    const lines = [];
-    const rows = Array.from(table.rows);
-    if (!rows.length) return lines;
-    if (title) lines.push(`**${title}**`, '');
-    
-    const headCells = Array.from(rows[0].cells).map(c => (c.textContent || '').trim().replace(/\|/g, '\\|'));
-    lines.push(`| ${headCells.join(' | ')} |`);
-    lines.push(`| ${headCells.map(() => '---').join(' | ')} |`);
-    
-    for (let i = 1; i < rows.length; i++) {
-      const rowCells = Array.from(rows[i].cells).map(c => {
-        let txt = (c.textContent || '').trim().replace(/\|/g, '\\|');
-        return txt.includes('\n') ? txt.replace(/\r?\n/g, '<br>') : txt;
-      });
-      lines.push(`| ${rowCells.join(' | ')} |`);
-    }
-    return lines;
-  }
-
-  function exportTableCSV(btn, { filename } = {}) {
-    const table = getTableFromButton(btn);
-    if (!table) return showToast('No table found', { type: 'warn' });
-    const csv = Array.from(table.rows).map(r => 
-      Array.from(r.cells).map(c => {
-        const v = c.textContent || '';
-        return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
-      }).join(',')
-    ).join('\r\n');
-    const name = sanitizeFileName(filename || table.closest('.table-wrapper')?.querySelector('h3')?.textContent || 'table') + '.csv';
-    downloadBlob(new Blob(["\uFEFF", csv], { type: 'text/csv;charset=utf-8;' }), name);
-    showToast('CSV exported', { type: 'success' });
-  }
-
-  function exportTableMarkdown(btn, { filename } = {}) {
-    const table = getTableFromButton(btn);
-    if (!table) return showToast('No table found', { type: 'warn' });
-    const title = table.closest('.table-wrapper')?.querySelector('h3')?.textContent || '';
-    const lines = tableToMarkdownLines(table, title);
-    if (!lines.length) return showToast('Table empty', { type: 'warn' });
-    const name = sanitizeFileName(filename || title || 'table') + '.md';
-    downloadBlob(new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' }), name);
-    showToast('Markdown exported', { type: 'success' });
-  }
-
-  function exportAllTablesMarkdown({ filename } = {}) {
-    const pieces = [];
-    document.querySelectorAll(".table-wrapper").forEach(w => {
-      const table = w.querySelector('table');
-      if (!table) return;
-      const lines = tableToMarkdownLines(table, w.querySelector('h3')?.textContent || '');
-      if (lines.length) {
-        if (pieces.length) pieces.push('');
-        pieces.push(...lines);
+        if (window.tableVirtualizer?.refresh) window.tableVirtualizer.refresh();
+        else if (window.tableVirtualizer?.update) window.tableVirtualizer.update();
+      } catch (_) {}
+      if (firstMatch) {
+        const rect = firstMatch.getBoundingClientRect();
+        const headerHeight = document.getElementById('stickyMainHeader')?.offsetHeight || 0;
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0;
+        window.scrollTo({ top: scrollTop + rect.top - headerHeight - 5, behavior: 'smooth' });
       }
-    });
-    if (!pieces.length) return showToast('No tables to export', { type: 'warn' });
-    const name = sanitizeFileName(filename || 'all_tables') + '.md';
-    downloadBlob(new Blob([pieces.join('\n')], { type: 'text/markdown;charset=utf-8' }), name);
-    showToast('All tables exported', { type: 'success' });
+      try { updateRowCounts(); } catch (_) {}
+      try { updateActiveTocItem(); } catch (_) {}
+    } catch (_) {}
   }
 
-  function exportTableJSON(btn, { filename } = {}) {
-    const table = getTableFromButton(btn);
-    if (!table) return showToast('No table found', { type: 'warn' });
-    
-    let headers = Array.from(table.tHead?.rows[0]?.cells || []).map(c => c.textContent.trim());
-    if (!headers.length) headers = Array.from(table.rows[0]?.cells || []).map((_, i) => `Col${i + 1}`);
-    
-    const data = Array.from(safeGetTBody(table).rows).map(r => {
-      const obj = {};
-      Array.from(r.cells).forEach((td, i) => obj[headers[i] || `Col${i + 1}`] = td.textContent.trim());
-      return obj;
-    });
-    const name = sanitizeFileName(filename || table.closest('.table-wrapper')?.querySelector('h3')?.textContent || 'table') + '.json';
-    downloadBlob(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8' }), name);
-    showToast('JSON exported', { type: 'success' });
-  }
-
-  function exportTableXLSX(btn, { filename } = {}) {
-    const table = getTableFromButton(btn);
-    if (!table) return showToast('No table found', { type: 'warn' });
-    const aoa = Array.from(table.querySelectorAll('tr')).map(tr => 
-      Array.from(tr.querySelectorAll('th,td')).map(td => (td.textContent || '').trim())
-    );
-    if (!aoa.length) return showToast('Table empty', { type: 'warn' });
-    
-    const baseName = sanitizeFileName(filename || table.closest('.table-wrapper')?.querySelector('h3')?.textContent || 'table');
-    if (window.XLSX?.utils && typeof window.XLSX.utils.aoa_to_sheet === 'function') {
-      try {
-        const wb = window.XLSX.utils.book_new();
-        window.XLSX.utils.book_append_sheet(wb, window.XLSX.utils.aoa_to_sheet(aoa), 'Sheet1');
-        window.XLSX.writeFile(wb, `${baseName}.xlsx`);
-        return showToast('XLSX exported', { type: 'success' });
-      } catch (err) { console.error('XLSX export error:', err); }
-    }
-    // Safe Fallback
-    const csv = aoa.map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\r\n');
-    downloadBlob(new Blob(["\uFEFF", csv], { type: 'text/csv;charset=utf-8;' }), `${baseName}.csv`);
-    showToast('XLSX library missing, downloaded CSV.', { type: 'info' });
-  }
-
-  function exportTablePDF(btn) {
-    const table = getTableFromButton(btn);
-    if (!table) return showToast('No table found', { type: 'warn' });
-    const title = table.closest('.table-wrapper')?.querySelector('h3')?.textContent || 'Table';
-    
-    const htmlDoc = `<!doctype html><html><head><meta charset="utf-8"><title>${title}</title>
-      <style>body{font-family:Arial,sans-serif;padding:24px;}table{border-collapse:collapse;width:100%;}th,td{border:1px solid #333;padding:8px;vertical-align:top;}th{background:#eee;}</style>
-      </head><body><h1 style="font-size:24px">${title}</h1>${table.outerHTML}</body></html>`;
-    
-    const w = window.open('', '_blank');
-    if (!w) return showToast('Unable to open print window', { type: 'warn' });
-    w.document.write(htmlDoc);
-    w.document.close();
-    setTimeout(() => { w.focus(); w.print(); }, 300);
-  }
-
-  function copyTablePlain(btn) {
-    const table = getTableFromButton(btn);
-    if (!table) return showToast('No table found', { type: 'warn' });
-    const text = (table.closest('.table-wrapper')?.querySelector('h3')?.textContent || '') + "\n" + 
-                 Array.from(table.rows).map(r => Array.from(r.cells).map(c => c.textContent.trim()).join("\t")).join("\n");
-    copyToClipboard(text).then(() => showToast('Copied as plain text!', { type: 'success' })).catch(() => showCopyModal(text, { title: 'Table Text' }));
-  }
-
-  function copyTableMarkdown(btn) {
-    const table = getTableFromButton(btn);
-    if (!table) return showToast('No table found', { type: 'warn' });
-    const title = table.closest('.table-wrapper')?.querySelector('h3')?.textContent || '';
-    const md = tableToMarkdownLines(table, title).join('\n');
-    if (!md) return showToast('Table empty', { type: 'warn' });
-    copyToClipboard(md).then(() => showToast('Copied in Markdown!', { type: 'success' })).catch(() => showCopyModal(md, { title: 'Table Markdown' }));
-  }
-
-  function copyAllTablesPlain() {
-    const text = Array.from(document.querySelectorAll(".table-wrapper")).map(w => {
-      const tbl = w.querySelector('table');
-      if (!tbl) return '';
-      return (w.querySelector('h3')?.textContent || '') + "\n" + 
-             Array.from(tbl.rows).map(r => Array.from(r.cells).map(c => c.textContent.trim()).join("\t")).join("\n");
-    }).filter(Boolean).join("\n\n");
-    if (!text) return showToast('No tables found', { type: 'warn' });
-    copyToClipboard(text).then(() => showToast("All tables copied!", { type: 'success' })).catch(() => showCopyModal(text, { title: 'All Tables' }));
-  }
-
-  function copyAllTablesMarkdown() {
-    const pieces = [];
-    document.querySelectorAll(".table-wrapper").forEach(w => {
-      const tbl = w.querySelector('table');
-      if (!tbl) return;
-      const lines = tableToMarkdownLines(tbl, w.querySelector('h3')?.textContent || '');
-      if (lines.length) {
-        if (pieces.length) pieces.push('');
-        pieces.push(...lines);
-      }
-    });
-    if (!pieces.length) return showToast('No tables to export', { type: 'warn' });
-    const md = pieces.join('\n');
-    copyToClipboard(md).then(() => showToast("All tables copied!", { type: 'success' })).catch(() => showCopyModal(md, { title: 'All Markdown Tables' }));
-  }
-
-  // -----------------------------
-  // 7. Initialization
-  // -----------------------------
-  function resetAllTables() {
-    document.querySelectorAll(".table-container table").forEach((table, idx) => {
-      const tbody = safeGetTBody(table);
-      if (!tbody) return;
-      
-      const order = STATE.originalRowOrders[idx];
-      if (order?.length) {
-        const arranged = order.map(uid => tbody.querySelector(`tr[data-tv-uid="${uid}"]`)).filter(Boolean);
-        Array.from(tbody.rows).forEach(r => { if (!arranged.includes(r)) arranged.push(r); });
-        arranged.forEach(r => tbody.appendChild(r));
-      }
-      
-      STATE.sortStates[idx] = Array(table.rows[0]?.cells.length || 0).fill(0);
-      updateHeaderSortUI(idx);
-    });
-    
-    document.querySelectorAll('.table-wrapper').forEach(w => {
-      w.classList.remove('table-collapsed');
-      updateToggleButtonState(w);
-    });
-
-    const toggleAllBtn = document.getElementById('toggleAllBtn');
-    if (toggleAllBtn) {
-      toggleAllBtn.setAttribute('aria-label', "Collapse All Tables");
-      if (!toggleAllBtn.querySelector('svg, i')) toggleAllBtn.textContent = "Collapse All Tables";
-    }
-
-    const sb = getSearchEl();
-    if (sb) sb.value = "";
-    searchTable();
-    updateRowCounts();
-    showToast("All tables reset!", { type: 'success' });
-  }
-
-  function ensureExtraJsAndIndex(base) {
-    if (!document.body) return setTimeout(() => ensureExtraJsAndIndex(base), 50);
+  // Mobile/table-control optimization — simplified and class-driven
+  function optimizeTableControls() {
     try {
-      if (!document.body.getAttribute('data-index-url')?.trim()) {
-        document.body.setAttribute('data-index-url', base.replace(/\/?$/, '/') + 'tables_index.json');
-      }
-      if (!document.body.getAttribute('data-worker-url')?.trim()) {
-        document.body.setAttribute('data-worker-url', base.replace(/\/?$/, '/') + 'worker.js');
-      }
-    } catch {}
+      const mql = window.matchMedia ? window.matchMedia('(max-width:600px)') : null;
+      const isMobile = mql ? mql.matches : (window.innerWidth <= 600);
+      document.querySelectorAll('.table-wrapper').forEach(wrapper => {
+        try {
+          const header = wrapper.querySelector('.table-header-wrapper');
+          if (!header) return;
+          header.classList.add('table-controls');
+          header.style.boxSizing = header.style.boxSizing || 'border-box';
+          header.style.overflowX = header.style.overflowX || 'auto';
+          header.style.webkitOverflowScrolling = header.style.webkitOverflowScrolling || 'touch';
+          header.style.display = header.style.display || 'flex';
+/* removed inline flexWrap to respect stylesheet; previously set by script */;
+          header.style.justifyContent = header.style.justifyContent || 'space-between';
+          header.style.gap = header.style.gap || '8px';
+          header.style.alignItems = header.style.alignItems || 'center';
 
-    if (window.__tv_no_auto_extra_load || document.querySelector('script[src*="extra.js"]') || window._tv_extra_loaded) return;
-    
-    window._tv_extra_loaded = true;
-    const candidates = [
-      base.replace(/\/?$/, '/') + 'extra.js',
-      base.replace(/\/?$/, '/') + 'assets/extra.js',
-      (location.origin || '') + '/assets/extra.js',
-      './assets/extra.js', './extra.js'
-    ];
-    let idx = 0;
-    (function tryNext() {
-      if (idx >= candidates.length) return console.warn('TV: extra.js candidates failed.');
-      const src = candidates[idx++];
-      const s = document.createElement('script');
-      s.src = src; s.async = true; s.defer = true;
-      s.onload = () => console.info('TV: extra.js loaded from', src);
-      s.onerror = () => { s.remove(); tryNext(); };
-      document.head.appendChild(s);
-    })();
+          let copyButtons = header.querySelector('.copy-buttons');
+          if (!copyButtons) {
+            const possibleBtns = Array.from(header.querySelectorAll('button')).filter(b => !b.classList.contains('toggle-table-btn') && !b.classList.contains('table-toggle-inline'));
+            if (possibleBtns.length > 0) {
+              const cb = document.createElement('div');
+              cb.className = 'copy-buttons';
+              cb.style.display = 'flex';
+              cb.style.gap = '6px';
+              possibleBtns.forEach(b => cb.appendChild(b));
+              header.insertBefore(cb, header.firstChild);
+              copyButtons = cb;
+            }
+          }
+
+          const toggleBtn = header.querySelector('.toggle-table-btn') || header.querySelector('.toggle-table');
+          if (toggleBtn) {
+            const toggleParent = toggleBtn.parentElement && toggleBtn.parentElement !== header ? toggleBtn.parentElement : null;
+            if (toggleParent && toggleParent !== header) {
+              try { header.insertBefore(toggleParent, header.firstChild); } catch (_) {}
+            } else {
+              try { header.insertBefore(toggleBtn, header.firstChild); } catch (_) {}
+            }
+
+            // Ensure compact inline class on all viewports. Remove legacy class.
+            try { toggleBtn.classList.remove('toggle-table-btn', 'table-toggle-mobile'); } catch (_) {}
+            try { toggleBtn.classList.add('table-toggle-inline'); } catch (_) {}
+
+            // Clear inline overrides. CSS controls sizing.
+            try {
+              toggleBtn.style.order = '';
+              toggleBtn.style.flex = '';
+              toggleBtn.style.width = '';
+              toggleBtn.style.boxSizing = '';
+              toggleBtn.style.margin = '';
+              toggleBtn.style.padding = '';
+              toggleBtn.style.fontWeight = '';
+              if (toggleBtn.parentElement) toggleBtn.parentElement.style.width = '';
+            } catch (_) {}
+          }
+
+          if (copyButtons) {
+            if (isMobile) {
+              copyButtons.style.flex = '1 1 auto';
+              copyButtons.style.gap = '6px';
+              Array.from(copyButtons.querySelectorAll('button')).forEach(b => {
+                b.style.padding = '4px 6px';
+                b.style.fontSize = '12px';
+                b.style.flex = '0 1 auto';
+                b.style.minWidth = 'unset';
+                if (b.classList.contains('icon-only')) {
+                  b.style.width = '36px';
+                  b.style.height = '36px';
+                  b.style.padding = '6px';
+                }
+              });
+            } else {
+              copyButtons.style.flex = '';
+              copyButtons.style.gap = '';
+              Array.from(copyButtons.querySelectorAll('button')).forEach(b => {
+                b.style.padding = '';
+                b.style.fontSize = '';
+                b.style.flex = '';
+                b.style.minWidth = '';
+                if (b.classList.contains('icon-only')) {
+                  b.style.width = '';
+                  b.style.height = '';
+                }
+              });
+            }
+          }
+        } catch (e) { /* per-wrapper silent */ }
+      });
+    } catch (e) { /* global silent */ }
   }
 
-  document.addEventListener('DOMContentLoaded', function () {
-    ensureExtraJsAndIndex(TV_BASE);
-    ensureIndexAndWorkerAttrs(TV_BASE);
+  const _debouncedOptimize = debounce(optimizeTableControls, 120);
+  if (window.matchMedia) {
+    try {
+      const mql = window.matchMedia('(max-width:600px)');
+      if (typeof mql.addEventListener === 'function') {
+        mql.addEventListener('change', _debouncedOptimize);
+      } else if (typeof mql.addListener === 'function') {
+        mql.addListener(_debouncedOptimize);
+      }
+    } catch (_) {}
+  }
+  window.addEventListener('resize', _debouncedOptimize);
 
-    document.querySelectorAll('.table-wrapper').forEach(wrapper => {
-      if (!wrapper.querySelector('.table-container') && wrapper.querySelector('table')) {
+  // Attach handlers and initial DOM setup
+  document.addEventListener('DOMContentLoaded', function () {
+    try {
+      // Wrap tables in .table-container if missing
+      document.querySelectorAll('.table-wrapper').forEach(wrapper => {
+        if (wrapper.querySelector('.table-container')) return;
+        const table = wrapper.querySelector('table');
+        if (!table) return;
         const container = document.createElement('div');
         container.className = 'table-container';
-        const tbl = wrapper.querySelector('table');
-        wrapper.insertBefore(container, tbl);
-        container.appendChild(tbl);
-      }
+        wrapper.insertBefore(container, table);
+        container.appendChild(table);
+      });
 
-      const header = wrapper.querySelector('.table-header-wrapper, .table-controls');
-      if (header && !header.classList.contains('table-controls')) {
-        header.classList.add('table-controls');
-      }
+      // Build single-table TOC first (so ids are assigned to rows)
+      try { buildSingleTableToc(); setTimeout(buildSingleTableToc, 500); } catch (e) {}
 
-      updateToggleButtonState(wrapper);
-    });
+      // Build snapshots and sortStates after DOM is stable (now after TOC so row ids exist)
+      document.querySelectorAll(".table-container table").forEach((table, idx) => {
+        try {
+          // Ensure each row has a stable internal UID and snapshot the original order
+          _ensureRowUidsAndSnapshot(table, idx);
 
-    document.querySelectorAll(".table-container table").forEach((table, idx) => {
-      ensureRowUidsAndSnapshot(table, idx);
-      STATE.sortStates[idx] = Array(table.rows[0]?.cells.length || 0).fill(0);
-      
-      const tbody = safeGetTBody(table);
-      if (tbody) {
+          // store initial sort state per column
+          sortStates[idx] = Array(table.rows[0]?.cells.length || 0).fill(0);
+        } catch (e) {
+          sortStates[idx] = sortStates[idx] || [];
+          originalRowOrders[idx] = originalRowOrders[idx] || [];
+        }
+      });
+
+      // attach per-cell original HTML snapshot used to restore highlights safely
+      document.querySelectorAll('.table-container table').forEach(table => {
+        const tbody = safeGetTBody(table);
+        if (!tbody) return;
         Array.from(tbody.rows).forEach(r => {
-          Array.from(r.cells).forEach(c => { 
-             // Save initial rich-HTML state safely to ensure complex HTML restores properly on clearHighlights()
-             if (!c.dataset.origHtml) c.dataset.origHtml = c.innerHTML; 
+          Array.from(r.cells).forEach(c => {
+            if (!c.dataset.origHtml) c.dataset.origHtml = c.innerHTML;
           });
         });
-      }
-      updateHeaderSortUI(idx);
-    });
-
-    initTocCache();
-
-    const anyExpanded = document.querySelectorAll('.table-wrapper:not(.table-collapsed)').length > 0;
-    const toggleAll = document.getElementById('toggleAllBtn');
-    if (toggleAll) {
-      const txt = anyExpanded ? "Collapse All Tables" : "Expand All Tables";
-      toggleAll.setAttribute('aria-label', txt);
-      if (!toggleAll.querySelector('svg, i')) toggleAll.textContent = txt;
-    }
-
-    const btt = document.getElementById('backToTop');
-    if (!btt) {
-      const b = document.createElement('button');
-      b.id = 'backToTop';
-      b.type = 'button';
-      b.title = 'Back to top';
-      b.setAttribute('aria-label', 'Back to top');
-      b.textContent = '↑';
-      b.style.display = 'none';
-      b.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
-      document.body.appendChild(b);
-    }
-
-    const sb = getSearchEl();
-    if (sb) {
-      const deb = debounce(searchTable, window.tvConfig.debounceMs || 120);
-      sb.addEventListener('input', deb);
-      sb.addEventListener('keyup', e => { if (e.key === 'Enter') searchTable(); });
-    }
-
-    const handlerPairs = [
-      ['.toggle-table-btn', '.toggle-table', toggleTable],
-      ['.copy-plain-btn', '.copy-plain', copyTablePlain],
-      ['.copy-markdown-btn', '.copy-markdown', copyTableMarkdown],
-      ['.export-csv-btn', '.export-csv', exportTableCSV],
-      ['.export-json-btn', '.export-json', exportTableJSON],
-      ['.export-xlsx-btn', '.export-xlsx', exportTableXLSX],
-      ['.export-pdf-btn', '.export-pdf', exportTablePDF]
-    ];
-
-    document.querySelectorAll('.table-wrapper').forEach(wrap => {
-      for (let i=0; i<handlerPairs.length; i+=3) {
-        const btn = wrap.querySelector(handlerPairs[i]) || wrap.querySelector(handlerPairs[i+1]);
-        if (btn && !btn.dataset.tvHandlerAttached && !btn.getAttribute('onclick')) {
-           const handlerFn = handlerPairs[i+2];
-           btn.addEventListener('click', function() { handlerFn(this); });
-           btn.dataset.tvHandlerAttached = '1';
-        }
-      }
-    });
-
-    window.scrollTo(window.scrollX, window.scrollY + 1); // Force initial scroll state layout update
-
-    updateRowCounts();
-    updateActiveTocItem();
-  });
-
-  function ensureIndexAndWorkerAttrs(base) { /* Handled above */ }
-
-  document.addEventListener("keydown", function (e) {
-    const active = document.activeElement;
-    const tag = active?.tagName?.toLowerCase();
-    
-    if (e.key === "/" && !e.ctrlKey && !e.metaKey && !e.altKey && !active?.isContentEditable) {
-      if (tag === 'input' || tag === 'textarea') return;
-      e.preventDefault();
-      const s = getSearchEl();
-      if (s) { s.focus(); s.select(); }
-    }
-    if (e.key === "Escape") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  });
-
-  // Delegation: Sorting & Anchor handling (Respecting theme scroll-margins)
-  document.addEventListener('click', function (e) {
-    const el = e.target;
-    const sortHit = el.closest?.('.sort-btn') || el.closest?.('.th-with-sort');
-    if (sortHit) {
-      const th = sortHit.closest('th');
-      if (th) {
-        const table = th.closest('table');
-        const tables = Array.from(document.querySelectorAll('.table-container table'));
-        const tableIdx = tables.indexOf(table);
-        const colIdx = th.cellIndex;
-        if (tableIdx !== -1 && colIdx >= 0) {
-          headerSortButtonClicked(tableIdx, colIdx, sortHit);
-          e.preventDefault();
-          e.stopPropagation();
-        }
-      }
-    }
-
-    const tocLink = el.closest?.('#tocBar a[href^="#"]');
-    if (tocLink) {
-      const id = tocLink.getAttribute('href').substring(1);
-      if (id) {
-        const target = document.getElementById(id);
-        if (target) {
-          e.preventDefault(); 
-          // Modern `scrollIntoView` properly leverages `scroll-margin-top` set by `style.css` on tr[id]
-          target.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
-          target.focus({ preventScroll: true }); 
-          history.replaceState(null, '', '#' + id);
-          // The theme `@media (hover: hover)` and focus-visible handling manages visual state safely now
-        }
-      }
-    }
-  });
-
-  let tickingScroll = false;
-  window.addEventListener("scroll", function () {
-    if (!tickingScroll) {
-      requestAnimationFrame(() => {
-        const btn = document.getElementById("backToTop");
-        if (btn) btn.style.display = (document.documentElement.scrollTop > 300 || window.scrollY > 300) ? "block" : "none";
-        updateActiveTocItem();
-        tickingScroll = false;
       });
-      tickingScroll = true;
-    }
+
+      // Update header sort UI
+      document.querySelectorAll(".table-container table").forEach((t, idx) => { updateHeaderSortUI(idx); });
+
+      // Update toggle buttons text
+      document.querySelectorAll('.table-wrapper').forEach(w => {
+        const btn = w.querySelector('.toggle-table-btn');
+        if (btn) btn.textContent = w.classList.contains('table-collapsed') ? "Expand Table" : "Collapse Table";
+      });
+
+      // Toggle all button state
+      const anyExpanded = document.querySelectorAll('.table-wrapper:not(.table-collapsed)').length > 0;
+      const toggleAll = document.getElementById('toggleAllBtn');
+      if (toggleAll) toggleAll.textContent = anyExpanded ? "Collapse All Tables" : "Expand All Tables";
+
+      // Ensure backToTop exists
+      if (!document.getElementById('backToTop')) {
+        try {
+          const b = document.createElement('button');
+          b.id = 'backToTop';
+          b.type = 'button';
+          b.title = 'Back to top';
+          b.textContent = '↑';
+          b.style.display = 'none';
+          document.body.appendChild(b);
+          b.addEventListener('click', backToTop);
+        } catch (e) { /* ignore */ }
+      }
+
+      // Attach search handlers (debounced)
+      const sb = getSearchEl();
+      if (sb) {
+        const deb = debounce(searchTable, (window.tvConfig && window.tvConfig.debounceMs) || 120);
+        try {
+          sb.addEventListener('input', deb);
+          sb.addEventListener('keyup', function (e) { if (e.key === 'Enter') searchTable(); });
+        } catch (e) { /* silent */ }
+      }
+
+      // Attach handlers to server-rendered toolbar buttons when missing
+      try {
+        document.querySelectorAll('.table-wrapper').forEach(wrapper => {
+          const handlers = [
+            { sel: '.toggle-table-btn, .toggle-table', fn: toggleTable },
+            { sel: '.copy-plain-btn, .copy-plain, .copy-plain-table', fn: copyTablePlain },
+            { sel: '.copy-markdown-btn, .copy-markdown, .copy-markdown-table', fn: copyTableMarkdown },
+            { sel: '.export-csv-btn, .export-csv, .export-csv-table', fn: exportTableCSV },
+            { sel: '.export-json-btn, .export-json, .export-json-table', fn: exportTableJSON },
+            { sel: '.export-xlsx-btn, .export-xlsx, .export-xlsx-table', fn: exportTableXLSX },
+            { sel: '.export-pdf-btn, .export-pdf, .export-pdf-table', fn: exportTablePDF }
+            // NOTE: export-markdown intentionally excluded from automatic handler attachment.
+          ];
+          handlers.forEach(h => {
+            try {
+              const btn = wrapper.querySelector(h.sel);
+              if (!btn) return;
+              if (btn.getAttribute && btn.getAttribute('onclick')) return;
+              if (btn.dataset && btn.dataset.tvHandlerAttached) return;
+              btn.addEventListener('click', function (ev) { try { h.fn(this); } catch (e) { /* silent */ } });
+              if (btn.dataset) btn.dataset.tvHandlerAttached = '1';
+            } catch (e) { /* silent */ }
+          });
+        });
+      } catch (e) { /* silent */ }
+
+      // Optimize table controls position/size for all viewports
+      try { optimizeTableControls(); setTimeout(optimizeTableControls, 200); } catch (e) { /* silent */ }
+
+      // Hide Reset All Tables UI targets (only hide; function retained)
+      try { hideResetAllTablesOption(); setTimeout(hideResetAllTablesOption, 500); } catch (e) {}
+
+      // Hide Export Markdown UI targets (only hide; function retained)
+      // We already injected early-hide CSS; still run JS-based hide for completeness.
+      try { hideExportMarkdownOption(); setTimeout(hideExportMarkdownOption, 500); } catch (e) {}
+
+      // Single consolidated keydown handler for "/" and "Escape"
+      document.addEventListener("keydown", function (e) {
+        try {
+          const active = document.activeElement;
+          const tag = active && (active.tagName || "").toLowerCase();
+          if (e.key === "/" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+            if (tag === 'input' || tag === 'textarea' || (active && active.isContentEditable)) return;
+            e.preventDefault();
+            const s = getSearchEl();
+            if (s) { s.focus(); s.select(); }
+            return;
+          }
+          if (e.key === "Escape") {
+            backToTop();
+            return;
+          }
+        } catch (err) { /* silent */ }
+      });
+
+      // Initial row counts
+      try { updateRowCounts(); } catch (e) {}
+      try { updateActiveTocItem(); } catch (e) {}
+    } catch (e) { /* silent */ }
+  });
+
+  // delegated click: sorting
+  document.addEventListener('click', function (e) {
+    try {
+      const el = e.target;
+      const hit = el.closest && (el.closest('.sort-btn') || el.closest('.th-with-sort') || (el.tagName && el.tagName.toLowerCase() === 'th' && el.getAttribute('role') === 'button' ? el : null));
+      if (!hit) return;
+      const th = hit.closest('th') || (hit.tagName && hit.tagName.toLowerCase() === 'th' ? hit : null);
+      if (!th) return;
+      const table = th.closest('table');
+      if (!table) return;
+      const tables = Array.from(document.querySelectorAll('.table-container table'));
+      const tableIdx = tables.indexOf(table);
+      const colIdx = th.cellIndex;
+      if (tableIdx === -1 || typeof colIdx === 'undefined' || colIdx < 0) return;
+      headerSortButtonClicked(tableIdx, colIdx, hit);
+      e.preventDefault();
+    } catch (err) { /* silent */ }
+  });
+
+  // delegated click: TOC anchor scroll
+  document.addEventListener('click', function (e) {
+    try {
+      const a = e.target.closest && e.target.closest('#tocBar a[href^="#"]');
+      if (!a) return;
+      e.preventDefault();
+      const id = (a.getAttribute('href') || '').substring(1);
+      if (!id) return;
+
+      const headerHeight = document.getElementById('stickyMainHeader')?.offsetHeight || 0;
+      const target = document.getElementById(id);
+
+      if (target) {
+        const rect = target.getBoundingClientRect();
+        const top = (window.pageYOffset || document.documentElement.scrollTop || 0) + rect.top;
+        window.scrollTo({ top: Math.max(0, top - headerHeight - 5), behavior: 'smooth' });
+        try { history.replaceState(null, '', '#' + id); } catch (err) {}
+        try { target.focus && target.focus({ preventScroll: true }); } catch (err) {}
+        
+        // FIX: Blur the clicked link to remove focus/active background styles
+        try { if (document.activeElement === a) a.blur(); } catch (err) {}
+        
+        return;
+      }
+
+      const container = a.closest('.table-wrapper');
+      if (!container) return;
+      const containerTop = container.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop || 0);
+      window.scrollTo({ top: Math.max(0, containerTop - headerHeight - 5), behavior: 'smooth' });
+      try { history.replaceState(null, '', '#' + id); } catch (err) {}
+      
+      // FIX: Blur the clicked link to remove focus/active background styles
+      try { if (document.activeElement === a) a.blur(); } catch (err) {}
+    } catch (err) { /* silent */ }
+  });
+
+  window.addEventListener("scroll", function () {
+    try {
+      const btn = document.getElementById("backToTop");
+      if (btn) {
+        if (document.documentElement.scrollTop > 200 || window.scrollY > 200) btn.style.display = "block";
+        else btn.style.display = "none";
+      }
+    } catch (e) { /* silent */ }
+    try { updateActiveTocItem(); } catch (e) { /* silent */ }
   }, { passive: true });
 
-  window.toggleMode = function() {
-    const html = document.documentElement;
-    const isDark = html.getAttribute('data-theme') === 'dark';
-    html.setAttribute('data-theme', isDark ? '' : 'dark');
-    const btn = document.getElementById('modeBtn');
-    if (btn) {
-      btn.setAttribute('aria-label', isDark ? 'Switch to Dark mode' : 'Switch to Light mode');
-      if (!btn.querySelector('svg, i')) btn.textContent = isDark ? 'Dark mode' : 'Light mode';
-    }
-    localStorage.setItem('uiMode', isDark ? 'light' : 'dark');
+  function backToTop() { try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) {} }
+
+  // Expose functions used by HTML inline handlers
+  window.headerSortButtonClicked = headerSortButtonClicked;
+  window.toggleTable = toggleTable;
+  window.toggleAllTables = toggleAllTables;
+  window.copyTablePlain = copyTablePlain;
+  window.copyTableMarkdown = copyTableMarkdown;
+  window.copyAllTablesPlain = copyAllTablesPlain;
+  window.copyAllTablesMarkdown = copyAllTablesMarkdown;
+  window.resetAllTables = resetAllTables;
+  window.searchTable = searchTable;
+  window.exportTableCSV = exportTableCSV;
+  window.exportTableJSON = exportTableJSON;
+  window.exportTableXLSX = exportTableXLSX;
+  window.exportTablePDF = exportTablePDF;
+  window.exportTableMarkdown = exportTableMarkdown;
+  window.exportAllTablesMarkdown = exportAllTablesMarkdown;
+
+  window.toggleMode = function () {
+    try {
+      const modeBtn = document.getElementById('modeBtn');
+      const dark = document.documentElement.getAttribute('data-theme') !== 'dark';
+      if (dark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        if (modeBtn) modeBtn.textContent = 'Light mode';
+        localStorage.setItem('uiMode', 'dark');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        if (modeBtn) modeBtn.textContent = 'Dark mode';
+        localStorage.setItem('uiMode', 'light');
+      }
+    } catch (e) { /* silent */ }
   };
 
-  Object.assign(window, {
-    headerSortButtonClicked, toggleTable, toggleAllTables, copyTablePlain, copyTableMarkdown,
-    copyAllTablesPlain, copyAllTablesMarkdown, resetAllTables, searchTable, exportTableCSV,
-    exportTableJSON, exportTableXLSX, exportTablePDF, exportTableMarkdown: exportTableMarkdown, exportAllTablesMarkdown
+  try {
+    const idxUrl = document.body && document.body.getAttribute('data-index-url');
+    const wUrl = document.body && document.body.getAttribute('data-worker-url');
+    if (console && console.info) {
+      console.info('tv:base', TV_BASE);
+      console.info('tv:index-url', idxUrl);
+      console.info('tv:worker-url', wUrl);
+    }
+  } catch (e) { /* silent */ }
+
+})();
+
+/* =========================
+   Append: extra.js loader + topic fallback
+   Safe, idempotent bootstrap to ensure Topic labels in single-table mobile TOC
+   ========================= */
+(function(){
+  'use strict';
+
+  if (window.__tv_extra_loader_patched) return;
+  window.__tv_extra_loader_patched = true;
+
+  function detectScriptBase() {
+    try {
+      const sel = document.querySelector('script[src*="script.js"], script[src*="/assets/script.js"]');
+      if (sel && sel.src) return sel.src.replace(/script\.js(\?.*)?$/, '');
+      const sAll = document.getElementsByTagName('script');
+      for (let i = sAll.length - 1; i >= 0; i--) {
+        const src = sAll[i].src || '';
+        if (src.indexOf('/assets/') !== -1 && src.indexOf('script') !== -1) return src.replace(/script\.js(\?.*)?$/, '');
+      }
+    } catch (e) { }
+    try { return location.origin + (location.pathname.substring(0, location.pathname.lastIndexOf('/') + 1) || '/'); } catch (e) { return './'; }
+  }
+
+  const BASE = detectScriptBase();
+  const CANDIDATES = [
+    BASE + 'extra.js',
+    BASE + 'assets/extra.js',
+    (location.origin || '') + '/assets/extra.js',
+    './assets/extra.js',
+    './extra.js'
+  ];
+
+  function loadScriptOnce(src, onload, onerror) {
+    try {
+      const exist = Array.from(document.getElementsByTagName('script')).some(s => (s.src||'').indexOf(src) !== -1);
+      if (exist) { if (typeof onload === 'function') onload(); return; }
+      const s = document.createElement('script');
+      s.src = src;
+      s.async = true;
+      s.onload = function() { try{ if (typeof onload === 'function') onload(); } catch(e){} };
+      s.onerror = function(e) { try{ if (typeof onerror === 'function') onerror(e); } catch(_){} };
+      (document.head || document.documentElement).appendChild(s);
+    } catch (e) {
+      if (typeof onerror === 'function') onerror(e);
+    }
+  }
+
+  function attemptLoadExtra(cands, cb) {
+    if (!cands || !cands.length) { if (cb) cb(false); return; }
+    const src = cands.shift();
+    loadScriptOnce(src, function(){ if (cb) cb(true, src); }, function(){ attemptLoadExtra(cands, cb); });
+  }
+
+  function minimalTopicFallback() {
+    try {
+      const reLabel = /^\s*Table\s*\d+\b/i;
+      let anchors = [];
+      const containers = Array.from(document.querySelectorAll('nav, .toc, .table-of-contents, #toc, .toc-list, .tv-toc, .tables-toc, aside'));
+      for (const c of containers) {
+        try {
+          anchors = anchors.concat(Array.from(c.querySelectorAll('a')).filter(a => reLabel.test((a.textContent||'').trim())));
+        } catch(e){}
+      }
+      if (anchors.length === 0) {
+        anchors = Array.from(document.querySelectorAll('a[href^="#"]')).filter(a => reLabel.test((a.textContent||'').trim()));
+      }
+      const tableWrappers = Array.from(document.querySelectorAll('.table-wrapper, .tables, table'));
+      if (!(anchors.length === 1 || tableWrappers.length === 1)) return;
+
+      const replaceNodeText = (el, re, repl) => {
+        if (!el) return false;
+        for (const child of Array.from(el.childNodes)) {
+          if (child.nodeType === 3) {
+            if (re.test(child.nodeValue||'')) {
+              child.nodeValue = child.nodeValue.replace(re, repl);
+              return true;
+            }
+          } else if (child.nodeType === 1 && child.childNodes.length === 1 && child.firstChild.nodeType === 3) {
+            if (re.test(child.firstChild.nodeValue||'')) {
+              child.firstChild.nodeValue = child.firstChild.nodeValue.replace(re, repl);
+              return true;
+            }
+          }
+        }
+        const all = el.textContent || '';
+        if (re.test(all)) {
+          el.textContent = all.replace(re, repl);
+          return true;
+        }
+        return false;
+      };
+
+      const a = anchors.length === 1 ? anchors[0] : null;
+      if (a) {
+        replaceNodeText(a, /\bTable\b/i, 'Topic');
+        const aria = a.getAttribute && a.getAttribute('aria-label');
+        if (aria && /\bTable\b/i.test(aria)) a.setAttribute('aria-label', aria.replace(/\bTable\b/i,'Topic'));
+        const href = a.getAttribute && a.getAttribute('href');
+        if (href && href.startsWith('#')) {
+          const tgt = document.querySelector(href);
+          if (tgt) {
+            const heading = tgt.querySelector('h1,h2,h3,h4,.table-title,.table-header') || tgt;
+            replaceNodeText(heading, /\bTable\b/i, 'Topic');
+            const dt = heading.getAttribute && heading.getAttribute('data-title');
+            if (dt && /\bTable\b/i.test(dt)) heading.setAttribute('data-title', dt.replace(/\bTable\b/i,'Topic'));
+          }
+        }
+      } else if (tableWrappers.length === 1) {
+        const wrapper = tableWrappers[0];
+        const heading = wrapper.querySelector('h1,h2,h3,h4,.table-title,.table-header') || wrapper;
+        replaceNodeText(heading, /\bTable\b/i, 'Topic');
+      }
+    } catch (e) { /* silent */ }
+  }
+
+  function __tv_patch_diag() {
+    return {
+      loadedExtraScript: !!document.querySelector('script[src*="extra.js"]'),
+      topicPatchFlag: !!window.__tv_topic_patch_loaded,
+      anchorsFound: Array.from(document.querySelectorAll('a')).filter(a=>/\bTable\s*\d+\b/i.test((a.textContent||'').trim())).slice(0,10).map(a=> (a.textContent||'').trim())
+    };
+  }
+  window.__tv_patch_diag = __tv_patch_diag;
+
+  if (window.__tv_no_auto_extra_load) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(minimalTopicFallback, 80); });
+    else setTimeout(minimalTopicFallback, 80);
+    return;
+  }
+
+  attemptLoadExtra(CANDIDATES.slice(), function(success, src){
+    setTimeout(function(){
+      if (window.__tv_topic_patch_loaded) {
+        return;
+      }
+      minimalTopicFallback();
+    }, 300);
   });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(function(){ if (!window.__tv_topic_patch_loaded) minimalTopicFallback(); }, 120); });
+  } else {
+    setTimeout(function(){ if (!window.__tv_topic_patch_loaded) minimalTopicFallback(); }, 120);
+  }
+
+  window.__tv_trigger_topic_fallback = function(){ minimalTopicFallback(); };
 
 })();
