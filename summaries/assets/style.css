@@ -312,7 +312,7 @@ code:not(pre code) {
   padding: 0.15em 0.4em;
   border-radius: 6px;
   font-size: 0.95em;
-  font-weight: 500;
+  font-weight: 400;
   font-family: var(--font-sans);
   word-break: break-word;
 }
@@ -358,7 +358,7 @@ td code:not(pre code) {
   padding: 2px 6px;
   border-radius: 6px;
   font-size: 0.95em;
-  font-weight: 500;
+  font-weight: 400;
   font-family: var(--font-sans);
 }
 td pre {
@@ -429,7 +429,7 @@ a:focus, button:focus, input:focus, select:focus, textarea:focus { outline: 3px 
     padding: 0.15em 0.4em !important;
     background: var(--inline-code-bg) !important;
     color: var(--inline-code-text) !important;
-    font-weight: 500 !important;
+    font-weight: 400 !important;
     font-family: var(--font-sans) !important;
     white-space: normal !important;
     overflow-wrap: anywhere !important;
