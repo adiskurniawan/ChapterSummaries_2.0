@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Tables Viewer v2.1</title>
+<style>:root{--main-header-height:56px;} .table-wrapper{opacity:0;min-height:24px;transition:opacity .12s linear}</style>
+<link rel="stylesheet" href="assets/style.css?v=1783619828">
+<link rel="stylesheet" href="assets/overrides.css?v=1789915340">
+</head><body>
+<div id="tables-viewer" role="region" aria-label="Tables viewer">
+<div id="stickyMainHeader">
+<div id="tv-header">
+<div><h1>Tables Viewer v2.1</h1></div>
+<div style="display:flex;gap:8px;align-items:center;">
+<input id="searchBox" class="tv-search" type="search" placeholder="Search" aria-label="Search tables" />
+<button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button>
+<button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button>
+<button id="copyAllPlainBtn" class="copy-btn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button>
+<button id="copyAllTablesBtn" class="copy-all-btn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy All Tables (Markdown)">Copy All Tables (Markdown)</button>
+<button id="copyAllMdBtn" style="display:none" aria-hidden="true"></button>
+<button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset All Tables">Reset All Tables</button>
+</div></div>
+<script>
+(function(){
+  function ensureDelegation(){
+    try {
+      var vis = document.getElementById('copyAllTablesBtn');
+      var alias = document.getElementById('copyAllMdBtn');
+      if(!vis || !alias) return;
+      alias.addEventListener = function(type, listener, options){
+        vis.addEventListener(type, listener, options);
+      };
+      alias.removeEventListener = function(type, listener, options){
+        vis.removeEventListener(type, listener, options);
+      };
+      Object.defineProperty(alias, 'onclick', {
+        set: function(fn){ vis.onclick = fn; },
+        get: function(){ return vis.onclick; },
+        configurable: true
+      });
+      alias.focus = function(){ vis.focus(); };
+      alias.blur = function(){ vis.blur(); };
+    } catch(e) {
+      try{ console && console.warn && console.warn('alias delegation failed', e); }catch(_){} 
+    }
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', ensureDelegation);
+  } else {
+    ensureDelegation();
+  }
+})();
+</script>
+<noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
+<div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1">Table 1</a></li></ul></div></div>
+<div class="table-caption" id="Table1" data-table="VACA_0002_01" style="margin-top:2mm;margin-left:3mm;"><strong>Table 1</strong></div>
+<div class="table-wrapper" data-table-id="table-1"><div class="table-heading-bar" aria-label="Table heading"></div><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button type="button" class="copy-plain-btn" data-action="copy-plain" onclick="copyTablePlain(this)">Copy Plain Table</button><button type="button" class="copy-markdown-btn" data-action="copy-markdown" onclick="copyTableMarkdown(this)">Copy Markdown Table</button><button type="button" class="export-csv-btn" data-action="export-csv" onclick="exportTableCSV(this)">Export CSV</button><button type="button" class="export-json-btn" data-action="export-json" onclick="exportTableJSON(this)">Export JSON</button><button type="button" class="export-xlsx-btn" data-action="export-xlsx" onclick="exportTableXLSX(this)">Export XLSX</button><button type="button" class="export-pdf-btn" data-action="export-pdf" onclick="exportTablePDF(this)">Export PDF</button><button type="button" class="export-markdown-btn export-markdown-initial" data-action="export-markdown" onclick="exportTableMarkdown(this)" style="display:none" data-initial-hidden="1">Export Markdown</button></div><div style="display:flex; align-items:center;"><button type="button" class="toggle-table-btn" data-action="toggle-collapse" onclick="toggleTable(this)">Collapse Table</button></div></div><table class="tv-table" role="table"><thead><tr><th class="tv-col-left" role="button" aria-label="Sort by Notes"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Notes</div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th></tr></thead><tbody><tr><td data-label="Notes"> <strong>Closing Date: 21 September 2026</strong><br><br><strong>1. Finance & Accounting Coordinator — Asosiasi Gagasan Bapakat Masyarakat Lestari</strong><br><strong>Location:</strong> Indonesia / East Java<br><strong>Status:</strong> Current service-contract finance vacancy; deadline <strong>21 September 2026</strong>.<br><br>Finance role supporting NGO financial operations, with relevance to project finance, NGO finance and subgrant-related work. <a href="https://devjobsindo.org/ngo-jobs/finance-accounting-coordinator/" target="_blank">Finance & Accounting Coordinator — Asosiasi Gagasan Bapakat Masyarakat Lestari</a><br><br><strong>Closing Date: 22 September 2026</strong><br><br><strong>2. Grants & Finance Manager — The Asia Foundation, PARTISIPASI Program</strong><br><strong>Location:</strong> Jakarta<br><strong>Status:</strong> Current; deadline <strong>22 September 2026</strong>.<br><br>Senior grants and finance management role supporting the Indonesia Democratic Participation Program, including financial and grants-management responsibilities within an Australian Government-supported development program. <a href="https://devjobsindo.org/ngo-jobs/the-asia-foundation-grants-finance-manager-of-partisipasi-indonesia-democratic-participation-program/" target="_blank">Grants & Finance Manager — The Asia Foundation</a><br><br><strong>Closing Date: 24 September 2026</strong><br><br><strong>3. Finance & Grants Manager — Konservasi Indonesia</strong><br><strong>Location:</strong> South Jakarta<br><strong>Status:</strong> Current; deadline <strong>24 September 2026</strong>.<br><br>Finance and grant-management leadership supporting the Tropical Forest and Coral Reef Conservation Act program, including financial management, compliance, budgeting, reporting and grant oversight. <a href="https://devjobsindo.org/ngo-jobs/finance-grants-manager-2/" target="_blank">Finance & Grants Manager — Konservasi Indonesia</a><br><br><strong>Closing Date: 30 September 2026</strong><br><br><strong>4. Finance and Operations Associate (Grants) — J-PAL Southeast Asia</strong><br><strong>Location:</strong> Jakarta / Indonesia<br><strong>Status:</strong> Current; deadline <strong>30 September 2026</strong>.<br><br>Finance and grants role supporting transaction review, donor billing and incoming funds, sub-grantee tracking, due diligence, grant compliance and financial monitoring. This is below manager level but directly within the NGO/development finance function. <a href="https://devjobsindo.org/ngo-jobs/finance-and-operations-associate-grants/" target="_blank">Finance and Operations Associate (Grants) — J-PAL SEA</a><br><br><strong>Closing Date: 1 October 2026</strong><br><br><strong>5. Finance Manager — Wildlife Conservation Society Indonesia</strong><br><strong>Location:</strong> Bogor, West Java<br><strong>Status:</strong> Current; deadline <strong>1 October 2026</strong>.<br><br>Leads the Indonesia finance program and finance personnel, covering financial controls, accounting systems, cash-flow management, donor reporting, reconciliation, audit, tax compliance and finance-team leadership. <a href="https://indonesia.wcs.org/en-us/About-Us/Vacancies/ID/26643/Finance-Manager.aspx" target="_blank">Finance Manager — WCS Indonesia</a><br><br><strong>Closing Date: 2 October 2026</strong><br><br><strong>6. Finance Manager — FHI 360</strong><br><strong>Location:</strong> Jakarta<br><strong>Status:</strong> Current listing; deadline shown by the current vacancy aggregator as <strong>2 October 2026</strong>.<br><br>Leads financial, operational and administrative functions for the STRIDES project, including budgeting, forecasting, accounting, reporting, donor compliance, procurement, subaward management, controls and financial-risk management. <a href="https://unchannel.org/jobs/169228" target="_blank">Finance Manager — FHI 360</a><br><br><strong>Closing Date: 2 October 2026</strong><br><br><strong>7. Finance, HR & Admin — Yayasan Teman Baik / Friends-International</strong><br><strong>Location:</strong> Jakarta<br><strong>Status:</strong> Current fixed-term NGO listing; deadline <strong>2 October 2026</strong>.<br><br>Combined finance-management and administration role supporting an NGO working with children, youth and families. It is an adjacent finance-management position rather than a pure Finance Manager title. <a href="https://devjobsindo.org/ngo-jobs/finance-hr-admin/" target="_blank">Finance, HR & Admin — Yayasan Teman Baik</a><br><br><strong>Closing Date: Not stated — currently listed</strong><br><br><strong>8. Head of Finance, Accounting, & Tax — YCAB Foundation</strong><br><strong>Location:</strong> Kebon Jeruk, West Jakarta<br><strong>Status:</strong> Current foundation recruitment listing; no role-specific closing date stated in the current vacancy information.<br><br>Leads financial health and sustainability, financial planning, cash-flow management, risk mitigation, reporting, SOP improvement, audit and the Finance & Accounting team. <a href="https://www.ycabfoundation.org/participate/jobs-vacancy/" target="_blank">Head of Finance, Accounting, & Tax — YCAB Foundation</a><br><br><strong>Closing Date: Not stated — currently listed</strong><br><br><strong>9. Finance Manager — World Vision International Indonesia</strong><br><strong>Location:</strong> Jakarta<br><strong>Status:</strong> Current official vacancy page; no closing date stated.<br><br>Provides leadership and coordination of finance and accounting functions, including cash management, financial reporting, stewardship, accountability, financial controls and policy compliance. <a href="https://www.wvi.org/indonesia/finance-manager-code-fm" target="_blank">Finance Manager — World Vision International Indonesia</a><br><br><strong>Closing Date: Not stated — currently listed</strong><br><br><strong>10. Finance Manager — Corduene Foundation</strong><br><strong>Location:</strong> Remote / Indonesia<br><strong>Status:</strong> Current nonprofit recruitment listing; no closing date stated.<br><br>Owns financial operations, budgeting, forecasting, grant compliance, internal controls, financial reporting, audit coordination, cash-flow planning and strategic financial planning for an international nonprofit. <a href="https://join.com/companies/cordueneorg/16435532-finance-manager" target="_blank">Finance Manager — Corduene Foundation</a><br><br><strong>Closing Date: 21 September 2026</strong><br><br><strong>11. Senior Project Finance Officer — Plan International Indonesia</strong><br><strong>Location:</strong> Kupang, East Nusa Tenggara<br><strong>Status:</strong> Current; application deadline <strong>21 September 2026</strong>.<br><br>Senior project-finance role supporting donor-funded programmes, with responsibility for project payments, fund transfers, expenditure controls, donor compliance, financial monitoring and guidance to implementation partners. The role requires at least five years of relevant experience and specifically values international-organization, INGO or bilateral-development experience. <a href="https://unjobs.org/vacancies/1789488245375" target="_blank">Plan International — Senior Project Finance Officer</a><br><br><strong>Closing Date: 24 September 2026</strong><br><br><strong>12. Finance and Reporting Officer — Konservasi Indonesia</strong><br><strong>Location:</strong> South Jakarta<br><strong>Status:</strong> Current; deadline <strong>24 September 2026</strong>.<br><br>Finance role within Konservasi Indonesia covering financial reporting and finance operations for a national conservation foundation. It is a level below Finance Manager but directly aligned with NGO finance, reporting and financial-control responsibilities. <a href="https://devjobsindo.org/ngo-jobs/finance-and-reporting-officer/" target="_blank">Konservasi Indonesia — Finance and Reporting Officer</a><br><br><strong>Closing Date: 25 September 2026</strong><br><br><strong>13. Project Finance Officer — Plan International Indonesia</strong><br><strong>Location:</strong> Jakarta / Kupang<br><strong>Status:</strong> Current; listing period shown through <strong>25 September 2026</strong>.<br><br>Responsible for the financial functions of programme-management units, including financial planning, monitoring, reporting, donor compliance and financial guidance to local implementation partners. The position reports to the Senior Project Finance Officer / Senior Finance Business Partner. <a href="https://unjobs.org/vacancies/1788714846865" target="_blank">Plan International — Project Finance Officer</a><br><br><strong>Closing Date: 27 September 2026</strong><br><br><strong>14. Portfolio and Finance Manager — UK Foreign, Commonwealth & Development Office (FCDO)</strong><br><strong>Location:</strong> Jakarta<br><strong>Status:</strong> Current; deadline <strong>27 September 2026</strong>.<br><br>Senior portfolio-finance position covering programme financial management, assurance, risk, audit, compliance, portfolio monitoring and donor-funded development programmes. This is a development-sector public-institution role rather than an NGO/INGO position, included as a closely relevant finance-management vacancy. <a href="https://unjobs.org/vacancies/1789663380437" target="_blank">FCDO — Portfolio and Finance Manager</a><br><br><strong>Closing Date: Not stated — currently listed</strong><br><br><strong>15. Finance Coordinator (Humanitarian Project) — Save the Children Indonesia</strong><br><strong>Location:</strong> Jakarta<br><strong>Status:</strong> Current vacancy; no closing date stated in the available listing.<br><br>Finance leadership/coordinator position supporting humanitarian-project financial planning, monthly and annual closing, budget-versus-actual analysis, forecasting, donor and member reporting, internal controls, audits and financial governance. The role requires finance experience in a corporate or NGO/INGO environment. <a href="https://unjobs.org/vacancies/1788130642464" target="_blank">Save the Children — Finance Coordinator (Humanitarian Project)</a><br><br><strong>Closing Date: Not stated — currently listed</strong><br><br><strong>16. Assistant Finance Manager — Grants Compliance, Landscape Alliance (CIFOR & ICRAF)</strong><br><strong>Location:</strong> Bogor, West Java<br><strong>Status:</strong> Current listing; no closing date stated in the available posting.<br><br>Finance-management role focused on grants compliance, financial controls and project-finance oversight within an international research and development organization. The position covers financial operations and compliance across multiple portfolios and is directly relevant to donor-funded finance leadership. <a href="https://unjobs.org/vacancies/1788341683416" target="_blank">Landscape Alliance — Assistant Finance Manager, Grants Compliance</a> </td></tr></tbody></table></div><div class="row-count">Rows: 1</div></div><script src="assets/xlsx.full.min.js?v=1758605028" defer></script>
+<script src="assets/script.js?v=1782876019" defer></script>
+<script src="assets/worker.js?v=1758331710" defer></script>
+<script>
+(function(){
+  const template = "{table}_{date}";
+  const userVal = "";
+  const hrefPrefix = "assets";
+  function formatName(tableName) {
+    const date = (new Date()).toISOString().slice(0,10);
+    return template.replace('{table}', tableName).replace('{date}', date).replace('{user}', userVal);
+  }
+  const btn = document.getElementById('exportBtn');
+  if(btn) {
+    btn.addEventListener('click', async function() {
+      try {
+        const html = document.documentElement.outerHTML;
+        if(html.length > 2000000) { alert('Export refused: html too large'); return; }
+        if(window.Worker) {
+          const workerUrl = (function(){ try{ return hrefPrefix + '/worker.js'; }catch(e){ return null; } })();
+          if(workerUrl) {
+            try {
+              const worker = new Worker(workerUrl);
+              worker.postMessage({html: html, format: 'pdf'});
+              worker.onmessage = function(e) { console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+            } catch(err) { console.warn('Worker create failed', err); alert('Worker not available'); }
+          } else { alert('Worker not available'); }
+        } else { alert('Export worker not supported in this environment.'); }
+      } catch(err) { console.warn('Export failed', err); alert('Export worker not available. See console for details.'); }
+    });
+  }
+})();
+window.addEventListener('load', function(){ try{ document.querySelectorAll('.table-wrapper').forEach(function(e){ e.style.opacity='1'; }); }catch(e){} });
+</script>
+</div>
+</body>
+</html>
