@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Tables Viewer v2.1</title>
+<style>:root{--main-header-height:56px;} .table-wrapper{opacity:0;min-height:24px;transition:opacity .12s linear}</style>
+<link rel="stylesheet" href="assets/style.css?v=1789967014">
+<link rel="stylesheet" href="assets/overrides.css?v=1790254795">
+</head><body>
+<div id="tables-viewer" role="region" aria-label="Tables viewer">
+<div id="stickyMainHeader">
+<div id="tv-header">
+<div><h1>Tables Viewer v2.1</h1></div>
+<div style="display:flex;gap:8px;align-items:center;">
+<input id="searchBox" class="tv-search" type="search" placeholder="Search" aria-label="Search tables" />
+<button id="modeBtn" type="button" onclick="toggleMode()" aria-label="Toggle theme">Theme</button>
+<button id="toggleAllBtn" type="button" aria-label="Toggle all" onclick="toggleAllTables()">Collapse All Tables</button>
+<button id="copyAllPlainBtn" class="copy-btn" type="button" onclick="copyAllTablesPlain()" aria-label="Copy all tables as plain text">Copy All Tables (Plain Text)</button>
+<button id="copyAllTablesBtn" class="copy-all-btn" type="button" onclick="copyAllTablesMarkdown()" aria-label="Copy All Tables (Markdown)">Copy All Tables (Markdown)</button>
+<button id="copyAllMdBtn" style="display:none" aria-hidden="true"></button>
+<button id="resetAllBtn" type="button" onclick="resetAllTables()" aria-label="Reset All Tables">Reset All Tables</button>
+</div></div>
+<script>
+(function(){
+  function ensureDelegation(){
+    try {
+      var vis = document.getElementById('copyAllTablesBtn');
+      var alias = document.getElementById('copyAllMdBtn');
+      if(!vis || !alias) return;
+      alias.addEventListener = function(type, listener, options){
+        vis.addEventListener(type, listener, options);
+      };
+      alias.removeEventListener = function(type, listener, options){
+        vis.removeEventListener(type, listener, options);
+      };
+      Object.defineProperty(alias, 'onclick', {
+        set: function(fn){ vis.onclick = fn; },
+        get: function(){ return vis.onclick; },
+        configurable: true
+      });
+      alias.focus = function(){ vis.focus(); };
+      alias.blur = function(){ vis.blur(); };
+    } catch(e) {
+      try{ console && console.warn && console.warn('alias delegation failed', e); }catch(_){} 
+    }
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', ensureDelegation);
+  } else {
+    ensureDelegation();
+  }
+})();
+</script>
+<noscript><div style='color:#b91c1c'>JavaScript is disabled. Tables will be shown statically. For large tables enable JS for virtualization.</div></noscript>
+<div id="tocBar" role="navigation" aria-label="Table of contents"><ul><li class="toc-item"><a class="toc-link" href="#Table1">Table 1</a></li></ul></div></div>
+<div class="table-caption" id="Table1" data-table="Docu_0266_01" style="margin-top:2mm;margin-left:3mm;"><strong>Table 1</strong></div>
+<div class="table-wrapper" data-table-id="table-1"><div class="table-heading-bar" aria-label="Table heading"></div><div class="table-container"><div class="table-header-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><div class="copy-buttons"><button type="button" class="copy-plain-btn" data-action="copy-plain" onclick="copyTablePlain(this)">Copy Plain Table</button><button type="button" class="copy-markdown-btn" data-action="copy-markdown" onclick="copyTableMarkdown(this)">Copy Markdown Table</button><button type="button" class="export-csv-btn" data-action="export-csv" onclick="exportTableCSV(this)">Export CSV</button><button type="button" class="export-json-btn" data-action="export-json" onclick="exportTableJSON(this)">Export JSON</button><button type="button" class="export-xlsx-btn" data-action="export-xlsx" onclick="exportTableXLSX(this)">Export XLSX</button><button type="button" class="export-pdf-btn" data-action="export-pdf" onclick="exportTablePDF(this)">Export PDF</button><button type="button" class="export-markdown-btn export-markdown-initial" data-action="export-markdown" onclick="exportTableMarkdown(this)" style="display:none" data-initial-hidden="1">Export Markdown</button></div><div style="display:flex; align-items:center;"><button type="button" class="toggle-table-btn" data-action="toggle-collapse" onclick="toggleTable(this)">Collapse Table</button></div></div><table class="tv-table" role="table"><thead><tr><th class="tv-col-left" role="button" aria-label="Sort by CONSUMABLE AND EQUIPMENT CLASSIFICATION"><div class="th-with-sort"><div style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">CONSUMABLE AND EQUIPMENT CLASSIFICATION</div><button class="sort-btn sort-state-0" title="Toggle sort" aria-label="Toggle sort"><span class="sort-icon" aria-hidden="true"></span></button></div></th></tr></thead><tbody><tr><td data-label="CONSUMABLE AND EQUIPMENT CLASSIFICATION"> <strong>GOVERNING PRINCIPLE</strong><br><br>GOVERNING PRINCIPLE — Never classify an item solely from its name. First determine what the item does, how long it is expected to remain usable, whether it is normally consumed or repeatedly used, whether it retains its identity, whether it is controlled individually, whether it meets the organisation's capitalization threshold, and what the applicable donor agreement requires.<br><br>GOVERNING PRINCIPLE — “Consumable” and “equipment” are operational classifications; “expense,” “inventory,” “capital asset,” “fixed asset,” “supplies,” and “intangible asset” are accounting/reporting classifications. They are related but are not interchangeable.<br><br>GOVERNING PRINCIPLE — A durable item can be equipment even when its cost is below the NGO's capitalization threshold. In that situation it may be treated as a low-value/non-capital equipment item for accounting while remaining equipment for procurement, custody, and donor reporting.<br><br>GOVERNING PRINCIPLE — An item can be physically durable yet still be treated as an expense rather than a fixed asset because the organisation's capitalization policy sets a monetary threshold, provided the treatment is consistent with the applicable accounting framework and donor rules.<br><br>GOVERNING PRINCIPLE — A high-value item is not automatically equipment merely because it is expensive. A service, subscription, consultancy, consumable stock, construction activity, lease, intangible asset, or prepaid expense may be high-value without being equipment.<br><br>GOVERNING PRINCIPLE — A low-value item is not automatically a consumable. A $20 calculator may be durable equipment operationally even if the NGO expenses it under its low-value asset policy.<br><br>GOVERNING PRINCIPLE — “Consumed” means more than “used.” An item is generally consumable when its substance, functionality, quantity, or identity is substantially exhausted through normal operations or when it is normally issued for one-time/short-term use.<br><br>GOVERNING PRINCIPLE — “Equipment” normally means a tangible, durable, non-expendable item that remains identifiable and usable after repeated operations and is expected to serve beyond a single routine use. Government procurement rules similarly define equipment around durability, non-expendability, functional completeness, and retention of identity. :contentReference[oaicite:3]{index=3}<br><br>GOVERNING PRINCIPLE — Under IAS 16, property, plant and equipment are tangible items held for use and expected to be used during more than one period. This is an accounting concept, not a universal donor procurement label. :contentReference[oaicite:4]{index=4}<br><br>GOVERNING PRINCIPLE — IAS 16 also says that spare parts, standby equipment, and servicing equipment are recognised as PPE when they meet the PPE definition; otherwise they are classified as inventory. Therefore “spare part” does not automatically mean consumable. :contentReference[oaicite:5]{index=5}<br><br>GOVERNING PRINCIPLE — The first classification question is physical durability: “Will the item normally continue to perform its intended function after ordinary use?” If no, classify as consumable/supply unless a specific donor or sector rule says otherwise.<br><br>GOVERNING PRINCIPLE — The second question is expected useful life: “Is it normally expected to remain usable beyond one operating period or repeated service cycle?” A yes answer strongly supports equipment/non-consumable treatment, subject to the accounting threshold and donor rules.<br><br>GOVERNING PRINCIPLE — The third question is identity: “Does the item remain a recognizable standalone item after use?” If it disappears into the process, is incorporated into another item, or is physically consumed, consumable/material treatment is normally appropriate.<br><br>GOVERNING PRINCIPLE — The fourth question is repeatability: “Can the same physical item be used repeatedly for its intended purpose?” Repeated reusable use strongly supports equipment or another durable non-consumable category.<br><br>GOVERNING PRINCIPLE — The fifth question is custody: “Would management reasonably expect the item to be assigned, tagged, tracked, safeguarded, or returned?” A yes answer strongly supports non-consumable/equipment control.<br><br>GOVERNING PRINCIPLE — The sixth question is replacement frequency. Items normally replaced after one use, one patient, one activity, one field distribution, or a short operational cycle generally behave as consumables.<br><br>GOVERNING PRINCIPLE — The seventh question is materiality. If an item is durable but below the capitalization threshold, do not automatically relabel it as a consumable; distinguish “non-capital equipment” from “consumable.”<br><br>GOVERNING PRINCIPLE — The eighth question is donor treatment. A donor may require equipment to be separately budgeted, prior-approved, inventoried, tagged, or reported even when the NGO's general ledger expenses the item immediately.<br><br>GOVERNING PRINCIPLE — The ninth question is ownership/title. Donor-funded equipment may remain NGO property, donor property, government property, beneficiary property, or another party's property depending on the agreement. Ownership does not by itself determine whether something is equipment.<br><br>GOVERNING PRINCIPLE — The tenth question is grant attribution. An item can be equipment in nature but funded from several grants, shared across programmes, purchased centrally, or transferred between projects. Classification and funding allocation must therefore be recorded separately.<br><br>GOVERNING PRINCIPLE — The eleventh question is intended recipient. Equipment retained by the NGO is different from durable goods purchased for distribution to beneficiaries. A bicycle distributed to a beneficiary is still a durable good operationally, but may not become an NGO fixed asset.<br><br>GOVERNING PRINCIPLE — The twelfth question is purpose. The same physical item can have different accounting/budget treatment depending on whether it is for internal operations, programme implementation, resale/distribution, construction, rental, demonstration, or beneficiary transfer.<br><br>GOVERNING PRINCIPLE — The thirteenth question is whether the item forms part of a larger system. A component can be a consumable/material when used in production or repair, but a major separately identifiable component may require equipment/PPE treatment.<br><br>GOVERNING PRINCIPLE — The fourteenth question is whether the item is normally stocked. Frequently stocked items can still be equipment; stock status is not sufficient to make an item a consumable.<br><br>GOVERNING PRINCIPLE — The fifteenth question is whether the item is merely a replacement part. Ordinary replacement parts are generally materials/spares; major replacement components with significant useful lives may be capitalised depending on the accounting policy. </td></tr><tr><td data-label="CONSUMABLE AND EQUIPMENT CLASSIFICATION"> <strong>FINAL RULE</strong><br><br>FINAL RULE — If the answer is “used up/issued/discarded/incorporated” → normally CONSUMABLE/MATERIAL/INVENTORY.<br>FINAL RULE — If the answer is “reusable, durable, identifiable, retained and repeatedly used” → normally EQUIPMENT/DURABLE SUPPLY.<br>FINAL RULE — If the answer is “durable but below capitalization threshold” → EQUIPMENT/DURABLE SUPPLY operationally; EXPENSE accounting treatment may apply.<br>FINAL RULE — If the answer is “durable but permanently transferred to a beneficiary/partner” → PROGRAMME DISTRIBUTION/DURABLE TRANSFER, not necessarily NGO equipment.<br>FINAL RULE — If the answer is “used to create another asset and loses its identity” → MATERIAL/PROJECT COST.<br>FINAL RULE — If the answer is “software, subscription, consultancy, rent, insurance, transport, training or another service” → SERVICE/INTANGIBLE/LEASE category, not consumable/equipment.<br>FINAL RULE — If the answer is “high-value stock that is consumed or distributed” → INVENTORY/CONSUMABLE; high value does not make it equipment.<br>FINAL RULE — If the answer is “major spare/standby/service item with multi-period useful life” → evaluate for PPE/equipment rather than automatically treating it as inventory. IAS 16 explicitly requires this fact-specific assessment. :contentReference[oaicite:16]{index=16}<br>FINAL RULE — If the answer changes because of the donor, do not change the underlying physical classification unnecessarily. Maintain an internal nature classification and a separate donor mapping.<br>FINAL RULE — For a multi-donor NGO, the cleanest architecture is therefore: ITEM NATURE → ACCOUNTING TREATMENT → DONOR BUDGET CATEGORY → DONOR CONTROL → OWNERSHIP/TITLE → FUNDING SOURCE → CUSTODIAN/LOCATION → CAPITALISATION STATUS → DISPOSITION.<br>FINAL RULE — The single most important distinction is: “expensed” does not mean “consumable,” and “capitalised” does not mean “equipment.” These are different dimensions and should not be collapsed into one field. </td></tr></tbody></table></div><div class="row-count">Rows: 2</div></div><script src="assets/script.js?v=1789967014" defer></script>
+<script src="assets/worker.js?v=1790254795" defer></script>
+<script>
+(function(){
+  const template = "{table}_{date}";
+  const userVal = "";
+  const hrefPrefix = "assets";
+  function formatName(tableName) {
+    const date = (new Date()).toISOString().slice(0,10);
+    return template.replace('{table}', tableName).replace('{date}', date).replace('{user}', userVal);
+  }
+  const btn = document.getElementById('exportBtn');
+  if(btn) {
+    btn.addEventListener('click', async function() {
+      try {
+        const html = document.documentElement.outerHTML;
+        if(html.length > 2000000) { alert('Export refused: html too large'); return; }
+        if(window.Worker) {
+          const workerUrl = (function(){ try{ return hrefPrefix + '/worker.js'; }catch(e){ return null; } })();
+          if(workerUrl) {
+            try {
+              const worker = new Worker(workerUrl);
+              worker.postMessage({html: html, format: 'pdf'});
+              worker.onmessage = function(e) { console.log('worker:', e.data); alert('Worker replied: '+(e.data.msg||e.data.status)); };
+            } catch(err) { console.warn('Worker create failed', err); alert('Worker not available'); }
+          } else { alert('Worker not available'); }
+        } else { alert('Export worker not supported in this environment.'); }
+      } catch(err) { console.warn('Export failed', err); alert('Export worker not available. See console for details.'); }
+    });
+  }
+})();
+window.addEventListener('load', function(){ try{ document.querySelectorAll('.table-wrapper').forEach(function(e){ e.style.opacity='1'; }); }catch(e){} });
+</script>
+</div>
+</body>
+</html>
