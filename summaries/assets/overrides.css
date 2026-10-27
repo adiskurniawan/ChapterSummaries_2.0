@@ -35,16 +35,35 @@
   background-color: var(--header-bg);
   color: var(--header-color);
 }
-/* Ensure header inner wrapper takes full height and centers content */
-.table-container table thead th .th-with-sort,
-.table-container table thead th .th-with-sort > div {
+/* Header labels wrap fully on narrow screens; sort buttons remain visible. */
+.table-container table thead th .th-with-sort {
   display: flex;
-  align-items: center;
-  height: 100%;
+  flex-flow: row nowrap;
+  align-items: flex-start;
   gap: 8px;
-  min-height: 1px;
+  height: auto;
+  min-height: 0;
+  min-width: 0;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: visible;
+}
+.table-container table thead th .th-with-sort > .th-label {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: auto;
+  box-sizing: border-box;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  line-height: 1.25;
+}
+.table-container table thead th .th-with-sort > .sort-btn {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  margin-top: 1px;
 }
 
 /* Sticky first column header: use the same header background */
@@ -110,11 +129,34 @@ body.dark-mode .table-container table thead th:first-child:hover {
   color: var(--header-highlight-color) !important;
 }
 
-/* proportional widths based on total_units (kept for compatibility) */
+/* proportional widths based on total_units (kept for desktop compatibility) */
 .table-container table thead th:first-child { width: 28.57%; }
 .table-container table thead th:not(:first-child) { width: 71.43%; }
 .table-container table tbody td:first-child { width: 28.57%; }
 .table-container table tbody td:not(:first-child) { width: 71.43%; }
+
+/* On mobile, don't apply the first-vs-rest desktop ratio to every additional column.
+   Let the fixed-layout table distribute available width evenly so normal header words
+   are not forced to wrap one character per line. */
+@media (max-width: 720px) {
+  .table-container table thead th,
+  .table-container table tbody td {
+    width: auto !important;
+  }
+  .table-container table thead th {
+    padding: 8px 6px;
+    font-size: .95rem;
+  }
+  .table-container table thead th .th-with-sort { gap: 4px; }
+  .table-container table thead th .th-with-sort > .sort-btn { padding: 4px; }
+  .table-container table thead th .th-label {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+}
 
 /* --- Lists inside table cells: force consistent markers --- */
 /* top-level unordered lists: use en-dash marker (–) */
