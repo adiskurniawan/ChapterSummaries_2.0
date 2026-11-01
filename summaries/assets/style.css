@@ -16,6 +16,7 @@
   --toc-link: #2563eb;
   --toc-link-hover-bg: #e0f2fe;
   --toc-link-hover-color: #1e40af;
+  --visited-link-color: #1d4ed8;
   --tv-header-min-height: 48px;
 
   /* QWEN-STYLE BLUE CODE VARIABLES */
@@ -79,6 +80,7 @@
     --toc-link: #60a5fa;
     --toc-link-hover-bg: #1e3a8a;
     --toc-link-hover-color: #ffffff;
+    --visited-link-color: #bfdbfe;
 
     --code-bg: #1e293b;       
     --code-bg-alt: #0f172a;
@@ -92,11 +94,16 @@
 }
 
 /* Explicit data-theme override */
+[data-theme="dark"], body.dark-mode {
+  --visited-link-color: #bfdbfe;
+}
+
 [data-theme="dark"] {
   --bg: #0f172a; --text: #e2e8f0; --panel: #1e293b; --border: #334155;
   --row-hover: #1e293b; --button-bg: #334155; --button-text: #e2e8f0;
   --muted: rgba(226, 232, 240, 0.5); --toc-link: #60a5fa;
   --toc-link-hover-bg: #1e3a8a; --toc-link-hover-color: #ffffff;
+  --visited-link-color: #bfdbfe;
   --code-bg: #1e293b; --code-bg-alt: #0f172a; --code-border: #334155;
   --code-accent: #3b82f6; --code-text-dark: #f8fafc;
   --inline-code-bg: #312e81; --inline-code-text: #c7d2fe;
@@ -593,12 +600,14 @@ thead th a, th a { color: inherit !important; }
   .markdown a, .content a, article a, #mainContent a, table a { color: #8ab4f8; text-decoration: underline; text-decoration-thickness: 0.09em; text-underline-offset: 0.18em; text-decoration-skip-ink: auto; -webkit-tap-highlight-color: transparent; border-radius: 4px; }
   .markdown a:hover, .content a:hover, article a:hover, #mainContent a:hover, table a:hover { color: #b6d4ff; text-decoration-color: currentColor; background: rgba(138, 180, 248, 0.10); }
   .markdown a:focus-visible, .content a:focus-visible, article a:focus-visible, #mainContent a:focus-visible { outline: 2px solid rgba(138, 180, 248, 0.55); outline-offset: 2px; background: rgba(138, 180, 248, 0.12); }
-  table a:visited, .markdown table a:visited, .content table a:visited, article table a:visited, #mainContent table a:visited { color: #c58af9; }
 }
 [data-theme="dark"] .markdown a, [data-theme="dark"] .content a, [data-theme="dark"] article a, [data-theme="dark"] #mainContent a, [data-theme="dark"] table a { color: #8ab4f8; text-decoration: underline; text-decoration-thickness: 0.09em; text-underline-offset: 0.18em; text-decoration-skip-ink: auto; -webkit-tap-highlight-color: transparent; border-radius: 4px; }
 [data-theme="dark"] .markdown a:hover, [data-theme="dark"] .content a:hover, [data-theme="dark"] article a:hover, [data-theme="dark"] #mainContent a:hover, [data-theme="dark"] table a:hover { color: #b6d4ff; text-decoration-color: currentColor; background: rgba(138, 180, 248, 0.10); }
 [data-theme="dark"] .markdown a:focus-visible, [data-theme="dark"] .content a:focus-visible, [data-theme="dark"] article a:focus-visible, [data-theme="dark"] #mainContent a:focus-visible { outline: 2px solid rgba(138, 180, 248, 0.55); outline-offset: 2px; background: rgba(138, 180, 248, 0.12); }
-[data-theme="dark"] table a:visited, [data-theme="dark"] .markdown table a:visited, [data-theme="dark"] .content table a:visited, [data-theme="dark"] article table a:visited, [data-theme="dark"] #mainContent table a:visited { color: #c58af9; }
+
+/* ========== Global Visited Hyperlink Color ========== */
+/* Applies to visited content links throughout the application, not only table links. */
+a:visited { color: var(--visited-link-color, #1d4ed8) !important; }
 
 @media (max-width: 720px) {
   .markdown a, .content a, article a, #mainContent a { text-decoration-thickness: 0.11em; text-underline-offset: 0.16em; }
